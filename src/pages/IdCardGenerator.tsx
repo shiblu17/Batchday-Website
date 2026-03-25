@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Download, FileText, Share2, Mail } from 'lucide-react';
+import { Loader2, Download, FileText, Share2, Mail, CheckCircle } from 'lucide-react';
 
 export default function IdCardGenerator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,7 +34,7 @@ export default function IdCardGenerator() {
         const { data: reg, error } = await supabase
           .from('registrations')
           .select('*')
-          .or(`roll.eq."${userRoll}",email.eq."${user.email}"`)
+          .eq('roll', userRoll)
           .maybeSingle();
 
         if (reg) {
@@ -42,8 +42,7 @@ export default function IdCardGenerator() {
             name: reg.name,
             roll: reg.roll,
             department: reg.department,
-            hall: reg.hall || 'জাহাঙ্গীরনগর বিশ্ববিদ্যালয়',
-            email: reg.email
+            hall: reg.hall || 'জাহাঙ্গীরনগর বিশ্ববিদ্যালয়'
           });
         } else {
           // If no registration found, show demo or info
@@ -145,22 +144,34 @@ export default function IdCardGenerator() {
     
     try {
       setLoading(true);
-      const pdf = new jsPDF({
-        orientation: 'p',
-        unit: 'px',
-        format: [400, 600]
-      });
-
+      
+      // Use standard A4 or custom size that is widely supported
+      const pdf = new jsPDF('p', 'mm', 'a4');
       const imgData = canvasRef.current.toDataURL('image/png', 1.0);
       
-      // Calculate aspect ratio to fit perfect
-      pdf.addImage(imgData, 'PNG', 0, 0, 400, 600);
-      pdf.save(`JU52_ID_${participant.roll}.pdf`);
+      // A4 is 210mm x 297mm. We want ID card to be around 100mm x 150mm centered
+      const imgWidth = 100;
+      const imgHeight = 150;
+      const x = (210 - imgWidth) / 2;
+      const y = (297 - imgHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
       
-      toast({ title: "PDF ডাউনলোড সম্পন্ন হয়েছে ✅" });
+      // Create a blob and download it manually for better mobile support
+      const pdfBlob = pdf.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `JU52_ID_${participant.roll}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({ title: "PDF ডাউনলোড শুরু হয়েছে ✅" });
     } catch (err) {
       console.error("PDF Export error:", err);
-      toast({ title: "PDF ডাউনলোড ব্যর্থ হয়েছে", variant: "destructive" });
+      toast({ title: "PDF ডাউনলোড ব্যর্থ হয়েছে", description: "আবার চেষ্টা করুন", variant: "destructive" });
     } finally {
       setLoading(false);
     }
