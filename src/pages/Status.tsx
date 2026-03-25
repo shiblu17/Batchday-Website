@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Clock, CheckCircle, XCircle, Download, Loader2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type Status = "idle" | "pending" | "verified" | "rejected" | "not_found" | "loading";
 
@@ -21,9 +23,12 @@ interface UserData {
 }
 
 export default function StatusPage() {
+  const { toast } = useToast();
   const [roll, setRoll] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +46,91 @@ export default function StatusPage() {
     } else {
       setUserData(data);
       setStatus(data.status as Status);
+    }
+  };
+
+  useEffect(() => {
+    if (status === "verified" && userData && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = 600;
+      canvas.height = 900;
+
+      // Draw Maroon Background
+      const gradient = ctx.createLinearGradient(0, 0, 0, 900);
+      gradient.addColorStop(0, '#800000'); 
+      gradient.addColorStop(1, '#4a0000'); 
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 600, 900);
+
+      // Gold Borders
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 10;
+      ctx.strokeRect(20, 20, 560, 860);
+
+      // Header
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 44px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('JU 52nd BATCH', 300, 100);
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '28px sans-serif';
+      ctx.fillText('OFFICIAL DIGITAL ID', 300, 150);
+
+      // Photo Placeholder
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      ctx.fillRect(200, 220, 200, 260);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(200, 220, 200, 260);
+
+      // QR Code Box
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(225, 520, 150, 150);
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('QR CODE', 300, 600);
+      
+      // Bottom Details
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 48px sans-serif';
+      ctx.fillText(userData.name.toUpperCase(), 300, 750);
+
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.fillText(`Roll: ${roll}`, 300, 810);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '24px sans-serif';
+      ctx.fillText(userData.department, 300, 850);
+    }
+  }, [status, userData, roll]);
+
+  const downloadPDF = async () => {
+    if (!canvasRef.current || !userData) return;
+    
+    try {
+      setDownloadLoading(true);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvasRef.current.toDataURL('image/jpeg', 0.8);
+      
+      const imgW = 105;
+      const imgH = 157.5;
+      const x = (210 - imgW) / 2;
+      const y = (297 - imgH) / 2;
+
+      pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
+      pdf.save(`JU52_ID_${roll}.pdf`);
+      
+      toast({ title: "PDF ডাউনলোড শুরু হয়েছে ✅" });
+    } catch (err) {
+      console.error("PDF error:", err);
+      toast({ title: "ডাউনলোড ব্যর্থ হয়েছে", variant: "destructive" });
+    } finally {
+      setDownloadLoading(false);
     }
   };
 
@@ -109,8 +199,9 @@ export default function StatusPage() {
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ type: "spring", delay: 0.15 }}
-                      className="rounded-2xl bg-primary p-6 text-primary-foreground text-center space-y-4"
+                      className="rounded-2xl bg-primary p-6 text-primary-foreground text-center space-y-4 relative overflow-hidden"
                     >
+                      <canvas ref={canvasRef} className="hidden" />
                       <p className="text-xs uppercase tracking-widest opacity-70">ডিজিটাল আইডি কার্ড</p>
                       <h3 className="font-display text-xl font-extrabold">JU-52 ব্যাচ ডে</h3>
                       <div className="mx-auto w-fit bg-card rounded-xl p-3">
@@ -121,8 +212,12 @@ export default function StatusPage() {
                         <p className="text-sm opacity-80">{userData.department}</p>
                         <p className="text-xs opacity-60">Roll: {roll}</p>
                       </div>
-                      <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-sm transition-all hover:scale-105 active:scale-95">
-                        <Download className="h-4 w-4" />
+                      <button 
+                        onClick={downloadPDF}
+                        disabled={downloadLoading}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                      >
+                        {downloadLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                         ডাউনলোড করো
                       </button>
                     </motion.div>
