@@ -8,8 +8,9 @@ import { Loader2, Download, FileText, Share2, Mail, CheckCircle } from 'lucide-r
 export default function IdCardGenerator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [downloadUrl, setDownloadUrl] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [debugStatus, setDebugStatus] = useState('ইনিশিয়ালাইজিং...');
+  const [loading, setLoading] = useState(false);
+  const [searchRoll, setSearchRoll] = useState('');
+  const [debugStatus, setDebugStatus] = useState('পছন্দমতো রোল দিয়ে সার্চ দিন...');
   const { toast } = useToast();
   const [participant, setParticipant] = useState<{
     name: string;
@@ -18,50 +19,57 @@ export default function IdCardGenerator() {
     hall: string;
   } | null>(null);
 
+  const handleSearch = async (manualRoll?: string) => {
+    const rollToSearch = manualRoll || searchRoll;
+    if (!rollToSearch) return;
+
+    try {
+      setLoading(true);
+      setDebugStatus('ডেটা খোঁজা হচ্ছে...');
+      
+      const { data: reg, error } = await supabase
+        .from('registrations')
+        .select('*')
+        .eq('roll', rollToSearch.trim())
+        .maybeSingle();
+
+      if (reg) {
+        setDebugStatus('ইউজার ডেটা পাওয়া গেছে');
+        setParticipant({
+          name: reg.name,
+          roll: reg.roll,
+          department: reg.department,
+          hall: reg.hall || 'জাহাঙ্গীরনগর বিশ্ববিদ্যালয়'
+        });
+      } else {
+        setDebugStatus('এই রোলে কোনো তথ্য পাওয়া যায়নি');
+        toast({ title: "ভুল রোল নম্বর", description: "আবার চেষ্টা করুন", variant: "destructive" });
+      }
+    } catch (err) {
+      setDebugStatus('এরর: ' + (err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchAutoData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setLoading(false);
-          setDebugStatus('লগইন করা নেই');
-          return;
-        }
-
-        const userRoll = user.user_metadata?.roll || '';
-        
-        const { data: reg, error } = await supabase
-          .from('registrations')
-          .select('*')
-          .eq('roll', userRoll)
-          .maybeSingle();
-
-        if (reg) {
-          setDebugStatus('ইউজার ডেটা পাওয়া গেছে');
-          setParticipant({
-            name: reg.name,
-            roll: reg.roll,
-            department: reg.department,
-            hall: reg.hall || 'জাহাঙ্গীরনগর বিশ্ববিদ্যালয়'
-          });
+        if (user && user.user_metadata?.roll) {
+          handleSearch(user.user_metadata.roll);
         } else {
-          setDebugStatus('রেজিস্ট্রেশন পাওয়া যায়নি, ডেমো দেখানো হচ্ছে');
+          // Default demo data
           setParticipant({
-            name: user.user_metadata?.full_name || 'JU স্টুডেন্ট',
-            roll: user.user_metadata?.roll || 'XXXX',
-            department: 'বিভাগ (বড় অক্ষরে লিখুন)',
-            hall: 'আপনার হল',
+            name: 'DEMO NAME',
+            roll: '89',
+            department: 'DEPARTMENT NAME',
+            hall: 'YOUR HALL NAME',
           });
         }
-      } catch (err) {
-        setDebugStatus('এরর: ' + (err as Error).message);
-        console.error("Error fetching participant:", err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) {}
     };
-
-    fetchUserData();
+    fetchAutoData();
   }, []);
 
   useEffect(() => {
@@ -210,10 +218,29 @@ export default function IdCardGenerator() {
           >
             <div className="text-left">
               <div className="flex justify-between items-center mb-4">
-                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider">VERIFIED ID CARD</span>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider">PREMIUM ID CARD</span>
                 <span className="text-[10px] text-slate-400 font-mono">{debugStatus}</span>
               </div>
-              <h2 className="text-5xl font-black text-slate-900 mb-6 leading-tight">আপনার নিজস্ব ডিজিটাল আইডি কার্ড।</h2>
+              <h2 className="text-5xl font-black text-slate-900 mb-6 leading-tight">আপনার ডিজিটাল আইডি কার্ড জেনারেট করুন।</h2>
+              
+              {/* Search Bar */}
+              <div className="flex gap-2 mb-8 p-1 bg-white rounded-2xl shadow-lg border border-slate-100">
+                <input 
+                  type="text" 
+                  placeholder="রোল নম্বর দিন (যেমন: 89)" 
+                  value={searchRoll}
+                  onChange={(e) => setSearchRoll(e.target.value)}
+                  className="flex-1 bg-transparent border-none focus:ring-0 px-6 font-bold text-lg"
+                />
+                <button 
+                  onClick={() => handleSearch()}
+                  disabled={loading}
+                  className="bg-primary text-secondary px-8 py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                >
+                  সার্চ দিন
+                </button>
+              </div>
+
               <p className="text-lg text-slate-600 font-medium">এটি আপনার অফিশিয়াল রেজিস্ট্রেশন কার্ড। ইভেন্টের দিন এন্ট্রির সময় এটি ফোনে অথবা প্রিন্ট করে সাথে রাখুন।</p>
             </div>
 
