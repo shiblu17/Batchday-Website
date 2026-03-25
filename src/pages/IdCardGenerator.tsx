@@ -9,13 +9,13 @@ export default function IdCardGenerator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [downloadUrl, setDownloadUrl] = useState('');
   const [loading, setLoading] = useState(true);
+  const [debugStatus, setDebugStatus] = useState('ইনিশিয়ালাইজিং...');
   const { toast } = useToast();
   const [participant, setParticipant] = useState<{
     name: string;
     roll: string;
     department: string;
     hall: string;
-    email?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -24,11 +24,10 @@ export default function IdCardGenerator() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setLoading(false);
+          setDebugStatus('লগইন করা নেই');
           return;
         }
 
-        // 1. Try to find registration by user_id
-        // 2. Fallback to roll from metadata or email
         const userRoll = user.user_metadata?.roll || '';
         
         const { data: reg, error } = await supabase
@@ -38,6 +37,7 @@ export default function IdCardGenerator() {
           .maybeSingle();
 
         if (reg) {
+          setDebugStatus('ইউজার ডেটা পাওয়া গেছে');
           setParticipant({
             name: reg.name,
             roll: reg.roll,
@@ -45,15 +45,16 @@ export default function IdCardGenerator() {
             hall: reg.hall || 'জাহাঙ্গীরনগর বিশ্ববিদ্যালয়'
           });
         } else {
-          // If no registration found, show demo or info
+          setDebugStatus('রেজিস্ট্রেশন পাওয়া যায়নি, ডেমো দেখানো হচ্ছে');
           setParticipant({
             name: user.user_metadata?.full_name || 'JU স্টুডেন্ট',
-            roll: user.user_metadata?.roll || '৫২-XXXX',
-            department: 'আপনার বিভাগ',
+            roll: user.user_metadata?.roll || 'XXXX',
+            department: 'বিভাগ (বড় অক্ষরে লিখুন)',
             hall: 'আপনার হল',
           });
         }
       } catch (err) {
+        setDebugStatus('এরর: ' + (err as Error).message);
         console.error("Error fetching participant:", err);
       } finally {
         setLoading(false);
@@ -133,49 +134,40 @@ export default function IdCardGenerator() {
     ctx.font = 'bold 16px sans-serif';
     ctx.fillText('VERIFIED', 300, 855);
 
+    setDebugStatus('কার্ড তৈরি সম্পন্ন');
     setDownloadUrl(canvas.toDataURL('image/png', 0.8));
   }, [participant]);
 
   const downloadPDF = async () => {
     if (!canvasRef.current || !participant) {
-      alert("তথ্য লোড হচ্ছে, দয়া করে একটু অপেক্ষা করুন।");
+      alert("ডেটা লোড হচ্ছে, দয়া করে অপেক্ষা করুন।");
       return;
     }
     
     try {
       setLoading(true);
+      setDebugStatus('PDF জেনারেট হচ্ছে...');
       
-      const fileName = `JU52_ID_${participant.roll || 'Participant'}.pdf`;
-      const pdf = new jsPDF('p', 'pt', 'a4'); 
-      const imgData = canvasRef.current.toDataURL('image/jpeg', 0.8); // JPEG is smaller for PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const canvas = canvasRef.current;
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
       
-      // A4 in pt: 595 x 842. We center the card (around 300x450 pt)
-      const w = 360; 
-      const h = 540;
-      const x = (595 - w) / 2;
-      const y = (842 - h) / 2;
+      const imgW = 100;
+      const imgH = 150;
+      const x = (210 - imgW) / 2;
+      const y = (297 - imgH) / 2;
 
-      pdf.addImage(imgData, 'JPEG', x, y, w, h);
+      pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
       
-      // Try multiple ways to trigger download
-      try {
-        pdf.save(fileName);
-      } catch (saveErr) {
-        // Fallback for some mobile browsers
-        const blob = pdf.output('blob');
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-      }
+      const fileName = `JU52_ID_${participant.roll}.pdf`;
+      pdf.save(fileName);
       
+      setDebugStatus('PDF ডাউনলোড শুরু হয়েছে');
       toast({ title: "PDF ডাউনলোড শুরু হয়েছে ✅" });
     } catch (err) {
       console.error("PDF Export error:", err);
-      alert("PDF ডাউনলোড ব্যর্থ হয়েছে। দয়া করে ইমেজ (IMAGE) ডাউনলোড করার চেষ্টা করুন অথবা একটি স্ক্রিনশট নিন।");
-      toast({ title: "PDF ডাউনলোড ব্যর্থ হয়েছে", variant: "destructive" });
+      setDebugStatus('PDF এরর: ' + (err as Error).message);
+      alert("PDF ডাউনলোড কাজ করছে না। দয়া করে IMAGE বাটনটি ব্যবহার করুন।");
     } finally {
       setLoading(false);
     }
@@ -217,7 +209,10 @@ export default function IdCardGenerator() {
             className="space-y-8"
           >
             <div className="text-left">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4">VERIFIED ID CARD</span>
+              <div className="flex justify-between items-center mb-4">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider">VERIFIED ID CARD</span>
+                <span className="text-[10px] text-slate-400 font-mono">{debugStatus}</span>
+              </div>
               <h2 className="text-5xl font-black text-slate-900 mb-6 leading-tight">আপনার নিজস্ব ডিজিটাল আইডি কার্ড।</h2>
               <p className="text-lg text-slate-600 font-medium">এটি আপনার অফিশিয়াল রেজিস্ট্রেশন কার্ড। ইভেন্টের দিন এন্ট্রির সময় এটি ফোনে অথবা প্রিন্ট করে সাথে রাখুন।</p>
             </div>
