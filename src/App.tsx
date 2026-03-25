@@ -11,7 +11,6 @@ import Register from "./pages/Register";
 import Leaderboard from "./pages/Leaderboard";
 import Status from "./pages/Status";
 import Gallery from "./pages/Gallery";
-import IdCardGenerator from "./pages/IdCardGenerator";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -84,15 +83,6 @@ const App = () => (
               <>
                 <Navbar />
                 <Gallery />
-              </>
-            }
-          />
-          <Route
-            path="/id-card"
-            element={
-              <>
-                <Navbar />
-                <IdCardGenerator />
               </>
             }
           />
