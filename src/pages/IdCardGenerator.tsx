@@ -70,108 +70,112 @@ export default function IdCardGenerator() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // High resolution canvas (2x)
-    canvas.width = 800;
-    canvas.height = 1200;
+    // Optimized resolution for memory (600x900)
+    canvas.width = 600;
+    canvas.height = 900;
 
     // Draw Background
-    const gradient = ctx.createLinearGradient(0, 0, 0, 1200);
-    gradient.addColorStop(0, '#800000'); // Maroon
+    const gradient = ctx.createLinearGradient(0, 0, 0, 900);
+    gradient.addColorStop(0, '#800000'); 
     gradient.addColorStop(1, '#4a0000'); 
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 800, 1200);
+    ctx.fillRect(0, 0, 600, 900);
 
     // Decorative Shapes
     ctx.fillStyle = 'rgba(255, 215, 0, 0.05)';
     ctx.beginPath();
-    ctx.arc(800, 0, 400, 0, Math.PI * 2);
+    ctx.arc(600, 0, 300, 0, Math.PI * 2);
     ctx.fill();
 
     // Top Header
     ctx.fillStyle = '#FFD700';
-    ctx.font = 'bold 54px sans-serif';
+    ctx.font = 'bold 44px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('JU 52nd BATCH', 400, 120);
+    ctx.fillText('JU 52nd BATCH', 300, 100);
     
     ctx.fillStyle = '#ffffff';
-    ctx.font = '34px sans-serif';
-    ctx.fillText('BATCH DAY REGISTRATION', 400, 180);
+    ctx.font = '28px sans-serif';
+    ctx.fillText('BATCH DAY REGISTRATION', 300, 150);
 
     // Photo Box
     ctx.fillStyle = '#ffffff';
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(250, 260, 300, 380);
-    ctx.shadowBlur = 0; // Reset shadow
+    ctx.fillRect(200, 220, 200, 260);
     
     ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(247, 257, 306, 386);
+    ctx.lineWidth = 4;
+    ctx.strokeRect(198, 218, 204, 264);
 
     ctx.fillStyle = '#800000';
-    ctx.font = 'bold 28px sans-serif';
-    ctx.fillText('OFFICIAL PHOTOGRAPH', 400, 450);
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('PHOTOGRAPH', 300, 350);
     
     // Details Section
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 64px sans-serif';
-    ctx.fillText(participant.name.toUpperCase(), 400, 780);
+    ctx.font = 'bold 48px sans-serif';
+    ctx.fillText(participant.name.toUpperCase(), 300, 600);
 
     ctx.fillStyle = '#FFD700';
-    ctx.font = 'bold 42px sans-serif';
-    ctx.fillText(`ID: JU52-${participant.roll}`, 400, 860);
+    ctx.font = 'bold 32px sans-serif';
+    ctx.fillText(`ID: JU52-${participant.roll}`, 300, 660);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '36px sans-serif';
-    ctx.fillText(participant.department, 400, 930);
+    ctx.font = '28px sans-serif';
+    ctx.fillText(participant.department, 300, 720);
 
     ctx.fillStyle = '#cccccc';
-    ctx.font = '30px sans-serif';
-    ctx.fillText(participant.hall, 400, 990);
+    ctx.font = '24px sans-serif';
+    ctx.fillText(participant.hall, 300, 770);
 
-    // QR Code Placeholder Area
+    // QR Area
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(325, 1040, 150, 150);
+    ctx.fillRect(250, 800, 100, 100);
     ctx.fillStyle = '#800000';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('VERIFIED QR', 400, 1125);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('VERIFIED', 300, 855);
 
-    setDownloadUrl(canvas.toDataURL('image/png', 1.0));
+    setDownloadUrl(canvas.toDataURL('image/png', 0.8));
   }, [participant]);
 
   const downloadPDF = async () => {
-    if (!canvasRef.current || !participant) return;
+    if (!canvasRef.current || !participant) {
+      alert("তথ্য লোড হচ্ছে, দয়া করে একটু অপেক্ষা করুন।");
+      return;
+    }
     
     try {
       setLoading(true);
       
-      // Use standard A4 or custom size that is widely supported
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvasRef.current.toDataURL('image/png', 1.0);
+      const fileName = `JU52_ID_${participant.roll || 'Participant'}.pdf`;
+      const pdf = new jsPDF('p', 'pt', 'a4'); 
+      const imgData = canvasRef.current.toDataURL('image/jpeg', 0.8); // JPEG is smaller for PDF
       
-      // A4 is 210mm x 297mm. We want ID card to be around 100mm x 150mm centered
-      const imgWidth = 100;
-      const imgHeight = 150;
-      const x = (210 - imgWidth) / 2;
-      const y = (297 - imgHeight) / 2;
+      // A4 in pt: 595 x 842. We center the card (around 300x450 pt)
+      const w = 360; 
+      const h = 540;
+      const x = (595 - w) / 2;
+      const y = (842 - h) / 2;
 
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', x, y, w, h);
       
-      // Create a blob and download it manually for better mobile support
-      const pdfBlob = pdf.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `JU52_ID_${participant.roll}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Try multiple ways to trigger download
+      try {
+        pdf.save(fileName);
+      } catch (saveErr) {
+        // Fallback for some mobile browsers
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
       
       toast({ title: "PDF ডাউনলোড শুরু হয়েছে ✅" });
     } catch (err) {
       console.error("PDF Export error:", err);
-      toast({ title: "PDF ডাউনলোড ব্যর্থ হয়েছে", description: "আবার চেষ্টা করুন", variant: "destructive" });
+      alert("PDF ডাউনলোড ব্যর্থ হয়েছে। দয়া করে ইমেজ (IMAGE) ডাউনলোড করার চেষ্টা করুন অথবা একটি স্ক্রিনশট নিন।");
+      toast({ title: "PDF ডাউনলোড ব্যর্থ হয়েছে", variant: "destructive" });
     } finally {
       setLoading(false);
     }
