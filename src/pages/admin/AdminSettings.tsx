@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useSiteSettings();
@@ -27,6 +27,13 @@ export default function AdminSettings() {
     nagad_number: "",
   });
 
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [halls, setHalls] = useState<{ id: string; name: string }[]>([]);
+  const [newDepartment, setNewDepartment] = useState("");
+  const [newDeptCapacity, setNewDeptCapacity] = useState("60");
+  const [newHall, setNewHall] = useState("");
+  const [newHallCapacity, setNewHallCapacity] = useState("200");
+
   useEffect(() => {
     if (settings) {
       setForm({
@@ -42,7 +49,61 @@ export default function AdminSettings() {
         nagad_number: settings.nagad_number,
       });
     }
+    fetchLists();
   }, [settings]);
+
+  const fetchLists = async () => {
+    const { data: depts } = await supabase.from("departments").select("*").order("name");
+    const { data: hl } = await supabase.from("halls").select("*").order("name");
+    if (depts) setDepartments(depts);
+    if (hl) setHalls(hl);
+  };
+
+  const addDepartment = async () => {
+    if (!newDepartment.trim()) return;
+    const { error } = await supabase.from("departments").insert([{ name: newDepartment, capacity: Number(newDeptCapacity) || 60 }]);
+    if (error) {
+      toast({ variant: "destructive", title: "ব্যর্থ হয়েছে", description: error.message });
+      return;
+    }
+    setNewDepartment("");
+    setNewDeptCapacity("60");
+    fetchLists();
+    toast({ title: "বিভাগ যোগ হয়েছে ✅" });
+  };
+
+  const deleteDepartment = async (id: string) => {
+    const { error } = await supabase.from("departments").delete().eq("id", id);
+    if (error) {
+      toast({ title: "বর্থ হয়েছে", description: "এটি সম্ভবত কোনো রেজিস্ট্রেশনে ব্যবহৃত হচ্ছে", variant: "destructive" });
+    } else {
+      fetchLists();
+      toast({ title: "বিভাগ মুছে ফেলা হয়েছে 🗑️" });
+    }
+  };
+
+  const addHall = async () => {
+    if (!newHall.trim()) return;
+    const { error } = await supabase.from("halls").insert([{ name: newHall, capacity: Number(newHallCapacity) || 200 }]);
+    if (error) {
+      toast({ variant: "destructive", title: "ব্যর্থ হয়েছে", description: error.message });
+      return;
+    }
+    setNewHall("");
+    setNewHallCapacity("200");
+    fetchLists();
+    toast({ title: "হল যোগ হয়েছে ✅" });
+  };
+
+  const deleteHall = async (id: string) => {
+    const { error } = await supabase.from("halls").delete().eq("id", id);
+    if (error) {
+      toast({ title: "বর্থ হয়েছে", description: "এটি সম্ভবত কোনো রেজিস্ট্রেশনে ব্যবহৃত হচ্ছে", variant: "destructive" });
+    } else {
+      fetchLists();
+      toast({ title: "হল মুছে ফেলা হয়েছে 🗑️" });
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -161,6 +222,80 @@ export default function AdminSettings() {
               value={form.hero_description}
               onChange={(e) => setForm((f) => ({ ...f, hero_description: e.target.value }))}
             />
+          </div>
+        </div>
+
+        {/* Manage Departments */}
+        <div className={sectionClass}>
+          <h2 className="font-display font-semibold text-base">বিভাগ ম্যানেজমেন্ট</h2>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                placeholder="নতুন নাম"
+                value={newDepartment}
+                onChange={(e) => setNewDepartment(e.target.value)}
+                className="flex-1 bg-background border border-input rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                type="number"
+                placeholder="সীমা"
+                value={newDeptCapacity}
+                onChange={(e) => setNewDeptCapacity(e.target.value)}
+                className="w-20 bg-background border border-input rounded-lg px-3 py-2 text-sm"
+              />
+              <button 
+                onClick={addDepartment}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2"
+              >
+                <Plus className="h-4 w-4" /> যোগ করুন
+              </button>
+            </div>
+          <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto pr-2">
+            {departments.map((d) => (
+              <div key={d.id} className="flex items-center justify-between p-2 bg-muted rounded-lg text-sm group">
+                <span className="truncate">{d.name}</span>
+                <button onClick={() => deleteDepartment(d.id)} className="opacity-0 group-hover:opacity-100 text-destructive p-1 hover:bg-destructive/10 rounded-md transition-all">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Manage Halls */}
+        <div className={sectionClass}>
+          <h2 className="font-display font-semibold text-base">হল ম্যানেজমেন্ট</h2>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                placeholder="নতুন নাম"
+                value={newHall}
+                onChange={(e) => setNewHall(e.target.value)}
+                className="flex-1 bg-background border border-input rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                type="number"
+                placeholder="সীমা"
+                value={newHallCapacity}
+                onChange={(e) => setNewHallCapacity(e.target.value)}
+                className="w-20 bg-background border border-input rounded-lg px-3 py-2 text-sm"
+              />
+              <button 
+                onClick={addHall}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2"
+              >
+                <Plus className="h-4 w-4" /> যোগ করুন
+              </button>
+            </div>
+          <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto pr-2">
+            {halls.map((h) => (
+              <div key={h.id} className="flex items-center justify-between p-2 bg-muted rounded-lg text-sm group">
+                <span className="truncate">{h.name}</span>
+                <button onClick={() => deleteHall(h.id)} className="opacity-0 group-hover:opacity-100 text-destructive p-1 hover:bg-destructive/10 rounded-md transition-all">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
 

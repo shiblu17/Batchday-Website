@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
-import { getLeaderboardData } from "@/lib/constants";
+import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useRegistrations } from "@/hooks/useRegistrations";
 
@@ -44,8 +44,35 @@ export default function Index() {
   const [hallData, setHallData] = useState<any[]>([]);
 
   useEffect(() => {
-    setDeptData(getLeaderboardData('dept'));
-    setHallData(getLeaderboardData('hall'));
+    const fetchLeaderboard = async () => {
+      const { data: regs } = await supabase.from("registrations").select("department, hall, status");
+      const { data: depts } = await supabase.from("departments").select("*");
+      const { data: hl } = await supabase.from("halls").select("*");
+
+      if (depts && hl) {
+        const deptCounts: Record<string, number> = {};
+        const hallCounts: Record<string, number> = {};
+        regs?.forEach(r => {
+          if (r.status === 'verified' || r.status === 'pending') {
+            deptCounts[r.department] = (deptCounts[r.department] || 0) + 1;
+            hallCounts[r.hall] = (hallCounts[r.hall] || 0) + 1;
+          }
+        });
+
+        setDeptData(depts.map(d => ({
+          name: d.name,
+          registered: deptCounts[d.name] || 0,
+          total: d.capacity || 60
+        })).sort((a,b) => b.registered - a.registered));
+
+        setHallData(hl.map(h => ({
+          name: h.name,
+          registered: hallCounts[h.name] || 0,
+          total: h.capacity || 200
+        })).sort((a,b) => b.registered - a.registered));
+      }
+    };
+    fetchLeaderboard();
   }, []);
   const { data: registrations = [] } = useRegistrations();
 

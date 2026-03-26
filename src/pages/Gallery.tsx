@@ -47,10 +47,20 @@ export default function GalleryPage() {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : photos.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
-          <ImageIcon className="h-16 w-16 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">এখনো কোনো ছবি আপলোড হয়নি</p>
-          <p className="text-xs mt-1">অ্যাডমিন গ্যালারিতে ছবি যোগ করলে এখানে দেখা যাবে</p>
+        <div className="text-center py-32 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200 mt-8 mx-2">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex flex-col items-center"
+          >
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
+              <ImageIcon className="h-10 w-10 text-slate-300" />
+            </div>
+            <h3 className="font-display text-2xl font-bold text-slate-400">স্মৃতিগুলো এখনো জমা হয়নি!</h3>
+            <p className="text-slate-400 text-sm mt-3 max-w-xs mx-auto">
+              ৫২তম ব্যাচের মেমোরি গ্যালারিটি এখনো খালি আছে। অ্যাডমিন থেকে ছবি আপলোড করলেই এখানে ভেসে উঠবে।
+            </p>
+          </motion.div>
         </div>
       ) : (
         <motion.div

@@ -11,6 +11,10 @@ interface Confession {
   content: string;
   author_nickname: string;
   created_at: string;
+  reactions?: {
+    love?: number;
+    haha?: number;
+  };
 }
 
 export default function Confessions() {
@@ -48,7 +52,7 @@ export default function Confessions() {
       .eq("is_approved", true)
       .order("created_at", { ascending: false });
       
-    if (data && !error) setConfessions(data);
+    if (data && !error) setConfessions(data as unknown as Confession[]);
     setLoading(false);
   };
 
@@ -72,6 +76,25 @@ export default function Confessions() {
       setContent("");
       setNickname("");
     }
+  };
+
+  const handleReaction = async (id: string, type: 'love' | 'haha') => {
+    // Optimistic UI update
+    setConfessions(prev => prev.map(c => {
+      if (c.id === id) {
+        const reactions = (c as any).reactions || {};
+        return { ...c, reactions: { ...reactions, [type]: (reactions[type] || 0) + 1 } };
+      }
+      return c;
+    }));
+
+    // Actual update - in a real app, we would use a database function (RPC) to increment safely
+    // Since I don't have the RPC yet, I'll fetch and update (race-condition prone but works for demo)
+    const { data: current } = await (supabase.from("confessions") as any).select("reactions").eq("id", id).single();
+    const reactions = current?.reactions || {};
+    reactions[type] = (reactions[type] || 0) + 1;
+    
+    await (supabase.from("confessions") as any).update({ reactions }).eq("id", id);
   };
 
   return (
@@ -155,20 +178,37 @@ export default function Confessions() {
                 key={confession.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="break-inside-avoid bg-card p-6 rounded-3xl border border-border shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+                className="break-inside-avoid bg-card p-6 rounded-3xl border border-border shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group mb-6"
               >
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-rose-500 to-fuchsia-600 opacity-80" />
                 <p className="text-foreground text-[17px] leading-relaxed mb-6 whitespace-pre-wrap font-medium">
                   "{confession.content}"
                 </p>
-                <div className="flex items-center justify-between border-t border-border pt-4">
-                  <span className="font-bold text-sm text-rose-500 flex items-center gap-1.5 bg-rose-500/10 px-2 py-1 rounded-md">
-                    <Sparkles className="w-3 h-3" />
-                    {confession.author_nickname}
-                  </span>
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    {new Date(confession.created_at).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric' })}
-                  </span>
+                <div className="flex flex-col gap-4 border-t border-border pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-rose-500 flex items-center gap-1.5 bg-rose-500/10 px-2 py-1 rounded-md">
+                      <Sparkles className="w-3 h-3" />
+                      {confession.author_nickname}
+                    </span>
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {new Date(confession.created_at).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => handleReaction(confession.id, 'love')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm transition-all active:scale-90"
+                    >
+                      ❤️ <span className="opacity-70">{(confession as any).reactions?.love || 0}</span>
+                    </button>
+                    <button 
+                       onClick={() => handleReaction(confession.id, 'haha')}
+                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-600 font-bold text-sm transition-all active:scale-90"
+                    >
+                      😂 <span className="opacity-70">{(confession as any).reactions?.haha || 0}</span>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}

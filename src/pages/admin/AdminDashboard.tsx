@@ -1,7 +1,18 @@
 import { motion } from "framer-motion";
-import { Users, CreditCard, Clock, CheckCircle, UserCheck, Loader2 } from "lucide-react";
+import { Users, CreditCard, Clock, CheckCircle, UserCheck, Loader2, TrendingUp, BarChart as BarChartIcon } from "lucide-react";
 import { useRegistrations } from "@/hooks/useRegistrations";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area 
+} from 'recharts';
 
 export default function AdminDashboard() {
   const { data: registrations = [], isLoading } = useRegistrations();
@@ -30,37 +41,101 @@ export default function AdminDashboard() {
     { label: "উপস্থিতি", value: attended, icon: UserCheck, color: "bg-secondary/10 text-secondary" },
   ];
 
-  const deptCount: Record<string, number> = {};
+  // Process chart data
+  const deptData: Record<string, number> = {};
+  const dateData: Record<string, number> = {};
+
   registrations.forEach((r) => {
-    deptCount[r.department] = (deptCount[r.department] || 0) + 1;
+    deptData[r.department] = (deptData[r.department] || 0) + 1;
+    const date = new Date(r.created_at).toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+    dateData[date] = (dateData[date] || 0) + 1;
   });
-  const deptList = Object.entries(deptCount).sort((a, b) => b[1] - a[1]);
+
+  const deptChartData = Object.entries(deptData)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a,b) => b.value - a.value)
+    .slice(0, 10);
+
+  const trendData = Object.entries(dateData)
+    .map(([name, value]) => ({ name, value }));
 
   return (
-    <div>
-      <h1 className="font-display text-2xl font-bold mb-6">ড্যাশবোর্ড</h1>
+    <div className="pb-10">
+      <h1 className="font-display text-2xl font-bold mb-6">ড্যাশবোর্ড ওভারভিউ</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className="rounded-xl bg-card p-4 shadow-card"
+            className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100"
           >
-            <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${s.color} mb-3`}>
-              <s.icon className="h-5 w-5" />
+            <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${s.color} mb-4 shadow-inner`}>
+              <s.icon className="h-6 w-6" />
             </div>
-            <p className="font-display text-2xl font-bold">{s.value}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+            <p className="font-display text-3xl font-black text-slate-800">{s.value}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">{s.label}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="rounded-xl bg-card shadow-card overflow-hidden">
-        <div className="p-4 border-b border-border">
-          <h2 className="font-display font-semibold">সাম্প্রতিক রেজিস্ট্রেশন</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Trend Chart */}
+        <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <h2 className="font-display font-bold text-slate-800">রেজিস্ট্রেশন প্রবণতা</h2>
+          </div>
+          <div className="h-[280px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#800000" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#800000" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                  labelStyle={{ fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="value" stroke="#800000" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Dept Chart */}
+        <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-2 mb-6">
+            <BarChartIcon className="h-5 w-5 text-primary" />
+            <h2 className="font-display font-bold text-slate-800">টপ ডিপার্টমেন্ট</h2>
+          </div>
+          <div className="h-[280px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={deptChartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip 
+                   cursor={{ fill: '#f8fafc' }}
+                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                />
+                <Bar dataKey="value" fill="#800000" radius={[4, 4, 0, 0]} barSize={24} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+          <h2 className="font-display font-bold text-slate-800">সাম্প্রতিক রেজিস্ট্রেশন</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -89,22 +164,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {deptList.length > 0 && (
-        <div className="mt-6 rounded-xl bg-card shadow-card p-4">
-          <h2 className="font-display font-semibold mb-4">ডিপার্টমেন্ট অনুযায়ী</h2>
-          <div className="space-y-2">
-            {deptList.map(([dept, count]) => (
-              <div key={dept} className="flex items-center gap-3">
-                <span className="text-sm flex-1 truncate">{dept}</span>
-                <div className="w-32 h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${(count / total) * 100}%` }} />
-                </div>
-                <span className="text-sm font-semibold w-8 text-right">{count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

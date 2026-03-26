@@ -18,31 +18,39 @@ export default function LeaderboardCard({ rank, name, total, registered }: Props
   const medal = medals[rank];
 
   return (
-    <div className={`flex items-center gap-3 md:gap-4 rounded-xl bg-card p-3 md:p-4 shadow-card border-l-4 ${
-      medal?.border || "border-l-border"
-    } hover:shadow-card-hover transition-shadow`}>
-      <div className="flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-lg bg-surface">
-        {medal ? (
-          <span className="text-lg md:text-xl">{medal.emoji}</span>
-        ) : (
-          <span className="font-display font-bold text-xs text-muted-foreground">#{rank}</span>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-display font-bold text-xs md:text-sm truncate">{name}</p>
-        <div className="flex items-center gap-2 mt-1.5">
-          <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
-              initial={{ width: 0 }}
-              whileInView={{ width: `${pct}%` }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
-            />
-          </div>
-          <span className="text-[11px] font-bold text-primary tabular-nums shrink-0">{pct}%</span>
+    <div className={`relative flex flex-col gap-2 rounded-2xl bg-white/50 p-5 shadow-sm border-l-[6px] ${
+      medal?.border || "border-l-gray-200"
+    } hover:shadow-md transition-all duration-300 group`}>
+      
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 shadow-inner group-hover:scale-110 transition-transform">
+          {medal ? (
+            <span className="text-2xl">{medal.emoji}</span>
+          ) : (
+            <span className="font-display font-bold text-sm text-gray-400">#{rank}</span>
+          )}
         </div>
-        <p className="text-[10px] md:text-[11px] text-muted-foreground mt-0.5">{registered}/{total} জন</p>
+        
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display font-bold text-lg md:text-xl text-slate-800 truncate">
+            {name}
+          </h3>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 mt-1">
+        <div className="flex-1 h-3 rounded-full bg-gray-100 overflow-hidden shadow-inner">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-accent relative"
+            initial={{ width: 0 }}
+            whileInView={{ width: `${pct}%` }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem]" />
+          </motion.div>
+        </div>
+        <span className="text-base font-black text-primary tabular-nums shrink-0">{pct}%</span>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DEPARTMENTS, HALLS, TSHIRT_SIZES } from "@/lib/constants";
+import { TSHIRT_SIZES } from "@/lib/constants";
 import { CheckCircle, Upload, Phone, CreditCard, ChevronLeft, ChevronRight, User, Camera, Loader2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,6 +78,19 @@ export default function RegisterPage() {
     txId: "",
     senderNumber: "",
   });
+
+  const [dbDepartments, setDbDepartments] = useState<string[]>([]);
+  const [dbHalls, setDbHalls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchLists = async () => {
+      const { data: depts } = await supabase.from("departments").select("name").order("name");
+      const { data: hl } = await supabase.from("halls").select("name").order("name");
+      if (depts) setDbDepartments(depts.map(d => d.name));
+      if (hl) setDbHalls(hl.map(h => h.name));
+    };
+    fetchLists();
+  }, []);
 
   const set = (key: string, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -318,7 +331,7 @@ export default function RegisterPage() {
                   <label className={labelClass}>ডিপার্টমেন্ট *</label>
                   <select className={`${inputClass} ${errors.department ? "border-destructive ring-destructive/20" : "border-input"}`} value={form.department} onChange={(e) => set("department", e.target.value)}>
                     <option value="">সিলেক্ট করো</option>
-                    {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    {dbDepartments.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                   {errors.department && <p className={errorClass}>{errors.department}</p>}
                 </div>
@@ -326,7 +339,7 @@ export default function RegisterPage() {
                   <label className={labelClass}>হল *</label>
                   <select className={`${inputClass} ${errors.hall ? "border-destructive ring-destructive/20" : "border-input"}`} value={form.hall} onChange={(e) => set("hall", e.target.value)}>
                     <option value="">সিলেক্ট করো</option>
-                    {HALLS.map((h) => <option key={h} value={h}>{h}</option>)}
+                    {dbHalls.map((h) => <option key={h} value={h}>{h}</option>)}
                   </select>
                   {errors.hall && <p className={errorClass}>{errors.hall}</p>}
                 </div>

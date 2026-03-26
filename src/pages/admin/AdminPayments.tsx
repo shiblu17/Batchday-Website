@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, XCircle, Search, Eye, Loader2, MessageCircle } from "lucide-react";
+import { CheckCircle, XCircle, Search, Eye, Loader2, MessageCircle, Edit, Trash2 } from "lucide-react";
 import { useRegistrations, type Registration } from "@/hooks/useRegistrations";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,10 +19,16 @@ export default function AdminPayments() {
   const [filter, setFilter] = useState<"all" | "pending" | "verified" | "rejected">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Registration | null>(null);
+  const [editing, setEditing] = useState<Registration | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const filtered = registrations.filter((r) => {
     if (filter !== "all" && r.status !== filter) return false;
-    if (search && !r.name.includes(search) && !r.roll.includes(search) && !r.tx_id.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && 
+        !r.name.toLowerCase().includes(search.toLowerCase()) && 
+        !r.roll.includes(search) && 
+        !r.phone.includes(search) &&
+        !r.tx_id.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
@@ -42,6 +48,50 @@ export default function AdminPayments() {
     toast({
       title: status === "verified" ? "পেমেন্ট অ্যাপ্রুভ হয়েছে ✅" : "পেমেন্ট রিজেক্ট হয়েছে ❌",
     });
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+
+    const { error } = await supabase
+      .from("registrations")
+      .update({
+        name: editing.name,
+        roll: editing.roll,
+        phone: editing.phone,
+        department: editing.department,
+        hall: editing.hall,
+        tshirt_size: editing.tshirt_size,
+        tx_id: editing.tx_id,
+        sender_number: editing.sender_number,
+        status: editing.status,
+      })
+      .eq("id", editing.id);
+
+    if (error) {
+      toast({ title: "সেভ ব্যর্থ হয়েছে", variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["registrations"] });
+      setEditing(null);
+      toast({ title: "তথ্য আপডেট করা হয়েছে ✅" });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("আপনি কি নিশ্চিতভাবে এই রেজিস্ট্রেশনটি মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।")) return;
+    
+    const { error } = await supabase
+      .from("registrations")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "মুছে ফেলা ব্যর্থ হয়েছে", variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["registrations"] });
+      toast({ title: "রেজিস্ট্রেশন মুছে ফেলা হয়েছে 🗑️" });
+    }
   };
 
   const pendingCount = registrations.filter((r) => r.status === "pending").length;
@@ -116,6 +166,12 @@ export default function AdminPayments() {
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => setSelected(r)} className="p-2 rounded-lg hover:bg-muted transition-colors" title="বিস্তারিত">
                         <Eye className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <button onClick={() => setEditing(r)} className="p-2 rounded-lg hover:bg-muted transition-colors" title="এডিট">
+                        <Edit className="h-4 w-4 text-primary" />
+                      </button>
+                      <button onClick={() => handleDelete(r.id)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors" title="ডিলিট">
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </button>
                       {r.status === "pending" && (
                         <>
@@ -201,6 +257,107 @@ export default function AdminPayments() {
                 </div>
               )}
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editing} onOpenChange={() => setEditing(null)}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">তথ্য এডিট করুন</DialogTitle>
+          </DialogHeader>
+          {editing && (
+            <form onSubmit={handleEdit} className="space-y-4 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">নাম</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.name} 
+                    onChange={e => setEditing({...editing, name: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">রোল</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.roll} 
+                    onChange={e => setEditing({...editing, roll: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">ফোন</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.phone} 
+                    onChange={e => setEditing({...editing, phone: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">ডিপার্টমেন্ট</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.department} 
+                    onChange={e => setEditing({...editing, department: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">হল</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.hall} 
+                    onChange={e => setEditing({...editing, hall: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">TxID</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.tx_id} 
+                    onChange={e => setEditing({...editing, tx_id: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">সেন্ডার নম্বর</label>
+                  <input 
+                    className="w-full rounded-lg border p-2 text-sm" 
+                    value={editing.sender_number} 
+                    onChange={e => setEditing({...editing, sender_number: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">স্ট্যাটাস</label>
+                  <select 
+                    className="w-full rounded-lg border p-2 text-sm"
+                    value={editing.status}
+                    onChange={e => setEditing({...editing, status: e.target.value})}
+                  >
+                    <option value="pending">পেনডিং</option>
+                    <option value="verified">ভেরিফাইড</option>
+                    <option value="rejected">রিজেক্টেড</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    handleEdit(e);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm"
+                >
+                  সেভ করুন
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(null)}
+                  className="px-6 py-2.5 rounded-xl bg-muted font-display font-bold text-sm"
+                >
+                  বাতিল
+                </button>
+              </div>
+            </form>
           )}
         </DialogContent>
       </Dialog>

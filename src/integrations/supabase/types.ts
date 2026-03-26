@@ -136,24 +136,63 @@ export type Database = {
       }
       confessions: {
         Row: {
-          id: string
-          author_nickname: string
+          approved: boolean
           content: string
-          is_approved: boolean
+          created_at: string
+          id: string
+        }
+        Insert: {
+          approved?: boolean
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          approved?: boolean
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      departments: {
+        Row: {
+          id: string
+          name: string
+          capacity: number
           created_at: string
         }
         Insert: {
           id?: string
-          author_nickname: string
-          content: string
-          is_approved?: boolean
+          name: string
+          capacity?: number
           created_at?: string
         }
         Update: {
           id?: string
-          author_nickname?: string
-          content?: string
-          is_approved?: boolean
+          name?: string
+          capacity?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      halls: {
+        Row: {
+          id: string
+          name?: string
+          capacity: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name?: string
+          capacity?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          capacity?: number
           created_at?: string
         }
         Relationships: []
