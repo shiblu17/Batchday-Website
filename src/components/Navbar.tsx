@@ -75,24 +75,84 @@ export default function Navbar() {
 
       {/* Mobile bottom bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md safe-area-bottom">
-        <div className="flex justify-around py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
-          {navItems.map((item) => {
-            const active = location.pathname === item.to;
+        <div className="flex justify-around py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] relative z-50 bg-background/95">
+          {navItems.slice(0, 4).map((item) => {
+            const active = location.pathname === item.to && !open;
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-colors min-w-[4rem] ${
+                onClick={() => setOpen(false)}
+                className={`flex flex-col flex-1 items-center gap-1 px-1 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} />
-                {item.label}
+                <span className="truncate w-full text-center">{item.label}</span>
               </Link>
             );
           })}
+          
+          <button
+            onClick={() => setOpen(!open)}
+            className={`flex flex-col flex-1 items-center gap-1 px-1 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
+              open ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            {open ? <X className="h-5 w-5 text-primary" /> : <Menu className="h-5 w-5" />}
+            <span className="truncate w-full text-center">মেনু</span>
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Popup Menu */}
+      <AnimatePresence>
+        {open && (
+           <motion.div
+             initial={{ opacity: 0, y: 100 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: 100 }}
+             className="md:hidden fixed inset-x-0 bottom-[4.5rem] p-4 z-40"
+           >
+              <div className="bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-3xl p-6 flex flex-col gap-4">
+                <h3 className="font-display font-bold text-foreground mb-2">আরও অপশন</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {navItems.slice(4).map((item) => {
+                    const active = location.pathname === item.to;
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setOpen(false)}
+                        className={`flex items-center gap-3 p-4 rounded-2xl font-bold transition-colors ${
+                          active ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+                </div>
+                
+                <div className="h-px bg-border my-2" />
+                
+                <div className="flex items-center justify-between bg-muted p-4 rounded-2xl">
+                   <span className="font-bold">ডার্ক মোড</span>
+                   <ThemeToggle />
+                </div>
+                
+                <Link
+                  to="/register"
+                  onClick={() => setOpen(false)}
+                  className="w-full py-4 text-center rounded-2xl bg-accent text-accent-foreground font-display font-bold"
+                >
+                   Register Now
+                </Link>
+              </div>
+           </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
