@@ -34,10 +34,37 @@ const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const LoadingFallback = () => (
-  <div className="flex h-screen w-full items-center justify-center p-4">
-    <div className="flex flex-col items-center gap-3">
-      <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      <p className="font-display font-medium text-muted-foreground animate-pulse">লোড হচ্ছে...</p>
+  <div className="flex h-screen w-full flex-col items-center justify-center bg-background relative overflow-hidden">
+    {/* Animated background rings */}
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="w-32 h-32 sm:w-40 sm:h-40 bg-primary/10 rounded-full animate-ping [animation-duration:3s]"></div>
+    </div>
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="w-48 h-48 sm:w-64 sm:h-64 bg-primary/5 rounded-full animate-ping [animation-duration:3s] [animation-delay:1.5s]"></div>
+    </div>
+    
+    <div className="relative z-10 flex flex-col items-center gap-8">
+       {/* Bouncing Logo Box */}
+       <div className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary to-[#600000] rounded-3xl shadow-2xl shadow-primary/30 animate-bounce">
+         <span className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-widest drop-shadow-md">JU</span>
+         {/* Glassmet shine */}
+         <div className="absolute top-0 left-0 right-0 h-[40%] rounded-t-3xl bg-gradient-to-b from-white/30 to-transparent"></div>
+       </div>
+       
+       {/* Text Area */}
+       <div className="flex flex-col items-center gap-3">
+         <div className="flex items-center gap-1">
+           <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">52nd Batch Day</span>
+         </div>
+         <div className="flex items-center gap-2 bg-muted/60 px-5 py-2 rounded-full border border-border/50">
+           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">লোড হচ্ছে</span>
+           <span className="flex items-center gap-1 pt-1">
+             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
+             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></span>
+             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce"></span>
+           </span>
+         </div>
+       </div>
     </div>
   </div>
 );
