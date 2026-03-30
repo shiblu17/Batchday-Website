@@ -134,26 +134,26 @@ export default function EventTimeline() {
   
                       {/* Content Card */}
                       <div className="w-full pl-9 pr-1 py-2 md:px-0 md:py-0 md:w-5/12 relative z-10">
-                        <div className="bg-white p-5 md:p-10 rounded-3xl md:rounded-[2.5rem] border border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 relative group/card overflow-hidden">
+                        <div className="bg-white p-4 md:p-10 rounded-[1.25rem] md:rounded-[2.5rem] border border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 relative group/card overflow-hidden">
                           {/* Subtle inner highlight */}
                           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-[60px] opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
                           
-                          <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-5">
-                             <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl ${event.color_class} text-white shadow-xl group-hover/card:scale-110 group-hover/card:rotate-6 transition-all duration-300 flex-shrink-0`}>
+                          <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-5">
+                             <div className={`p-2.5 md:p-4 rounded-xl md:rounded-2xl ${event.color_class} text-white shadow-lg group-hover/card:scale-110 group-hover/card:rotate-6 transition-all duration-300 flex-shrink-0`}>
                                <IconComponent className="w-5 h-5 md:w-6 md:h-6" />
                              </div>
                              <div className="min-w-0">
-                               <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1 bg-muted/30 w-fit px-2 py-0.5 rounded-full">
+                               <span className="text-[11px] md:text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1 bg-muted/40 w-fit px-2 py-0.5 rounded-full">
                                  <Clock className="w-3 h-3" /> {event.time}
                                </span>
-                               <h3 className="font-display font-bold text-lg md:text-2xl text-foreground leading-tight">{event.title}</h3>
+                               <h3 className="font-display font-bold text-[17px] md:text-2xl text-foreground leading-[1.2]">{event.title}</h3>
                              </div>
                           </div>
                           
-                          <p className="text-base text-foreground/75 mb-6 leading-relaxed whitespace-pre-line">{event.description}</p>
+                          <p className="text-[13px] md:text-base text-foreground/75 mb-4 md:mb-6 leading-relaxed md:leading-relaxed whitespace-pre-line">{event.description}</p>
                           
-                          <div className="flex items-center gap-2 text-[13px] font-bold text-primary bg-primary/5 w-fit px-4 py-2 rounded-full border border-primary/10 shadow-sm">
-                            <div className={`w-2 h-2 rounded-full ${event.color_class} animate-pulse`} />
+                          <div className="flex items-center gap-2 text-[11px] md:text-[13px] font-bold text-primary bg-primary/5 w-fit px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-primary/10 shadow-sm">
+                            <div className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${event.color_class} animate-pulse`} />
                             {event.location}
                           </div>
                         </div>
