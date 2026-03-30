@@ -67,12 +67,12 @@ export default function EventTimeline() {
           className="relative group"
         >
           {/* Liquid Border Effect */}
-          <div className="absolute -inset-[2px] rounded-[3.6rem] md:rounded-[5.1rem] bg-gradient-to-r from-primary via-accent to-orange-500 opacity-30 group-hover:opacity-100 blur-[2px] transition-opacity duration-1000 animate-pulse" />
+          <div className="absolute -inset-[2px] rounded-[3.6rem] md:rounded-[5.1rem] bg-gradient-to-br from-white/30 via-transparent to-white/10 opacity-50 group-hover:opacity-100 blur-sm transition-opacity duration-1000" />
           
-          <div className="bg-white/5 backdrop-blur-3xl rounded-[3.5rem] md:rounded-[5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] p-8 md:p-20 relative overflow-hidden">
+          <div className="bg-white/10 backdrop-blur-3xl rounded-[3.5rem] md:rounded-[5rem] border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] p-8 md:p-20 relative overflow-hidden">
             {/* Decorative background shapes */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48 transition-transform group-hover:scale-110 duration-1000" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-500/5 rounded-full blur-[100px] -ml-48 -mb-48" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] -mr-48 -mt-48 transition-transform group-hover:scale-110 duration-1000" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-[100px] -ml-48 -mb-48" />
 
           <div className="text-center mb-16 relative z-10">
             <motion.h2 
@@ -81,7 +81,7 @@ export default function EventTimeline() {
               viewport={{ once: true }}
               className="font-display text-4xl mt-3 md:text-6xl font-extrabold text-white mb-6"
             >
-              ইভেন্ট <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">টাইমলাইন</span>
+              ইভেন্ট <span className="text-white">টাইমলাইন</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
