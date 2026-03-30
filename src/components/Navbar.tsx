@@ -23,7 +23,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop top bar */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="hidden md:block sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container flex h-14 md:h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <span className="font-display text-xl font-extrabold text-primary">JU-52</span>
