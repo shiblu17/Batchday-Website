@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageSquarePlus, MessageCircleHeart, ArrowLeft, Send, Loader2, Sparkles } from "lucide-react";
+import { MessageSquarePlus, MessageCircleHeart, ArrowLeft, Send, Loader2, Sparkles, Music, Search, X as CloseIcon, Play, Pause, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -10,6 +10,13 @@ interface Confession {
   id: string;
   content: string;
   author_nickname: string;
+  to_name?: string;
+  song_info?: {
+    name: string;
+    artist: string;
+    artwork: string;
+    previewUrl?: string;
+  };
   created_at: string;
   reactions?: {
     love?: number;
@@ -25,7 +32,57 @@ export default function Confessions() {
   // form state
   const [content, setContent] = useState("");
   const [nickname, setNickname] = useState("");
+  const [toName, setToName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // music playback state
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  // cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+      }
+    };
+  }, [audio]);
+
+  // music search state
+  const [songSearch, setSongSearch] = useState("");
+  const [songResults, setSongResults] = useState<any[]>([]);
+  const [selectedSong, setSelectedSong] = useState<any | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (songSearch.trim().length > 2) {
+        searchSongs(songSearch);
+      } else {
+        setSongResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [songSearch]);
+
+  const searchSongs = async (term: string) => {
+    setIsSearching(true);
+    try {
+      const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=5&media=music`);
+      const data = await response.json();
+      setSongResults(data.results.map((r: any) => ({
+        name: r.trackName,
+        artist: r.artistName,
+        artwork: r.artworkUrl100,
+        previewUrl: r.previewUrl
+      })));
+    } catch (err) {
+      console.error("Music search failed", err);
+    }
+    setIsSearching(false);
+  };
 
   useEffect(() => {
     fetchConfessions();
@@ -37,7 +94,7 @@ export default function Confessions() {
          setConfessions(prev => [payload.new as Confession, ...prev]);
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "confessions", filter: "is_approved=eq.true" }, (payload) => {
-         fetchConfessions(); // Reload to capture newly approved ones easily without manual sorting logic
+         fetchConfessions(); 
       })
       .subscribe();
       
@@ -46,8 +103,8 @@ export default function Confessions() {
 
   const fetchConfessions = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("confessions")
+    const { data, error } = await (supabase
+      .from("confessions") as any)
       .select("*")
       .eq("is_approved", true)
       .order("created_at", { ascending: false });
@@ -61,9 +118,11 @@ export default function Confessions() {
     if (!content.trim()) return;
     
     setSubmitting(true);
-    const { error } = await supabase.from("confessions").insert({
+    const { error } = await (supabase.from("confessions") as any).insert({
       content: content.trim(),
       author_nickname: nickname.trim() || "অজ্ঞাত",
+      to_name: toName.trim(),
+      song_info: selectedSong
     });
     
     setSubmitting(false);
@@ -75,6 +134,9 @@ export default function Confessions() {
       setOpen(false);
       setContent("");
       setNickname("");
+      setToName("");
+      setSelectedSong(null);
+      setSongSearch("");
     }
   };
 
@@ -96,9 +158,31 @@ export default function Confessions() {
     
     await (supabase.from("confessions") as any).update({ reactions }).eq("id", id);
   };
+  
+  const togglePlay = (confessionId: string, url: string) => {
+    if (playingId === confessionId) {
+      audio?.pause();
+      setPlayingId(null);
+    } else {
+      // stop current
+      if (audio) {
+        audio.pause();
+      }
+      
+      const newAudio = new Audio(url);
+      newAudio.play();
+      setAudio(newAudio);
+      setPlayingId(confessionId);
+      
+      newAudio.onended = () => {
+        setPlayingId(null);
+      };
+    }
+  };
 
   return (
-    <div className="container max-w-6xl py-8 min-h-[80vh]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-slate-50 to-rose-50/30">
+      <div className="container max-w-6xl py-8 min-h-[80vh]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 px-2">
         <div>
           <h1 className="font-display text-4xl mt-4 md:mt-0 font-extrabold flex items-center gap-3">
@@ -137,9 +221,69 @@ export default function Confessions() {
               <div>
                 <input
                   type="text"
+                  value={toName}
+                  onChange={(e) => setToName(e.target.value)}
+                  placeholder="কার উদ্দেশ্যে? (যেমন: মীরা, ক-৫২)"
+                  className="w-full p-4 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-foreground"
+                  maxLength={30}
+                />
+              </div>
+              <div className="relative">
+                {!selectedSong ? (
+                  <>
+                    <div className="relative">
+                      <Music className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={songSearch}
+                        onChange={(e) => setSongSearch(e.target.value)}
+                        placeholder="একটি গান খুঁজে ব্যাকগ্রাউন্ডে দাও..."
+                        className="w-full pl-10 p-4 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-sm"
+                      />
+                      {isSearching && <Loader2 className="absolute right-3 top-4 h-4 w-4 animate-spin text-muted-foreground" />}
+                    </div>
+                    {songResults.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+                        {songResults.map((s, i) => (
+                          <div 
+                            key={i} 
+                            onClick={() => setSelectedSong(s)}
+                            className="p-3 flex items-center gap-3 hover:bg-muted cursor-pointer transition-colors border-b border-border last:border-0"
+                          >
+                            <img src={s.artwork} className="w-10 h-10 rounded-md" alt="" />
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-bold truncate">{s.name}</span>
+                              <span className="text-[10px] text-muted-foreground truncate">{s.artist}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="p-3 bg-muted rounded-xl flex items-center justify-between gap-3 border border-border">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img src={selectedSong.artwork} className="w-12 h-12 rounded-lg shadow-sm" alt="" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-bold truncate">{selectedSong.name}</span>
+                        <span className="text-[11px] text-muted-foreground truncate">{selectedSong.artist}</span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedSong(null)}
+                      className="p-1.5 hover:bg-card rounded-full text-muted-foreground transition-colors"
+                    >
+                      <CloseIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div>
+                <input
+                  type="text"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  placeholder="নিকনেম (ঐচ্ছিক: ফাঁকা রাখলে 'অজ্ঞাত' দেখাবে)"
+                  placeholder="তোমার নাম/নিকনেম (ফাঁকা রাখলে 'অজ্ঞাত' দেখাবে)"
                   className="w-full p-4 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-foreground"
                   maxLength={30}
                 />
@@ -171,43 +315,101 @@ export default function Confessions() {
           <p className="text-muted-foreground text-sm">তুমিই প্রথম মনের কথা শেয়ার করো।</p>
         </div>
       ) : (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 px-2">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 px-2 mt-12 pb-20">
           <AnimatePresence>
             {confessions.map((confession) => (
               <motion.div
                 key={confession.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="break-inside-avoid bg-card p-6 rounded-3xl border border-border shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group mb-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                className="break-inside-avoid bg-white/70 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden group flex flex-col transition-all duration-300"
               >
-                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-rose-500 to-fuchsia-600 opacity-80" />
-                <p className="text-foreground text-[17px] leading-relaxed mb-6 whitespace-pre-wrap font-medium">
-                  "{confession.content}"
-                </p>
-                <div className="flex flex-col gap-4 border-t border-border pt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-rose-500 flex items-center gap-1.5 bg-rose-500/10 px-2 py-1 rounded-md">
-                      <Sparkles className="w-3 h-3" />
-                      {confession.author_nickname}
-                    </span>
-                    <span className="text-xs font-semibold text-muted-foreground">
-                      {new Date(confession.created_at).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric' })}
-                    </span>
-                  </div>
+                {/* Card Header - To section */}
+                <div className="p-6 pb-0 flex items-start justify-between">
+                  {confession.to_name && (
+                    <div className="px-5 py-1.5 bg-blue-100/80 text-blue-600 rounded-full text-[13px] font-bold tracking-tight">
+                      To: {confession.to_name}
+                    </div>
+                  )}
+                  <span className="text-[11px] font-bold text-slate-400 bg-slate-100/50 px-3 py-1 rounded-full uppercase tracking-widest">
+                   {new Date(confession.created_at).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+
+                {/* Card Body - Handwriting Text */}
+                <div className="p-8 pt-4 flex-1">
+                  <p className="font-handwriting text-[26px] md:text-[28px] leading-[1.3] text-slate-800 decoration-rose-500/10 decoration-wavy underline-offset-8 underline">
+                    {confession.content}
+                  </p>
+                </div>
+
+                {/* Card Footer - Music info & Reactions */}
+                <div className="bg-slate-50/80 border-t border-slate-100 p-6">
+                  {confession.song_info && (
+                    <div className="mb-4 p-3 bg-white/50 border border-slate-100 rounded-2xl flex items-center gap-3">
+                      <div className="relative group/play flex-shrink-0">
+                        <img src={confession.song_info.artwork} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                        <button 
+                          onClick={() => togglePlay(confession.id, confession.song_info!.previewUrl!)}
+                          className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/play:opacity-100 transition-opacity rounded-lg"
+                        >
+                          {playingId === confession.id ? (
+                            <Pause className="w-5 h-5 text-white fill-current" />
+                          ) : (
+                            <Play className="w-5 h-5 text-white fill-current translate-x-0.5" />
+                          )}
+                        </button>
+                        {playingId === confession.id && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full flex items-center justify-center animate-bounce">
+                             <Volume2 className="w-2.5 h-2.5 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-700 truncate">{confession.song_info.name}</span>
+                          {playingId === confession.id && (
+                            <div className="flex gap-0.5 items-end h-3">
+                              <div className="w-0.5 bg-rose-500 animate-[music-bar_0.8s_ease-in-out_infinite]" />
+                              <div className="w-0.5 bg-rose-500 animate-[music-bar_1s_ease-in-out_infinite]" />
+                              <div className="w-0.5 bg-rose-500 animate-[music-bar_1.2s_ease-in-out_infinite]" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-medium truncate">{confession.song_info.artist}</span>
+                      </div>
+                      <button 
+                         onClick={() => togglePlay(confession.id, confession.song_info!.previewUrl!)}
+                         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${playingId === confession.id ? 'bg-rose-500 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                      >
+                         {playingId === confession.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 translate-x-0.5" />}
+                      </button>
+                    </div>
+                  )}
                   
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => handleReaction(confession.id, 'love')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm transition-all active:scale-90"
-                    >
-                      ❤️ <span className="opacity-70">{(confession as any).reactions?.love || 0}</span>
-                    </button>
-                    <button 
-                       onClick={() => handleReaction(confession.id, 'haha')}
-                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-600 font-bold text-sm transition-all active:scale-90"
-                    >
-                      😂 <span className="opacity-70">{(confession as any).reactions?.haha || 0}</span>
-                    </button>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-0.5">FROM</span>
+                      <span className="text-sm font-bold text-slate-700 truncate max-w-[120px]">
+                        {confession.author_nickname}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleReaction(confession.id, 'love')}
+                        className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-rose-500 hover:scale-110 active:scale-90 transition-all border border-slate-100"
+                      >
+                        ❤️ <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.love || 0}</span>
+                      </button>
+                      <button 
+                         onClick={() => handleReaction(confession.id, 'haha')}
+                         className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-yellow-600 hover:scale-110 active:scale-90 transition-all border border-slate-100"
+                      >
+                        😂 <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.haha || 0}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -215,6 +417,7 @@ export default function Confessions() {
           </AnimatePresence>
         </div>
       )}
+      </div>
     </div>
   );
 }

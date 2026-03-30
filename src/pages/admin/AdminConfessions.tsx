@@ -22,8 +22,8 @@ export default function AdminConfessions() {
   };
 
   const toggleApproval = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from("confessions")
+    const { error } = await (supabase
+      .from("confessions") as any)
       .update({ is_approved: !currentStatus })
       .eq("id", id);
 
@@ -59,6 +59,8 @@ export default function AdminConfessions() {
             <thead className="bg-muted text-muted-foreground uppercase font-semibold text-xs border-b border-border">
               <tr>
                 <th className="px-6 py-4">লেখক</th>
+                <th className="px-6 py-4">কার জন্য (To)</th>
+                <th className="px-6 py-4">গান (Song)</th>
                 <th className="px-6 py-4">কনফেশন</th>
                 <th className="px-6 py-4">তারিখ</th>
                 <th className="px-6 py-4">স্ট্যাটাস</th>
@@ -69,6 +71,18 @@ export default function AdminConfessions() {
               {confessions.map((c) => (
                 <tr key={c.id} className="hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 font-bold text-rose-500 whitespace-nowrap">{c.author_nickname}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-blue-600 font-medium">{c.to_name || "—"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {c.song_info ? (
+                      <div className="flex items-center gap-2">
+                        <img src={c.song_info.artwork} className="w-8 h-8 rounded shadow-sm" alt="" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs font-bold truncate max-w-[100px]">{c.song_info.name}</span>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">{c.song_info.artist}</span>
+                        </div>
+                      </div>
+                    ) : "—"}
+                  </td>
                   <td className="px-6 py-4">
                     <p className="line-clamp-2 max-w-sm font-medium" title={c.content}>{c.content}</p>
                   </td>
