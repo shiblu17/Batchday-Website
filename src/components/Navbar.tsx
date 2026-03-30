@@ -82,7 +82,7 @@ export default function Navbar() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors min-w-[3.5rem] ${
+                className={`flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-colors min-w-[4rem] ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >

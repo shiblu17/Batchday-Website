@@ -107,7 +107,7 @@ export default function EventTimeline() {
           ) : (
             <div className="relative max-w-4xl mx-auto">
               {/* Main vertical line */}
-              <div className="absolute left-6 md:left-1/2 md:-ml-0.5 top-0 bottom-8 w-1 bg-gradient-to-b from-primary/40 via-orange-500/40 to-transparent rounded-full" />
+              <div className="absolute left-4 md:left-1/2 md:-ml-0.5 top-0 bottom-8 w-1 bg-gradient-to-b from-primary/40 via-orange-500/40 to-transparent rounded-full" />
 
               <div className="space-y-12">
                 {events.map((event, index) => {
@@ -128,27 +128,25 @@ export default function EventTimeline() {
                       <div className="hidden md:block w-5/12" />
                       
                       {/* Timeline Node */}
-                      <div className="absolute left-6 md:left-1/2 -ml-3 md:-ml-4 flex h-6 w-6 md:h-10 md:w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-xl border-4 border-white/10 shadow-lg z-20">
+                      <div className="absolute left-4 md:left-1/2 -ml-3 md:-ml-4 flex h-6 w-6 md:h-10 md:w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-xl border-4 border-white/10 shadow-lg z-20">
                         <div className={`h-3 w-3 md:h-5 md:w-5 rounded-full ${event.color_class} shadow-inner bg-gradient-to-br from-white/30 to-transparent`} />
                       </div>
   
                       {/* Content Card */}
-                      <div className="w-full pl-10 md:pl-0 md:w-5/12 relative z-10">
-                        <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 relative group/card overflow-hidden">
+                      <div className="w-full pl-9 pr-1 py-2 md:px-0 md:py-0 md:w-5/12 relative z-10">
+                        <div className="bg-white p-5 md:p-10 rounded-3xl md:rounded-[2.5rem] border border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 relative group/card overflow-hidden">
                           {/* Subtle inner highlight */}
                           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-[60px] opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
-                          {/* Mobile Spacer */}
-                          <div className="md:hidden h-2" />
                           
-                          <div className="flex items-start gap-4 mb-5">
-                             <div className={`p-4 rounded-2xl ${event.color_class} text-white shadow-xl group-hover/card:scale-110 group-hover/card:rotate-6 transition-all duration-300 flex-shrink-0`}>
-                               <IconComponent className="w-6 h-6" />
+                          <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-5">
+                             <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl ${event.color_class} text-white shadow-xl group-hover/card:scale-110 group-hover/card:rotate-6 transition-all duration-300 flex-shrink-0`}>
+                               <IconComponent className="w-5 h-5 md:w-6 md:h-6" />
                              </div>
                              <div className="min-w-0">
                                <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1 bg-muted/30 w-fit px-2 py-0.5 rounded-full">
                                  <Clock className="w-3 h-3" /> {event.time}
                                </span>
-                               <h3 className="font-display font-bold text-2xl text-foreground leading-tight">{event.title}</h3>
+                               <h3 className="font-display font-bold text-lg md:text-2xl text-foreground leading-tight">{event.title}</h3>
                              </div>
                           </div>
                           

@@ -136,10 +136,10 @@ export default function Index() {
               { val: countdown.seconds, label: "সেকেন্ড" }].
               map((t) =>
               <div key={t.label} className="flex flex-col items-center">
-                  <span className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary-foreground tabular-nums w-12 sm:w-14 text-center">
+                  <span className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary-foreground tabular-nums w-12 sm:w-16 text-center">
                     {String(t.val).padStart(2, "0")}
                   </span>
-                  <span className="text-[10px] sm:text-xs text-primary-foreground/50 uppercase tracking-wider mt-1">{t.label}</span>
+                  <span className="text-xs sm:text-sm text-primary-foreground/50 uppercase tracking-wider mt-1">{t.label}</span>
                 </div>
               )}
             </motion.div>
@@ -149,19 +149,19 @@ export default function Index() {
               {s.registration_open ?
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md">
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md">
                 
                   Register Now
                   <ArrowRight className="h-5 w-5" />
                 </Link> :
 
-              <span className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-muted text-muted-foreground font-display font-bold text-base cursor-not-allowed">
+              <span className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-muted text-muted-foreground font-display font-bold text-base cursor-not-allowed">
                   রেজিস্ট্রেশন বন্ধ
                 </span>
               }
               <Link
                 to="/status"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border-2 border-primary-foreground/20 text-primary-foreground font-display font-semibold text-base hover:bg-primary-foreground/10 active:scale-[0.98] transition-all">
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl border-2 border-primary-foreground/20 text-primary-foreground font-display font-semibold text-base hover:bg-primary-foreground/10 active:scale-[0.98] transition-all">
                 
                 Check Status
               </Link>
