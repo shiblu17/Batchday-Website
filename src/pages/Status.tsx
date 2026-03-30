@@ -20,6 +20,7 @@ interface UserData {
   department: string;
   hall: string;
   status: string;
+  tshirt_size: string;
 }
 
 export default function StatusPage() {
@@ -38,7 +39,7 @@ export default function StatusPage() {
 
     const { data, error } = await supabase
       .from("registrations")
-      .select("name, department, hall, status")
+      .select("name, department, hall, status, tshirt_size")
       .eq("roll", roll.trim())
       .maybeSingle();
 
@@ -70,67 +71,111 @@ export default function StatusPage() {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 600, 900);
 
-      // 2. Gold Accent Patterns
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.05)';
+      // 2. Complex Premium Background elements
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.03)';
+      
+      // Top Right Circle
       ctx.beginPath();
-      ctx.arc(600, 0, 300, 0, Math.PI * 2);
+      ctx.arc(600, 0, 350, 0, Math.PI * 2);
       ctx.fill();
       
+      // Bottom Left Circle
       ctx.beginPath();
-      ctx.arc(0, 900, 200, 0, Math.PI * 2);
+      ctx.arc(0, 900, 250, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Decorative center band
+      const bgGradient = ctx.createLinearGradient(0, 400, 600, 400);
+      bgGradient.addColorStop(0, 'rgba(255, 215, 0, 0)');
+      bgGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.05)');
+      bgGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 400, 600, 100);
 
-      // 3. Gold Borders (Double line)
+      // 3. Luxurious Gold Borders
       ctx.strokeStyle = '#FFD700';
       ctx.lineWidth = 4;
       ctx.strokeRect(30, 30, 540, 840);
       ctx.lineWidth = 1;
       ctx.strokeRect(40, 40, 520, 820);
+      
+      // Corner accents
+      ctx.fillStyle = '#FFD700';
+      const corners = [[30,30], [570,30], [30,870], [570,870]];
+      corners.forEach(([cx, cy]) => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
       // 4. Header Section
       ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 44px sans-serif';
+      ctx.font = '900 48px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('JU 52nd BATCH', 300, 110);
       
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'italic 22px sans-serif';
+      ctx.font = 'italic 20px sans-serif';
+      ctx.letterSpacing = "2px";
       ctx.fillText('BATCH DAY 2024 • OFFICIAL ID', 300, 150);
+      ctx.letterSpacing = "0px";
 
       // 5. User Details (Premium Typography)
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 54px sans-serif';
-      ctx.fillText(userData.name.toUpperCase(), 300, 620);
+      
+      // Auto-shrink name to prevent border overflow
+      let fontSize = 56;
+      ctx.font = `900 ${fontSize}px sans-serif`;
+      const nameText = userData.name.toUpperCase();
+      while (ctx.measureText(nameText).width > 480 && fontSize > 24) {
+        fontSize -= 2;
+        ctx.font = `900 ${fontSize}px sans-serif`;
+      }
+      ctx.fillText(nameText, 300, 600);
 
       ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 36px sans-serif';
-      ctx.fillText(`ID NO: JU52-${roll}`, 300, 680);
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText(`ID: JU52-${roll}`, 300, 660);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.font = '28px sans-serif';
-      ctx.fillText(userData.department, 300, 740);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.fillText(userData.department, 300, 720);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = '22px sans-serif';
-      ctx.fillText(userData.hall, 300, 785);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '24px sans-serif';
+      ctx.fillText(`Hall: ${userData.hall}`, 300, 765);
+      
+      // T-Shirt Size Badge
+      ctx.fillStyle = '#FFAE00';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(`T-SHIRT: ${userData.tshirt_size}`, 300, 820);
 
       // 6. QR Code Area (Real QR from API)
       const qrImage = new Image();
       qrImage.crossOrigin = "anonymous";
-      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=JU52-${roll}`;
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=JU52-${roll}&margin=1`;
       qrImage.onload = () => {
+        // Draw white background for QR
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(225, 250, 150, 150);
-        ctx.drawImage(qrImage, 225, 250, 150, 150);
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 20;
+        ctx.fillRect(200, 260, 200, 200);
+        ctx.shadowBlur = 0; // reset shadow
+        
+        ctx.drawImage(qrImage, 210, 270, 180, 180);
         
         // Verified Seal Over QR
         ctx.fillStyle = '#FFD700';
+        ctx.shadowColor = '#000000';
+        ctx.shadowBlur = 10;
         ctx.beginPath();
-        ctx.arc(300, 325, 30, 0, Math.PI * 2);
+        ctx.arc(300, 360, 35, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#800000';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText('JU52', 300, 330);
+        ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#600000';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText('JU52', 300, 365);
         
         // Update Preview
         setPreviewUrl(canvas.toDataURL('image/png', 0.8));
