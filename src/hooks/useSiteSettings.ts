@@ -26,20 +26,29 @@ const DEFAULTS: SiteSettings = {
 };
 
 async function fetchSettings(): Promise<SiteSettings> {
-  const { data, error } = await supabase
+  const { data: rawData, error } = await supabase
     .from("site_settings")
     .select("*")
     .limit(1)
     .maybeSingle();
 
-  if (error || !data) return DEFAULTS;
+  if (error || !rawData) return DEFAULTS;
+  const data = rawData as any;
 
   return {
     ...DEFAULTS,
-    event_date: data.event_date,
-    registration_open: data.registration_open,
-    bkash_number: data.bkash_number,
-    nagad_number: data.nagad_number,
+    event_date: data.event_date ?? DEFAULTS.event_date,
+    event_location: {
+      name: data.event_location_name ?? DEFAULTS.event_location.name,
+      detail: data.event_location_detail ?? DEFAULTS.event_location.detail,
+    },
+    hero_title: data.hero_title ?? DEFAULTS.hero_title,
+    hero_subtitle: data.hero_subtitle ?? DEFAULTS.hero_subtitle,
+    hero_description: data.hero_description ?? DEFAULTS.hero_description,
+    registration_open: data.registration_open ?? DEFAULTS.registration_open,
+    registration_fee: data.registration_fee ?? DEFAULTS.registration_fee,
+    bkash_number: data.bkash_number ?? DEFAULTS.bkash_number,
+    nagad_number: data.nagad_number ?? DEFAULTS.nagad_number,
   };
 }
 

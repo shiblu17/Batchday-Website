@@ -108,15 +108,18 @@ export default function AdminSettings() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("site_settings")
+      const { error } = await (supabase.from("site_settings") as any)
         .update({
           event_date: form.event_date,
+          event_location_name: form.event_location_name,
+          event_location_detail: form.event_location_detail,
+          hero_title: form.hero_title,
+          hero_subtitle: form.hero_subtitle,
+          hero_description: form.hero_description,
           registration_open: form.registration_open,
+          registration_fee: form.registration_fee,
           bkash_number: form.bkash_number,
           nagad_number: form.nagad_number,
-          // Since some fields might not exist in the table (like hero_title), 
-          // we only update what's available in the schema.
         })
         .eq("id", 1);
       
