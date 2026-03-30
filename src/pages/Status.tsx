@@ -182,10 +182,10 @@ export default function StatusPage() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-2 p-1.5 bg-white border border-slate-200 rounded-[2rem] shadow-xl focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+        <form onSubmit={handleSearch} className="flex gap-1 p-1.5 bg-white border border-slate-200 rounded-full shadow-xl focus-within:ring-4 focus-within:ring-primary/10 transition-all max-w-full overflow-hidden">
           <input
-            className="flex-1 bg-transparent border-none focus:ring-0 px-6 py-3 font-bold text-slate-700 placeholder:text-slate-300"
-            placeholder="রোল নম্বর লিখুন (যেমন: 89)"
+            className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 outline-none px-4 md:px-6 py-2.5 md:py-3 font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-base"
+            placeholder="রোল নম্বর (যেমন: 89)"
             value={roll}
             onChange={(e) => setRoll(e.target.value)}
             required
@@ -193,9 +193,9 @@ export default function StatusPage() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="bg-primary hover:bg-[#600000] text-white px-8 py-3 rounded-[1.5rem] font-bold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+            className="shrink-0 bg-primary hover:bg-[#600000] text-white px-5 md:px-8 py-2.5 md:py-3 rounded-full font-bold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 text-sm md:text-base"
           >
-            {status === "loading" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+            {status === "loading" ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Search className="h-4 w-4 md:h-5 md:w-5" />}
             খুঁজুন
           </button>
         </form>
