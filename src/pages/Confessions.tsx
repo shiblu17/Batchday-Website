@@ -182,7 +182,7 @@ export default function Confessions() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-slate-50 to-rose-50/30">
-      <div className="container max-w-6xl py-8 min-h-[80vh]">
+      <div className="container max-w-6xl py-8 min-h-[90vh] pb-24">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 px-2">
         <div>
           <h1 className="font-display text-4xl mt-4 md:mt-0 font-extrabold flex items-center gap-3">
@@ -315,7 +315,7 @@ export default function Confessions() {
           <p className="text-muted-foreground text-sm">তুমিই প্রথম মনের কথা শেয়ার করো।</p>
         </div>
       ) : (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 px-2 mt-12 pb-20">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 px-2 mt-12 pb-28">
           <AnimatePresence>
             {confessions.map((confession) => (
               <motion.div
@@ -337,9 +337,8 @@ export default function Confessions() {
                   </span>
                 </div>
 
-                {/* Card Body - Handwriting Text */}
                 <div className="p-8 pt-4 flex-1">
-                  <p className="font-handwriting text-[26px] md:text-[28px] leading-[1.3] text-slate-800 decoration-rose-500/10 decoration-wavy underline-offset-8 underline">
+                  <p className="font-handwriting text-lg md:text-xl text-slate-800 leading-relaxed font-semibold">
                     {confession.content}
                   </p>
                 </div>

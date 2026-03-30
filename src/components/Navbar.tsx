@@ -63,54 +63,14 @@ export default function Navbar() {
           {/* Mobile controls */}
           <div className="flex items-center gap-2 md:hidden">
             <ThemeToggle />
-            <button
-              className="p-2 rounded-lg hover:bg-muted active:bg-muted/80 transition-colors"
-              onClick={() => setOpen(!open)}
-              aria-label="Toggle menu"
+            <Link
+              to="/register"
+              className="px-4 py-1.5 rounded-lg bg-accent text-accent-foreground font-display font-bold text-xs"
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+              Register
+            </Link>
           </div>
         </div>
-
-        {/* Mobile dropdown */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden overflow-hidden border-t border-border"
-            >
-              <nav className="container py-3 flex flex-col gap-1">
-                {navItems.map((item) => {
-                  const active = location.pathname === item.to;
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                        active
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-                <Link
-                  to="/register"
-                  className="mt-2 px-5 py-3 rounded-lg bg-accent text-accent-foreground font-display font-bold text-sm text-center"
-                >
-                  Register Now
-                </Link>
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
       {/* Mobile bottom bar */}

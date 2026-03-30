@@ -97,7 +97,7 @@ export default function Index() {
   const timeStr = dateObj.toLocaleTimeString("bn-BD", { hour: "numeric", minute: "2-digit" });
 
   return (
-    <div className="pb-20 md:pb-0">
+    <div className="pb-28 md:pb-0">
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary">
         <div className="absolute inset-0 opacity-[0.07]" style={{

@@ -148,7 +148,7 @@ export default function EventTimeline() {
                                <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1 bg-muted/30 w-fit px-2 py-0.5 rounded-full">
                                  <Clock className="w-3 h-3" /> {event.time}
                                </span>
-                               <h3 className="font-display font-bold text-2xl text-foreground leading-tight truncate">{event.title}</h3>
+                               <h3 className="font-display font-bold text-2xl text-foreground leading-tight">{event.title}</h3>
                              </div>
                           </div>
                           
