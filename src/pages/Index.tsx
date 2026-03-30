@@ -117,8 +117,10 @@ export default function Index() {
               <>{s.hero_title.split("-")[0]}<span className="text-accent">-</span>{s.hero_title.split("-")[1]}</> :
               s.hero_title}
             </motion.h1>
-            <motion.p variants={fadeUp} className="font-display text-lg sm:text-xl md:text-2xl font-bold text-accent">
-              {s.hero_subtitle}
+            <motion.p variants={fadeUp} className="font-display text-lg sm:text-xl md:text-2xl font-bold text-accent whitespace-pre-line leading-relaxed sm:leading-relaxed">
+              {s.hero_subtitle.includes("এই নগরীর ভিড়ে") 
+                ? s.hero_subtitle.replace("বায়ান্নর", "\nবায়ান্নর") 
+                : s.hero_subtitle}
             </motion.p>
             <motion.p variants={fadeUp} className="text-primary-foreground/70 max-w-md mx-auto text-sm md:text-base leading-relaxed">
               {s.hero_description}
