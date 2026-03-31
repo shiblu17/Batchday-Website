@@ -28,6 +28,7 @@ export default function Confessions() {
   const [confessions, setConfessions] = useState<Confession[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   // form state
   const [content, setContent] = useState("");
@@ -179,6 +180,11 @@ export default function Confessions() {
       };
     }
   };
+  const filteredConfessions = confessions.filter((c) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return c.to_name?.toLowerCase().includes(query) || c.author_nickname?.toLowerCase().includes(query) || c.content?.toLowerCase().includes(query);
+  });
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-slate-50 to-rose-50/30">
@@ -194,14 +200,26 @@ export default function Confessions() {
           </p>
         </div>
         
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-rose-600 text-white font-bold hover:bg-rose-700 hover:scale-105 active:scale-95 transition-all shadow-md shrink-0">
-              <MessageSquarePlus className="w-5 h-5" />
-              নতুন কনফেশন
-            </button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md bg-card rounded-3xl p-6 w-[95vw]">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3 shrink-0">
+          <div className="relative w-full sm:w-[220px] md:w-[280px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="কার উদ্দেশ্যে? নাম খুঁজুন..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-white/80 backdrop-blur-sm border border-rose-100 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/50 shadow-sm transition-shadow"
+            />
+          </div>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <button className="flex items-center justify-center gap-2 px-6 py-3 sm:py-2.5 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-md shrink-0">
+                <MessageSquarePlus className="w-5 h-5" />
+                নতুন কনফেশন
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md bg-card rounded-3xl p-6 w-[95vw]">
             <DialogHeader>
               <DialogTitle className="font-display text-2xl font-bold flex items-center justify-center gap-2 text-rose-600 mb-4">
                 <Sparkles className="w-6 h-6" />
@@ -302,6 +320,7 @@ export default function Confessions() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {loading ? (
@@ -309,19 +328,26 @@ export default function Confessions() {
           <Loader2 className="w-10 h-10 animate-spin text-rose-500" />
         </div>
       ) : confessions.length === 0 ? (
-        <div className="text-center py-24 bg-card rounded-3xl border border-border mt-8 mx-2">
+        <div className="text-center py-24 bg-card/60 backdrop-blur rounded-[2.5rem] border border-border mt-8 mx-2 shadow-sm">
           <MessageCircleHeart className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="font-display text-2xl font-bold text-foreground mb-2">এখনো কোনো কনফেশন আসেনি!</h3>
           <p className="text-muted-foreground text-sm">তুমিই প্রথম মনের কথা শেয়ার করো।</p>
         </div>
+      ) : filteredConfessions.length === 0 ? (
+        <div className="text-center py-24 bg-white/50 backdrop-blur-sm rounded-[2.5rem] mt-8 mx-2 shadow-sm">
+          <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4 -scale-x-100" />
+          <h3 className="font-display text-xl font-bold text-foreground mb-2">কোনো ফলাফল পাওয়া যায়নি</h3>
+          <p className="text-muted-foreground text-sm">অন্য কোনো নাম দিয়ে চেষ্টা করো।</p>
+        </div>
       ) : (
         <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 px-2 mt-12 pb-28">
           <AnimatePresence>
-            {confessions.map((confession) => (
+            {filteredConfessions.map((confession) => (
               <motion.div
                 key={confession.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 className="break-inside-avoid bg-white/70 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden group flex flex-col transition-all duration-300"
               >
