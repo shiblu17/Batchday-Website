@@ -10,6 +10,7 @@ import LeaderboardCard from "@/components/LeaderboardCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useRegistrations } from "@/hooks/useRegistrations";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 function useCountdown(target: Date) {
   const calc = () => {
@@ -130,20 +131,8 @@ export default function Index() {
             <EventTimeline />
 
             {/* Countdown */}
-            <motion.div variants={fadeUp} className="flex justify-center gap-3 sm:gap-4 pt-2">
-              {[
-              { val: countdown.days, label: "দিন" },
-              { val: countdown.hours, label: "ঘণ্টা" },
-              { val: countdown.minutes, label: "মিনিট" },
-              { val: countdown.seconds, label: "সেকেন্ড" }].
-              map((t) =>
-              <div key={t.label} className="flex flex-col items-center">
-                  <span className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary-foreground tabular-nums w-12 sm:w-16 text-center">
-                    {String(t.val).padStart(2, "0")}
-                  </span>
-                  <span className="text-xs sm:text-sm text-primary-foreground/50 uppercase tracking-wider mt-1">{t.label}</span>
-                </div>
-              )}
+            <motion.div variants={fadeUp}>
+               <CountdownTimer days={countdown.days} hours={countdown.hours} minutes={countdown.minutes} seconds={countdown.seconds} />
             </motion.div>
 
             {/* CTA */}
