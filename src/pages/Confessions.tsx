@@ -97,14 +97,22 @@ export default function Confessions() {
   useEffect(() => {
     fetchConfessions();
     
-    // Subscribe to new approved confessions
+    // Subscribe to new approved confessions and live reaction updates
     const channel = supabase
       .channel("public:confessions")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "confessions", filter: "is_approved=eq.true" }, (payload) => {
-         setConfessions(prev => [payload.new as Confession, ...prev]);
+         // Add new confession to the top of the list instantly
+         setConfessions(prev => {
+           // Prevent duplicates
+           if (prev.some(c => c.id === payload.new.id)) return prev;
+           return [payload.new as Confession, ...prev];
+         });
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "confessions", filter: "is_approved=eq.true" }, (payload) => {
-         fetchConfessions(); 
+         // Hot-swap only the updated confession (reactions) seamlessly without reloading everything
+         setConfessions(prev => prev.map(c => 
+           c.id === payload.new.id ? payload.new as Confession : c
+         ));
       })
       .subscribe();
       
