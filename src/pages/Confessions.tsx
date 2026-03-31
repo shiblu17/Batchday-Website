@@ -39,6 +39,15 @@ export default function Confessions() {
   // music playback state
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  
+  // local reaction tracking
+  const [reactedConfessions, setReactedConfessions] = useState<Record<string, 'love' | 'haha'>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('ju52_reactions') || '{}');
+    } catch {
+      return {};
+    }
+  });
 
   // cleanup audio on unmount
   useEffect(() => {
@@ -142,6 +151,13 @@ export default function Confessions() {
   };
 
   const handleReaction = async (id: string, type: 'love' | 'haha') => {
+    if (reactedConfessions[id]) return; // Prevent multiple reactions
+    
+    // Save locally
+    const params = { ...reactedConfessions, [id]: type };
+    setReactedConfessions(params);
+    localStorage.setItem('ju52_reactions', JSON.stringify(params));
+
     // Optimistic UI update
     setConfessions(prev => prev.map(c => {
       if (c.id === id) {
@@ -423,14 +439,16 @@ export default function Confessions() {
 
                     <div className="flex items-center gap-2">
                       <button 
+                        disabled={!!reactedConfessions[confession.id]}
                         onClick={() => handleReaction(confession.id, 'love')}
-                        className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-rose-500 hover:scale-110 active:scale-90 transition-all border border-slate-100"
+                        className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-rose-500 transition-all border border-slate-100 ${reactedConfessions[confession.id] === 'love' ? 'bg-rose-50 border-rose-200' : 'bg-white hover:scale-110 active:scale-90'} ${reactedConfessions[confession.id] && reactedConfessions[confession.id] !== 'love' ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                       >
                         ❤️ <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.love || 0}</span>
                       </button>
                       <button 
+                         disabled={!!reactedConfessions[confession.id]}
                          onClick={() => handleReaction(confession.id, 'haha')}
-                         className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-yellow-600 hover:scale-110 active:scale-90 transition-all border border-slate-100"
+                         className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-yellow-600 transition-all border border-slate-100 ${reactedConfessions[confession.id] === 'haha' ? 'bg-yellow-50 border-yellow-200' : 'bg-white hover:scale-110 active:scale-90'} ${reactedConfessions[confession.id] && reactedConfessions[confession.id] !== 'haha' ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                       >
                         😂 <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.haha || 0}</span>
                       </button>
