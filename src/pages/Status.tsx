@@ -164,19 +164,6 @@ export default function StatusPage() {
         
         ctx.drawImage(qrImage, 210, 270, 180, 180);
         
-        // Verified Seal Over QR
-        ctx.fillStyle = '#FFD700';
-        ctx.shadowColor = '#000000';
-        ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.arc(300, 360, 35, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        ctx.fillStyle = '#600000';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText('JU52', 300, 365);
-        
         // Update Preview
         setPreviewUrl(canvas.toDataURL('image/png', 0.8));
       };
