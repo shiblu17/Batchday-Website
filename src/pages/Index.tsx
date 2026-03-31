@@ -215,14 +215,9 @@ export default function Index() {
               কেন যোগ দেবে?
             </h2>
           </motion.div>
-          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {[
-            { emoji: "🎶", title: "লাইভ কনসার্ট", desc: "মিউজিক ও পারফরম্যান্স" },
-            { emoji: "🍽️", title: "ফুড ফেস্ট", desc: "ক্যাম্পাসের বিখ্যাত খাবার" },
-            { emoji: "📸", title: "ফটো জোন", desc: "স্মৃতি ধরে রাখো" },
-            { emoji: "🏆", title: "প্রতিযোগিতা", desc: "হল vs হল চ্যালেঞ্জ" }].
-            map((item) =>
-            <motion.div key={item.title} variants={fadeUp} whileHover={{ y: -4 }} className="rounded-2xl bg-card p-4 md:p-5 shadow-card text-center hover:shadow-card-hover transition-shadow">
+          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-3 md:gap-4">
+            {s.features.map((item, idx) =>
+              <motion.div key={idx} variants={fadeUp} whileHover={{ y: -4 }} className="rounded-2xl bg-card border border-border/50 p-4 md:p-5 shadow-card text-center hover:shadow-card-hover transition-all">
                 <span className="text-3xl md:text-4xl block mb-2">{item.emoji}</span>
                 <p className="font-display font-bold text-sm md:text-base">{item.title}</p>
                 <p className="text-[11px] md:text-xs text-muted-foreground mt-1">{item.desc}</p>

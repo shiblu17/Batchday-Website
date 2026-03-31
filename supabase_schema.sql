@@ -29,12 +29,18 @@ CREATE TABLE public.site_settings (
     event_date TEXT NOT NULL,
     registration_open BOOLEAN DEFAULT true NOT NULL,
     bkash_number TEXT NOT NULL,
-    nagad_number TEXT NOT NULL
+    nagad_number TEXT NOT NULL,
+    features JSONB DEFAULT '[]'::jsonb NOT NULL
 );
 
 -- Insert initial settings row
-INSERT INTO public.site_settings (id, event_date, registration_open, bkash_number, nagad_number)
-VALUES (1, '2025-06-15T10:00:00+06:00', true, '01700000000', '01600000000');
+INSERT INTO public.site_settings (id, event_date, registration_open, bkash_number, nagad_number, features)
+VALUES (1, '2025-06-15T10:00:00+06:00', true, '01700000000', '01600000000', '[
+  {"emoji": "🎶", "title": "লাইভ কনসার্ট", "desc": "মিউজিক ও পারফরম্যান্স"},
+  {"emoji": "🍽️", "title": "ফুড ফেস্ট", "desc": "ক্যাম্পাসের বিখ্যাত খাবার"},
+  {"emoji": "📸", "title": "ফটো জোন", "desc": "স্মৃতি ধরে রাখো"},
+  {"emoji": "🏆", "title": "প্রতিযোগিতা", "desc": "হল vs হল চ্যালেঞ্জ"}
+]'::jsonb);
 
 -- 4. Enable Row Level Security (RLS) but make them fully public for now (matching local setup)
 ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;

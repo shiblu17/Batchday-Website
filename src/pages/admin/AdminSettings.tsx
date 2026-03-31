@@ -13,6 +13,7 @@ export default function AdminSettings() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [features, setFeatures] = useState<{ emoji: string; title: string; desc: string }[]>([]);
 
   const [form, setForm] = useState({
     event_date: "",
@@ -48,6 +49,9 @@ export default function AdminSettings() {
         bkash_number: settings.bkash_number,
         nagad_number: settings.nagad_number,
       });
+      if (settings.features) {
+        setFeatures(settings.features);
+      }
     }
     fetchLists();
   }, [settings]);
@@ -120,6 +124,7 @@ export default function AdminSettings() {
           registration_fee: form.registration_fee,
           bkash_number: form.bkash_number,
           nagad_number: form.nagad_number,
+          features: features,
         })
         .eq("id", 1);
       
@@ -225,6 +230,62 @@ export default function AdminSettings() {
               value={form.hero_description}
               onChange={(e) => setForm((f) => ({ ...f, hero_description: e.target.value }))}
             />
+          </div>
+        </div>
+
+        {/* Features Management */}
+        <div className={sectionClass}>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display font-semibold text-base">ইভেন্টের ফিচার্স (Features)</h2>
+            <Button size="sm" variant="outline" onClick={() => setFeatures([...features, { emoji: "✨", title: "নতুন ফিচার", desc: "বিবরণ লিখুন" }])}>
+              <Plus className="w-4 h-4 mr-1" /> যোগ করুন
+            </Button>
+          </div>
+          <div className="space-y-3 mt-4">
+            {features.map((feature, i) => (
+              <div key={i} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center bg-background p-3 rounded-xl border border-border/50 shadow-sm transition-all focus-within:ring-2 focus-within:ring-primary/20">
+                <Input 
+                  className="w-full sm:w-16 text-xl text-center bg-transparent border-none shadow-none focus-visible:ring-0"
+                  value={feature.emoji}
+                  onChange={(e) => {
+                    const newF = [...features];
+                    newF[i].emoji = e.target.value;
+                    setFeatures(newF);
+                  }}
+                  placeholder="ইমোজি"
+                />
+                <div className="hidden sm:block w-px h-8 bg-border"></div>
+                <Input 
+                  className="w-full sm:w-1/3 text-sm font-semibold bg-transparent border-none shadow-none focus-visible:ring-0"
+                  value={feature.title}
+                  onChange={(e) => {
+                    const newF = [...features];
+                    newF[i].title = e.target.value;
+                    setFeatures(newF);
+                  }}
+                  placeholder="টাইটেল"
+                />
+                <div className="hidden sm:block w-px h-8 bg-border"></div>
+                <Input 
+                  className="w-full sm:flex-1 text-sm text-muted-foreground bg-transparent border-none shadow-none focus-visible:ring-0"
+                  value={feature.desc}
+                  onChange={(e) => {
+                    const newF = [...features];
+                    newF[i].desc = e.target.value;
+                    setFeatures(newF);
+                  }}
+                  placeholder="বিবরণ"
+                />
+                <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => {
+                  setFeatures(features.filter((_, idx) => idx !== i));
+                }}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+            {features.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-4">কোনো ফিচার যোগ করা হয়নি।</p>
+            )}
           </div>
         </div>
 

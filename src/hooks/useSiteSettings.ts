@@ -11,6 +11,7 @@ export type SiteSettings = {
   registration_fee: number;
   bkash_number: string;
   nagad_number: string;
+  features: { emoji: string; title: string; desc: string }[];
 };
 
 const DEFAULTS: SiteSettings = {
@@ -23,6 +24,12 @@ const DEFAULTS: SiteSettings = {
   registration_fee: 500,
   bkash_number: "01XXXXXXXXX",
   nagad_number: "01XXXXXXXXX",
+  features: [
+    { emoji: "🎶", title: "লাইভ কনসার্ট", desc: "মিউজিক ও পারফরম্যান্স" },
+    { emoji: "🍽️", title: "ফুড ফেস্ট", desc: "ক্যাম্পাসের বিখ্যাত খাবার" },
+    { emoji: "📸", title: "ফটো জোন", "desc": "স্মৃতি ধরে রাখো" },
+    { emoji: "🏆", title: "প্রতিযোগিতা", "desc": "হল vs হল চ্যালেঞ্জ" }
+  ]
 };
 
 async function fetchSettings(): Promise<SiteSettings> {
@@ -49,6 +56,7 @@ async function fetchSettings(): Promise<SiteSettings> {
     registration_fee: data.registration_fee ?? DEFAULTS.registration_fee,
     bkash_number: data.bkash_number ?? DEFAULTS.bkash_number,
     nagad_number: data.nagad_number ?? DEFAULTS.nagad_number,
+    features: data.features ?? DEFAULTS.features,
   };
 }
 
