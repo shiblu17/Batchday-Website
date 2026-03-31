@@ -92,15 +92,25 @@ export default function AdminTimeline() {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= events.length) return;
 
-    const currentEvent = events[index];
-    const neighborEvent = events[newIndex];
+    // Swap elements optimistically
+    const newEvents = [...events];
+    const temp = newEvents[index];
+    newEvents[index] = newEvents[newIndex];
+    newEvents[newIndex] = temp;
+    setEvents(newEvents);
 
-    const { error } = await supabase.from("event_timeline").upsert([
-      { id: currentEvent.id, sort_order: neighborEvent.sort_order },
-      { id: neighborEvent.id, sort_order: currentEvent.sort_order }
-    ]);
+    // Update all sort_orders to strictly sequential 1, 2, 3...
+    const updates = newEvents.map((ev, idx) => ({
+      ...ev,
+      sort_order: idx + 1
+    }));
 
-    if (!error) fetchEvents();
+    const { error } = await supabase.from("event_timeline").upsert(updates);
+
+    if (error) {
+      toast.error("ক্রমানুসারে সাজাতে সমস্যা হয়েছে!");
+      fetchEvents(); // Revert on failure
+    }
   };
 
   const startEdit = (event: TimelineEvent) => {
