@@ -2,7 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Trophy, UserCheck, Image, Menu, X, Gamepad2, MessageCircleHeart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { to: "/", label: "হোম", icon: Home },
@@ -49,9 +48,6 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <div className="ml-2 mr-1">
-              <ThemeToggle />
-            </div>
             <Link
               to="/register"
               className="ml-2 px-5 py-2 rounded-lg bg-accent text-accent-foreground font-display font-bold text-sm transition-all hover:scale-105 active:scale-95"
@@ -62,7 +58,6 @@ export default function Navbar() {
 
           {/* Mobile controls */}
           <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle />
             <Link
               to="/register"
               className="px-4 py-1.5 rounded-lg bg-accent text-accent-foreground font-display font-bold text-xs"
@@ -136,11 +131,6 @@ export default function Navbar() {
                 </div>
                 
                 <div className="h-px bg-border my-2" />
-                
-                <div className="flex items-center justify-between bg-muted p-4 rounded-2xl">
-                   <span className="font-bold">ডার্ক মোড</span>
-                   <ThemeToggle />
-                </div>
                 
                 <Link
                   to="/register"
