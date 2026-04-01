@@ -40,6 +40,13 @@ export default function Confessions() {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   
+  // read more state
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (id: string) => {
+    setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+  
   // local reaction tracking
   const [reactedConfessions, setReactedConfessions] = useState<Record<string, 'love' | 'haha'>>(() => {
     try {
@@ -388,9 +395,17 @@ export default function Confessions() {
                 </div>
 
                 <div className="p-8 pt-4 flex-1">
-                  <p className="font-handwriting text-lg md:text-xl text-slate-800 leading-relaxed font-semibold">
+                  <p className={`font-handwriting text-lg md:text-xl text-slate-800 leading-relaxed font-semibold transition-all duration-300 ${expandedCards[confession.id] ? "" : "line-clamp-4"}`}>
                     {confession.content}
                   </p>
+                  {confession.content.length > 150 && (
+                    <button 
+                      onClick={() => toggleExpand(confession.id)}
+                      className="text-rose-500 text-sm font-bold mt-2 hover:underline"
+                    >
+                      {expandedCards[confession.id] ? "Show less" : "Read more"}
+                    </button>
+                  )}
                 </div>
 
                 {/* Card Footer - Music info & Reactions */}
