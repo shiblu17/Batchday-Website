@@ -86,7 +86,13 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "progress-fill": "progress-fill 1s ease-out forwards",
       },
+      gridTemplateColumns: {
+        '15': 'repeat(15, minmax(0, 1fr))',
+      },
+      gridTemplateRows: {
+        '15': 'repeat(15, minmax(0, 1fr))',
+      },
     },
   },
   plugins: [],
-}
+};

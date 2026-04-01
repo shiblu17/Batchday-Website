@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Gamepad2, BrainCircuit, XSquare, Play, Footprints } from "lucide-react";
+import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices } from "lucide-react";
 
 const games = [
   {
@@ -34,6 +34,14 @@ const games = [
     icon: Footprints,
     color: "bg-orange-100 text-orange-600",
     gradient: "from-orange-500 to-red-600",
+  },
+  {
+    path: "/game/ludo",
+    title: "লুডু মাস্টার",
+    description: "বন্ধুদের সাথে জম্পেশ লুডু আড্ডা!",
+    icon: Dices,
+    color: "bg-indigo-100 text-indigo-600",
+    gradient: "from-indigo-500 to-violet-600",
   },
 ];
 
