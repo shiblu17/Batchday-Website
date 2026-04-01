@@ -35,14 +35,6 @@ const games = [
     color: "bg-orange-100 text-orange-600",
     gradient: "from-orange-500 to-red-600",
   },
-  {
-    path: "/game/ludo",
-    title: "লুডু মাস্টার",
-    description: "বন্ধুদের সাথে জম্পেশ লুডু আড্ডা!",
-    icon: Dices,
-    color: "bg-indigo-100 text-indigo-600",
-    gradient: "from-indigo-500 to-violet-600",
-  },
 ];
 
 export default function GameHub() {
