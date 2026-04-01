@@ -35,6 +35,14 @@ const games = [
     color: "bg-orange-100 text-orange-600",
     gradient: "from-orange-500 to-red-600",
   },
+  {
+    path: "/game/ludo",
+    title: "লুডু",
+    description: "বন্ধু বা এআই-এর সাথে লুডু খেলো!",
+    icon: Dices,
+    color: "bg-violet-100 text-violet-600",
+    gradient: "from-violet-500 to-purple-600",
+  },
 ];
 
 export default function GameHub() {
