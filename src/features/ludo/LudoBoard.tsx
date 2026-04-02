@@ -154,7 +154,7 @@ const LudoBoard = ({
 
         elements.push(
           <div key={`t-${token.color}-${token.id}-${token.pathIndex}`}
-            className={`absolute rounded-full transition-all duration-300 ease-in-out ${isMovable ? 'cursor-pointer' : 'cursor-default'}`}
+            className={`absolute rounded-full transition-all duration-300 ease-in-out ${isMovable ? 'cursor-pointer pointer-events-auto' : 'cursor-default pointer-events-none'}`}
             style={{
               top: `${r * cellPct + (1 - sz) * cellPct / 2 + offR}%`,
               left: `${c * cellPct + (1 - sz) * cellPct / 2 + offC}%`,
