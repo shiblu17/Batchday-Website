@@ -28,6 +28,7 @@ const FlappyJU = lazy(() => import("./pages/FlappyJU"));
 const MemoryMatch = lazy(() => import("./pages/MemoryMatch"));
 const TicTacToe = lazy(() => import("./pages/TicTacToe"));
 const DinoRun = lazy(() => import("./pages/DinoRun"));
+const LudoGame = lazy(() => import("./pages/LudoGame"));
 const Confessions = lazy(() => import("./pages/Confessions"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
@@ -170,6 +171,10 @@ const App = () => (
                   <DinoRun />
                 </>
               }
+            />
+            <Route
+              path="/game/ludo"
+              element={<LudoGame />}
             />
 
             <Route
