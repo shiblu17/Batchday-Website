@@ -16,10 +16,9 @@ interface DiceProps {
   isRolling: boolean;
   canRoll: boolean;
   onRoll: () => void;
-  onRollSix: () => void;
 }
 
-const LudoDice = ({ value, color, isRolling, canRoll, onRoll, onRollSix }: DiceProps) => {
+const LudoDice = ({ value, color, isRolling, canRoll, onRoll }: DiceProps) => {
   return (
     <div className="flex flex-col items-center gap-1.5 animate-in fade-in zoom-in duration-300">
       {/* Dice */}
@@ -78,23 +77,7 @@ const LudoDice = ({ value, color, isRolling, canRoll, onRoll, onRollSix }: DiceP
         )}
       </div>
 
-      {/* Cheat / Admin Roll 6 for testing */}
-      {canRoll && !isRolling && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onRollSix();
-          }}
-          className="text-[11px] font-black px-2.5 py-1 rounded-full transition-all hover:bg-white/80 active:scale-90 shadow-sm mt-1"
-          style={{
-            backgroundColor: COLOR_HEX[color] + '15',
-            color: COLOR_DARK[color],
-            border: `1.5px solid ${COLOR_HEX[color]}44`,
-          }}
-        >
-          FORCE 6
-        </button>
-      )}
+
     </div>
   );
 };

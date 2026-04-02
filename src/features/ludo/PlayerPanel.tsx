@@ -10,7 +10,6 @@ interface PlayerPanelProps {
   isRolling: boolean;
   canRoll: boolean;
   onRoll: () => void;
-  onRollSix: () => void;
   consecutiveSixes: number;
   noMoves: boolean;
   position: 'top' | 'bottom' | 'left' | 'right';
@@ -19,7 +18,7 @@ interface PlayerPanelProps {
 
 const PlayerPanel = ({
   color, finished, isActive, diceValue, isRolling, canRoll,
-  onRoll, onRollSix, consecutiveSixes, noMoves, position, playerType
+  onRoll, consecutiveSixes, noMoves, position, playerType
 }: PlayerPanelProps) => {
   const isHorizontal = position === 'top' || position === 'bottom';
 
@@ -73,7 +72,6 @@ const PlayerPanel = ({
           isRolling={isActive && isRolling}
           canRoll={isActive && canRoll}
           onRoll={onRoll}
-          onRollSix={onRollSix}
         />
         
         {/* Consecutive Sixes Indicator (🔥) */}
