@@ -30,7 +30,7 @@ export default function IdCardGenerator() {
       const { data: reg, error } = await supabase
         .from('registrations')
         .select('*')
-        .eq('roll', rollToSearch.trim())
+        .or(`roll.eq.${rollToSearch.trim()},phone.eq.${rollToSearch.trim()}`)
         .maybeSingle();
 
       if (reg) {
@@ -227,7 +227,7 @@ export default function IdCardGenerator() {
               <div className="flex gap-2 mb-8 p-1 bg-white rounded-2xl shadow-lg border border-slate-100">
                 <input 
                   type="text" 
-                  placeholder="রোল নম্বর দিন (যেমন: 89)" 
+                  placeholder="রোল নম্বর বা ফোন নম্বর দিন" 
                   value={searchRoll}
                   onChange={(e) => setSearchRoll(e.target.value)}
                   className="flex-1 bg-transparent border-none focus:ring-0 px-6 font-bold text-lg"

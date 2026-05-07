@@ -199,13 +199,17 @@ export default function Confessions() {
       return c;
     }));
 
-    // Actual update - in a real app, we would use a database function (RPC) to increment safely
-    // Since I don't have the RPC yet, I'll fetch and update (race-condition prone but works for demo)
-    const { data: current } = await (supabase.from("confessions") as any).select("reactions").eq("id", id).single();
-    const reactions = current?.reactions || {};
-    reactions[type] = (reactions[type] || 0) + 1;
+    // Try RPC first for race-condition safe increment
+    const { error } = await supabase.rpc('increment_reaction', { confession_id: id, reaction_type: type });
     
-    await (supabase.from("confessions") as any).update({ reactions }).eq("id", id);
+    if (error) {
+      // Fallback: Actual update - in a real app, we would use a database function (RPC) to increment safely
+      const { data: current } = await (supabase.from("confessions") as any).select("reactions").eq("id", id).single();
+      const reactions = current?.reactions || {};
+      reactions[type] = (reactions[type] || 0) + 1;
+      
+      await (supabase.from("confessions") as any).update({ reactions }).eq("id", id);
+    }
   };
   
   const togglePlay = (confessionId: string, url: string) => {
@@ -233,6 +237,8 @@ export default function Confessions() {
     const query = searchQuery.toLowerCase();
     return c.to_name?.toLowerCase().includes(query) || c.author_nickname?.toLowerCase().includes(query) || c.content?.toLowerCase().includes(query);
   });
+
+  const playingConfession = playingId ? confessions.find(c => c.id === playingId) : null;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-slate-50 to-rose-50/30">
@@ -514,6 +520,39 @@ export default function Confessions() {
         </div>
       )}
       </div>
+
+      {/* Global Mini Player */}
+      <AnimatePresence>
+        {playingId && playingConfession && playingConfession.song_info && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-50 bg-white/90 backdrop-blur-md border border-slate-200 shadow-2xl rounded-full p-2 pr-4 flex items-center gap-3 md:gap-4"
+          >
+            <div className="relative w-12 h-12 rounded-full overflow-hidden animate-spin" style={{ animationDuration: '4s' }}>
+              <img src={playingConfession.song_info.artwork} className="w-full h-full object-cover" alt="" />
+              <div className="absolute inset-0 border-[4px] border-slate-900/10 rounded-full" />
+              <div className="absolute inset-[35%] bg-white rounded-full shadow-sm" />
+            </div>
+            <div className="flex flex-col min-w-0 max-w-[120px] sm:max-w-[180px]">
+              <span className="text-sm font-bold text-slate-800 truncate">{playingConfession.song_info.name}</span>
+              <span className="text-[10px] text-slate-500 font-medium truncate">{playingConfession.song_info.artist}</span>
+            </div>
+            <div className="flex gap-1 items-end h-4 ml-1 md:ml-2">
+              <div className="w-1 bg-rose-500 rounded-t animate-[music-bar_0.8s_ease-in-out_infinite]" />
+              <div className="w-1 bg-rose-500 rounded-t animate-[music-bar_1s_ease-in-out_infinite]" />
+              <div className="w-1 bg-rose-500 rounded-t animate-[music-bar_1.2s_ease-in-out_infinite]" />
+            </div>
+            <button 
+              onClick={() => togglePlay(playingConfession.id, playingConfession.song_info!.previewUrl!)}
+              className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-colors ml-1 md:ml-2"
+            >
+              <Pause className="w-5 h-5 fill-current" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
