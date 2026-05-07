@@ -32,6 +32,9 @@ jobs:
 
       - name: Build the app
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: "https://enebjlvbaipggzswnzme.supabase.co"
+          VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuZWJqbHZiYWlwZ2d6c3duem1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODc4NzEsImV4cCI6MjA4OTg2Mzg3MX0.JDWbZ0ce9CfoypVto-ndXRBTKBselqXj1SlQjpWYuk0"
 
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
