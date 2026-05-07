@@ -7,17 +7,35 @@ export default function AdminConfessions() {
   const [confessions, setConfessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
+
   useEffect(() => {
-    fetchConfessions();
+    fetchConfessions(0);
   }, []);
 
-  const fetchConfessions = async () => {
-    setLoading(true);
+  const fetchConfessions = async (pageNumber: number) => {
+    if (pageNumber === 0) setLoading(true);
+    
+    const from = pageNumber * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
     const { data } = await supabase
       .from("confessions")
       .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setConfessions(data);
+      .order("created_at", { ascending: false })
+      .range(from, to);
+      
+    if (data) {
+      if (pageNumber === 0) {
+        setConfessions(data);
+      } else {
+        setConfessions(prev => [...prev, ...data]);
+      }
+      setHasMore(data.length === PAGE_SIZE);
+      setPage(pageNumber);
+    }
     setLoading(false);
   };
 
@@ -118,7 +136,7 @@ export default function AdminConfessions() {
               ))}
               {confessions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-base">
+                  <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground text-base">
                     এখনো কোনো কনফেশন ডাটাবেজে জমা পড়েনি।
                   </td>
                 </tr>
@@ -126,6 +144,17 @@ export default function AdminConfessions() {
             </tbody>
           </table>
         </div>
+        
+        {hasMore && confessions.length > 0 && (
+          <div className="p-4 flex justify-center border-t border-border bg-muted/20">
+            <button
+              onClick={() => fetchConfessions(page + 1)}
+              className="px-6 py-2 bg-white border border-border text-foreground font-semibold rounded-lg shadow-sm hover:bg-muted transition-all text-sm flex items-center gap-2"
+            >
+              আরো লোড করুন
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

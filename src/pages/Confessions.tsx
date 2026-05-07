@@ -30,6 +30,10 @@ export default function Confessions() {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
+
   // form state
   const [content, setContent] = useState("");
   const [nickname, setNickname] = useState("");
@@ -102,7 +106,7 @@ export default function Confessions() {
   };
 
   useEffect(() => {
-    fetchConfessions();
+    fetchConfessions(0);
     
     // Subscribe to new approved confessions and live reaction updates
     const channel = supabase
@@ -126,15 +130,28 @@ export default function Confessions() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const fetchConfessions = async () => {
-    setLoading(true);
+  const fetchConfessions = async (pageNumber: number) => {
+    if (pageNumber === 0) setLoading(true);
+    
+    const from = pageNumber * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
     const { data, error } = await (supabase
       .from("confessions") as any)
       .select("*")
       .eq("is_approved", true)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(from, to);
       
-    if (data && !error) setConfessions(data as unknown as Confession[]);
+    if (data && !error) {
+      if (pageNumber === 0) {
+        setConfessions(data as unknown as Confession[]);
+      } else {
+        setConfessions(prev => [...prev, ...(data as unknown as Confession[])]);
+      }
+      setHasMore(data.length === PAGE_SIZE);
+      setPage(pageNumber);
+    }
     setLoading(false);
   };
 
@@ -371,116 +388,129 @@ export default function Confessions() {
           <p className="text-muted-foreground text-sm">অন্য কোনো নাম দিয়ে চেষ্টা করো।</p>
         </div>
       ) : (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 px-2 mt-12 pb-28">
-          <AnimatePresence>
-            {filteredConfessions.map((confession) => (
-              <motion.div
-                key={confession.id}
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="break-inside-avoid bg-white/70 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden group flex flex-col transition-all duration-300"
-              >
-                {/* Card Header - To section */}
-                <div className="p-6 pb-0 flex items-start justify-between">
-                  {confession.to_name && (
-                    <div className="px-5 py-1.5 bg-blue-100/80 text-blue-600 rounded-full text-[13px] font-bold tracking-tight">
-                      To: {confession.to_name}
-                    </div>
-                  )}
-                  <span className="text-[11px] font-bold text-slate-400 bg-slate-100/50 px-3 py-1 rounded-full uppercase tracking-widest">
-                   {new Date(confession.created_at).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-
-                <div className="p-8 pt-4 flex-1">
-                  <p className={`font-handwriting text-lg md:text-xl text-slate-800 leading-relaxed font-semibold transition-all duration-300 ${expandedCards[confession.id] ? "" : "line-clamp-4"}`}>
-                    {confession.content}
-                  </p>
-                  {confession.content.length > 150 && (
-                    <button 
-                      onClick={() => toggleExpand(confession.id)}
-                      className="text-rose-500 text-sm font-bold mt-2 hover:underline"
-                    >
-                      {expandedCards[confession.id] ? "Show less" : "Read more"}
-                    </button>
-                  )}
-                </div>
-
-                {/* Card Footer - Music info & Reactions */}
-                <div className="bg-slate-50/80 border-t border-slate-100 p-6">
-                  {confession.song_info && (
-                    <div className="mb-4 p-3 bg-white/50 border border-slate-100 rounded-2xl flex items-center gap-3">
-                      <div className="relative group/play flex-shrink-0">
-                        <img src={confession.song_info.artwork} className="w-12 h-12 rounded-lg object-cover" alt="" />
-                        <button 
-                          onClick={() => togglePlay(confession.id, confession.song_info!.previewUrl!)}
-                          className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/play:opacity-100 transition-opacity rounded-lg"
-                        >
-                          {playingId === confession.id ? (
-                            <Pause className="w-5 h-5 text-white fill-current" />
-                          ) : (
-                            <Play className="w-5 h-5 text-white fill-current translate-x-0.5" />
-                          )}
-                        </button>
-                        {playingId === confession.id && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full flex items-center justify-center animate-bounce">
-                             <Volume2 className="w-2.5 h-2.5 text-white" />
-                          </div>
-                        )}
+        <div className="px-2 mt-12 pb-8">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+            <AnimatePresence>
+              {filteredConfessions.map((confession) => (
+                <motion.div
+                  key={confession.id}
+                  initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  className="break-inside-avoid bg-white/70 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden group flex flex-col transition-all duration-300"
+                >
+                  {/* Card Header - To section */}
+                  <div className="p-6 pb-0 flex items-start justify-between">
+                    {confession.to_name && (
+                      <div className="px-5 py-1.5 bg-blue-100/80 text-blue-600 rounded-full text-[13px] font-bold tracking-tight">
+                        To: {confession.to_name}
                       </div>
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-slate-700 truncate">{confession.song_info.name}</span>
+                    )}
+                    <span className="text-[11px] font-bold text-slate-400 bg-slate-100/50 px-3 py-1 rounded-full uppercase tracking-widest">
+                     {new Date(confession.created_at).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+
+                  <div className="p-8 pt-4 flex-1">
+                    <p className={`font-handwriting text-lg md:text-xl text-slate-800 leading-relaxed font-semibold transition-all duration-300 ${expandedCards[confession.id] ? "" : "line-clamp-4"}`}>
+                      {confession.content}
+                    </p>
+                    {confession.content.length > 150 && (
+                      <button 
+                        onClick={() => toggleExpand(confession.id)}
+                        className="text-rose-500 text-sm font-bold mt-2 hover:underline"
+                      >
+                        {expandedCards[confession.id] ? "Show less" : "Read more"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Card Footer - Music info & Reactions */}
+                  <div className="bg-slate-50/80 border-t border-slate-100 p-6">
+                    {confession.song_info && (
+                      <div className="mb-4 p-3 bg-white/50 border border-slate-100 rounded-2xl flex items-center gap-3">
+                        <div className="relative group/play flex-shrink-0">
+                          <img src={confession.song_info.artwork} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                          <button 
+                            onClick={() => togglePlay(confession.id, confession.song_info!.previewUrl!)}
+                            className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/play:opacity-100 transition-opacity rounded-lg"
+                          >
+                            {playingId === confession.id ? (
+                              <Pause className="w-5 h-5 text-white fill-current" />
+                            ) : (
+                              <Play className="w-5 h-5 text-white fill-current translate-x-0.5" />
+                            )}
+                          </button>
                           {playingId === confession.id && (
-                            <div className="flex gap-0.5 items-end h-3">
-                              <div className="w-0.5 bg-rose-500 animate-[music-bar_0.8s_ease-in-out_infinite]" />
-                              <div className="w-0.5 bg-rose-500 animate-[music-bar_1s_ease-in-out_infinite]" />
-                              <div className="w-0.5 bg-rose-500 animate-[music-bar_1.2s_ease-in-out_infinite]" />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full flex items-center justify-center animate-bounce">
+                               <Volume2 className="w-2.5 h-2.5 text-white" />
                             </div>
                           )}
                         </div>
-                        <span className="text-[11px] text-slate-400 font-medium truncate">{confession.song_info.artist}</span>
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-slate-700 truncate">{confession.song_info.name}</span>
+                            {playingId === confession.id && (
+                              <div className="flex gap-0.5 items-end h-3">
+                                <div className="w-0.5 bg-rose-500 animate-[music-bar_0.8s_ease-in-out_infinite]" />
+                                <div className="w-0.5 bg-rose-500 animate-[music-bar_1s_ease-in-out_infinite]" />
+                                <div className="w-0.5 bg-rose-500 animate-[music-bar_1.2s_ease-in-out_infinite]" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium truncate">{confession.song_info.artist}</span>
+                        </div>
+                        <button 
+                           onClick={() => togglePlay(confession.id, confession.song_info!.previewUrl!)}
+                           className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${playingId === confession.id ? 'bg-rose-500 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                        >
+                           {playingId === confession.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 translate-x-0.5" />}
+                        </button>
                       </div>
-                      <button 
-                         onClick={() => togglePlay(confession.id, confession.song_info!.previewUrl!)}
-                         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${playingId === confession.id ? 'bg-rose-500 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
-                      >
-                         {playingId === confession.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 translate-x-0.5" />}
-                      </button>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-0.5">FROM</span>
-                      <span className="text-sm font-bold text-slate-700 truncate max-w-[120px]">
-                        {confession.author_nickname}
-                      </span>
-                    </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-0.5">FROM</span>
+                        <span className="text-sm font-bold text-slate-700 truncate max-w-[120px]">
+                          {confession.author_nickname}
+                        </span>
+                      </div>
 
-                    <div className="flex items-center gap-2">
-                      <button 
-                        disabled={!!reactedConfessions[confession.id]}
-                        onClick={() => handleReaction(confession.id, 'love')}
-                        className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-rose-500 transition-all border border-slate-100 ${reactedConfessions[confession.id] === 'love' ? 'bg-rose-50 border-rose-200' : 'bg-white hover:scale-110 active:scale-90'} ${reactedConfessions[confession.id] && reactedConfessions[confession.id] !== 'love' ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
-                      >
-                        ❤️ <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.love || 0}</span>
-                      </button>
-                      <button 
-                         disabled={!!reactedConfessions[confession.id]}
-                         onClick={() => handleReaction(confession.id, 'haha')}
-                         className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-yellow-600 transition-all border border-slate-100 ${reactedConfessions[confession.id] === 'haha' ? 'bg-yellow-50 border-yellow-200' : 'bg-white hover:scale-110 active:scale-90'} ${reactedConfessions[confession.id] && reactedConfessions[confession.id] !== 'haha' ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
-                      >
-                        😂 <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.haha || 0}</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          disabled={!!reactedConfessions[confession.id]}
+                          onClick={() => handleReaction(confession.id, 'love')}
+                          className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-rose-500 transition-all border border-slate-100 ${reactedConfessions[confession.id] === 'love' ? 'bg-rose-50 border-rose-200' : 'bg-white hover:scale-110 active:scale-90'} ${reactedConfessions[confession.id] && reactedConfessions[confession.id] !== 'love' ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                        >
+                          ❤️ <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.love || 0}</span>
+                        </button>
+                        <button 
+                           disabled={!!reactedConfessions[confession.id]}
+                           onClick={() => handleReaction(confession.id, 'haha')}
+                           className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-yellow-600 transition-all border border-slate-100 ${reactedConfessions[confession.id] === 'haha' ? 'bg-yellow-50 border-yellow-200' : 'bg-white hover:scale-110 active:scale-90'} ${reactedConfessions[confession.id] && reactedConfessions[confession.id] !== 'haha' ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                        >
+                          😂 <span className="text-[10px] ml-0.5 font-bold">{(confession as any).reactions?.haha || 0}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+          
+          {hasMore && (
+            <div className="flex justify-center mt-12 mb-16">
+              <button
+                onClick={() => fetchConfessions(page + 1)}
+                className="px-8 py-3 bg-white/80 backdrop-blur-md border border-rose-200 text-rose-600 font-bold rounded-full shadow-sm hover:shadow-md hover:bg-white transition-all active:scale-95 flex items-center gap-2"
+              >
+                আরো দেখুন
+              </button>
+            </div>
+          )}
         </div>
       )}
       </div>
