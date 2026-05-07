@@ -8,12 +8,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (localStorage.getItem("ju52_admin_login") === "true") {
-      setUser({ id: "admin", email: "admin@ju52.com" } as User);
-      setIsAdmin(true);
-      setLoading(false);
-      return;
-    }
+
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {

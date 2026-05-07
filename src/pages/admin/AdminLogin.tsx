@@ -18,13 +18,7 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
 
-    // Master Admin Bypass
-    if (email === "atiquzzaman116592@gmail.com" && password === "admin123") {
-      localStorage.setItem("ju52_admin_login", "true");
-      toast({ title: "লগইন সফল", description: "অ্যাডমিন প্যানেলে স্বাগতম!" });
-      window.location.href = "/admin";
-      return;
-    }
+
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
