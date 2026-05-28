@@ -16,33 +16,35 @@ export default function Sponsors() {
 
   return (
     <>
-      {/* Mobile Design: Narrow Edge-to-edge Banner */}
-      <div className="md:hidden w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+      {/* Mobile Design: Boxed Narrow Banner with Border & Rounded Corners */}
+      <div className="md:hidden mx-4 sm:mx-8">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="w-full bg-black border-y border-border/30 shadow-sm relative overflow-hidden h-20"
+          className="w-full rounded-2xl overflow-hidden bg-white/40 border border-white/60 shadow-md backdrop-blur-md relative flex justify-center items-center p-1.5 bg-gradient-to-br from-rose-50/50 to-fuchsia-50/50 h-24"
         >
-          {ytId ? (
-            <div className="absolute top-1/2 left-1/2 w-[200vw] sm:w-[150vw] aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-              <iframe
-                src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                allow="autoplay; encrypted-media"
-                className="w-full h-full border-0"
-                style={{ pointerEvents: 'none' }}
+          <div className="w-full h-full rounded-xl overflow-hidden relative shadow-inner pointer-events-none bg-black">
+            {ytId ? (
+              <div className="absolute top-1/2 left-1/2 w-[200vw] sm:w-[150vw] aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <iframe
+                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                  allow="autoplay; encrypted-media"
+                  className="w-full h-full border-0 scale-[1.05]"
+                  style={{ pointerEvents: 'none' }}
+                />
+              </div>
+            ) : (
+              <video
+                src={videoUrl}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover object-center absolute top-0 left-0"
               />
-            </div>
-          ) : (
-            <video
-              src={videoUrl}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover object-center absolute top-0 left-0"
-            />
-          )}
+            )}
+          </div>
         </motion.div>
       </div>
 
