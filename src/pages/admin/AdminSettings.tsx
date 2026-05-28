@@ -6,13 +6,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Upload } from "lucide-react";
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useSiteSettings();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [features, setFeatures] = useState<{ emoji: string; title: string; desc: string }[]>([]);
 
   const [form, setForm] = useState({
@@ -142,6 +143,39 @@ export default function AdminSettings() {
     }
   };
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.includes("video/mp4")) {
+      toast({ title: "শুধুমাত্র .mp4 ফাইল সাপোর্ট করে", variant: "destructive" });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "ফাইল সাইজ ২০MB এর বেশি হওয়া যাবে না", variant: "destructive" });
+      return;
+    }
+
+    setUploadingVideo(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `sponsor_videos/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(filePath, file);
+      
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("photos").getPublicUrl(filePath);
+      
+      setForm((f) => ({ ...f, sponsor_video_url: urlData.publicUrl }));
+      toast({ title: "ভিডিও সফলভাবে আপলোড হয়েছে, এখন সেভ করুন ✅" });
+    } catch (err: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -241,13 +275,25 @@ export default function AdminSettings() {
           <h2 className="font-display font-semibold text-base">স্পন্সর সেটিংস</h2>
           <div>
             <label className={labelClass}>ভিডিও লিংক (YouTube অথবা MP4)</label>
-            <Input
-              value={form.sponsor_video_url}
-              onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url: e.target.value }))}
-              placeholder="https://youtu.be/... অথবা https://.../video.mp4"
-            />
+            <div className="flex gap-2 mb-2">
+              <Input
+                value={form.sponsor_video_url}
+                onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url: e.target.value }))}
+                placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                className="flex-1"
+              />
+              <label className="shrink-0 cursor-pointer">
+                <Button disabled={uploadingVideo} asChild variant="secondary">
+                  <span>
+                    {uploadingVideo ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                    সরাসরি আপলোড
+                  </span>
+                </Button>
+                <input type="file" accept="video/mp4" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
+              </label>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              ইউটিউব লিংক অথবা সরাসরি .mp4 লিংক দিলে সেটি নিজে থেকেই এডজাস্ট হয়ে যাবে।
+              ইউটিউব লিংক অথবা সরাসরি .mp4 আপলোড করলে সেটি নিজে থেকেই এডজাস্ট হয়ে যাবে। (সর্বোচ্চ ২০MB)
             </p>
           </div>
         </div>
