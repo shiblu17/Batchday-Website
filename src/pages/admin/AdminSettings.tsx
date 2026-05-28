@@ -26,6 +26,7 @@ export default function AdminSettings() {
     registration_fee: 500,
     bkash_number: "",
     nagad_number: "",
+    sponsor_video_url: "",
   });
 
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
@@ -48,6 +49,7 @@ export default function AdminSettings() {
         registration_fee: settings.registration_fee,
         bkash_number: settings.bkash_number,
         nagad_number: settings.nagad_number,
+        sponsor_video_url: settings.sponsor_video_url,
       });
       if (settings.features) {
         setFeatures(settings.features);
@@ -124,6 +126,7 @@ export default function AdminSettings() {
           registration_fee: form.registration_fee,
           bkash_number: form.bkash_number,
           nagad_number: form.nagad_number,
+          sponsor_video_url: form.sponsor_video_url,
           features: features,
         })
         .eq("id", 1);
@@ -230,6 +233,22 @@ export default function AdminSettings() {
               value={form.hero_description}
               onChange={(e) => setForm((f) => ({ ...f, hero_description: e.target.value }))}
             />
+          </div>
+        </div>
+
+        {/* Sponsor Settings */}
+        <div className={sectionClass}>
+          <h2 className="font-display font-semibold text-base">স্পন্সর সেটিংস</h2>
+          <div>
+            <label className={labelClass}>ভিডিও লিংক (YouTube অথবা MP4)</label>
+            <Input
+              value={form.sponsor_video_url}
+              onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url: e.target.value }))}
+              placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              ইউটিউব লিংক অথবা সরাসরি .mp4 লিংক দিলে সেটি নিজে থেকেই এডজাস্ট হয়ে যাবে।
+            </p>
           </div>
         </div>
 

@@ -12,6 +12,7 @@ export type SiteSettings = {
   bkash_number: string;
   nagad_number: string;
   features: { emoji: string; title: string; desc: string }[];
+  sponsor_video_url: string;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -28,8 +29,9 @@ const DEFAULTS: SiteSettings = {
     { emoji: "🎶", title: "লাইভ কনসার্ট", desc: "মিউজিক ও পারফরম্যান্স" },
     { emoji: "🍽️", title: "ফুড ফেস্ট", desc: "ক্যাম্পাসের বিখ্যাত খাবার" },
     { emoji: "📸", title: "ফটো জোন", "desc": "স্মৃতি ধরে রাখো" },
-    { emoji: "🏆", title: "প্রতিযোগিতা", "desc": "হল vs হল চ্যালেঞ্জ" }
-  ]
+    { emoji: "🏆", title: "প্রতিযোগিতা", desc: "হল vs হল চ্যালেঞ্জ" }
+  ],
+  sponsor_video_url: "https://youtu.be/e_5anFAQIps"
 };
 
 async function fetchSettings(): Promise<SiteSettings> {
@@ -57,6 +59,7 @@ async function fetchSettings(): Promise<SiteSettings> {
     bkash_number: data.bkash_number ?? DEFAULTS.bkash_number,
     nagad_number: data.nagad_number ?? DEFAULTS.nagad_number,
     features: data.features ?? DEFAULTS.features,
+    sponsor_video_url: data.sponsor_video_url ?? DEFAULTS.sponsor_video_url,
   };
 }
 
