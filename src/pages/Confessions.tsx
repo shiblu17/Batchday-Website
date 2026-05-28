@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MessageSquarePlus, MessageCircleHeart, ArrowLeft, Send, Loader2, Sparkles, Music, Search, X as CloseIcon, Play, Pause, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Sponsors from "@/components/Sponsors";
 
 interface Confession {
   id: string;
@@ -375,6 +376,11 @@ export default function Confessions() {
           </DialogContent>
         </Dialog>
         </div>
+      </div>
+
+      {/* Sponsors Section below header */}
+      <div className="mb-8 -mx-4 sm:-mx-8 md:-mx-0">
+        <Sponsors />
       </div>
 
       {loading ? (

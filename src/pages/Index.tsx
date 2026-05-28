@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
+import Sponsors from "@/components/Sponsors";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useRegistrations } from "@/hooks/useRegistrations";
@@ -194,6 +195,9 @@ export default function Index() {
           </motion.div>
         </div>
       </section>
+
+      {/* Sponsors Section */}
+      <Sponsors />
 
       {/* Highlights */}
       <section className="py-10 md:py-14">
