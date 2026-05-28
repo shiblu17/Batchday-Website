@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays, MapPin, Users, Sparkles, Clock, Share2, Loader2 } from "lucide-react";
 import LeaderboardCard from "../components/LeaderboardCard";
-import Sponsors from "../components/Sponsors";
 import { getLeaderboardData } from "../lib/constants";
 import { useSiteSettings } from "../hooks/useSiteSettings";
 import { useRegistrations } from "../hooks/useRegistrations";
@@ -170,9 +169,6 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
-
-      {/* Sponsors Section */}
-      <Sponsors />
 
       {/* Highlights */}
       <section className="py-16 md:py-24 max-w-6xl mx-auto px-4">
