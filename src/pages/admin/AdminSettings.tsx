@@ -13,7 +13,7 @@ export default function AdminSettings() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState<'video1' | 'video2' | null>(null);
   const [features, setFeatures] = useState<{ emoji: string; title: string; desc: string }[]>([]);
 
   const [form, setForm] = useState({
@@ -28,6 +28,7 @@ export default function AdminSettings() {
     bkash_number: "",
     nagad_number: "",
     sponsor_video_url: "",
+    sponsor_video_url_2: "",
   });
 
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
@@ -51,6 +52,7 @@ export default function AdminSettings() {
         bkash_number: settings.bkash_number,
         nagad_number: settings.nagad_number,
         sponsor_video_url: settings.sponsor_video_url,
+        sponsor_video_url_2: settings.sponsor_video_url_2,
       });
       if (settings.features) {
         setFeatures(settings.features);
@@ -128,6 +130,7 @@ export default function AdminSettings() {
           bkash_number: form.bkash_number,
           nagad_number: form.nagad_number,
           sponsor_video_url: form.sponsor_video_url,
+          sponsor_video_url_2: form.sponsor_video_url_2,
           features: features,
         })
         .eq("id", 1);
@@ -143,7 +146,7 @@ export default function AdminSettings() {
     }
   };
 
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, videoField: 'video1' | 'video2') => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.includes("video/mp4")) {
@@ -155,7 +158,7 @@ export default function AdminSettings() {
       return;
     }
 
-    setUploadingVideo(true);
+    setUploadingVideo(videoField);
     try {
       const ext = file.name.split(".").pop();
       const filePath = `sponsor_videos/${Date.now()}.${ext}`;
@@ -167,12 +170,16 @@ export default function AdminSettings() {
 
       const { data: urlData } = supabase.storage.from("photos").getPublicUrl(filePath);
       
-      setForm((f) => ({ ...f, sponsor_video_url: urlData.publicUrl }));
+      if (videoField === 'video1') {
+        setForm((f) => ({ ...f, sponsor_video_url: urlData.publicUrl }));
+      } else {
+        setForm((f) => ({ ...f, sponsor_video_url_2: urlData.publicUrl }));
+      }
       toast({ title: "ভিডিও সফলভাবে আপলোড হয়েছে, এখন সেভ করুন ✅" });
     } catch (err: any) {
       toast({ title: "আপলোড ব্যর্থ", description: err.message, variant: "destructive" });
     } finally {
-      setUploadingVideo(false);
+      setUploadingVideo(null);
     }
   };
 
@@ -273,25 +280,49 @@ export default function AdminSettings() {
         {/* Sponsor Settings */}
         <div className={sectionClass}>
           <h2 className="font-display font-semibold text-base">স্পন্সর সেটিংস</h2>
-          <div>
-            <label className={labelClass}>ভিডিও লিংক (YouTube অথবা MP4)</label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={form.sponsor_video_url}
-                onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url: e.target.value }))}
-                placeholder="https://youtu.be/... অথবা https://.../video.mp4"
-                className="flex-1"
-              />
-              <label className="shrink-0 cursor-pointer">
-                <Button disabled={uploadingVideo} asChild variant="secondary">
-                  <span>
-                    {uploadingVideo ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                    সরাসরি আপলোড
-                  </span>
-                </Button>
-                <input type="file" accept="video/mp4" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
-              </label>
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>কনফেশন পেজ স্পন্সর (ভিডিও লিংক)</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={form.sponsor_video_url}
+                  onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url: e.target.value }))}
+                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  className="flex-1"
+                />
+                <label className="shrink-0 cursor-pointer">
+                  <Button disabled={uploadingVideo === 'video1'} asChild variant="secondary">
+                    <span>
+                      {uploadingVideo === 'video1' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                      সরাসরি আপলোড
+                    </span>
+                  </Button>
+                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video1')} disabled={uploadingVideo === 'video1'} />
+                </label>
+              </div>
             </div>
+
+            <div>
+              <label className={labelClass}>লিডারবোর্ড পেজ স্পন্সর (ভিডিও লিংক)</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={form.sponsor_video_url_2}
+                  onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url_2: e.target.value }))}
+                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  className="flex-1"
+                />
+                <label className="shrink-0 cursor-pointer">
+                  <Button disabled={uploadingVideo === 'video2'} asChild variant="secondary">
+                    <span>
+                      {uploadingVideo === 'video2' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                      সরাসরি আপলোড
+                    </span>
+                  </Button>
+                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video2')} disabled={uploadingVideo === 'video2'} />
+                </label>
+              </div>
+            </div>
+            
             <p className="text-xs text-muted-foreground mt-1">
               ইউটিউব লিংক অথবা সরাসরি .mp4 আপলোড করলে সেটি নিজে থেকেই এডজাস্ট হয়ে যাবে। (সর্বোচ্চ ২০MB)
             </p>

@@ -17,7 +17,7 @@ export default function LeaderboardPage() {
           <p className="text-muted-foreground text-lg mb-8">কোন হল বা ডিপার্টমেন্ট এগিয়ে আছে দেখো!</p>
           
           <div className="mb-8 -mx-4 sm:-mx-8 md:-mx-0">
-            <Sponsors />
+            <Sponsors type="leaderboard" />
           </div>
         </div>
 

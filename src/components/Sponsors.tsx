@@ -7,11 +7,15 @@ function getYouTubeVideoId(url: string) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
-export default function Sponsors() {
+export default function Sponsors({ type = "confession" }: { type?: "confession" | "leaderboard" }) {
   const { data: settings } = useSiteSettings();
   
   // Fallback to default if settings not loaded or empty
-  const videoUrl = settings?.sponsor_video_url || "https://youtu.be/e_5anFAQIps";
+  const defaultUrl = "https://youtu.be/e_5anFAQIps";
+  const videoUrl = type === "leaderboard" 
+    ? (settings?.sponsor_video_url_2 || defaultUrl) 
+    : (settings?.sponsor_video_url || defaultUrl);
+    
   const ytId = getYouTubeVideoId(videoUrl);
 
   return (
