@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import Leaderboard from "@/components/Leaderboard";
+import Sponsors from "@/components/Sponsors";
 
 export default function LeaderboardPage() {
   return (
@@ -13,7 +14,11 @@ export default function LeaderboardPage() {
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent inline-block">
             🏆 লিডারবোর্ড
           </h1>
-          <p className="text-muted-foreground text-lg">কোন হল বা ডিপার্টমেন্ট এগিয়ে আছে দেখো!</p>
+          <p className="text-muted-foreground text-lg mb-8">কোন হল বা ডিপার্টমেন্ট এগিয়ে আছে দেখো!</p>
+          
+          <div className="mb-8 -mx-4 sm:-mx-8 md:-mx-0">
+            <Sponsors />
+          </div>
         </div>
 
         <Leaderboard />
