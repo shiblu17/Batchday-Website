@@ -14,6 +14,7 @@ export type SiteSettings = {
   features: { emoji: string; title: string; desc: string }[];
   sponsor_video_url: string;
   sponsor_video_url_2: string;
+  sponsor_video_url_3: string;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -33,7 +34,8 @@ const DEFAULTS: SiteSettings = {
     { emoji: "🏆", title: "প্রতিযোগিতা", desc: "হল vs হল চ্যালেঞ্জ" }
   ],
   sponsor_video_url: "https://youtu.be/e_5anFAQIps",
-  sponsor_video_url_2: "https://youtu.be/e_5anFAQIps"
+  sponsor_video_url_2: "https://youtu.be/e_5anFAQIps",
+  sponsor_video_url_3: "https://youtu.be/e_5anFAQIps"
 };
 
 async function fetchSettings(): Promise<SiteSettings> {
@@ -63,6 +65,7 @@ async function fetchSettings(): Promise<SiteSettings> {
     features: data.features ?? DEFAULTS.features,
     sponsor_video_url: data.sponsor_video_url ?? DEFAULTS.sponsor_video_url,
     sponsor_video_url_2: data.sponsor_video_url_2 ?? DEFAULTS.sponsor_video_url_2,
+    sponsor_video_url_3: data.sponsor_video_url_3 ?? DEFAULTS.sponsor_video_url_3,
   };
 }
 

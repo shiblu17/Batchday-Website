@@ -5,6 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import Sponsors from "@/components/Sponsors";
 
 type Status = "idle" | "pending" | "verified" | "rejected" | "not_found" | "loading";
 
@@ -231,6 +232,11 @@ export default function StatusPage() {
             খুঁজুন
           </button>
         </form>
+
+        {/* Sponsor Banner */}
+        <div className="-mx-4 sm:mx-0">
+          <Sponsors type="status" />
+        </div>
 
         <AnimatePresence mode="wait">
           {status !== "idle" && status !== "loading" && (
