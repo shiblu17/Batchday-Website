@@ -9,27 +9,31 @@ function getYouTubeVideoId(url: string) {
 
 export default function Sponsors({ 
   type = "confession",
-  mobileAspect = "aspect-[21/9]"
+  mobileAspect = "aspect-[21/9]",
+  wrapperClass = ""
 }: { 
-  type?: "confession" | "leaderboard" | "status",
-  mobileAspect?: string
+  type?: "confession" | "leaderboard" | "status" | "gallery",
+  mobileAspect?: string,
+  wrapperClass?: string
 }) {
   const { data: settings } = useSiteSettings();
   
   // Fallback to default if settings not loaded or empty
   const defaultUrl = "https://youtu.be/e_5anFAQIps";
-  const videoUrl = type === "status"
-    ? (settings?.sponsor_video_url_3 || defaultUrl)
-    : type === "leaderboard" 
-      ? (settings?.sponsor_video_url_2 || defaultUrl) 
-      : (settings?.sponsor_video_url || defaultUrl);
+  const videoUrl = type === "gallery"
+    ? (settings?.sponsor_video_url_4 || defaultUrl)
+    : type === "status"
+      ? (settings?.sponsor_video_url_3 || defaultUrl)
+      : type === "leaderboard" 
+        ? (settings?.sponsor_video_url_2 || defaultUrl) 
+        : (settings?.sponsor_video_url || defaultUrl);
     
   const ytId = getYouTubeVideoId(videoUrl);
 
   return (
-    <>
+    <div className={wrapperClass}>
       {/* Mobile Design: Boxed Narrow Banner with Border & Rounded Corners */}
-      <div className="md:hidden mx-4 sm:mx-8">
+      <div className={`md:hidden ${!wrapperClass ? "mx-4 sm:mx-8" : ""}`}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -61,7 +65,7 @@ export default function Sponsors({
       </div>
 
       {/* PC Design: Boxed Narrow Banner with Border & Rounded Corners (No Text) */}
-      <div className="hidden md:block w-full">
+      <div className={`hidden md:block ${!wrapperClass ? "w-full" : ""}`}>
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -91,6 +95,6 @@ export default function Sponsors({
           </div>
         </motion.div>
       </div>
-    </>
+    </div>
   );
 }

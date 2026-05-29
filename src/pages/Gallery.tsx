@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ImageIcon } from "lucide-react";
+import Sponsors from "@/components/Sponsors";
 
 function useGalleryPhotos() {
   return useQuery({
@@ -37,9 +38,23 @@ export default function GalleryPage() {
 
   return (
     <div className="container py-6 md:py-8 pb-24 md:pb-8 px-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-display text-2xl font-bold mb-1">📸 মেমোরি গ্যালারি</h1>
-        <p className="text-muted-foreground text-sm mb-6">৫২তম ব্যাচের স্মৃতিগুলো</p>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-between items-start mb-6 gap-4"
+      >
+        <div>
+          <h1 className="font-display text-2xl font-bold mb-1">📸 মেমোরি গ্যালারি</h1>
+          <p className="text-muted-foreground text-sm">৫২তম ব্যাচের স্মৃতিগুলো</p>
+        </div>
+        
+        <div className="w-32 sm:w-40 shrink-0">
+          <Sponsors 
+            type="gallery" 
+            mobileAspect="aspect-[4/3]" 
+            wrapperClass="w-full h-full" 
+          />
+        </div>
       </motion.div>
 
       {isLoading ? (
