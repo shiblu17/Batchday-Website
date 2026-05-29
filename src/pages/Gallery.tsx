@@ -41,19 +41,15 @@ export default function GalleryPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-start mb-6 gap-4"
+        className="mb-8"
       >
-        <div>
+        <div className="text-center md:text-left mb-6">
           <h1 className="font-display text-2xl font-bold mb-1">📸 মেমোরি গ্যালারি</h1>
           <p className="text-muted-foreground text-sm">৫২তম ব্যাচের স্মৃতিগুলো</p>
         </div>
         
-        <div className="w-32 sm:w-40 shrink-0">
-          <Sponsors 
-            type="gallery" 
-            mobileAspect="aspect-[4/3]" 
-            wrapperClass="w-full h-full" 
-          />
+        <div className="-mx-4 sm:-mx-8 md:-mx-0">
+          <Sponsors type="gallery" />
         </div>
       </motion.div>
 
