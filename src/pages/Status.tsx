@@ -198,7 +198,7 @@ export default function StatusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] py-12 px-4 pb-12 flex flex-col">
+    <div className="min-h-screen bg-[#fafafa] py-12 px-4 pb-32 md:pb-12 flex flex-col">
       <div className="max-w-xl mx-auto space-y-10 w-full flex-grow">
         
         {/* Header Section */}
