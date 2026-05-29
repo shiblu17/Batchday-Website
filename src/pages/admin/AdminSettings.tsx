@@ -13,7 +13,7 @@ export default function AdminSettings() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState<'video1' | 'video2' | 'video3' | 'video4' | null>(null);
+  const [uploadingVideo, setUploadingVideo] = useState<'video1' | 'video2' | 'video3' | 'video4' | 'video5' | null>(null);
   const [features, setFeatures] = useState<{ emoji: string; title: string; desc: string }[]>([]);
 
   const [form, setForm] = useState({
@@ -31,6 +31,7 @@ export default function AdminSettings() {
     sponsor_video_url_2: "",
     sponsor_video_url_3: "",
     sponsor_video_url_4: "",
+    sponsor_video_url_5: "",
   });
 
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
@@ -57,6 +58,7 @@ export default function AdminSettings() {
         sponsor_video_url_2: settings.sponsor_video_url_2,
         sponsor_video_url_3: settings.sponsor_video_url_3,
         sponsor_video_url_4: settings.sponsor_video_url_4,
+        sponsor_video_url_5: settings.sponsor_video_url_5,
       });
       if (settings.features) {
         setFeatures(settings.features);
@@ -137,6 +139,7 @@ export default function AdminSettings() {
           sponsor_video_url_2: form.sponsor_video_url_2,
           sponsor_video_url_3: form.sponsor_video_url_3,
           sponsor_video_url_4: form.sponsor_video_url_4,
+          sponsor_video_url_5: form.sponsor_video_url_5,
           features: features,
         })
         .eq("id", 1);
@@ -152,7 +155,7 @@ export default function AdminSettings() {
     }
   };
 
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, videoField: 'video1' | 'video2' | 'video3' | 'video4') => {
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, videoField: 'video1' | 'video2' | 'video3' | 'video4' | 'video5') => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.includes("video/mp4")) {
@@ -182,8 +185,10 @@ export default function AdminSettings() {
         setForm((f) => ({ ...f, sponsor_video_url_2: urlData.publicUrl }));
       } else if (videoField === 'video3') {
         setForm((f) => ({ ...f, sponsor_video_url_3: urlData.publicUrl }));
-      } else {
+      } else if (videoField === 'video4') {
         setForm((f) => ({ ...f, sponsor_video_url_4: urlData.publicUrl }));
+      } else {
+        setForm((f) => ({ ...f, sponsor_video_url_5: urlData.publicUrl }));
       }
       toast({ title: "ভিডিও সফলভাবে আপলোড হয়েছে, এখন সেভ করুন ✅" });
     } catch (err: any) {
@@ -371,6 +376,27 @@ export default function AdminSettings() {
                     </span>
                   </Button>
                   <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video4')} disabled={uploadingVideo === 'video4'} />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>গেম জোন স্পন্সর (ভিডিও লিংক)</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={form.sponsor_video_url_5}
+                  onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url_5: e.target.value }))}
+                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  className="flex-1"
+                />
+                <label className="shrink-0 cursor-pointer">
+                  <Button disabled={uploadingVideo === 'video5'} asChild variant="secondary">
+                    <span>
+                      {uploadingVideo === 'video5' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                      সরাসরি আপলোড
+                    </span>
+                  </Button>
+                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video5')} disabled={uploadingVideo === 'video5'} />
                 </label>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices } from "lucide-react";
+import Sponsors from "@/components/Sponsors";
 
 const games = [
   {
@@ -56,9 +57,13 @@ export default function GameHub() {
           <Gamepad2 className="h-10 w-10 text-primary" />
         </div>
         <h1 className="font-display text-4xl font-extrabold mb-4">গেম জোন 🎮</h1>
-        <p className="text-muted-foreground text-lg mb-12 max-w-xl mx-auto">
-          реজিস্ট্রেশনের ফাকে একটু বিরতি নাও! জাবি ৫২ ব্যাচ ডে-র এই স্পেশাল গেমগুলো খেলে তোমার বেস্ট স্কোর সেট করো।
+        <p className="text-muted-foreground text-lg mb-10 max-w-xl mx-auto">
+          রেজিস্ট্রেশনের ফাকে একটু বিরতি নাও! জাবি ৫২ ব্যাচ ডে-র এই স্পেশাল গেমগুলো খেলে তোমার বেস্ট স্কোর সেট করো।
         </p>
+
+        <div className="-mx-4 sm:-mx-8 md:-mx-0 mb-12">
+          <Sponsors type="game" />
+        </div>
       </motion.div>
 
       <div className="grid md:grid-cols-3 gap-6 text-left">

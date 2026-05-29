@@ -12,7 +12,7 @@ export default function Sponsors({
   mobileAspect = "aspect-[21/9]",
   wrapperClass = ""
 }: { 
-  type?: "confession" | "leaderboard" | "status" | "gallery",
+  type?: "confession" | "leaderboard" | "status" | "gallery" | "game",
   mobileAspect?: string,
   wrapperClass?: string
 }) {
@@ -20,13 +20,15 @@ export default function Sponsors({
   
   // Fallback to default if settings not loaded or empty
   const defaultUrl = "https://youtu.be/e_5anFAQIps";
-  const videoUrl = type === "gallery"
-    ? (settings?.sponsor_video_url_4 || defaultUrl)
-    : type === "status"
-      ? (settings?.sponsor_video_url_3 || defaultUrl)
-      : type === "leaderboard" 
-        ? (settings?.sponsor_video_url_2 || defaultUrl) 
-        : (settings?.sponsor_video_url || defaultUrl);
+  const videoUrl = type === "game"
+    ? (settings?.sponsor_video_url_5 || defaultUrl)
+    : type === "gallery"
+      ? (settings?.sponsor_video_url_4 || defaultUrl)
+      : type === "status"
+        ? (settings?.sponsor_video_url_3 || defaultUrl)
+        : type === "leaderboard" 
+          ? (settings?.sponsor_video_url_2 || defaultUrl) 
+          : (settings?.sponsor_video_url || defaultUrl);
     
   const ytId = getYouTubeVideoId(videoUrl);
 

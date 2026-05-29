@@ -16,6 +16,7 @@ export type SiteSettings = {
   sponsor_video_url_2: string;
   sponsor_video_url_3: string;
   sponsor_video_url_4: string;
+  sponsor_video_url_5: string;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -37,7 +38,8 @@ const DEFAULTS: SiteSettings = {
   sponsor_video_url: "https://youtu.be/e_5anFAQIps",
   sponsor_video_url_2: "https://youtu.be/e_5anFAQIps",
   sponsor_video_url_3: "https://youtu.be/e_5anFAQIps",
-  sponsor_video_url_4: "https://youtu.be/e_5anFAQIps"
+  sponsor_video_url_4: "https://youtu.be/e_5anFAQIps",
+  sponsor_video_url_5: "https://youtu.be/e_5anFAQIps"
 };
 
 async function fetchSettings(): Promise<SiteSettings> {
@@ -69,6 +71,7 @@ async function fetchSettings(): Promise<SiteSettings> {
     sponsor_video_url_2: data.sponsor_video_url_2 ?? DEFAULTS.sponsor_video_url_2,
     sponsor_video_url_3: data.sponsor_video_url_3 ?? DEFAULTS.sponsor_video_url_3,
     sponsor_video_url_4: data.sponsor_video_url_4 ?? DEFAULTS.sponsor_video_url_4,
+    sponsor_video_url_5: data.sponsor_video_url_5 ?? DEFAULTS.sponsor_video_url_5,
   };
 }
 
