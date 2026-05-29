@@ -7,7 +7,13 @@ function getYouTubeVideoId(url: string) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
-export default function Sponsors({ type = "confession" }: { type?: "confession" | "leaderboard" | "status" }) {
+export default function Sponsors({ 
+  type = "confession",
+  mobileAspect = "aspect-[21/9]"
+}: { 
+  type?: "confession" | "leaderboard" | "status",
+  mobileAspect?: string
+}) {
   const { data: settings } = useSiteSettings();
   
   // Fallback to default if settings not loaded or empty
@@ -28,7 +34,7 @@ export default function Sponsors({ type = "confession" }: { type?: "confession" 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="w-full rounded-2xl overflow-hidden bg-white/40 border border-white/60 shadow-md backdrop-blur-md relative flex justify-center items-center p-1.5 bg-gradient-to-br from-rose-50/50 to-fuchsia-50/50 h-24"
+          className={`w-full ${mobileAspect} rounded-2xl overflow-hidden bg-white/40 border border-white/60 shadow-md backdrop-blur-md relative flex justify-center items-center p-1.5 bg-gradient-to-br from-rose-50/50 to-fuchsia-50/50`}
         >
           <div className="w-full h-full rounded-xl overflow-hidden relative shadow-inner pointer-events-none bg-black">
             {ytId ? (

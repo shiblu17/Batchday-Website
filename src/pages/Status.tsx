@@ -198,8 +198,8 @@ export default function StatusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] py-12 px-4 pb-32">
-      <div className="max-w-xl mx-auto space-y-10">
+    <div className="min-h-screen bg-[#fafafa] py-12 px-4 pb-12 flex flex-col">
+      <div className="max-w-xl mx-auto space-y-10 w-full flex-grow">
         
         {/* Header Section */}
         <div className="text-center space-y-2">
@@ -232,11 +232,6 @@ export default function StatusPage() {
             খুঁজুন
           </button>
         </form>
-
-        {/* Sponsor Banner */}
-        <div className="-mx-4 sm:mx-0">
-          <Sponsors type="status" />
-        </div>
 
         <AnimatePresence mode="wait">
           {status !== "idle" && status !== "loading" && (
@@ -323,6 +318,13 @@ export default function StatusPage() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Footer Sponsor Banner */}
+      <div className="max-w-xl mx-auto w-full mt-12 pt-8">
+        <div className="-mx-4 sm:mx-0">
+          <Sponsors type="status" mobileAspect="aspect-[16/9]" />
+        </div>
       </div>
     </div>
   );
