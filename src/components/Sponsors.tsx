@@ -9,7 +9,7 @@ function getYouTubeVideoId(url: string) {
 
 export default function Sponsors({ 
   type = "confession",
-  mobileAspect = "aspect-[21/9]",
+  mobileAspect = "h-24",
   wrapperClass = ""
 }: { 
   type?: "confession" | "leaderboard" | "status" | "gallery" | "game",
