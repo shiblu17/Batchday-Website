@@ -6,22 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Upload, Trash2, ImageIcon } from "lucide-react";
 
-function useGalleryPhotos() {
+function useGalleryPhotos(page: number) {
+  const LIMIT = 24;
   return useQuery({
-    queryKey: ["gallery-photos"],
+    queryKey: ["gallery-photos", page],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("gallery_photos")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(0, page * LIMIT - 1);
       if (error) throw error;
-      return data;
+      return { data, count };
     },
   });
 }
 
 export default function AdminGallery() {
-  const { data: photos = [], isLoading } = useGalleryPhotos();
+  const [page, setPage] = useState(1);
+  const { data: queryData, isLoading } = useGalleryPhotos(page);
+  const photos = queryData?.data || [];
+  const totalCount = queryData?.count || 0;
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
@@ -37,17 +43,26 @@ export default function AdminGallery() {
 
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const filePath = `gallery/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("photos")
-        .upload(filePath, file);
-      if (uploadError) throw uploadError;
+      const formData = new FormData();
+      formData.append("image", file);
 
-      const { data: urlData } = supabase.storage.from("photos").getPublicUrl(filePath);
+      const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
+      if (!apiKey) throw new Error("ImgBB API Key is missing in .env");
+
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: formData,
+      });
+      const imgbbData = await res.json();
+
+      if (!imgbbData.success) {
+        throw new Error(imgbbData.error?.message || "Failed to upload to ImgBB");
+      }
+
+      const imageUrl = imgbbData.data.url;
 
       const { error: insertError } = await supabase.from("gallery_photos").insert({
-        url: urlData.publicUrl,
+        url: imageUrl,
         caption: caption || null,
       });
       if (insertError) throw insertError;
@@ -113,27 +128,37 @@ export default function AdminGallery() {
           <p className="text-sm">কোনো ছবি নেই</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {photos.map((photo) => (
-            <div key={photo.id} className="group relative rounded-xl overflow-hidden shadow-card bg-card">
-              <img
-                src={photo.url}
-                alt={photo.caption || "Gallery photo"}
-                className="w-full aspect-square object-cover"
-              />
-              {photo.caption && (
-                <p className="p-2 text-xs text-muted-foreground truncate">{photo.caption}</p>
-              )}
-              <button
-                onClick={() => handleDelete(photo.id)}
-                className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                title="ডিলিট করো"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {photos.map((photo) => (
+              <div key={photo.id} className="group relative rounded-xl overflow-hidden shadow-card bg-card">
+                <img
+                  src={photo.url}
+                  alt={photo.caption || "Gallery photo"}
+                  className="w-full aspect-square object-cover"
+                />
+                {photo.caption && (
+                  <p className="p-2 text-xs text-muted-foreground truncate">{photo.caption}</p>
+                )}
+                <button
+                  onClick={() => handleDelete(photo.id)}
+                  className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="ডিলিট করো"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          {photos.length < totalCount && (
+            <div className="mt-8 text-center">
+              <Button onClick={() => setPage(p => p + 1)} variant="outline" className="rounded-full px-8">
+                আরো ছবি দেখুন
+              </Button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

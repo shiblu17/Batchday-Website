@@ -1,23 +1,27 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ImageIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Sponsors from "@/components/Sponsors";
 
-function useGalleryPhotos() {
+function useGalleryPhotos(page: number) {
+  const LIMIT = 24;
   return useQuery({
-    queryKey: ["gallery-photos"],
+    queryKey: ["gallery-photos", page],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error, count } = await supabase
           .from("gallery_photos")
-          .select("*")
-          .order("created_at", { ascending: false });
+          .select("*", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .range(0, page * LIMIT - 1);
         if (error) throw error;
-        return data || [];
+        return { data: data || [], count: count || 0 };
       } catch (err) {
         console.error("Supabase fetch error:", err);
-        return [];
+        return { data: [], count: 0 };
       }
     },
     retry: false,
@@ -34,7 +38,10 @@ const fadeUp = {
 };
 
 export default function GalleryPage() {
-  const { data: photos = [], isLoading } = useGalleryPhotos();
+  const [page, setPage] = useState(1);
+  const { data: queryData, isLoading } = useGalleryPhotos(page);
+  const photos = queryData?.data || [];
+  const totalCount = queryData?.count || 0;
 
   return (
     <div className="container py-6 md:py-8 pb-24 md:pb-8 px-4">
@@ -74,33 +81,47 @@ export default function GalleryPage() {
           </motion.div>
         </div>
       ) : (
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-          className="columns-2 sm:columns-3 gap-3 space-y-3"
-        >
-          {photos.map((photo) => (
-            <motion.div
-              key={photo.id}
-              variants={fadeUp}
-              whileHover={{ y: -4 }}
-              className="break-inside-avoid rounded-xl overflow-hidden shadow-card group cursor-pointer"
-            >
-              <img
-                src={photo.url}
-                alt={photo.caption || "Gallery photo"}
-                className="w-full object-cover transition-transform group-hover:scale-105"
-                loading="lazy"
-              />
-              {photo.caption && (
-                <div className="bg-card p-3">
-                  <p className="text-xs text-muted-foreground">{photo.caption}</p>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </motion.div>
+        <>
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            animate="show"
+            className="columns-2 sm:columns-3 gap-3 space-y-3"
+          >
+            {photos.map((photo) => (
+              <motion.div
+                key={photo.id}
+                variants={fadeUp}
+                whileHover={{ y: -4 }}
+                className="break-inside-avoid rounded-xl overflow-hidden shadow-card group cursor-pointer"
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.caption || "Gallery photo"}
+                  className="w-full object-cover transition-transform group-hover:scale-105"
+                  loading="lazy"
+                />
+                {photo.caption && (
+                  <div className="bg-card p-3">
+                    <p className="text-xs text-muted-foreground">{photo.caption}</p>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {photos.length < totalCount && (
+            <div className="mt-12 text-center pb-8">
+              <Button 
+                onClick={() => setPage(p => p + 1)} 
+                variant="outline" 
+                className="rounded-full px-8 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm font-semibold"
+              >
+                আরো ছবি দেখুন
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
