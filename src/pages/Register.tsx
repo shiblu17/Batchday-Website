@@ -102,8 +102,8 @@ export default function RegisterPage() {
     if (!file) return;
 
     // Optional early check for insanely large files to avoid browser crash
-    if (file.size > 20 * 1024 * 1024) {
-      toast({ title: "ছবির সাইজ ২০MB-এর বেশি হতে পারবে না!", variant: "destructive" });
+    if (file.size > 50 * 1024 * 1024) {
+      toast({ title: "ছবির সাইজ অনেক বেশি বড় (৫০MB+)", variant: "destructive" });
       return;
     }
 
@@ -396,7 +396,7 @@ export default function RegisterPage() {
                         <Upload className="h-7 w-7 text-primary" />
                       </div>
                       <span className="text-sm text-muted-foreground font-medium">ছবি সিলেক্ট করো</span>
-                      <span className="text-xs text-muted-foreground">Max 5MB · JPG, PNG</span>
+                      <span className="text-xs text-muted-foreground">যেকোনো সাইজের ছবি দিতে পারো</span>
                     </>
                   )}
                   <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} />

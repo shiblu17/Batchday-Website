@@ -6,6 +6,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Upload, Trash2, ImageIcon } from "lucide-react";
 
+const compressImage = (file: File): Promise<File> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            }));
+          } else {
+            resolve(file);
+          }
+        }, 'image/jpeg', 0.85);
+      };
+    };
+  });
+};
+
 function useGalleryPhotos(page: number) {
   const LIMIT = 24;
   return useQuery({
@@ -36,15 +82,18 @@ export default function AdminGallery() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "ফাইল সাইজ ১০MB এর বেশি", variant: "destructive" });
+    
+    // Safety check for insanely large files to avoid browser Out-Of-Memory crash
+    if (file.size > 50 * 1024 * 1024) {
+      toast({ title: "ফাইলের সাইজ অনেক বেশি বড় (৫০MB+)", variant: "destructive" });
       return;
     }
 
     setUploading(true);
     try {
+      const compressedFile = await compressImage(file);
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("image", compressedFile);
 
       const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
       if (!apiKey) throw new Error("ImgBB API Key is missing in .env");
@@ -116,7 +165,7 @@ export default function AdminGallery() {
               </span>
             </Button>
             <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
-            <span className="text-xs text-muted-foreground">Max 10MB</span>
+            <span className="text-xs text-muted-foreground">DSLR বা যেকোনো হাই-কোয়ালিটি ছবি দিন</span>
           </label>
         </div>
       </div>
