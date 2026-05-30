@@ -157,20 +157,25 @@ export default function RegisterPage() {
 
       // Upload photo if provided
       if (photo) {
-        const ext = photo.name.split(".").pop();
-        const filePath = `${form.roll}-${Date.now()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from("photos")
-          .upload(filePath, photo);
+        const formData = new FormData();
+        formData.append("image", photo);
 
-        if (uploadError) {
-          toast({ title: "ছবি আপলোড ব্যর্থ হয়েছে", description: uploadError.message, variant: "destructive" });
+        const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
+        if (!apiKey) throw new Error("ImgBB API Key is missing in .env");
+
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: "POST",
+          body: formData,
+        });
+        const imgbbData = await res.json();
+
+        if (!imgbbData.success) {
+          toast({ title: "ছবি আপলোড ব্যর্থ হয়েছে", description: imgbbData.error?.message, variant: "destructive" });
           setSubmitting(false);
           return;
         }
 
-        const { data: urlData } = supabase.storage.from("photos").getPublicUrl(filePath);
-        photoUrl = urlData.publicUrl;
+        photoUrl = imgbbData.data.url;
       }
 
       // Insert registration
