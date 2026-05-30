@@ -178,6 +178,24 @@ export default function AdminSettings() {
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("photos").getPublicUrl(filePath);
+
+      let oldUrl = "";
+      if (videoField === 'video1') oldUrl = form.sponsor_video_url;
+      else if (videoField === 'video2') oldUrl = form.sponsor_video_url_2;
+      else if (videoField === 'video3') oldUrl = form.sponsor_video_url_3;
+      else if (videoField === 'video4') oldUrl = form.sponsor_video_url_4;
+      else oldUrl = form.sponsor_video_url_5;
+
+      if (oldUrl && oldUrl.includes("supabase.co") && oldUrl.includes("/photos/sponsor_videos/")) {
+        try {
+          const oldFileName = decodeURIComponent(oldUrl.split('/').pop() || "");
+          if (oldFileName) {
+            await supabase.storage.from("photos").remove([`sponsor_videos/${oldFileName}`]);
+          }
+        } catch (e) {
+          console.error("Failed to delete old video:", e);
+        }
+      }
       
       if (videoField === 'video1') {
         setForm((f) => ({ ...f, sponsor_video_url: urlData.publicUrl }));
