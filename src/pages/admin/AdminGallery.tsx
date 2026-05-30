@@ -95,8 +95,8 @@ export default function AdminGallery() {
       const formData = new FormData();
       formData.append("image", compressedFile);
 
-      const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
-      if (!apiKey) throw new Error("ImgBB API Key is missing in .env");
+      const apiKey = "85164bf284c589b1ac8c2f2408fdc3f5";
+      if (!apiKey) throw new Error("ImgBB API Key is missing");
 
       const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: "POST",
