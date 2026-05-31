@@ -83,7 +83,11 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
   };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 p-4">
+    <div 
+      className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 p-4"
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
