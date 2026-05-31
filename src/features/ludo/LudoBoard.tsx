@@ -148,7 +148,7 @@ const LudoBoard = ({
       group.forEach(({ token, pos }, idx) => {
         const [r, c] = pos;
         const isMovable = token.color === currentPlayer &&
-          validMoveTokens.includes(token.id) && token.pathIndex !== 57;
+          validMoveTokens.includes(token.id) && token.pathIndex !== 56;
         const sz = group.length > 2 ? 0.45 : group.length > 1 ? 0.55 : 0.7;
         let offR = 0, offC = 0;
         if (group.length > 1) {
@@ -168,7 +168,7 @@ const LudoBoard = ({
                 ? `0 0 12px 4px ${COLOR_HEX[token.color]}66, 0 8px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.6)`
                 : `0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.6)`,
               border: `1.5px solid ${COLOR_DARK[token.color]}`,
-              zIndex: token.pathIndex === 57 ? 4 : (isMovable ? 20 : 10),
+              zIndex: token.pathIndex === 56 ? 4 : (isMovable ? 20 : 10),
               transform: isMovable ? 'scale(1.15) translateY(-2px)' : 'scale(1)',
 
             }}
