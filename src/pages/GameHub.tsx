@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star, Loader2 } from "lucide-react";
+import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star, Loader2, Activity } from "lucide-react";
 import Sponsors from "@/components/Sponsors";
 
 // Web Audio API Sound Utility
@@ -170,14 +170,37 @@ const games = [
   {
     path: "/game/dinorun",
     title: "জাবি রানার",
-    description: "ক্যাম্পাসের বাধা পার হও!",
+    description: "ডাইনোসরের মতো ছুটে চলো ক্যাম্পাসে!",
     icon: Footprints,
-    color: "bg-orange-100 text-orange-600",
-    gradient: "from-orange-500 to-red-600",
+    color: "bg-amber-100 text-amber-600",
+    gradient: "from-amber-500 to-orange-600",
+    badge: "HOT",
+    badgeIcon: Flame,
+    badgeColor: "bg-amber-500 text-white"
+  },
+  {
+    path: "/game/ju-maze",
+    title: "জাবি মেজ",
+    description: "ভুলভুলাইয়া পার হয়ে বটতলায় পৌঁছাও দ্রুততম সময়ে!",
+    icon: BrainCircuit,
+    color: "bg-green-100 text-green-600",
+    gradient: "from-green-500 to-emerald-600",
+    badge: "NEW",
+    badgeIcon: Sparkles,
+    badgeColor: "bg-yellow-500 text-white"
+  },
+  {
+    path: "/game/typing-master",
+    title: "এক্সাম নাইট টাইপিং",
+    description: "শব্দ পড়ার আগেই টাইপ করে ফেলো!",
+    icon: Gamepad2,
+    color: "bg-indigo-100 text-indigo-600",
+    gradient: "from-indigo-500 to-purple-600",
+    badge: "NEW",
+    badgeIcon: Sparkles,
+    badgeColor: "bg-yellow-500 text-white"
   }
 ];
-
-// We will fetch real data instead of mock
 
 // Game Card Component with 3D Tilt
 const GameCard = ({ game, index }: { game: any; index: number }) => {
@@ -289,24 +312,27 @@ export default function GameHub() {
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [retroMode, setRetroMode] = useState(false);
   const [globalScores, setGlobalScores] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchGlobalLeaderboard = async () => {
       setLoadingLeaderboard(true);
-      const gamesMap = {
+      const gamesMap: Record<string, string> = {
         "catch-grades_v3": "Catch the Grades",
         "flappy_v3": "Flappy Student",
         "ludo": "জাবি লুডু কিং",
         "memory_v3": "JU মেমোরি ম্যাচ",
         "tictactoe": "টিক-ট্যাক-টো",
-        "dinorun_v3": "জাবি রানার"
+        "dinorun_v3": "জাবি রানার",
+        "jumaze_v3": "জাবি মেজ",
+        "typing_v3": "এক্সাম নাইট টাইপিং"
       };
       
       const results = [];
       for (const [gameId, gameTitle] of Object.entries(gamesMap)) {
-        const ascending = gameId === "memory_v3";
+        const ascending = gameId === "memory_v3" || gameId === "jumaze_v3";
         const { data } = await supabase
           .from("game_scores")
           .select("nickname, score")
@@ -318,17 +344,33 @@ export default function GameHub() {
           results.push({
             name: data[0].nickname,
             game: gameTitle,
-            score: gameId === "memory_v3" ? `${data[0].score} চাল` : data[0].score.toString(),
+            score: gameId === "memory_v3" ? `${data[0].score} চাল` : gameId === "jumaze_v3" ? `${data[0].score} সে.` : data[0].score.toString(),
             gameId
           });
         }
       }
       
       setGlobalScores(results);
+
+      const { data: recentData } = await supabase
+        .from("game_scores")
+        .select("nickname, game_name, score")
+        .order("created_at", { ascending: false })
+        .limit(5);
+        
+      if (recentData) {
+        setRecentActivity(recentData.map(d => ({
+           ...d, 
+           gameTitle: gamesMap[d.game_name] || d.game_name 
+        })));
+      }
+      
       setLoadingLeaderboard(false);
     };
     
     fetchGlobalLeaderboard();
+    const interval = setInterval(fetchGlobalLeaderboard, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -417,6 +459,40 @@ export default function GameHub() {
           <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white" />
         </div>
       </motion.div>
+
+      {/* Live Activity Ticker */}
+      {recentActivity.length > 0 && (
+        <div className="container max-w-5xl mx-auto mb-8 bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center overflow-hidden relative shadow-sm">
+          <div className="flex-shrink-0 flex items-center gap-2 text-primary font-bold text-sm z-10 bg-gradient-to-r from-primary/10 to-transparent pr-4">
+            <Activity className="w-4 h-4 animate-pulse" />
+            লাইভ আপডেট:
+          </div>
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex whitespace-nowrap animate-marquee gap-8 items-center text-sm">
+              {recentActivity.map((activity, idx) => (
+                <span key={idx} className="flex items-center gap-1.5">
+                  <span className="font-bold">{activity.nickname}</span>
+                  <span className="text-muted-foreground text-xs">মাত্র</span>
+                  <span className="font-semibold text-primary">{activity.gameTitle}</span>
+                  <span className="text-muted-foreground text-xs">গেমটিতে</span>
+                  <span className="font-black text-amber-600 bg-amber-100 px-1.5 rounded text-xs">{activity.score}</span>
+                  <span className="text-muted-foreground text-xs">স্কোর করেছে!</span>
+                  <span className="text-primary/40 mx-2">•</span>
+                </span>
+              ))}
+            </div>
+          </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes marquee {
+              0% { transform: translateX(100%); }
+              100% { transform: translateX(-100%); }
+            }
+            .animate-marquee {
+              animation: marquee 20s linear infinite;
+            }
+          `}} />
+        </div>
+      )}
 
       <div className="container max-w-5xl mx-auto text-center relative z-10">
         <motion.div

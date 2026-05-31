@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Trophy, Heart } from "lucide-react";
 import GameLoginModal from "@/components/GameLoginModal";
 import GameLeaderboard from "@/components/GameLeaderboard";
+import { audioSystem } from "@/utils/audio";
+import { triggerConfetti } from "@/utils/confetti";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Item {
@@ -47,6 +49,7 @@ export default function CatchTheGrades() {
           game_name: "catch-grades_v3",
           score: score
         });
+        triggerConfetti();
       };
       submitScore();
     }
@@ -66,6 +69,7 @@ export default function CatchTheGrades() {
     setItems([]);
     gameSpeed.current = 1;
     lastSpawnTime.current = performance.now();
+    audioSystem.playClick();
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -116,19 +120,25 @@ export default function CatchTheGrades() {
       let currentLives = lives;
       let currentScore = score;
       let hit = false;
+      let gameOverTriggered = false;
 
       for (const item of prevItems) {
         const newY = item.y + item.speed;
         
-        // Collision check (Basket is around 85-95% Y, and +- 10% X of basketX)
+        // Collision check
         const inBasketX = Math.abs(item.x - basketX) < 15;
         const inBasketY = newY > 85 && newY < 95;
 
         if (inBasketX && inBasketY) {
           if (item.type === 'good') {
             currentScore += 10;
+            audioSystem.playCoin();
           } else {
             currentLives -= 1;
+            if (currentLives <= 0) {
+                audioSystem.playGameOver();
+                gameOverTriggered = true;
+            }
           }
           hit = true;
           continue; // item caught
@@ -136,9 +146,6 @@ export default function CatchTheGrades() {
 
         // Missed item
         if (newY > 100) {
-          if (item.type === 'good') {
-            // Missing a good item doesn't hurt right now, but we could deduct points
-          }
           continue; // item falls off screen
         }
 

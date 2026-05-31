@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import GameLeaderboard from "@/components/GameLeaderboard";
 import GameLoginModal from "@/components/GameLoginModal";
+import { audioSystem } from "@/utils/audio";
+import { triggerConfetti } from "@/utils/confetti";
 import { Play, RotateCcw, Trophy, Gamepad2 } from "lucide-react";
 
 const GRAVITY = 0.4;
@@ -53,10 +55,16 @@ export default function FlappyJU() {
       pipes.current = [];
       setScore(0);
       hasSubmittedScore.current = false;
+      audioSystem.playClick();
     } else if (gameState === "playing") {
-      birdVelocity.current = JUMP;
+      // Only jump if we are not at the top
+      if (birdY.current > 0) {
+        birdVelocity.current = JUMP;
+        audioSystem.playJump();
+      }
     } else if (gameState === "gameover") {
       setGameState("start");
+      audioSystem.playClick();
     }
   }, [gameState, nickname]);
 
@@ -83,6 +91,7 @@ export default function FlappyJU() {
     // Floor & Ceiling collision
     if (birdY.current >= GAME_HEIGHT - BIRD_SIZE) {
       birdY.current = GAME_HEIGHT - BIRD_SIZE;
+      audioSystem.playGameOver();
       endGame();
     }
     if (birdY.current <= 0) {
@@ -149,11 +158,15 @@ export default function FlappyJU() {
       // Score logic
       if (!p.passed && p.x + PIPE_WIDTH < 50) {
         p.passed = true;
-        setScore((s) => s + 1);
+        setScore((s) => {
+          audioSystem.playCoin();
+          return s + 1;
+        });
       }
     });
 
     if (collision) {
+      audioSystem.playGameOver();
       endGame();
       return;
     }
@@ -201,6 +214,7 @@ export default function FlappyJU() {
           game_name: "flappy_v3",
           score: score
         });
+        triggerConfetti();
       };
       submitScore();
     }

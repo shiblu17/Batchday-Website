@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import GameLeaderboard from "@/components/GameLeaderboard";
 import GameLoginModal from "@/components/GameLoginModal";
 import { ArrowLeft, RotateCcw, BrainCircuit } from "lucide-react";
+import { audioSystem } from "@/utils/audio";
+import { triggerConfetti } from "@/utils/confetti";
 
 const EMOJIS = ["🎓", "🚌", "🎸", "☕", "💻", "📷", "🏆", "🏀"];
 const INITIAL_CARDS = [...EMOJIS, ...EMOJIS].map((emoji, i) => ({
@@ -42,11 +44,20 @@ export default function MemoryMatch() {
     if (flippedIds.length === 2) {
       const [first, second] = flippedIds;
       if (cards[first].emoji === cards[second].emoji) {
+        audioSystem.playCoin();
         setCards((c) =>
           c.map((card, i) =>
             i === first || i === second ? { ...card, isMatched: true } : card
           )
         );
+        
+        // Check win condition
+        const allMatched = cards.every((c, i) => 
+          (i === first || i === second) ? true : c.isMatched
+        );
+        if (allMatched) {
+          setGameState("gameover");
+        }
       } else {
         setTimeout(() => {
           setCards((c) =>
@@ -71,6 +82,8 @@ export default function MemoryMatch() {
           game_name: "memory_v3",
           score: moves
         });
+        triggerConfetti();
+        audioSystem.playGameOver();
       };
       submitScore();
     }
@@ -79,6 +92,7 @@ export default function MemoryMatch() {
   const handleFlip = (index: number) => {
     if (gameState !== "playing" || flippedIds.length >= 2 || cards[index].isFlipped || cards[index].isMatched) return;
     
+    audioSystem.playClick();
     setCards((c) =>
       c.map((card, i) => (i === index ? { ...card, isFlipped: true } : card))
     );
@@ -88,6 +102,7 @@ export default function MemoryMatch() {
   const startGame = () => {
     if (!nickname.trim()) return;
     hasSubmittedScore.current = false;
+    audioSystem.playClick();
     setCards(shuffleCards());
     setMoves(0);
     setFlippedIds([]);

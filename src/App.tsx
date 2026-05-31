@@ -32,6 +32,8 @@ const TicTacToe = lazy(() => import("./pages/TicTacToe"));
 const DinoRun = lazy(() => import("./pages/DinoRun"));
 const LudoGame = lazy(() => import("./pages/LudoGame"));
 const CatchTheGrades = lazy(() => import("./pages/CatchTheGrades"));
+const JUMaze = lazy(() => import("./pages/JUMaze"));
+const TypingMaster = lazy(() => import("./pages/TypingMaster"));
 const Confessions = lazy(() => import("./pages/Confessions"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
@@ -182,6 +184,24 @@ const App = () => (
                     <>
                       <Navbar />
                       <CatchTheGrades />
+                    </>
+                  }
+                />
+                <Route
+                  path="/game/ju-maze"
+                  element={
+                    <>
+                      <Navbar />
+                      <JUMaze />
+                    </>
+                  }
+                />
+                <Route
+                  path="/game/typing-master"
+                  element={
+                    <>
+                      <Navbar />
+                      <TypingMaster />
                     </>
                   }
                 />

@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import GameLeaderboard from "@/components/GameLeaderboard";
 import GameLoginModal from "@/components/GameLoginModal";
 import { ArrowLeft, RotateCcw, Footprints, Trophy, Keyboard } from "lucide-react";
+import { audioSystem } from "@/utils/audio";
+import { triggerConfetti } from "@/utils/confetti";
 
 const GRAVITY = 0.8;
 const JUMP_VELOCITY = -14;
@@ -60,13 +62,16 @@ export default function DinoRun() {
       currentSpeed.current = BASE_SPEED;
       setScore(0);
       hasSubmittedScore.current = false;
+      audioSystem.playClick();
     } else if (gameState === "playing") {
       // Only jump if on the ground
       if (playerY.current >= GROUND_Y - PLAYER_SIZE - 2) {
         playerVelocity.current = JUMP_VELOCITY;
+        audioSystem.playJump();
       }
     } else if (gameState === "gameover") {
       setGameState("start");
+      audioSystem.playClick();
     }
   }, [gameState, nickname]);
 
@@ -158,6 +163,7 @@ export default function DinoRun() {
     });
 
     if (collision) {
+      audioSystem.playGameOver();
       endGame();
       return;
     }
@@ -211,6 +217,7 @@ export default function DinoRun() {
           game_name: "dinorun_v3",
           score: score
         });
+        triggerConfetti();
       };
       submitScore();
     }
