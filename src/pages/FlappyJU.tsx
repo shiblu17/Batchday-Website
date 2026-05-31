@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import GameLeaderboard from "@/components/GameLeaderboard";
+import GameLoginModal from "@/components/GameLoginModal";
 import { Play, RotateCcw, Trophy, Gamepad2 } from "lucide-react";
 
 const GRAVITY = 0.6;
@@ -45,7 +46,6 @@ export default function FlappyJU() {
   const jump = useCallback((e?: React.MouseEvent | React.PointerEvent) => {
     if (gameState === "start") {
       if (!nickname.trim()) return;
-      localStorage.setItem("ju_game_nickname", nickname.trim());
       setGameState("playing");
       birdY.current = GAME_HEIGHT / 2;
       birdVelocity.current = JUMP;
@@ -249,37 +249,46 @@ export default function FlappyJU() {
         )}
 
         {/* UI Overlays */}
-        {gameState === "start" && (
+        {gameState === "start" && !nickname && (
+          <GameLoginModal 
+            gameTitle="Flappy Student" 
+            onStart={(name) => {
+              setNickname(name);
+              localStorage.setItem("ju_game_nickname", name);
+              // Instead of calling jump() which might not work well with synthetic events inside onStart,
+              // we can set the state directly
+              setGameState("playing");
+              birdY.current = GAME_HEIGHT / 2;
+              birdVelocity.current = JUMP;
+              pipes.current = [];
+              setScore(0);
+            }} 
+          />
+        )}
+        
+        {gameState === "start" && nickname && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-20">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-card p-6 rounded-2xl text-center shadow-2xl max-w-[80%]"
+              className="bg-card p-6 rounded-3xl text-center shadow-2xl max-w-[80%] border-2 border-border"
             >
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <Gamepad2 className="h-8 w-8 text-primary" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary mb-4 shadow-lg">
+                <Gamepad2 className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h2 className="font-display text-xl font-bold mb-2">Flappy Student</h2>
-              <p className="text-sm text-muted-foreground mb-4">নিকনেম দিয়ে খেলা শুরু করো!</p>
-              
-              <input 
-                type="text" 
-                placeholder="তোমার নিকনেম..." 
-                maxLength={20}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full text-center px-4 py-3 rounded-xl border-2 border-primary/20 bg-background font-semibold focus:outline-none focus:border-primary mb-4"
-              />
+              <h2 className="font-display text-2xl font-black mb-2">Flappy Student</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                স্বাগতম, <strong className="text-primary text-lg">{nickname}</strong>!
+              </p>
 
               <button 
                  onClick={jump}
-                 disabled={!nickname.trim()}
-                 className="w-full mb-3 px-8 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold shadow-md hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                 className="w-full mb-6 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
-                শুরু করো
+                শুরু করো 🚀
               </button>
               
-              <div className="flex justify-center">
+              <div className="border-t border-border pt-4">
                 <GameLeaderboard gameName="flappy" ascending={false} />
               </div>
             </motion.div>

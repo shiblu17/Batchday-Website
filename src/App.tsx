@@ -31,6 +31,7 @@ const MemoryMatch = lazy(() => import("./pages/MemoryMatch"));
 const TicTacToe = lazy(() => import("./pages/TicTacToe"));
 const DinoRun = lazy(() => import("./pages/DinoRun"));
 const LudoGame = lazy(() => import("./pages/LudoGame"));
+const CatchTheGrades = lazy(() => import("./pages/CatchTheGrades"));
 const Confessions = lazy(() => import("./pages/Confessions"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
@@ -172,6 +173,15 @@ const App = () => (
                     <>
                       <Navbar />
                       <DinoRun />
+                    </>
+                  }
+                />
+                <Route
+                  path="/game/catch-grades"
+                  element={
+                    <>
+                      <Navbar />
+                      <CatchTheGrades />
                     </>
                   }
                 />
