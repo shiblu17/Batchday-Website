@@ -79,6 +79,40 @@ const LudoGame = () => {
     }
   }, [diceRolled, diceValue, isMoving, isRolling, winner, validMoves, advancePlayer]);
 
+  // AI Logic Hook
+  useEffect(() => {
+    if (!mode || winner || isMoving || isRolling) return;
+    
+    // AI is only Yellow in 2-player mode, or Yellow/Red/Blue in 4-player mode if we wanted (but user only chose 2-player or 4-human). Let's stick to Yellow in mode 2.
+    const isAI = mode === 2 && currentPlayer === 'yellow';
+    if (!isAI) return;
+
+    if (!diceRolled) {
+      const timer = setTimeout(() => rollDice(), 800);
+      return () => clearTimeout(timer);
+    } else {
+      if (validMoves.length === 0) return; // handled by auto-pass
+      
+      const timer = setTimeout(() => {
+        let chosenToken = validMoves[0];
+        // Prioritize killing (if possible, though complex, we'll just prioritize finishing/getting out)
+        const tokenToOut = tokens[currentPlayer].find(t => t.pathIndex === -1 && validMoves.includes(t.id));
+        if (tokenToOut) {
+          chosenToken = tokenToOut.id;
+        } else {
+          // Pick token closest to finish
+          const active = tokens[currentPlayer].filter(t => validMoves.includes(t.id));
+          if (active.length > 0) {
+            chosenToken = active.sort((a, b) => b.pathIndex - a.pathIndex)[0].id;
+          }
+        }
+        // Safely call handleTokenClick by passing the color explicitly
+        handleTokenClick('yellow', chosenToken);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [mode, winner, isMoving, isRolling, currentPlayer, diceRolled, validMoves, tokens]);
+
   const rollDice = useCallback(() => {
     if (isRolling || isMoving || diceRolled || winner) return;
     setIsRolling(true);
@@ -91,11 +125,20 @@ const LudoGame = () => {
         const value = Math.floor(Math.random() * 6) + 1;
         setDiceValue(value);
         setDisplayDice(value);
-        setDiceRolled(true);
         setIsRolling(false);
+        
+        if (value === 6 && consecutiveSixes === 2) {
+          // Penalty for 3rd six!
+          setTimeout(() => {
+             setConsecutiveSixes(0);
+             advancePlayer();
+          }, 1000);
+        } else {
+          setDiceRolled(true);
+        }
       }
     }, 60);
-  }, [isRolling, isMoving, diceRolled, winner]);
+  }, [isRolling, isMoving, diceRolled, winner, consecutiveSixes, advancePlayer]);
 
   const handleTokenClick = useCallback(async (color: PlayerColor, tokenId: number) => {
     if (isMoving || !diceRolled || diceValue === null || winner) return;
@@ -137,6 +180,7 @@ const LudoGame = () => {
       }
     }
 
+    let capturedToken = false;
     // Check capture (only on common path cells, indices 0-50)
     if (finalPathIndex >= 0 && finalPathIndex <= 50) {
       const finalCell = playerPath[finalPathIndex];
@@ -146,7 +190,6 @@ const LudoGame = () => {
         for (const oppColor of order) {
           if (oppColor === color) continue;
           const oppPath = paths[oppColor];
-          let captured = false;
           
           setTokens(prev => {
             const updated = {
@@ -155,7 +198,7 @@ const LudoGame = () => {
                 if (t.pathIndex >= 0 && t.pathIndex <= 50) {
                   const tCell = oppPath[t.pathIndex];
                   if (tCell[0] === finalCell[0] && tCell[1] === finalCell[1]) {
-                    captured = true;
+                    capturedToken = true;
                     return { ...t, pathIndex: -1 };
                   }
                 }
@@ -165,10 +208,10 @@ const LudoGame = () => {
             return updated;
           });
           
-          if (captured) {
+          if (capturedToken) {
             playCapture();
-            // Optional: Delay for capture effect
             await delay(400); 
+            break; // only capture one stack technically (or all at once)
           }
         }
       }
@@ -179,30 +222,21 @@ const LudoGame = () => {
     setDiceRolled(false);
     setDiceValue(null);
 
-    // Handle turn
-    if (dice === 6) {
-      const newSixes = currentSixes + 1;
-      if (newSixes >= 3) {
-        setConsecutiveSixes(0);
-        setTimeout(() => {
-          setCurrentPlayer(prev => {
-            const order = mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P;
-            return order[(order.indexOf(prev) + 1) % order.length];
-          });
-        }, 400);
+    const isFinished = finalPathIndex === 57;
+    const getsBonusTurn = dice === 6 || capturedToken || isFinished;
+
+    if (getsBonusTurn) {
+      if (dice === 6) {
+        setConsecutiveSixes(prev => prev + 1);
       } else {
-        setConsecutiveSixes(newSixes);
+        setConsecutiveSixes(0); // bonus from capture/finish resets 6s count? Standard rule says yes, but we'll leave it 0 to be safe.
       }
+      // Gets another turn, do nothing else
     } else {
       setConsecutiveSixes(0);
-      setTimeout(() => {
-        setCurrentPlayer(prev => {
-          const order = mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P;
-          return order[(order.indexOf(prev) + 1) % order.length];
-        });
-      }, 400);
+      setTimeout(() => advancePlayer(), 400);
     }
-  }, [isMoving, diceRolled, diceValue, winner, currentPlayer, tokens, paths, mode, consecutiveSixes, getValidMoves]);
+  }, [isMoving, diceRolled, diceValue, winner, currentPlayer, tokens, paths, mode, getValidMoves, advancePlayer]);
 
   const startGame = (m: 2 | 4) => {
     setMode(m);

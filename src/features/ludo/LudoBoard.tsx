@@ -61,16 +61,19 @@ const LudoBoard = ({
         }
 
         let bg = bgType;
-        let border = '0.5px solid rgba(0,0,0,0.08)';
-        if (inHomeBase) { bg = '#FFFFFF'; border = 'none'; }
-        else if (isPath || isHomeStretch) { border = '0.5px solid rgba(0,0,0,0.12)'; }
+        let border = '1px solid rgba(0,0,0,0.05)';
+        if (inHomeBase) { bg = 'transparent'; border = 'none'; }
+        else if (isPath || isHomeStretch) { 
+          bg = isSafe ? (bgType === '#FFFFFF' ? '#F3F4F6' : bgType) : bgType;
+          border = '1px solid rgba(0,0,0,0.08)'; 
+        }
 
         result.push(
-          <div key={`${r}-${c}`} className="relative flex items-center justify-center"
+          <div key={`${r}-${c}`} className="relative flex items-center justify-center shadow-[inset_0_0_8px_rgba(0,0,0,0.02)]"
             style={{ backgroundColor: bg, border }}>
             {isSafe && (
-              <span className="absolute text-amber-400 font-bold select-none drop-shadow-sm"
-                style={{ fontSize: 'clamp(7px, 2vw, 18px)' }}>★</span>
+              <span className="absolute opacity-50 select-none drop-shadow-sm text-gray-500"
+                style={{ fontSize: 'clamp(10px, 2.5vw, 22px)' }}>🌳</span>
             )}
           </div>
         );
@@ -89,7 +92,8 @@ const LudoBoard = ({
           <polygon points="0,0 100,0 50,50" fill={COLOR_HEX.yellow} />
           <polygon points="100,0 100,100 50,50" fill={COLOR_HEX.blue} />
           <polygon points="0,100 50,50 100,100" fill={COLOR_HEX.red} />
-          <circle cx="50" cy="50" r="12" fill="white" stroke="#ddd" strokeWidth="1" />
+          <circle cx="50" cy="50" r="14" fill="white" stroke="#ddd" strokeWidth="1" />
+          <text x="50" y="52" fontSize="12" dominantBaseline="middle" textAnchor="middle">🏆</text>
           <line x1="0" y1="0" x2="100" y2="100" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" />
           <line x1="100" y1="0" x2="0" y2="100" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" />
         </svg>
@@ -161,11 +165,12 @@ const LudoBoard = ({
               width: `${sz * cellPct}%`, height: `${sz * cellPct}%`,
               background: `radial-gradient(circle at 30% 30%, ${COLOR_LIGHT[token.color]} 0%, ${COLOR_HEX[token.color]} 50%, ${COLOR_DARK[token.color]} 100%)`,
               boxShadow: isMovable
-                ? `0 0 10px 3px ${COLOR_HEX[token.color]}, 0 0 20px 5px ${COLOR_HEX[token.color]}44, 0 3px 6px rgba(0,0,0,0.3)`
-                : `0 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3)`,
-              border: `2px solid ${COLOR_DARK[token.color]}`,
+                ? `0 0 12px 4px ${COLOR_HEX[token.color]}66, 0 8px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.6)`
+                : `0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.6)`,
+              border: `1.5px solid ${COLOR_DARK[token.color]}`,
               zIndex: token.pathIndex === 57 ? 4 : (isMovable ? 20 : 10),
-              transform: isMovable ? 'scale(1.1)' : 'scale(1)',
+              transform: isMovable ? 'scale(1.15) translateY(-2px)' : 'scale(1)',
+
             }}
             onClick={() => isMovable && onTokenClick(token.color, token.id)}
           >
@@ -182,20 +187,20 @@ const LudoBoard = ({
   })();
 
   return (
-    <div className="relative w-full shadow-2xl rounded-[32px] overflow-hidden bg-white p-2" style={{ aspectRatio: '1' }}>
-      <div className="absolute inset-2"
+    <div className="relative w-full shadow-2xl rounded-[32px] bg-white/40 backdrop-blur-xl p-3 border border-white/60" style={{ aspectRatio: '1' }}>
+      <div className="absolute inset-3 shadow-inner"
         style={{
           display: 'grid', gridTemplateColumns: 'repeat(15, 1fr)', gridTemplateRows: 'repeat(15, 1fr)',
-          border: '2px solid rgba(0,0,0,0.1)',
-          background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden'
+          border: '3px solid rgba(0,0,0,0.08)',
+          background: 'rgba(255,255,255,0.85)', borderRadius: '24px', overflow: 'hidden'
         }}>
         {cells}
       </div>
-      <div className="absolute inset-2 pointer-events-none">
+      <div className="absolute inset-3 pointer-events-none">
         {homeBaseOverlays}
         {centerOverlay}
       </div>
-      <div className="absolute inset-2 pointer-events-none">
+      <div className="absolute inset-3 pointer-events-none">
         {tokenElements}
       </div>
     </div>

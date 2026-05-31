@@ -8,7 +8,7 @@ export interface TokenState {
 
 export const PLAYER_COLORS: PlayerColor[] = ['green', 'yellow', 'blue', 'red'];
 export const TURN_ORDER_4P: PlayerColor[] = ['green', 'yellow', 'blue', 'red'];
-export const TURN_ORDER_2P: PlayerColor[] = ['green', 'blue'];
+export const TURN_ORDER_2P: PlayerColor[] = ['green', 'yellow'];
 
 export const COLOR_HEX: Record<PlayerColor, string> = {
   green: '#4CAF50', yellow: '#FFC107', blue: '#2196F3', red: '#F44336',
