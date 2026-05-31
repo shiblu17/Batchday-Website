@@ -37,10 +37,10 @@ export const COMMON_PATH: [number, number][] = [
 ];
 
 export const HOME_STRETCHES: Record<PlayerColor, [number, number][]> = {
-  red:    [[13,7],[12,7],[11,7],[10,7],[9,7]],
-  green:  [[7,1],[7,2],[7,3],[7,4],[7,5]],
-  yellow: [[1,7],[2,7],[3,7],[4,7],[5,7]],
-  blue:   [[7,13],[7,12],[7,11],[7,10],[7,9]],
+  red:    [[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],
+  green:  [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
+  yellow: [[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],
+  blue:   [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
 };
 
 const ENTRY_INDEX: Record<PlayerColor, number> = {
@@ -54,7 +54,6 @@ export function getPlayerPath(color: PlayerColor): [number, number][] {
     path.push(COMMON_PATH[(entry + i) % 52]);
   }
   path.push(...HOME_STRETCHES[color]);
-  path.push([7, 7]); // center = finished
   return path; // 57 cells, indices 0-56
 }
 

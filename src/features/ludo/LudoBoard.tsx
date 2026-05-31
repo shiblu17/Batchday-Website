@@ -86,7 +86,7 @@ const LudoBoard = ({
     const cellPct = 100 / 15;
     return (
       <div className="absolute overflow-hidden"
-        style={{ top: `${cellPct * 6}%`, left: `${cellPct * 6}%`, width: `${cellPct * 3}%`, height: `${cellPct * 3}%`, zIndex: 5 }}>
+        style={{ top: `${cellPct * 6}%`, left: `${cellPct * 6}%`, width: `${cellPct * 3}%`, height: `${cellPct * 3}%`, zIndex: 3 }}>
         <svg viewBox="0 0 100 100" width="100%" height="100%">
           <polygon points="0,0 50,50 0,100" fill={COLOR_HEX.green} />
           <polygon points="0,0 100,0 50,50" fill={COLOR_HEX.yellow} />
