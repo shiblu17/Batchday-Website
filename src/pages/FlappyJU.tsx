@@ -273,7 +273,11 @@ export default function FlappyJU() {
         )}
         
         {gameState === "start" && nickname && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-20">
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-20"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -313,7 +317,11 @@ export default function FlappyJU() {
         )}
 
         {gameState === "gameover" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-20">
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-20"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <motion.div
               initial={{ scale: 0.5, opacity: 0, rotate: -5 }}
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
