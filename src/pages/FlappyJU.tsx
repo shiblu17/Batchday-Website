@@ -227,8 +227,7 @@ export default function FlappyJU() {
         className="relative overflow-hidden rounded-2xl border-4 border-input shadow-card w-full bg-sky-200 cursor-pointer select-none"
         style={{ height: GAME_HEIGHT, maxWidth: GAME_WIDTH }}
         onPointerDown={(e) => {
-          if (gameState === "start" && !nickname) return;
-          e.preventDefault();
+          if ((e.target as Element).closest('button, input, select, .z-20, .z-50')) return;
           jump(e);
         }}
       >

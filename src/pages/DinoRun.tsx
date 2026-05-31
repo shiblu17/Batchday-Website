@@ -245,8 +245,10 @@ export default function DinoRun() {
       <div
         className="relative overflow-hidden rounded-3xl border-2 border-border shadow-card w-full bg-surface cursor-pointer select-none"
         style={{ height: GAME_HEIGHT, maxWidth: "100%" }}
-        onClick={jump}
-        onPointerDown={jump}
+        onPointerDown={(e) => {
+          if ((e.target as Element).closest('button, input, select, .z-20, .z-50')) return;
+          jump(e);
+        }}
       >
         {/* Background Scenery Elements */}
         {gameState !== "start" && (
