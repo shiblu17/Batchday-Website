@@ -39,6 +39,7 @@ export default function DinoRun() {
 
   const playerRef = useRef<HTMLDivElement>(null);
   const obstaclesRef = useRef<HTMLDivElement>(null);
+  const hasSubmittedScore = useRef(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("dinorun_ju_highscore");
@@ -58,6 +59,7 @@ export default function DinoRun() {
       frameCount.current = 0;
       currentSpeed.current = BASE_SPEED;
       setScore(0);
+      hasSubmittedScore.current = false;
     } else if (gameState === "playing") {
       // Only jump if on the ground
       if (playerY.current >= GROUND_Y - PLAYER_SIZE - 2) {
@@ -195,35 +197,40 @@ export default function DinoRun() {
         setHighScore(currentScore);
         localStorage.setItem("dinorun_ju_highscore", currentScore.toString());
       }
-      
-      // Submit to Supabase
-      if (currentScore > 0 && nickname.trim() !== "") {
-        (async () => {
-          const finalName = nickname.trim().substring(0, 40);
-          const { data } = await supabase
-            .from("game_scores")
-            .select("id, score")
-            .eq("nickname", finalName)
-            .eq("game_name", "dinorun_v2")
-            .maybeSingle();
-            
-          if (data) {
-            if (currentScore > data.score) {
-              await supabase.from("game_scores").update({ score: currentScore }).eq("id", data.id);
-            }
-          } else {
-            await supabase.from("game_scores").insert({
-              nickname: finalName,
-              game_name: "dinorun_v2",
-              score: currentScore
-            });
-          }
-        })();
-      }
-      
       return currentScore;
     });
   };
+
+  useEffect(() => {
+    if (gameState === "gameover" && score > 0 && nickname.trim() !== "" && !hasSubmittedScore.current) {
+      hasSubmittedScore.current = true;
+      const submitScore = async () => {
+        const finalName = nickname.trim().substring(0, 40);
+        const { data } = await supabase
+          .from("game_scores")
+          .select("id, score")
+          .eq("nickname", finalName)
+          .eq("game_name", "dinorun_v3")
+          .order("score", { ascending: false })
+          .limit(1);
+          
+        const existingRecord = data && data.length > 0 ? data[0] : null;
+          
+        if (existingRecord) {
+          if (score > existingRecord.score) {
+            await supabase.from("game_scores").update({ score: score }).eq("id", existingRecord.id);
+          }
+        } else {
+          await supabase.from("game_scores").insert({
+            nickname: finalName,
+            game_name: "dinorun_v3",
+            score: score
+          });
+        }
+      };
+      submitScore();
+    }
+  }, [gameState, score, nickname]);
 
   useEffect(() => {
     if (gameState === "playing") {
@@ -355,7 +362,7 @@ export default function DinoRun() {
               </button>
               
               <div className="flex justify-center border-t border-border pt-4 mt-1">
-                <GameLeaderboard gameName="dinorun_v2" ascending={false} />
+                <GameLeaderboard gameName="dinorun_v3" ascending={false} />
               </div>
             </motion.div>
           </div>
@@ -382,7 +389,7 @@ export default function DinoRun() {
               </button>
               
               <div className="flex justify-center">
-                <GameLeaderboard gameName="dinorun_v2" ascending={false} />
+                <GameLeaderboard gameName="dinorun_v3" ascending={false} />
               </div>
             </motion.div>
           </div>

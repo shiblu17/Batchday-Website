@@ -30,6 +30,7 @@ export default function MemoryMatch() {
   const [flippedIds, setFlippedIds] = useState<number[]>([]);
   const [gameState, setGameState] = useState<"start" | "playing" | "gameover">("start");
   const [nickname, setNickname] = useState("");
+  const hasSubmittedScore = useRef(false);
 
   useEffect(() => {
     const savedNick = localStorage.getItem("ju_game_nickname_v2");
@@ -61,35 +62,35 @@ export default function MemoryMatch() {
   }, [flippedIds, cards]);
 
   useEffect(() => {
-    if (gameState === "playing" && cards.length > 0 && cards.every((c) => c.isMatched)) {
-      setGameState("gameover");
-      
-      // Submit score (score is number of moves, so lower is better)
-      if (moves > 0 && nickname.trim() !== "") {
-        (async () => {
-          const finalName = nickname.trim().substring(0, 40);
-          const { data } = await supabase
-            .from("game_scores")
-            .select("id, score")
-            .eq("nickname", finalName)
-            .eq("game_name", "memory_v2")
-            .maybeSingle();
-            
-          if (data) {
-            if (moves < data.score) {
-              await supabase.from("game_scores").update({ score: moves }).eq("id", data.id);
-            }
-          } else {
-            await supabase.from("game_scores").insert({
-              nickname: finalName,
-              game_name: "memory_v2",
-              score: moves
-            });
+    if (gameState === "gameover" && moves > 0 && nickname.trim() !== "" && !hasSubmittedScore.current) {
+      hasSubmittedScore.current = true;
+      const submitScore = async () => {
+        const finalName = nickname.trim().substring(0, 40);
+        const { data } = await supabase
+          .from("game_scores")
+          .select("id, score")
+          .eq("nickname", finalName)
+          .eq("game_name", "memory_v3")
+          .order("score", { ascending: true })
+          .limit(1);
+          
+        const existingRecord = data && data.length > 0 ? data[0] : null;
+          
+        if (existingRecord) {
+          if (moves < existingRecord.score) {
+            await supabase.from("game_scores").update({ score: moves }).eq("id", existingRecord.id);
           }
-        })();
-      }
+        } else {
+          await supabase.from("game_scores").insert({
+            nickname: finalName,
+            game_name: "memory_v3",
+            score: moves
+          });
+        }
+      };
+      submitScore();
     }
-  }, [cards, gameState, moves, nickname]);
+  }, [gameState, moves, nickname]);
 
   const handleFlip = (index: number) => {
     if (gameState !== "playing" || flippedIds.length >= 2 || cards[index].isFlipped || cards[index].isMatched) return;
@@ -102,6 +103,7 @@ export default function MemoryMatch() {
 
   const startGame = () => {
     if (!nickname.trim()) return;
+    hasSubmittedScore.current = false;
     setCards(shuffleCards());
     setMoves(0);
     setFlippedIds([]);
@@ -168,6 +170,7 @@ export default function MemoryMatch() {
             onStart={(name) => {
               setNickname(name);
               localStorage.setItem("ju_game_nickname_v2", name);
+              hasSubmittedScore.current = false;
               setCards(shuffleCards());
               setMoves(0);
               setFlippedIds([]);
@@ -205,7 +208,7 @@ export default function MemoryMatch() {
               </button>
               
               <div className="flex justify-center border-t border-border pt-4 mt-1">
-                <GameLeaderboard gameName="memory_v2" ascending={true} />
+                <GameLeaderboard gameName="memory_v3" ascending={true} />
               </div>
             </motion.div>
           </div>
@@ -233,7 +236,7 @@ export default function MemoryMatch() {
           </button>
           
           <div className="flex justify-center">
-            <GameLeaderboard gameName="memory_v2" ascending={true} />
+            <GameLeaderboard gameName="memory_v3" ascending={true} />
           </div>
         </motion.div>
       )}

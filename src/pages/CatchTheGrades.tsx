@@ -28,6 +28,7 @@ export default function CatchTheGrades() {
   const [items, setItems] = useState<Item[]>([]);
   const [basketX, setBasketX] = useState(50); // percentage
   const [nickname, setNickname] = useState("");
+  const hasSubmittedScore = useRef(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("ju_game_nickname_v2");
@@ -35,6 +36,33 @@ export default function CatchTheGrades() {
     const savedScore = localStorage.getItem("catch_grades_highscore");
     if (savedScore) setHighScore(parseInt(savedScore, 10));
   }, []);
+
+  useEffect(() => {
+    if (isGameOver && !hasSubmittedScore.current && score > 0 && nickname) {
+      hasSubmittedScore.current = true;
+      (async () => {
+        const finalName = nickname.trim().substring(0, 40);
+        const { data } = await supabase
+          .from("game_scores")
+          .select("id, score")
+          .eq("nickname", finalName)
+          .eq("game_name", "catch-grades_v3")
+          .maybeSingle();
+          
+        if (data) {
+          if (score > data.score) {
+            await supabase.from("game_scores").update({ score: score }).eq("id", data.id);
+          }
+        } else {
+          await supabase.from("game_scores").insert({
+            nickname: finalName,
+            game_name: "catch-grades_v3",
+            score: score
+          });
+        }
+      })();
+    }
+  }, [isGameOver, score, nickname]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
@@ -44,6 +72,7 @@ export default function CatchTheGrades() {
   const startGame = () => {
     setIsPlaying(true);
     setIsGameOver(false);
+    hasSubmittedScore.current = false;
     setScore(0);
     setLives(3);
     setItems([]);
@@ -139,29 +168,6 @@ export default function CatchTheGrades() {
             setHighScore(currentScore);
             localStorage.setItem("catch_grades_highscore", currentScore.toString());
           }
-          if (currentScore > 0 && nickname) {
-            (async () => {
-              const finalName = nickname.trim().substring(0, 40);
-              const { data } = await supabase
-                .from("game_scores")
-                .select("id, score")
-                .eq("nickname", finalName)
-                .eq("game_name", "catch-grades_v2")
-                .maybeSingle();
-                
-              if (data) {
-                if (currentScore > data.score) {
-                  await supabase.from("game_scores").update({ score: currentScore }).eq("id", data.id);
-                }
-              } else {
-                await supabase.from("game_scores").insert({
-                  nickname: finalName,
-                  game_name: "catch-grades_v2",
-                  score: currentScore
-                });
-              }
-            })();
-          }
         } else {
           setLives(currentLives);
         }
@@ -171,7 +177,7 @@ export default function CatchTheGrades() {
     });
 
     requestRef.current = requestAnimationFrame(updateGame);
-  }, [isPlaying, isGameOver, lives, score, basketX]);
+  }, [isPlaying, isGameOver, lives, score, basketX, highScore]);
 
   useEffect(() => {
     if (isPlaying && !isGameOver) {
@@ -272,8 +278,8 @@ export default function CatchTheGrades() {
                     আবার খেলো 🚀
                   </Button>
 
-                  <div className="mt-4 border-t border-border pt-4">
-                     <GameLeaderboard gameName="catch-grades_v2" ascending={false} />
+                  <div className="border-t border-border pt-4">
+                     <GameLeaderboard gameName="catch-grades_v3" ascending={false} />
                   </div>
                 </div>
               ) : (
