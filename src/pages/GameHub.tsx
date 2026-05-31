@@ -296,17 +296,17 @@ export default function GameHub() {
     const fetchGlobalLeaderboard = async () => {
       setLoadingLeaderboard(true);
       const gamesMap = {
-        "catch-grades": "Catch the Grades",
-        "flappy": "Flappy Student",
+        "catch-grades_v2": "Catch the Grades",
+        "flappy_v2": "Flappy Student",
         "ludo": "জাবি লুডু কিং",
-        "memory": "JU মেমোরি ম্যাচ",
+        "memory_v2": "JU মেমোরি ম্যাচ",
         "tictactoe": "টিক-ট্যাক-টো",
-        "dinorun": "জাবি রানার"
+        "dinorun_v2": "জাবি রানার"
       };
       
       const results = [];
       for (const [gameId, gameTitle] of Object.entries(gamesMap)) {
-        const ascending = gameId === "memory";
+        const ascending = gameId === "memory_v2";
         const { data } = await supabase
           .from("game_scores")
           .select("nickname, score")
@@ -318,7 +318,7 @@ export default function GameHub() {
           results.push({
             name: data[0].nickname,
             game: gameTitle,
-            score: gameId === "memory" ? `${data[0].score} চাল` : data[0].score.toString(),
+            score: gameId === "memory_v2" ? `${data[0].score} চাল` : data[0].score.toString(),
             gameId
           });
         }

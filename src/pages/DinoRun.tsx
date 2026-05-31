@@ -44,7 +44,7 @@ export default function DinoRun() {
     const saved = localStorage.getItem("dinorun_ju_highscore");
     if (saved) setHighScore(parseInt(saved, 10));
     
-    const savedNick = localStorage.getItem("ju_game_nickname");
+    const savedNick = localStorage.getItem("ju_game_nickname_v2");
     if (savedNick) setNickname(savedNick);
   }, []);
 
@@ -200,7 +200,7 @@ export default function DinoRun() {
       if (currentScore > 0 && nickname.trim() !== "") {
         supabase.from("game_scores").insert({
           nickname: nickname.trim().substring(0, 20),
-          game_name: "dinorun",
+          game_name: "dinorun_v2",
           score: currentScore
         }).then();
       }
@@ -289,7 +289,7 @@ export default function DinoRun() {
             gameTitle="জাবি রানার" 
             onStart={(name) => {
               setNickname(name);
-              localStorage.setItem("ju_game_nickname", name);
+              localStorage.setItem("ju_game_nickname_v2", name);
               setGameState("playing");
               playerY.current = GROUND_Y - PLAYER_SIZE;
               playerVelocity.current = 0;
@@ -320,13 +320,24 @@ export default function DinoRun() {
 
               <button 
                  onClick={jump}
-                 className="w-full flex justify-center items-center gap-2 mb-3 px-6 py-2.5 rounded-full bg-orange-500 text-white font-bold hover:scale-105 active:scale-95 transition-all mx-auto"
+                 className="w-full flex justify-center items-center gap-2 mb-2 px-6 py-2.5 rounded-full bg-orange-500 text-white font-bold hover:scale-105 active:scale-95 transition-all mx-auto"
               >
                 শুরু করো 🚀
               </button>
               
-              <div className="flex justify-center border-t border-border pt-4 mt-2">
-                <GameLeaderboard gameName="dinorun" ascending={false} />
+              <button 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   localStorage.removeItem("ju_game_nickname_v2");
+                   setNickname("");
+                 }}
+                 className="w-full text-xs text-muted-foreground hover:text-orange-500 transition-colors mb-3 font-semibold"
+              >
+                নাম পরিবর্তন করুন
+              </button>
+              
+              <div className="flex justify-center border-t border-border pt-4 mt-1">
+                <GameLeaderboard gameName="dinorun_v2" ascending={false} />
               </div>
             </motion.div>
           </div>
@@ -353,7 +364,7 @@ export default function DinoRun() {
               </button>
               
               <div className="flex justify-center">
-                <GameLeaderboard gameName="dinorun" ascending={false} />
+                <GameLeaderboard gameName="dinorun_v2" ascending={false} />
               </div>
             </motion.div>
           </div>

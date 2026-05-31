@@ -32,7 +32,7 @@ export default function MemoryMatch() {
   const [nickname, setNickname] = useState("");
 
   useEffect(() => {
-    const savedNick = localStorage.getItem("ju_game_nickname");
+    const savedNick = localStorage.getItem("ju_game_nickname_v2");
     if (savedNick) setNickname(savedNick);
   }, []);
 
@@ -68,7 +68,7 @@ export default function MemoryMatch() {
       if (moves > 0 && nickname.trim() !== "") {
         supabase.from("game_scores").insert({
           nickname: nickname.trim().substring(0, 20),
-          game_name: "memory",
+          game_name: "memory_v2",
           score: moves
         }).then();
       }
@@ -151,7 +151,7 @@ export default function MemoryMatch() {
             gameTitle="JU মেমোরি ম্যাচ" 
             onStart={(name) => {
               setNickname(name);
-              localStorage.setItem("ju_game_nickname", name);
+              localStorage.setItem("ju_game_nickname_v2", name);
               setCards(shuffleCards());
               setMoves(0);
               setFlippedIds([]);
@@ -177,8 +177,19 @@ export default function MemoryMatch() {
                 শুরু করো 🚀
               </button>
               
-              <div className="flex justify-center border-t border-border pt-4 mt-2">
-                <GameLeaderboard gameName="memory" ascending={true} />
+              <button 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   localStorage.removeItem("ju_game_nickname_v2");
+                   setNickname("");
+                 }}
+                 className="w-full text-xs text-muted-foreground hover:text-fuchsia-600 transition-colors mb-3 font-semibold"
+              >
+                নাম পরিবর্তন করুন
+              </button>
+              
+              <div className="flex justify-center border-t border-border pt-4 mt-1">
+                <GameLeaderboard gameName="memory_v2" ascending={true} />
               </div>
             </motion.div>
           </div>
@@ -206,7 +217,7 @@ export default function MemoryMatch() {
           </button>
           
           <div className="flex justify-center">
-            <GameLeaderboard gameName="memory" ascending={true} />
+            <GameLeaderboard gameName="memory_v2" ascending={true} />
           </div>
         </motion.div>
       )}

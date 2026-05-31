@@ -30,7 +30,7 @@ export default function CatchTheGrades() {
   const [nickname, setNickname] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("ju_game_nickname");
+    const saved = localStorage.getItem("ju_game_nickname_v2");
     if (saved) setNickname(saved);
     const savedScore = localStorage.getItem("catch_grades_highscore");
     if (savedScore) setHighScore(parseInt(savedScore, 10));
@@ -142,7 +142,7 @@ export default function CatchTheGrades() {
           if (currentScore > 0 && nickname) {
             supabase.from("game_scores").insert({
               nickname: nickname,
-              game_name: "catch-grades",
+              game_name: "catch-grades_v2",
               score: currentScore
             }).then();
           }
@@ -238,7 +238,7 @@ export default function CatchTheGrades() {
                   gameTitle="Catch the Grades" 
                   onStart={(name) => {
                     setNickname(name);
-                    localStorage.setItem("ju_game_nickname", name);
+                    localStorage.setItem("ju_game_nickname_v2", name);
                     startGame();
                   }} 
                 />
@@ -257,7 +257,7 @@ export default function CatchTheGrades() {
                   </Button>
 
                   <div className="mt-4 border-t border-border pt-4">
-                     <GameLeaderboard gameName="catch-grades" ascending={false} />
+                     <GameLeaderboard gameName="catch-grades_v2" ascending={false} />
                   </div>
                 </div>
               ) : (
@@ -267,11 +267,23 @@ export default function CatchTheGrades() {
                     স্বাগতম, <strong className="text-primary text-lg">{nickname}</strong>! <br/><br/>
                     A+ এবং সিঙ্গারা গুলো ব্যাগে ভরো! Assignment আর F গ্রেড থেকে সাবধান!
                   </p>
-                  <Button size="lg" onClick={startGame} className="w-full text-lg py-6 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-md mb-6">
+                  <Button size="lg" onClick={startGame} className="w-full text-lg py-6 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-md mb-2">
                     খেলা শুরু করো
                   </Button>
+                  
+                  <button 
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       localStorage.removeItem("ju_game_nickname_v2");
+                       setNickname("");
+                     }}
+                     className="w-full text-xs text-muted-foreground hover:text-primary transition-colors mb-4 font-semibold"
+                  >
+                    নাম পরিবর্তন করুন
+                  </button>
+
                   <div className="mt-2 border-t border-border pt-4">
-                     <GameLeaderboard gameName="catch-grades" ascending={false} />
+                     <GameLeaderboard gameName="catch-grades_v2" ascending={false} />
                   </div>
                 </div>
               )}

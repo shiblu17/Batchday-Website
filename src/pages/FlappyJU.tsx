@@ -39,7 +39,7 @@ export default function FlappyJU() {
     const saved = localStorage.getItem("flappy_ju_highscore");
     if (saved) setHighScore(parseInt(saved, 10));
     
-    const savedNick = localStorage.getItem("ju_game_nickname");
+    const savedNick = localStorage.getItem("ju_game_nickname_v2");
     if (savedNick) setNickname(savedNick);
   }, []);
 
@@ -190,7 +190,7 @@ export default function FlappyJU() {
       if (currentScore > 0 && nickname.trim() !== "") {
         supabase.from("game_scores").insert({
           nickname: nickname.trim().substring(0, 40),
-          game_name: "flappy",
+          game_name: "flappy_v2",
           score: currentScore
         }).then();
       }
@@ -259,7 +259,7 @@ export default function FlappyJU() {
             gameTitle="Flappy Student" 
             onStart={(name) => {
               setNickname(name);
-              localStorage.setItem("ju_game_nickname", name);
+              localStorage.setItem("ju_game_nickname_v2", name);
               // Instead of calling jump() which might not work well with synthetic events inside onStart,
               // we can set the state directly
               setGameState("playing");
@@ -288,13 +288,24 @@ export default function FlappyJU() {
 
               <button 
                  onClick={jump}
-                 className="w-full mb-6 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+                 className="w-full mb-3 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 শুরু করো 🚀
               </button>
               
+              <button 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   localStorage.removeItem("ju_game_nickname_v2");
+                   setNickname("");
+                 }}
+                 className="w-full text-xs text-muted-foreground hover:text-primary transition-colors mb-4 font-semibold"
+              >
+                নাম পরিবর্তন করুন
+              </button>
+              
               <div className="border-t border-border pt-4">
-                <GameLeaderboard gameName="flappy" ascending={false} />
+                <GameLeaderboard gameName="flappy_v2" ascending={false} />
               </div>
             </motion.div>
           </div>
@@ -321,7 +332,7 @@ export default function FlappyJU() {
               </button>
               
               <div className="flex justify-center">
-                <GameLeaderboard gameName="flappy" ascending={false} />
+                <GameLeaderboard gameName="flappy_v2" ascending={false} />
               </div>
             </motion.div>
           </div>
