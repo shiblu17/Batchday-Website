@@ -304,8 +304,8 @@ export default function CatchTheGrades() {
                     নাম পরিবর্তন করুন
                   </button>
 
-                  <div className="mt-2 border-t border-border pt-4">
-                     <GameLeaderboard gameName="catch-grades_v2" ascending={false} />
+                  <div className="mt-4 border-t border-border pt-4">
+                     <GameLeaderboard gameName="catch-grades_v3" ascending={false} />
                   </div>
                 </div>
               )}
