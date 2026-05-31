@@ -25,6 +25,7 @@ const LudoGame = () => {
   const [diceRolled, setDiceRolled] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [winner, setWinner] = useState<PlayerColor | null>(null);
   const [consecutiveSixes, setConsecutiveSixes] = useState(0);
   const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
   const [joinCodeInput, setJoinCodeInput] = useState('');
