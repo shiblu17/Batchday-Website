@@ -66,27 +66,11 @@ export default function MemoryMatch() {
       hasSubmittedScore.current = true;
       const submitScore = async () => {
         const finalName = nickname.trim().substring(0, 40);
-        const { data } = await supabase
-          .from("game_scores")
-          .select("id, score")
-          .eq("nickname", finalName)
-          .eq("game_name", "memory_v3")
-          .order("score", { ascending: true })
-          .limit(1);
-          
-        const existingRecord = data && data.length > 0 ? data[0] : null;
-          
-        if (existingRecord) {
-          if (moves < existingRecord.score) {
-            await supabase.from("game_scores").update({ score: moves }).eq("id", existingRecord.id);
-          }
-        } else {
-          await supabase.from("game_scores").insert({
-            nickname: finalName,
-            game_name: "memory_v3",
-            score: moves
-          });
-        }
+        await supabase.from("game_scores").insert({
+          nickname: finalName,
+          game_name: "memory_v3",
+          score: moves
+        });
       };
       submitScore();
     }

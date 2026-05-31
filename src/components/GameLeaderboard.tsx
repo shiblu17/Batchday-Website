@@ -28,10 +28,27 @@ export default function GameLeaderboard({ gameName, ascending = false }: { gameN
           .select("nickname, score")
           .eq("game_name", gameName)
           .order("score", { ascending })
-          .limit(10);
+          .limit(100);
           
         if (data && !error) {
-          setScores(data);
+          const bestScores = new Map<string, number>();
+          data.forEach((row) => {
+             if (!bestScores.has(row.nickname)) {
+                bestScores.set(row.nickname, row.score);
+             } else {
+                const currentBest = bestScores.get(row.nickname)!;
+                if (ascending) {
+                   if (row.score < currentBest) bestScores.set(row.nickname, row.score);
+                } else {
+                   if (row.score > currentBest) bestScores.set(row.nickname, row.score);
+                }
+             }
+          });
+          
+          const uniqueScores = Array.from(bestScores.entries()).map(([nickname, score]) => ({ nickname, score }));
+          uniqueScores.sort((a, b) => ascending ? a.score - b.score : b.score - a.score);
+          
+          setScores(uniqueScores.slice(0, 10));
         }
         setLoading(false);
       };
