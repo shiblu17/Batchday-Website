@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star, Loader2 } from "lucide-react";
 import Sponsors from "@/components/Sponsors";
 
 // Web Audio API Sound Utility
@@ -176,14 +177,7 @@ const games = [
   }
 ];
 
-// Mock Leaderboard Data
-const mockLeaderboard = [
-  { name: "Rafiq (IIT)", game: "Flappy Student", score: "95", rank: 1 },
-  { name: "Sadiya (Physics)", game: "Catch the Grades", score: "820", rank: 2 },
-  { name: "Rakib (CSE)", game: "জাবি রানার", score: "1240", rank: 3 },
-  { name: "Nusrat (English)", game: "JU মেমোরি ম্যাচ", score: "42s", rank: 4 },
-  { name: "Tanvir (Chemistry)", game: "Flappy Student", score: "78", rank: 5 },
-];
+// We will fetch real data instead of mock
 
 // Game Card Component with 3D Tilt
 const GameCard = ({ game, index }: { game: any; index: number }) => {
@@ -294,7 +288,48 @@ export default function GameHub() {
   const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [retroMode, setRetroMode] = useState(false);
+  const [globalScores, setGlobalScores] = useState<any[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchGlobalLeaderboard = async () => {
+      setLoadingLeaderboard(true);
+      const gamesMap = {
+        "catch-grades": "Catch the Grades",
+        "flappy": "Flappy Student",
+        "ludo": "জাবি লুডু কিং",
+        "memory": "JU মেমোরি ম্যাচ",
+        "tictactoe": "টিক-ট্যাক-টো",
+        "dinorun": "জাবি রানার"
+      };
+      
+      const results = [];
+      for (const [gameId, gameTitle] of Object.entries(gamesMap)) {
+        const ascending = gameId === "memory";
+        const { data } = await supabase
+          .from("game_scores")
+          .select("nickname, score")
+          .eq("game_name", gameId)
+          .order("score", { ascending })
+          .limit(1);
+          
+        if (data && data.length > 0) {
+          results.push({
+            name: data[0].nickname,
+            game: gameTitle,
+            score: gameId === "memory" ? `${data[0].score} চাল` : data[0].score.toString(),
+            gameId
+          });
+        }
+      }
+      
+      setGlobalScores(results);
+      setLoadingLeaderboard(false);
+    };
+    
+    fetchGlobalLeaderboard();
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -453,33 +488,44 @@ export default function GameHub() {
             </div>
             <div>
               <h2 className="text-2xl font-bold font-display">গ্লোবাল লিডারবোর্ড</h2>
-              <p className="text-sm text-muted-foreground">শীর্ষ ৫ জন প্লেয়ার (Mock Data)</p>
+              <p className="text-sm text-muted-foreground">প্রতিটি গেমের শীর্ষ প্লেয়ার</p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            {mockLeaderboard.map((player) => (
-              <div key={player.rank} className="flex items-center justify-between p-4 rounded-2xl bg-background/80 border border-border hover:border-primary/30 transition-colors group">
-                <div className="flex items-center gap-4">
-                  <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm
-                    ${player.rank === 1 ? 'bg-yellow-100 text-yellow-700' : 
-                      player.rank === 2 ? 'bg-gray-200 text-gray-700' : 
-                      player.rank === 3 ? 'bg-orange-100 text-orange-700' : 
-                      'bg-muted text-muted-foreground'}`}
-                  >
-                    {player.rank === 1 ? <Medal className="w-4 h-4" /> : `#${player.rank}`}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">{player.name}</h4>
-                    <p className="text-xs text-muted-foreground">{player.game}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 opacity-80" />
-                  <span className="font-bold text-lg">{player.score}</span>
-                </div>
+          <div className="space-y-3 relative min-h-[150px]">
+            {loadingLeaderboard ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               </div>
-            ))}
+            ) : globalScores.length === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-medium flex-col gap-2">
+                <Trophy className="w-12 h-12 text-muted/30" />
+                এখনো কেউ গেম খেলেনি!
+              </div>
+            ) : (
+              globalScores.map((player, idx) => (
+                <div key={player.gameId} className="flex items-center justify-between p-4 rounded-2xl bg-background/80 border border-border hover:border-primary/30 transition-colors group shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm
+                      ${idx === 0 ? 'bg-yellow-100 text-yellow-700' : 
+                        idx === 1 ? 'bg-gray-200 text-gray-700' : 
+                        idx === 2 ? 'bg-orange-100 text-orange-700' : 
+                        'bg-primary/10 text-primary'}`}
+                    >
+                      <Medal className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground group-hover:text-primary transition-colors text-[15px]">{player.name}</h4>
+                      <p className="text-xs text-muted-foreground">{player.game}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 opacity-80" />
+                    <span className="font-bold text-lg text-primary">{player.score}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
       </div>

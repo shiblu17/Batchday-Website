@@ -5,11 +5,11 @@ import GameLeaderboard from "@/components/GameLeaderboard";
 import GameLoginModal from "@/components/GameLoginModal";
 import { Play, RotateCcw, Trophy, Gamepad2 } from "lucide-react";
 
-const GRAVITY = 0.6;
-const JUMP = -9;
-const PIPE_SPEED = 2.5;
+const GRAVITY = 0.4;
+const JUMP = -7;
+const PIPE_SPEED = 2.2;
 const PIPE_WIDTH = 60;
-const PIPE_GAP = 200;
+const PIPE_GAP = 220;
 const BIRD_SIZE = 34;
 const GAME_WIDTH = 400;
 const GAME_HEIGHT = 600;
@@ -189,7 +189,7 @@ export default function FlappyJU() {
       // Submit score silently to Supabase if valid
       if (currentScore > 0 && nickname.trim() !== "") {
         supabase.from("game_scores").insert({
-          nickname: nickname.trim().substring(0, 20),
+          nickname: nickname.trim().substring(0, 40),
           game_name: "flappy",
           score: currentScore
         }).then();
@@ -226,8 +226,10 @@ export default function FlappyJU() {
       <div
         className="relative overflow-hidden rounded-2xl border-4 border-input shadow-card w-full bg-sky-200 cursor-pointer select-none"
         style={{ height: GAME_HEIGHT, maxWidth: GAME_WIDTH }}
-        onClick={jump}
-        onPointerDown={jump}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          jump(e);
+        }}
       >
         {/* Sky Background Elements */}
         <div className="absolute top-10 left-10 w-20 h-10 bg-white/60 rounded-full blur-md" />
