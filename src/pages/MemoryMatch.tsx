@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import GameLeaderboard from "@/components/GameLeaderboard";
+import GameLoginModal from "@/components/GameLoginModal";
 import { ArrowLeft, RotateCcw, BrainCircuit } from "lucide-react";
 
 const EMOJIS = ["🎓", "🚌", "🎸", "☕", "💻", "📷", "🏆", "🏀"];
@@ -85,7 +86,6 @@ export default function MemoryMatch() {
 
   const startGame = () => {
     if (!nickname.trim()) return;
-    localStorage.setItem("ju_game_nickname", nickname.trim());
     setCards(shuffleCards());
     setMoves(0);
     setFlippedIds([]);
@@ -146,7 +146,21 @@ export default function MemoryMatch() {
             </motion.div>
           </button>
         ))}
-        {gameState === "start" && (
+        {gameState === "start" && !nickname && (
+          <GameLoginModal 
+            gameTitle="JU মেমোরি ম্যাচ" 
+            onStart={(name) => {
+              setNickname(name);
+              localStorage.setItem("ju_game_nickname", name);
+              setCards(shuffleCards());
+              setMoves(0);
+              setFlippedIds([]);
+              setGameState("playing");
+            }} 
+          />
+        )}
+
+        {gameState === "start" && nickname && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20 rounded-2xl">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -154,26 +168,16 @@ export default function MemoryMatch() {
               className="bg-card p-6 rounded-2xl text-center shadow-xl border border-border w-[90%]"
             >
               <h2 className="font-display text-xl font-bold mb-1 text-fuchsia-600">মেমোরি ম্যাচ</h2>
-              <p className="text-sm text-muted-foreground mb-4">নিকনেম দিয়ে খেলা শুরু করো!</p>
+              <p className="text-sm text-muted-foreground mb-4">স্বাগতম, <strong className="text-foreground">{nickname}</strong>!</p>
               
-              <input 
-                type="text" 
-                placeholder="তোমার নিকনেম..." 
-                maxLength={20}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full text-center px-4 py-2 mt-2 rounded-xl border-2 border-fuchsia-500/20 bg-background font-semibold focus:outline-none focus:border-fuchsia-500 mb-4"
-              />
-
               <button 
                  onClick={startGame}
-                 disabled={!nickname.trim()}
-                 className="w-full mb-3 px-6 py-2.5 rounded-full bg-fuchsia-600 text-white font-bold hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                 className="w-full mb-3 px-6 py-2.5 rounded-full bg-fuchsia-600 text-white font-bold hover:scale-105 active:scale-95 transition-all"
               >
-                শুরু করো
+                শুরু করো 🚀
               </button>
               
-              <div className="flex justify-center">
+              <div className="flex justify-center border-t border-border pt-4 mt-2">
                 <GameLeaderboard gameName="memory" ascending={true} />
               </div>
             </motion.div>

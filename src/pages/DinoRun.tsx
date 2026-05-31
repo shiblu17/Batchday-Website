@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import GameLeaderboard from "@/components/GameLeaderboard";
+import GameLoginModal from "@/components/GameLoginModal";
 import { ArrowLeft, RotateCcw, Footprints, Trophy, Keyboard } from "lucide-react";
 
 const GRAVITY = 0.8;
@@ -50,7 +51,6 @@ export default function DinoRun() {
   const jump = useCallback((e?: React.MouseEvent | React.PointerEvent) => {
     if (gameState === "start") {
       if (!nickname.trim()) return;
-      localStorage.setItem("ju_game_nickname", nickname.trim());
       setGameState("playing");
       playerY.current = GROUND_Y - PLAYER_SIZE;
       playerVelocity.current = 0;
@@ -284,7 +284,24 @@ export default function DinoRun() {
         )}
 
         {/* Overlays */}
-        {gameState === "start" && (
+        {gameState === "start" && !nickname && (
+          <GameLoginModal 
+            gameTitle="জাবি রানার" 
+            onStart={(name) => {
+              setNickname(name);
+              localStorage.setItem("ju_game_nickname", name);
+              setGameState("playing");
+              playerY.current = GROUND_Y - PLAYER_SIZE;
+              playerVelocity.current = 0;
+              obstacles.current = [];
+              frameCount.current = 0;
+              currentSpeed.current = BASE_SPEED;
+              setScore(0);
+            }} 
+          />
+        )}
+
+        {gameState === "start" && nickname && (
           <div 
             className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20"
             onClick={(e) => e.stopPropagation()}
@@ -299,26 +316,16 @@ export default function DinoRun() {
                 <Footprints className="h-8 w-8 text-orange-500" />
               </div>
               <p className="font-display font-bold text-xl mb-1 text-orange-600">জাবি রানার</p>
-              <p className="text-sm text-muted-foreground mb-4">নিকনেম দিয়ে খেলা শুরু করো!</p>
-              
-              <input 
-                type="text" 
-                placeholder="তোমার নিকনেম..." 
-                maxLength={20}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full text-center px-4 py-2 mt-2 rounded-xl border-2 border-orange-500/20 bg-background font-semibold focus:outline-none focus:border-orange-500 mb-4"
-              />
+              <p className="text-sm text-muted-foreground mb-4">স্বাগতম, <strong className="text-foreground">{nickname}</strong>!</p>
 
               <button 
                  onClick={jump}
-                 disabled={!nickname.trim()}
-                 className="w-full flex justify-center items-center gap-2 mb-3 px-6 py-2.5 rounded-full bg-orange-500 text-white font-bold hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 mx-auto"
+                 className="w-full flex justify-center items-center gap-2 mb-3 px-6 py-2.5 rounded-full bg-orange-500 text-white font-bold hover:scale-105 active:scale-95 transition-all mx-auto"
               >
-                শুরু করো
+                শুরু করো 🚀
               </button>
               
-              <div className="flex justify-center">
+              <div className="flex justify-center border-t border-border pt-4 mt-2">
                 <GameLeaderboard gameName="dinorun" ascending={false} />
               </div>
             </motion.div>
