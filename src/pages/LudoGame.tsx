@@ -35,7 +35,7 @@ const LudoGame = () => {
   const getValidMoves = useCallback((player: PlayerColor, dice: number): number[] => {
     return tokens[player]
       .filter(t => {
-        if (t.pathIndex === 56) return false;
+        if (t.pathIndex >= 56) return false;
         if (t.pathIndex === -1) return dice === 6;
         return t.pathIndex + dice <= 56;
       })
@@ -52,7 +52,7 @@ const LudoGame = () => {
     if (!mode) return;
     const ap = mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P;
     for (const color of ap) {
-      if (tokens[color].every(t => t.pathIndex === 56)) {
+      if (tokens[color].every(t => t.pathIndex >= 56)) {
         setWinner(color);
         playFanfare();
         return;
@@ -222,7 +222,7 @@ const LudoGame = () => {
     setDiceRolled(false);
     setDiceValue(null);
 
-    const isFinished = finalPathIndex === 56;
+    const isFinished = finalPathIndex >= 56;
     const getsBonusTurn = dice === 6 || capturedToken || isFinished;
 
     if (getsBonusTurn) {
@@ -327,7 +327,7 @@ const LudoGame = () => {
         <div className="w-full flex justify-between items-end">
           <PlayerPanel
             color="green" position="top" playerType="human"
-            finished={tokens.green.filter(t => t.pathIndex === 56).length}
+            finished={tokens.green.filter(t => t.pathIndex >= 56).length}
             isActive={currentPlayer === 'green'}
             diceValue={diceDisplay} isRolling={isRolling}
             canRoll={currentPlayer === 'green' && !diceRolled && !isRolling && !isMoving && !winner}
@@ -337,7 +337,7 @@ const LudoGame = () => {
           />
           <PlayerPanel
             color="yellow" position="top" playerType={mode === 2 ? 'ai' : 'human'}
-            finished={tokens.yellow.filter(t => t.pathIndex === 56).length}
+            finished={tokens.yellow.filter(t => t.pathIndex >= 56).length}
             isActive={currentPlayer === 'yellow'}
             diceValue={diceDisplay} isRolling={isRolling}
             canRoll={currentPlayer === 'yellow' && !diceRolled && !isRolling && !isMoving && !winner}
@@ -370,7 +370,7 @@ const LudoGame = () => {
         <div className="w-full flex justify-between items-start">
           <PlayerPanel
             color="red" position="bottom" playerType={mode === 2 ? 'ai' : 'human'}
-            finished={tokens.red.filter(t => t.pathIndex === 56).length}
+            finished={tokens.red.filter(t => t.pathIndex >= 56).length}
             isActive={currentPlayer === 'red'}
             diceValue={diceDisplay} isRolling={isRolling}
             canRoll={currentPlayer === 'red' && !diceRolled && !isRolling && !isMoving && !winner}
@@ -380,7 +380,7 @@ const LudoGame = () => {
           />
           <PlayerPanel
             color="blue" position="bottom" playerType={mode === 2 ? 'human' : 'human'}
-            finished={tokens.blue.filter(t => t.pathIndex === 56).length}
+            finished={tokens.blue.filter(t => t.pathIndex >= 56).length}
             isActive={currentPlayer === 'blue'}
             diceValue={diceDisplay} isRolling={isRolling}
             canRoll={currentPlayer === 'blue' && !diceRolled && !isRolling && !isMoving && !winner}
