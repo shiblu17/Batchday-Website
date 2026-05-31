@@ -9,26 +9,54 @@ import { audioSystem } from "@/utils/audio";
 import { triggerConfetti } from "@/utils/confetti";
 
 // 0: path, 1: wall
-const MAZE_GRID = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-  [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-  [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-  [1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-  [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-];
+const MAZE_WIDTH = 15;
+const MAZE_HEIGHT = 15;
+
+const generateMaze = (width: number, height: number) => {
+  const maze = Array(height).fill(0).map(() => Array(width).fill(1));
+  
+  const carve = (x: number, y: number) => {
+    maze[y][x] = 0;
+    
+    const dirs = [
+      [0, -2], [0, 2], [-2, 0], [2, 0]
+    ].sort(() => Math.random() - 0.5);
+    
+    for (const [dx, dy] of dirs) {
+      const nx = x + dx;
+      const ny = y + dy;
+      
+      if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && maze[ny][nx] === 1) {
+        maze[y + dy / 2][x + dx / 2] = 0;
+        carve(nx, ny);
+      }
+    }
+  };
+  
+  carve(1, 1);
+  
+  // Ensure the end position is always accessible (rarely it might get blocked if dimensions are weird, but odd dimensions are safe)
+  maze[height - 2][width - 2] = 0;
+  
+  // Optionally, knock down a few random walls to make it a bit less linear/more complex with multiple paths
+  for (let i = 0; i < 5; i++) {
+    const rx = Math.floor(Math.random() * ((width - 3) / 2)) * 2 + 1;
+    const ry = Math.floor(Math.random() * ((height - 3) / 2)) * 2 + 1;
+    if (rx > 0 && ry > 0) {
+      const dirs = [[0, 1], [1, 0]];
+      const d = dirs[Math.floor(Math.random() * 2)];
+      maze[ry + d[0]][rx + d[1]] = 0;
+    }
+  }
+  
+  return maze;
+};
 
 const START_POS = { x: 1, y: 1 };
-const END_POS = { x: 13, y: 11 };
+const END_POS = { x: MAZE_WIDTH - 2, y: MAZE_HEIGHT - 2 };
 
 export default function JUMaze() {
+  const [mazeGrid, setMazeGrid] = useState<number[][]>(() => generateMaze(MAZE_WIDTH, MAZE_HEIGHT));
   const [playerPos, setPlayerPos] = useState(START_POS);
   const [gameState, setGameState] = useState<"start" | "playing" | "gameover">("start");
   const [nickname, setNickname] = useState("");
@@ -76,8 +104,8 @@ export default function JUMaze() {
       const newX = prev.x + dx;
       const newY = prev.y + dy;
 
-      if (newY >= 0 && newY < MAZE_GRID.length && newX >= 0 && newX < MAZE_GRID[0].length) {
-        if (MAZE_GRID[newY][newX] === 0) {
+      if (newY >= 0 && newY < mazeGrid.length && newX >= 0 && newX < mazeGrid[0].length) {
+        if (mazeGrid[newY][newX] === 0) {
           audioSystem.playClick();
           
           if (newX === END_POS.x && newY === END_POS.y) {
@@ -108,6 +136,7 @@ export default function JUMaze() {
     if (!nickname.trim()) return;
     hasSubmittedScore.current = false;
     audioSystem.playClick();
+    setMazeGrid(generateMaze(MAZE_WIDTH, MAZE_HEIGHT));
     setPlayerPos(START_POS);
     setTimeElapsed(0);
     setGameState("playing");
@@ -138,13 +167,13 @@ export default function JUMaze() {
       <div className="relative bg-card border-4 border-border rounded-xl p-1 overflow-hidden shadow-sm">
         <div 
           className="grid gap-0 bg-green-50"
-          style={{ gridTemplateColumns: `repeat(${MAZE_GRID[0].length}, 1fr)` }}
+          style={{ gridTemplateColumns: `repeat(${MAZE_WIDTH}, 1fr)` }}
         >
-          {MAZE_GRID.map((row, y) => (
+          {mazeGrid.map((row, y) => (
             row.map((cell, x) => (
               <div 
                 key={`${x}-${y}`}
-                className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-sm sm:text-xl ${
+                className={`w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center text-xs sm:text-lg ${
                   cell === 1 ? 'bg-green-800 border border-green-900/50' : 'bg-transparent'
                 }`}
               >
