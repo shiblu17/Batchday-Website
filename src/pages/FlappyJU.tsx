@@ -106,12 +106,15 @@ export default function FlappyJU() {
     currentPipes.forEach((p) => {
       p.x -= PIPE_SPEED;
 
-      // Hitbox logic
+      // Hitbox logic (make it forgiving)
+      const hitboxMarginX = 6;
+      const hitboxMarginY = 6;
+      
       const birdRect = {
-        left: 50,
-        right: 50 + BIRD_SIZE,
-        top: birdY.current,
-        bottom: birdY.current + BIRD_SIZE,
+        left: 50 + hitboxMarginX,
+        right: 50 + BIRD_SIZE - hitboxMarginX,
+        top: birdY.current + hitboxMarginY,
+        bottom: birdY.current + BIRD_SIZE - hitboxMarginY,
       };
 
       const topPipeRect = {
