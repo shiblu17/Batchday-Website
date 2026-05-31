@@ -140,11 +140,27 @@ export default function CatchTheGrades() {
             localStorage.setItem("catch_grades_highscore", currentScore.toString());
           }
           if (currentScore > 0 && nickname) {
-            supabase.from("game_scores").insert({
-              nickname: nickname,
-              game_name: "catch-grades_v2",
-              score: currentScore
-            }).then();
+            (async () => {
+              const finalName = nickname.trim().substring(0, 40);
+              const { data } = await supabase
+                .from("game_scores")
+                .select("id, score")
+                .eq("nickname", finalName)
+                .eq("game_name", "catch-grades_v2")
+                .maybeSingle();
+                
+              if (data) {
+                if (currentScore > data.score) {
+                  await supabase.from("game_scores").update({ score: currentScore }).eq("id", data.id);
+                }
+              } else {
+                await supabase.from("game_scores").insert({
+                  nickname: finalName,
+                  game_name: "catch-grades_v2",
+                  score: currentScore
+                });
+              }
+            })();
           }
         } else {
           setLives(currentLives);

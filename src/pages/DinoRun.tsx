@@ -198,11 +198,27 @@ export default function DinoRun() {
       
       // Submit to Supabase
       if (currentScore > 0 && nickname.trim() !== "") {
-        supabase.from("game_scores").insert({
-          nickname: nickname.trim().substring(0, 20),
-          game_name: "dinorun_v2",
-          score: currentScore
-        }).then();
+        (async () => {
+          const finalName = nickname.trim().substring(0, 40);
+          const { data } = await supabase
+            .from("game_scores")
+            .select("id, score")
+            .eq("nickname", finalName)
+            .eq("game_name", "dinorun_v2")
+            .maybeSingle();
+            
+          if (data) {
+            if (currentScore > data.score) {
+              await supabase.from("game_scores").update({ score: currentScore }).eq("id", data.id);
+            }
+          } else {
+            await supabase.from("game_scores").insert({
+              nickname: finalName,
+              game_name: "dinorun_v2",
+              score: currentScore
+            });
+          }
+        })();
       }
       
       return currentScore;
