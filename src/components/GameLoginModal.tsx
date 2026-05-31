@@ -169,7 +169,7 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
                           placeholder="নাম সার্চ করো..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full bg-background border border-input rounded-t-xl px-4 py-2.5 text-sm outline-none border-b-0"
+                          className="w-full bg-background text-foreground border border-input rounded-t-xl px-4 py-2.5 text-sm outline-none border-b-0"
                         />
                         <div className="max-h-32 overflow-y-auto border border-input rounded-b-xl bg-background divide-y divide-border">
                           {filteredNames.length === 0 ? (
@@ -182,7 +182,7 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
                                   setSelectedName(name);
                                   setSearchTerm(name);
                                 }}
-                                className={`w-full text-left px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${selectedName === name ? 'bg-primary/20 font-bold text-primary' : ''}`}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${selectedName === name ? 'bg-primary/20 font-bold text-primary' : 'text-foreground'}`}
                               >
                                 {name}
                               </button>
