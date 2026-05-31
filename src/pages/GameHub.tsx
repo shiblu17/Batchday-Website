@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star, Loader2, Activity } from "lucide-react";
 import Sponsors from "@/components/Sponsors";
+import GameStore from '@/components/GameStore';
 
 // Web Audio API Sound Utility
 const playHoverSound = () => {
@@ -558,6 +559,14 @@ export default function GameHub() {
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
           
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 relative z-10">
+            <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-indigo-600 drop-shadow-sm flex items-center gap-3">
+              <Gamepad2 className="w-10 h-10 text-amber-500" />
+              JU Game Zone
+            </h1>
+            <GameStore />
+          </div>
+
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
               <Trophy className="w-6 h-6 text-white" />

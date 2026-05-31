@@ -8,20 +8,36 @@ import LudoBoard from '@/features/ludo/LudoBoard';
 import PlayerPanel from '@/features/ludo/PlayerPanel';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
+import { useGameEconomy } from '@/hooks/useGameEconomy';
+import { useMultiplayer } from '@/hooks/useMultiplayer';
+import Scorecard from '@/components/Scorecard';
+import { Input } from '@/components/ui/input';
+import { RefreshCw } from 'lucide-react';
 
 const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
 const LudoGame = () => {
-  const [mode, setMode] = useState<2 | 4 | null>(null);
+  const [mode, setMode] = useState<2 | 4 | 'multiplayer' | null>(null);
+  const [tokens, setTokens] = useState<Record<PlayerColor, TokenState[]>>(createInitialTokens());
   const [currentPlayer, setCurrentPlayer] = useState<PlayerColor>('green');
-  const [tokens, setTokens] = useState(createInitialTokens());
   const [diceValue, setDiceValue] = useState<number | null>(null);
   const [displayDice, setDisplayDice] = useState(1);
   const [diceRolled, setDiceRolled] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
-  const [winner, setWinner] = useState<PlayerColor | null>(null);
   const [consecutiveSixes, setConsecutiveSixes] = useState(0);
+  const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+
+  const { addCoins } = useGameEconomy();
+  const { roomId, isConnected, createRoom, joinRoom, leaveRoom, broadcastState } = useMultiplayer('ludo', (state) => {
+    if (state.tokens) setTokens(state.tokens);
+    if (state.currentPlayer) setCurrentPlayer(state.currentPlayer);
+    if (state.diceValue !== undefined) setDiceValue(state.diceValue);
+    if (state.diceRolled !== undefined) setDiceRolled(state.diceRolled);
+    if (state.consecutiveSixes !== undefined) setConsecutiveSixes(state.consecutiveSixes);
+    if (state.winner !== undefined) setWinner(state.winner);
+  });
 
   const paths = useMemo(() => ({
     green: getPlayerPath('green'),
@@ -55,10 +71,11 @@ const LudoGame = () => {
       if (tokens[color].every(t => t.pathIndex >= 56)) {
         setWinner(color);
         playFanfare();
+        addCoins(500);
         return;
       }
     }
-  }, [tokens, mode]);
+  }, [tokens, mode, addCoins]);
 
   const advancePlayer = useCallback(() => {
     setDiceRolled(false);
@@ -66,9 +83,11 @@ const LudoGame = () => {
     setConsecutiveSixes(0);
     setCurrentPlayer(prev => {
       const order = mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P;
-      return order[(order.indexOf(prev) + 1) % order.length];
+      const next = order[(order.indexOf(prev) + 1) % order.length];
+      if (mode === 'multiplayer') broadcastState({ currentPlayer: next, diceRolled: false, diceValue: null, consecutiveSixes: 0 });
+      return next;
     });
-  }, [mode]);
+  }, [mode, broadcastState]);
 
   // Auto-pass when no valid moves
   useEffect(() => {
@@ -81,32 +100,28 @@ const LudoGame = () => {
 
   // AI Logic Hook
   useEffect(() => {
-    if (!mode || winner || isMoving || isRolling) return;
+    if (mode !== 2 || winner || isMoving || isRolling) return;
     
-    // AI is only Yellow in 2-player mode, or Yellow/Red/Blue in 4-player mode if we wanted (but user only chose 2-player or 4-human). Let's stick to Yellow in mode 2.
-    const isAI = mode === 2 && currentPlayer === 'yellow';
+    const isAI = currentPlayer === 'yellow';
     if (!isAI) return;
 
     if (!diceRolled) {
       const timer = setTimeout(() => rollDice(), 800);
       return () => clearTimeout(timer);
     } else {
-      if (validMoves.length === 0) return; // handled by auto-pass
+      if (validMoves.length === 0) return;
       
       const timer = setTimeout(() => {
         let chosenToken = validMoves[0];
-        // Prioritize killing (if possible, though complex, we'll just prioritize finishing/getting out)
         const tokenToOut = tokens[currentPlayer].find(t => t.pathIndex === -1 && validMoves.includes(t.id));
         if (tokenToOut) {
           chosenToken = tokenToOut.id;
         } else {
-          // Pick token closest to finish
           const active = tokens[currentPlayer].filter(t => validMoves.includes(t.id));
           if (active.length > 0) {
             chosenToken = active.sort((a, b) => b.pathIndex - a.pathIndex)[0].id;
           }
         }
-        // Safely call handleTokenClick by passing the color explicitly
         handleTokenClick('yellow', chosenToken);
       }, 1000);
       return () => clearTimeout(timer);
@@ -128,17 +143,17 @@ const LudoGame = () => {
         setIsRolling(false);
         
         if (value === 6 && consecutiveSixes === 2) {
-          // Penalty for 3rd six!
           setTimeout(() => {
              setConsecutiveSixes(0);
              advancePlayer();
           }, 1000);
         } else {
           setDiceRolled(true);
+          if (mode === 'multiplayer') broadcastState({ diceValue: value, diceRolled: true, isRolling: false });
         }
       }
     }, 60);
-  }, [isRolling, isMoving, diceRolled, winner, consecutiveSixes, advancePlayer]);
+  }, [isRolling, isMoving, diceRolled, winner, consecutiveSixes, advancePlayer, mode, broadcastState]);
 
   const handleTokenClick = useCallback(async (color: PlayerColor, tokenId: number) => {
     if (isMoving || !diceRolled || diceValue === null || winner) return;
@@ -155,33 +170,33 @@ const LudoGame = () => {
     setIsMoving(true);
 
     let finalPathIndex: number;
+    let newTokens = { ...tokens };
 
     if (token.pathIndex === -1) {
-      // Bring out token
       finalPathIndex = 0;
       playPop();
-      setTokens(prev => ({
-        ...prev,
-        [color]: prev[color].map(t => t.id === tokenId ? { ...t, pathIndex: 0 } : t),
-      }));
+      newTokens = {
+        ...newTokens,
+        [color]: newTokens[color].map(t => t.id === tokenId ? { ...t, pathIndex: 0 } : t),
+      };
+      setTokens(newTokens);
       await delay(300);
     } else {
-      // Move step by step
       finalPathIndex = token.pathIndex;
       for (let step = 1; step <= dice; step++) {
         await delay(300);
         playPop();
         const nextIdx = token.pathIndex + step;
-        setTokens(prev => ({
-          ...prev,
-          [color]: prev[color].map(t => t.id === tokenId ? { ...t, pathIndex: nextIdx } : t),
-        }));
+        newTokens = {
+          ...newTokens,
+          [color]: newTokens[color].map(t => t.id === tokenId ? { ...t, pathIndex: nextIdx } : t),
+        };
+        setTokens(newTokens);
         finalPathIndex = nextIdx;
       }
     }
 
     let capturedToken = false;
-    // Check capture (only on common path cells, indices 0-50)
     if (finalPathIndex >= 0 && finalPathIndex <= 50) {
       const finalCell = playerPath[finalPathIndex];
       const cellKey = `${finalCell[0]},${finalCell[1]}`;
@@ -191,29 +206,28 @@ const LudoGame = () => {
           if (oppColor === color) continue;
           const oppPath = paths[oppColor];
           
-          setTokens(prev => {
-            const updated = {
-              ...prev,
-              [oppColor]: prev[oppColor].map(t => {
-                if (t.pathIndex >= 0 && t.pathIndex <= 50) {
-                  const tCell = oppPath[t.pathIndex];
-                  if (tCell[0] === finalCell[0] && tCell[1] === finalCell[1]) {
-                    capturedToken = true;
-                    return { ...t, pathIndex: -1 };
-                  }
+          let captureOccurred = false;
+          newTokens = {
+            ...newTokens,
+            [oppColor]: newTokens[oppColor].map(t => {
+              if (t.pathIndex >= 0 && t.pathIndex <= 50) {
+                const tCell = oppPath[t.pathIndex];
+                if (tCell[0] === finalCell[0] && tCell[1] === finalCell[1]) {
+                  captureOccurred = true;
+                  return { ...t, pathIndex: -1 };
                 }
-                return t;
-              }),
-            };
-            return updated;
-          });
+              }
+              return t;
+            }),
+          };
           
-          if (capturedToken) {
+          if (captureOccurred) {
+            capturedToken = true;
             playCapture();
-            await delay(400); 
-            break; // only capture one stack technically (or all at once)
           }
         }
+        setTokens(newTokens);
+        if (capturedToken) await delay(400);
       }
     }
 
@@ -223,22 +237,26 @@ const LudoGame = () => {
     setDiceValue(null);
 
     const isFinished = finalPathIndex >= 56;
-    const getsBonusTurn = dice === 6 || capturedToken || isFinished;
+    const bonusTurn = dice === 6 || capturedToken || isFinished;
+    const sixes = dice === 6 ? currentSixes + 1 : 0;
 
-    if (getsBonusTurn) {
-      if (dice === 6) {
-        setConsecutiveSixes(prev => prev + 1);
-      } else {
-        setConsecutiveSixes(0); // bonus from capture/finish resets 6s count? Standard rule says yes, but we'll leave it 0 to be safe.
-      }
-      // Gets another turn, do nothing else
-    } else {
-      setConsecutiveSixes(0);
-      setTimeout(() => advancePlayer(), 400);
+    if (mode === 'multiplayer') {
+        broadcastState({ tokens: newTokens, currentPlayer: bonusTurn ? currentPlayer : (mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P)[((mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P).indexOf(currentPlayer) + 1) % (mode === 2 ? TURN_ORDER_2P : TURN_ORDER_4P).length], diceRolled: false, diceValue: null, consecutiveSixes: bonusTurn ? sixes : 0 });
     }
-  }, [isMoving, diceRolled, diceValue, winner, currentPlayer, tokens, paths, mode, getValidMoves, advancePlayer]);
 
-  const startGame = (m: 2 | 4) => {
+    if (bonusTurn) {
+        setConsecutiveSixes(sixes);
+    } else {
+        setConsecutiveSixes(0);
+        setTimeout(() => advancePlayer(), 400);
+    }
+  }, [isMoving, diceRolled, diceValue, winner, currentPlayer, tokens, paths, mode, getValidMoves, advancePlayer, broadcastState, consecutiveSixes]);
+
+  const startGame = (m: 2 | 4 | 'multiplayer') => {
+    if (m === 'multiplayer') {
+      const newRoom = createRoom();
+      console.log('Room created:', newRoom);
+    }
     setMode(m);
     setTokens(createInitialTokens());
     setCurrentPlayer('green');
@@ -248,8 +266,22 @@ const LudoGame = () => {
     setConsecutiveSixes(0);
   };
 
+  const handleJoinRoom = () => {
+    if (joinCodeInput.length === 4) {
+      joinRoom(joinCodeInput.toUpperCase());
+      setMode('multiplayer');
+      setTokens(createInitialTokens());
+      setCurrentPlayer('green');
+      setDiceValue(null);
+      setDiceRolled(false);
+      setWinner(null);
+      setConsecutiveSixes(0);
+    }
+  };
+
   const restartGame = () => {
     setMode(null);
+    leaveRoom();
     setTokens(createInitialTokens());
     setCurrentPlayer('green');
     setDiceValue(null);
@@ -260,7 +292,6 @@ const LudoGame = () => {
     setConsecutiveSixes(0);
   };
 
-  // Setup screen
   if (!mode) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-orange-50 gap-12 p-6 animate-in fade-in duration-700">
@@ -274,20 +305,58 @@ const LudoGame = () => {
           <p className="text-gray-500 text-xl font-medium">নিচের মোডগুলো থেকে একটি সিলেক্ট করো</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-6 w-full max-w-lg">
-          <Button 
-            onClick={() => startGame(2)} 
-            size="lg" 
-            className="flex-1 py-10 text-2xl font-black rounded-[32px] bg-white text-gray-800 border-4 border-gray-100 hover:border-primary hover:bg-primary/5 transition-all shadow-xl"
-          >
-            👥 ২ জন খেলোয়াড়
-          </Button>
-          <Button 
-            onClick={() => startGame(4)} 
-            size="lg" 
-            className="flex-1 py-10 text-2xl font-black rounded-[32px] bg-white text-gray-800 border-4 border-gray-100 hover:border-primary hover:bg-primary/5 transition-all shadow-xl"
-          >
-            👥👥 ৪ জন খেলোয়াড়
-          </Button>
+          {showMultiplayerMenu ? (
+            <div className="w-full flex flex-col gap-4 animate-in slide-in-from-right">
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Enter 4-letter Room Code" 
+                  value={joinCodeInput} 
+                  onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
+                  maxLength={4}
+                  className="text-center text-xl font-bold uppercase tracking-widest h-16 rounded-2xl"
+                />
+                <Button 
+                  onClick={handleJoinRoom}
+                  disabled={joinCodeInput.length !== 4}
+                  className="h-16 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                >
+                  Join
+                </Button>
+              </div>
+              <div className="text-center text-gray-500 font-bold">OR</div>
+              <Button 
+                onClick={() => startGame('multiplayer')} 
+                className="h-16 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg shadow-lg"
+              >
+                Create New Room
+              </Button>
+              <Button variant="ghost" onClick={() => setShowMultiplayerMenu(false)}>Cancel</Button>
+            </div>
+          ) : (
+            <>
+              <Button 
+                onClick={() => startGame(2)} 
+                size="lg" 
+                className="flex-1 py-10 text-2xl font-black rounded-[32px] bg-white text-gray-800 border-4 border-gray-100 hover:border-primary hover:bg-primary/5 transition-all shadow-xl"
+              >
+                👥 ২ জন খেলোয়াড়
+              </Button>
+              <Button 
+                onClick={() => startGame(4)} 
+                size="lg" 
+                className="flex-1 py-10 text-2xl font-black rounded-[32px] bg-white text-gray-800 border-4 border-gray-100 hover:border-primary hover:bg-primary/5 transition-all shadow-xl"
+              >
+                👥👥 ৪ জন খেলোয়াড়
+              </Button>
+              <Button 
+                onClick={() => setShowMultiplayerMenu(true)} 
+                size="lg" 
+                className="flex-1 py-10 text-2xl font-black rounded-[32px] bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-4 border-transparent hover:opacity-90 transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+              >
+                🌐 Play Online
+              </Button>
+            </>
+          )}
         </div>
         
         <div className="max-w-md text-center px-6">
@@ -304,6 +373,15 @@ const LudoGame = () => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFCFB] pb-10">
       <Navbar />
+
+      {mode === 'multiplayer' && roomId && (
+        <div className="w-full flex justify-center mt-4 px-4 relative z-10">
+          <div className="bg-white/80 backdrop-blur-md px-6 py-3 rounded-full border border-indigo-100 shadow-md flex items-center gap-3">
+            <span className="text-gray-500 font-bold text-sm">Room Code:</span>
+            <span className="font-black text-2xl tracking-widest text-indigo-600">{roomId}</span>
+          </div>
+        </div>
+      )}
       
       {/* Header */}
       <div className="w-full max-w-4xl px-4 py-4 flex items-center justify-between mt-4">
@@ -391,24 +469,22 @@ const LudoGame = () => {
         </div>
       </div>
 
-      {/* Winner Overlay - High Fidelity */}
+      {/* Winner Overlay - Scorecard */}
       {winner && (
-        <div className="fixed inset-0 bg-white/20 backdrop-blur-xl flex items-center justify-center z-[100] animate-in fade-in duration-500">
-          <div className="bg-white rounded-[40px] p-12 text-center shadow-2xl border border-gray-100 max-w-sm mx-4 animate-in zoom-in slide-in-from-bottom-10 duration-700">
-            <div className="text-8xl mb-8 animate-bounce">👑</div>
-            <h2 className="text-4xl font-black capitalize mb-2 tracking-tight"
-              style={{ color: COLOR_HEX[winner] }}>
-              {winner === 'green' ? 'সবুজ' : winner === 'red' ? 'লাল' : winner === 'yellow' ? 'হলুদ' : 'নীল'} টিম জয়ী!
-            </h2>
-            <p className="text-gray-500 text-lg font-bold mb-10">অসাধারণ খেলেছেন! 🎉</p>
-            <Button 
-              onClick={restartGame} 
-              size="lg" 
-              className="w-full py-8 text-xl font-black rounded-3xl shadow-xl hover:scale-105 active:scale-95 transition-all"
-            >
-              আবার খেলুন
-            </Button>
-          </div>
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in p-4">
+          <Scorecard 
+            gameName="Ludo" 
+            scoreOrStatus={`${winner === 'green' ? 'সবুজ' : winner === 'red' ? 'লাল' : winner === 'yellow' ? 'হলুদ' : 'নীল'} টিম জয়ী!`} 
+            avatarUrl={`https://api.dicebear.com/7.x/avataaars/svg?seed=${winner}Ludo`}
+            playerName="Ludo Champion"
+          />
+          <Button
+            size="lg"
+            className="mt-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-full font-bold shadow-lg text-xl px-8 py-6"
+            onClick={restartGame}
+          >
+            <RefreshCw className="w-6 h-6 mr-2" /> আবার খেলুন
+          </Button>
         </div>
       )}
     </div>
