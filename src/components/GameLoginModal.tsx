@@ -139,10 +139,10 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
                     <select 
                       value={selectedDept}
                       onChange={(e) => setSelectedDept(e.target.value)}
-                      className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none"
+                      className="w-full bg-background text-foreground border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none"
                     >
-                      <option value="">সিলেক্ট করো...</option>
-                      {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                      <option value="" className="text-foreground bg-background">সিলেক্ট করো...</option>
+                      {departments.map(d => <option key={d} value={d} className="text-foreground bg-background">{d}</option>)}
                     </select>
                   </div>
 
@@ -152,10 +152,10 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
                       <select 
                         value={selectedHall}
                         onChange={(e) => setSelectedHall(e.target.value)}
-                        className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none"
+                        className="w-full bg-background text-foreground border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none"
                       >
-                        <option value="">সিলেক্ট করো...</option>
-                        {halls.map(h => <option key={h} value={h}>{h}</option>)}
+                        <option value="" className="text-foreground bg-background">সিলেক্ট করো...</option>
+                        {halls.map(h => <option key={h} value={h} className="text-foreground bg-background">{h}</option>)}
                       </select>
                     </motion.div>
                   )}
