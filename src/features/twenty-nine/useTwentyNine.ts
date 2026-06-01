@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GameState, PlayerPosition, Card, Bid, Trick, Suit } from './types';
-import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair, sortHand } from './engine';
+import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair, sortHand, evaluateHandStrength, getBestAIPlay } from './engine';
 
 const INITIAL_STATE: GameState = {
   mode: null,
@@ -341,10 +341,17 @@ export const useTwentyNine = () => {
       const activePlayer = state.players[state.activeBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
-          // Very simple AI: random chance to bid +1 or pass
-          // A real AI would evaluate hand strength
-          if (state.currentBid < 20 && Math.random() > 0.5) {
-            placeBid(state.currentBid + 1);
+          const hand = state.hands[state.activeBidder];
+          const strength = evaluateHandStrength(hand);
+          
+          let targetBid: number | 'pass' = 'pass';
+          if (strength >= 5) targetBid = 19;
+          else if (strength >= 4) targetBid = 18;
+          else if (strength >= 3) targetBid = 17;
+          else if (strength >= 2) targetBid = 16;
+
+          if (targetBid !== 'pass' && targetBid > state.currentBid) {
+            placeBid(targetBid);
           } else {
             placeBid('pass');
           }
@@ -359,26 +366,26 @@ export const useTwentyNine = () => {
         const timer = setTimeout(() => {
           const hand = state.hands[state.activeBidder];
           if (hand.length > 0) {
-            // Count suits to determine hand strength
-            const suitCounts = hand.reduce((acc, card) => {
-              acc[card.suit] = (acc[card.suit] || 0) + 1;
+            // Evaluate suits based on both count and power (Jack = 3, 9 = 2, A = 1, 10 = 1)
+            const suitScores = hand.reduce((acc, card) => {
+              acc[card.suit] = (acc[card.suit] || 0) + (card.value * 2) + 1; // 1 base point per card, plus power value
               return acc;
             }, {} as Record<string, number>);
             
-            let maxCount = 0;
-            for (const suit in suitCounts) {
-              if (suitCounts[suit] > maxCount) maxCount = suitCounts[suit];
+            let bestSuit = '';
+            let maxScore = 0;
+            for (const suit in suitScores) {
+              if (suitScores[suit] > maxScore) {
+                maxScore = suitScores[suit];
+                bestSuit = suit;
+              }
             }
 
-            if (maxCount <= 1) {
-              // Weak hand (no suit has more than 1 card), opt for 7th card trump
+            if (maxScore <= 3) {
+              // Weak hand (no suit has strong cards), opt for 7th card trump
               setTrump('7th_card');
             } else {
-              // Pick a card from the most abundant suit
-              let bestSuit = Object.keys(suitCounts)[0];
-              for (const suit in suitCounts) {
-                if (suitCounts[suit] === maxCount) bestSuit = suit;
-              }
+              // Pick a card from the strongest suit
               const cardToSet = hand.find(c => c.suit === bestSuit) || hand[0];
               setTrump(cardToSet);
             }
@@ -398,10 +405,13 @@ export const useTwentyNine = () => {
             
             // AI might want to ask for trump if they can't follow suit and trump isn't revealed
             if (!state.trumpRevealed && state.currentTrick.leadSuit && !hand.some(c => c.suit === state.currentTrick.leadSuit)) {
-              if (Math.random() > 0.5) revealTrump(); // 50% chance to reveal
+              const trickPoints = calculateTrickPoints(state.currentTrick);
+              if (trickPoints > 0 || Math.random() > 0.6) {
+                revealTrump(); 
+              }
             }
 
-            const cardToPlay = validMoves[Math.floor(Math.random() * validMoves.length)] || hand[0];
+            const cardToPlay = getBestAIPlay(validMoves, state.currentTrick, state.trumpSuit, state.trumpRevealed, state.turn);
             playCard(state.turn, cardToPlay);
           }
         }, 2000);

@@ -153,3 +153,93 @@ export const sortHand = (hand: Card[], hiddenTrumpCardId?: string): Card[] => {
   
   return visibleCards;
 };
+
+// --- AI HELPER FUNCTIONS ---
+
+export const evaluateHandStrength = (hand: Card[]): number => {
+  let strength = 0;
+  const suitCounts: Record<string, { J: boolean, 9: boolean, count: number }> = {
+    spades: { J: false, 9: false, count: 0 },
+    hearts: { J: false, 9: false, count: 0 },
+    diamonds: { J: false, 9: false, count: 0 },
+    clubs: { J: false, 9: false, count: 0 }
+  };
+
+  for (const card of hand) {
+    strength += card.value;
+    suitCounts[card.suit].count++;
+    if (card.rank === 'J') suitCounts[card.suit].J = true;
+    if (card.rank === '9') suitCounts[card.suit]['9'] = true;
+  }
+
+  for (const suit of SUITS) {
+    if (suitCounts[suit].J && suitCounts[suit]['9']) {
+      strength += 2;
+    }
+  }
+  return strength;
+};
+
+export const getBestAIPlay = (
+  validMoves: Card[],
+  trick: Trick,
+  trumpSuit: Suit | null,
+  trumpRevealed: boolean,
+  aiPosition: PlayerPosition
+): Card => {
+  if (validMoves.length === 1) return validMoves[0];
+
+  const leadSuit = trick.leadSuit;
+  const partnerMap: Record<PlayerPosition, PlayerPosition> = {
+    bottom: 'top', top: 'bottom', left: 'right', right: 'left'
+  };
+  const partner = partnerMap[aiPosition];
+  const currentWinner = evaluateTrick(trick, trumpSuit, trumpRevealed);
+  const isPartnerWinning = currentWinner === partner;
+
+  if (!leadSuit) {
+    const sortedByPower = [...validMoves].sort((a, b) => RANK_POWER[b.rank] - RANK_POWER[a.rank]);
+    const safeLeads = sortedByPower.filter(c => c.rank === 'J' || c.rank === '9' || c.value === 0);
+    return safeLeads.length > 0 ? safeLeads[0] : sortedByPower[0];
+  }
+
+  const hasLeadSuit = validMoves.some(c => c.suit === leadSuit);
+  if (hasLeadSuit) {
+    const sortedLeadSuit = validMoves.filter(c => c.suit === leadSuit).sort((a, b) => RANK_POWER[b.rank] - RANK_POWER[a.rank]);
+    const currentWinningCard = currentWinner ? trick.cards[currentWinner] : null;
+    
+    if (currentWinningCard && currentWinningCard.suit === leadSuit) {
+      const ourBestCard = sortedLeadSuit[0];
+      if (RANK_POWER[ourBestCard.rank] > RANK_POWER[currentWinningCard.rank] && !isPartnerWinning) {
+        return ourBestCard; 
+      }
+    }
+    
+    if (isPartnerWinning) {
+      const pointCards = sortedLeadSuit.filter(c => c.value > 0).sort((a, b) => a.value - b.value);
+      if (pointCards.length > 0) return pointCards[pointCards.length - 1]; 
+    }
+
+    return sortedLeadSuit[sortedLeadSuit.length - 1];
+  }
+
+  const trumps = validMoves.filter(c => c.suit === trumpSuit);
+  if (trumpRevealed && trumps.length > 0 && !isPartnerWinning) {
+    const trickPoints = calculateTrickPoints(trick);
+    if (trickPoints > 0) {
+      const sortedTrumps = trumps.sort((a, b) => RANK_POWER[a.rank] - RANK_POWER[b.rank]);
+      return sortedTrumps[0];
+    }
+  }
+
+  if (isPartnerWinning) {
+    const pointCards = validMoves.filter(c => c.value > 0).sort((a, b) => a.value - b.value);
+    if (pointCards.length > 0) return pointCards[pointCards.length - 1];
+  }
+
+  const sortedOffSuit = [...validMoves].sort((a, b) => {
+    if (a.value !== b.value) return a.value - b.value;
+    return RANK_POWER[a.rank] - RANK_POWER[b.rank];
+  });
+  return sortedOffSuit[0];
+};
