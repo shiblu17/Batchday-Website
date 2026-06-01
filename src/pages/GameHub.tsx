@@ -134,6 +134,17 @@ const games = [
     badgeColor: "bg-yellow-500 text-white",
   },
   {
+    path: "/game/29",
+    title: "Twenty-Nine (২৯)",
+    description: "খাঁটি দেশি ২৯ কার্ড গেম!",
+    icon: Flame,
+    color: "bg-red-100 text-red-600",
+    gradient: "from-red-500 to-rose-700",
+    badge: "BETA",
+    badgeIcon: Gamepad2,
+    badgeColor: "bg-black text-white",
+  },
+  {
     path: "/game/flappy",
     title: "Flappy Student",
     description: "বাস বাঁচিয়ে বাধা পার হও!",

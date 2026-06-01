@@ -38,6 +38,7 @@ const Confessions = lazy(() => import("./pages/Confessions"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const TwentyNineGame = lazy(() => import("./pages/TwentyNineGame"));
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-full flex-col items-center justify-center bg-background relative overflow-hidden">
@@ -208,6 +209,10 @@ const App = () => (
                 <Route
                   path="/game/ludo"
                   element={<LudoGame />}
+                />
+                <Route
+                  path="/game/29"
+                  element={<TwentyNineGame />}
                 />
 
                 <Route
