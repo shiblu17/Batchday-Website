@@ -175,7 +175,7 @@ export const TwentyNineBoard: React.FC = () => {
       <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] pointer-events-none z-10">
         
         {/* Top Trick / Status Cards */}
-        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-3/4 flex justify-between items-start">
+        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[60%] flex justify-between items-start">
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">They</span>
             <div className="relative">
