@@ -25,6 +25,7 @@ const INITIAL_STATE: GameState = {
   trumpRevealed: false,
   trumpRevealer: null,
   currentTrick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+  lastTrick: null,
   tricksWon: { bottom: [], left: [], top: [], right: [] },
   turn: 'right',
   scores: { team1: 0, team2: 0 },
@@ -71,6 +72,7 @@ export const useTwentyNine = () => {
       trumpRevealed: false,
       trumpRevealer: null,
       currentTrick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+      lastTrick: null,
       tricksWon: { bottom: [], left: [], top: [], right: [] },
       roundPoints: { team1: 0, team2: 0 },
       passedPlayers: []
@@ -294,7 +296,7 @@ export const useTwentyNine = () => {
       const totalTricks = Object.values(newTricksWon).reduce((sum, tricks) => sum + tricks.length, 0);
       
       if (totalTricks === 8) {
-        return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points } });
+        return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick });
       }
 
       return {
@@ -302,6 +304,7 @@ export const useTwentyNine = () => {
         tricksWon: newTricksWon,
         roundPoints: { team1: team1Points, team2: team2Points },
         currentTrick: { leadPlayer: winner, leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+        lastTrick: trick,
         turn: winner
       };
     });

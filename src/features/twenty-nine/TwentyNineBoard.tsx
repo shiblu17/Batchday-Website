@@ -16,6 +16,8 @@ export const TwentyNineBoard: React.FC = () => {
     prevTrickWinner.current = state.currentTrick.winner;
   }, [state.currentTrick.winner]);
 
+  const [showLastHand, setShowLastHand] = useState(false);
+  
   if (state.phase === 'lobby') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6 text-white">
@@ -88,7 +90,13 @@ export const TwentyNineBoard: React.FC = () => {
           <div className="text-white/90">
             {state.bidWinner ? state.players[state.bidWinner].name : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
           </div>
-          <button className="mt-1 px-3 py-1 bg-gradient-to-b from-[#a0744e] to-[#734e30] border border-[#d6af84] rounded-sm shadow-md pointer-events-auto uppercase">
+          <button 
+            onClick={() => {
+              if (state.lastTrick) setShowLastHand(true);
+            }}
+            disabled={!state.lastTrick}
+            className="mt-1 px-3 py-1 bg-gradient-to-b from-[#a0744e] to-[#734e30] border border-[#d6af84] rounded-sm shadow-md pointer-events-auto uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Last Hand
           </button>
         </div>
@@ -433,6 +441,53 @@ export const TwentyNineBoard: React.FC = () => {
           </motion.div>
         </div>
       )}
+
+      {/* Last Hand Modal */}
+      <AnimatePresence>
+        {showLastHand && state.lastTrick && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white pointer-events-auto"
+            onClick={() => setShowLastHand(false)}
+          >
+            <h2 className="text-3xl font-black mb-8 text-amber-500">Previous Trick</h2>
+            
+            <div className="relative w-[300px] h-[300px] mb-8">
+              {state.lastTrick.cards.top && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 scale-75">
+                  <div className="text-center mb-1 text-xs">Partner</div>
+                  <CardUI card={state.lastTrick.cards.top} />
+                </div>
+              )}
+              {state.lastTrick.cards.bottom && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 scale-75">
+                  <div className="text-center mt-[70px] text-xs">You</div>
+                  <CardUI card={state.lastTrick.cards.bottom} />
+                </div>
+              )}
+              {state.lastTrick.cards.left && (
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 scale-75">
+                  <div className="text-center mb-1 text-xs">Left</div>
+                  <CardUI card={state.lastTrick.cards.left} />
+                </div>
+              )}
+              {state.lastTrick.cards.right && (
+                <div className="absolute top-1/2 right-0 -translate-y-1/2 scale-75">
+                  <div className="text-center mb-1 text-xs">Right</div>
+                  <CardUI card={state.lastTrick.cards.right} />
+                </div>
+              )}
+            </div>
+
+            <button 
+              onClick={() => setShowLastHand(false)}
+              className="px-6 py-2 bg-amber-600 text-white rounded-full font-bold shadow-lg"
+            >
+              Close
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

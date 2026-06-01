@@ -53,6 +53,7 @@ export interface GameState {
   
   // Gameplay
   currentTrick: Trick;
+  lastTrick: Trick | null;
   tricksWon: Record<PlayerPosition, Trick[]>;
   turn: PlayerPosition;
   
