@@ -197,16 +197,22 @@ export const useTwentyNine = () => {
   };
 
   const revealTrump = () => {
-    setState(prev => ({
-      ...prev,
-      trumpRevealed: true,
-      trumpRevealer: prev.turn,
-      // The hidden card goes back to the bidder's hand
-      hands: {
-        ...prev.hands,
-        [prev.bidWinner!]: [...prev.hands[prev.bidWinner!], prev.hiddenTrumpCard!]
+    setState(prev => {
+      if (!prev.hiddenTrumpCard || prev.trumpRevealed) return prev;
+      
+      const newHands = { ...prev.hands };
+      // Only give the card back if it's not a dummy conceptual card
+      if (!prev.hiddenTrumpCard.id.startsWith('dummy_')) {
+        newHands[prev.bidWinner!] = [...newHands[prev.bidWinner!], prev.hiddenTrumpCard];
       }
-    }));
+
+      return {
+        ...prev,
+        trumpRevealed: true,
+        trumpRevealer: prev.turn,
+        hands: newHands
+      }
+    });
   };
 
   const playCard = (player: PlayerPosition, card: Card) => {

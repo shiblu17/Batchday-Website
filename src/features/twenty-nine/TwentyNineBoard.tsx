@@ -45,8 +45,6 @@ export const TwentyNineBoard: React.FC = () => {
       onClick={() => {
         if (state.phase === 'playing' && isPlayable) {
           playCard(pos, card);
-        } else if (state.phase === 'dealing_2' && state.activeBidder === pos) {
-          setTrump(card);
         }
       }}
     />
@@ -267,10 +265,30 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       )}
 
-      {/* Waiting for other players to bid */}
+      {/* Trump Selection Grid */}
+      {state.phase === 'dealing_2' && state.activeBidder === 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[340px]">
+          <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c] flex flex-col items-center">
+            <h3 className="text-amber-400 font-bold mb-4 text-center text-lg">Select Trump Suit</h3>
+            <div className="flex gap-3 justify-center w-full">
+              {(['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).map(suit => (
+                <div 
+                  key={suit} 
+                  className="w-[60px] sm:w-[70px] hover:-translate-y-2 hover:scale-105 transition-all cursor-pointer shadow-lg" 
+                  onClick={() => setTrump({ id: `dummy_${suit}`, suit, rank: '2', value: 0 })}
+                >
+                  <CardUI card={{ id: `dummy_${suit}`, suit, rank: '2', value: 0 }} isHidden={false} isPlayable={true} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Waiting for other players to bid or set trump */}
       {state.phase === 'bidding' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center">
-          <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse">
+          <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse text-center">
             Waiting for {state.players[state.activeBidder].name} to bid...
           </div>
           {state.currentBid > 15 && state.highestBidder && (
@@ -278,6 +296,15 @@ export const TwentyNineBoard: React.FC = () => {
               Highest Bid: {state.currentBid} (by {state.players[state.highestBidder].name})
             </div>
           )}
+        </div>
+      )}
+
+      {/* Waiting for other players to set trump */}
+      {state.phase === 'dealing_2' && state.activeBidder !== 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center text-center">
+          <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse">
+            Waiting for {state.players[state.activeBidder].name} to set Trump...
+          </div>
         </div>
       )}
 
@@ -302,7 +329,7 @@ export const TwentyNineBoard: React.FC = () => {
         <div className="flex justify-center w-full max-w-[500px] pointer-events-auto">
            {state.hands['bottom'].map((card, i) => (
              <div key={card.id} className="w-[18vw] max-w-[70px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
-               {renderCard(card, 'bottom', (state.turn === 'bottom' && state.phase === 'playing') || (state.phase === 'dealing_2' && state.activeBidder === 'bottom'))}
+               {renderCard(card, 'bottom', state.turn === 'bottom' && state.phase === 'playing')}
              </div>
            ))}
         </div>
