@@ -311,10 +311,7 @@ export const useTwentyNine = () => {
     let t1Score = state.scores.team1;
     let t2Score = state.scores.team2;
     
-    // Last trick winner gets +1 point
-    const lastTrickWinner = state.currentTrick.winner;
-    if (lastTrickWinner === 'bottom' || lastTrickWinner === 'top') state.roundPoints.team1 += 1;
-    if (lastTrickWinner === 'left' || lastTrickWinner === 'right') state.roundPoints.team2 += 1;
+    // Last trick point rule disabled as per user request (strict 28 points)
 
     // Apply Pair Rule points if applicable (simplified for MVP)
     
