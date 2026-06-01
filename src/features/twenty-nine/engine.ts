@@ -136,14 +136,20 @@ export const sortHand = (hand: Card[], hiddenTrumpCardId?: string): Card[] => {
     clubs: 1
   };
   
-  return [...hand].sort((a, b) => {
-    // Keep the hidden trump card at the very end so its position doesn't give away its suit
-    if (a.id === hiddenTrumpCardId && b.id !== hiddenTrumpCardId) return 1;
-    if (b.id === hiddenTrumpCardId && a.id !== hiddenTrumpCardId) return -1;
-    
+  const visibleCards = hand.filter(c => c.id !== hiddenTrumpCardId);
+  const hiddenCard = hand.find(c => c.id === hiddenTrumpCardId);
+  
+  visibleCards.sort((a, b) => {
     if (suitOrder[a.suit] !== suitOrder[b.suit]) {
       return suitOrder[b.suit] - suitOrder[a.suit];
     }
     return RANK_POWER[b.rank] - RANK_POWER[a.rank];
   });
+  
+  if (hiddenCard) {
+    // Insert hidden card at the 7th position (index 6) to visually represent it as the 7th card
+    visibleCards.splice(6, 0, hiddenCard);
+  }
+  
+  return visibleCards;
 };
