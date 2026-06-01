@@ -237,7 +237,7 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Bidding Grid (Transparent, tightly packed) */}
-      {state.phase === 'bidding' && (
+      {state.phase === 'bidding' && state.activeBidder === 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[80%] max-w-[280px]">
           <div className="grid grid-cols-4 gap-[2px] bg-[#3a2010] p-[4px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c]">
             {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
@@ -264,6 +264,20 @@ export const TwentyNineBoard: React.FC = () => {
               Pass
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Waiting for other players to bid */}
+      {state.phase === 'bidding' && state.activeBidder !== 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center">
+          <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse">
+            Waiting for {state.players[state.activeBidder].name} to bid...
+          </div>
+          {state.currentBid > 15 && state.highestBidder && (
+            <div className="text-amber-400 text-xl font-black mt-3 drop-shadow-lg shadow-black bg-black/60 px-6 py-2 rounded-lg border border-amber-500/30">
+              Highest Bid: {state.currentBid} (by {state.players[state.highestBidder].name})
+            </div>
+          )}
         </div>
       )}
 
