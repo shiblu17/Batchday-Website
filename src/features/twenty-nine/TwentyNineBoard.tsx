@@ -377,7 +377,7 @@ export const TwentyNineBoard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex justify-center w-full max-w-[500px] pointer-events-auto">
+        <div className="flex justify-center w-full max-w-[600px] pointer-events-auto px-2">
            {state.hands['bottom'].map((card, i) => {
              const isHiddenTrump = card.id === state.hiddenTrumpCard?.id && !state.trumpRevealed;
              
@@ -392,7 +392,7 @@ export const TwentyNineBoard: React.FC = () => {
              
              const isPlayable = state.turn === 'bottom' && state.phase === 'playing' && !isHiddenTrump && isValidSuit;
              return (
-               <div key={card.id} className="w-[18vw] max-w-[70px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
+               <div key={card.id} className="w-[14vw] sm:w-[12vw] max-w-[70px] -ml-[6vw] sm:-ml-[3vw] md:-ml-6 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
                  {renderCard(card, 'bottom', isPlayable, isHiddenTrump)}
                </div>
              );
