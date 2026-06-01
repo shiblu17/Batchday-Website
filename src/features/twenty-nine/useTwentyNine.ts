@@ -170,25 +170,44 @@ export const useTwentyNine = () => {
     });
   };
 
-  const setTrump = (card: Card) => {
+  const setTrump = (cardOrString: Card | '7th_card') => {
     setState((prev: any) => {
-      // Remove card from hand and set as hidden trump
-      const newHand = prev.hands[prev.activeBidder].filter((c: Card) => c.id !== card.id);
+      let hiddenCard: Card;
+      let newHand = [...prev.hands[prev.activeBidder]];
+      const rem = prev.remainingDeck;
+      let nextFour: Card[] = [];
+
+      if (prev.activeBidder === 'bottom') nextFour = [...rem.slice(0, 4)];
+      else if (prev.activeBidder === 'left') nextFour = [...rem.slice(4, 8)];
+      else if (prev.activeBidder === 'top') nextFour = [...rem.slice(8, 12)];
+      else if (prev.activeBidder === 'right') nextFour = [...rem.slice(12, 16)];
+
+      if (cardOrString === '7th_card') {
+        // The 7th card is the 3rd card in the next batch of 4
+        hiddenCard = nextFour[2];
+        // Remove it from nextFour so they don't get it in their hand
+        nextFour.splice(2, 1);
+      } else {
+        hiddenCard = cardOrString;
+        // If it's a real card from their hand, remove it
+        if (!hiddenCard.id.startsWith('dummy_')) {
+          newHand = newHand.filter((c: Card) => c.id !== hiddenCard.id);
+        }
+      }
       
       // Deal remaining cards
-      const rem = prev.remainingDeck;
       const finalHands = {
-        bottom: [...(prev.activeBidder === 'bottom' ? newHand : prev.hands.bottom), ...rem.slice(0, 4)],
-        left: [...(prev.activeBidder === 'left' ? newHand : prev.hands.left), ...rem.slice(4, 8)],
-        top: [...(prev.activeBidder === 'top' ? newHand : prev.hands.top), ...rem.slice(8, 12)],
-        right: [...(prev.activeBidder === 'right' ? newHand : prev.hands.right), ...rem.slice(12, 16)]
+        bottom: prev.activeBidder === 'bottom' ? [...newHand, ...nextFour] : [...prev.hands.bottom, ...rem.slice(0, 4)],
+        left: prev.activeBidder === 'left' ? [...newHand, ...nextFour] : [...prev.hands.left, ...rem.slice(4, 8)],
+        top: prev.activeBidder === 'top' ? [...newHand, ...nextFour] : [...prev.hands.top, ...rem.slice(8, 12)],
+        right: prev.activeBidder === 'right' ? [...newHand, ...nextFour] : [...prev.hands.right, ...rem.slice(12, 16)]
       };
 
       return {
         ...prev,
         phase: 'playing',
-        trumpSuit: card.suit,
-        hiddenTrumpCard: card,
+        trumpSuit: hiddenCard.suit,
+        hiddenTrumpCard: hiddenCard,
         trumpRevealed: false,
         hands: finalHands,
         turn: 'right' // Player right of dealer leads the first trick
@@ -335,11 +354,31 @@ export const useTwentyNine = () => {
       const activePlayer = state.players[state.activeBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
-          // AI randomly picks a card from its hand to be trump
           const hand = state.hands[state.activeBidder];
           if (hand.length > 0) {
-            const randomCard = hand[Math.floor(Math.random() * hand.length)];
-            setTrump(randomCard);
+            // Count suits to determine hand strength
+            const suitCounts = hand.reduce((acc, card) => {
+              acc[card.suit] = (acc[card.suit] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            let maxCount = 0;
+            for (const suit in suitCounts) {
+              if (suitCounts[suit] > maxCount) maxCount = suitCounts[suit];
+            }
+
+            if (maxCount <= 1) {
+              // Weak hand (no suit has more than 1 card), opt for 7th card trump
+              setTrump('7th_card');
+            } else {
+              // Pick a card from the most abundant suit
+              let bestSuit = Object.keys(suitCounts)[0];
+              for (const suit in suitCounts) {
+                if (suitCounts[suit] === maxCount) bestSuit = suit;
+              }
+              const cardToSet = hand.find(c => c.suit === bestSuit) || hand[0];
+              setTrump(cardToSet);
+            }
           }
         }, 1500);
         return () => clearTimeout(timer);

@@ -269,8 +269,8 @@ export const TwentyNineBoard: React.FC = () => {
       {state.phase === 'dealing_2' && state.activeBidder === 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[340px]">
           <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c] flex flex-col items-center">
-            <h3 className="text-amber-400 font-bold mb-4 text-center text-lg">Select Trump Suit</h3>
-            <div className="flex gap-3 justify-center w-full">
+            <h3 className="text-amber-400 font-bold mb-4 text-center text-lg drop-shadow-md">Select Trump Suit</h3>
+            <div className="flex gap-3 justify-center w-full mb-5">
               {(['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).map(suit => (
                 <div 
                   key={suit} 
@@ -281,6 +281,19 @@ export const TwentyNineBoard: React.FC = () => {
                 </div>
               ))}
             </div>
+            
+            <div className="w-full flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#8a5a3a] to-transparent"></div>
+              <span className="text-[#cba388] text-xs font-bold uppercase tracking-widest">OR</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#8a5a3a] to-transparent"></div>
+            </div>
+
+            <button 
+              onClick={() => setTrump('7th_card')}
+              className="w-full h-12 bg-gradient-to-b from-[#8a3a3a] to-[#5c2020] text-amber-100 text-sm sm:text-base font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.6)] hover:brightness-110 active:translate-y-px transition-all rounded-lg flex items-center justify-center gap-2 border border-[#a85050]"
+            >
+              <span className="text-xl">❓</span> 7th Card (Mystery)
+            </button>
           </div>
         </div>
       )}
