@@ -302,7 +302,7 @@ export const TwentyNineBoard: React.FC = () => {
         <div className="flex justify-center w-full max-w-[500px] pointer-events-auto">
            {state.hands['bottom'].map((card, i) => (
              <div key={card.id} className="w-[18vw] max-w-[70px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
-               {renderCard(card, 'bottom', state.turn === 'bottom' && state.phase === 'playing')}
+               {renderCard(card, 'bottom', (state.turn === 'bottom' && state.phase === 'playing') || (state.phase === 'dealing_2' && state.activeBidder === 'bottom'))}
              </div>
            ))}
         </div>
