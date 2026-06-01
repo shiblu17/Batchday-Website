@@ -220,15 +220,19 @@ export const TwentyNineBoard: React.FC = () => {
           )}
         </div>
 
-        {/* Reveal Trump Button */}
-        {state.phase === 'playing' && !state.trumpRevealed && state.turn === 'bottom' && (
-          <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 pointer-events-auto">
-            <button 
-              onClick={revealTrump}
-              className="bg-[#5d4037] text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-[0_5px_10px_rgba(0,0,0,0.5)] border border-[#a0744e] hover:bg-[#734e30] uppercase"
-            >
-              Reveal Trump
-            </button>
+        {/* Trump Reveal Button */}
+        {state.phase === 'playing' && 
+         !state.trumpRevealed && 
+         state.turn === 'bottom' && 
+         state.currentTrick.leadSuit !== null &&
+         !state.hands['bottom'].some(c => c.suit === state.currentTrick.leadSuit) && (
+          <div className="absolute top-[60%] sm:top-[65%] left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
+             <button 
+               onClick={revealTrump}
+               className="px-6 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-bold rounded-full shadow-lg border-2 border-red-400 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 animate-pulse"
+             >
+               <span>👁️</span> Show Trump
+             </button>
           </div>
         )}
         
