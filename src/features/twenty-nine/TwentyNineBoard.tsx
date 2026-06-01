@@ -283,6 +283,40 @@ export const TwentyNineBoard: React.FC = () => {
         {renderPlayerBadge('bottom')}
       </div>
 
+      {/* Round Over Overlay */}
+      {state.phase === 'round_over' && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-8 text-center rounded-3xl">
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
+            <h2 className="text-4xl md:text-6xl font-black mb-2 text-primary drop-shadow-lg">Round Over!</h2>
+            
+            <div className="mb-8 p-4 bg-white/5 rounded-2xl border border-white/10 w-full max-w-md">
+              <h3 className="text-xl font-bold text-muted-foreground mb-4">Bid Winner: {state.players[state.bidWinner!].name} ({state.currentBid})</h3>
+              <div className="flex justify-between gap-4">
+                <div className="flex-1 bg-gradient-to-br from-green-600/40 to-emerald-900/40 p-4 rounded-xl border border-green-500/30 shadow-inner">
+                  <h3 className="text-sm font-bold text-green-200 mb-1">Team 1</h3>
+                  <p className="text-xs text-green-100/50 mb-2">(You & AI Partner)</p>
+                  <p className="text-4xl font-black text-white">{state.scores.team1}</p>
+                  <p className="text-xs mt-2 text-green-300">Round Pts: {state.roundPoints.team1}</p>
+                </div>
+                <div className="flex-1 bg-gradient-to-br from-red-600/40 to-rose-900/40 p-4 rounded-xl border border-red-500/30 shadow-inner">
+                  <h3 className="text-sm font-bold text-red-200 mb-1">Team 2</h3>
+                  <p className="text-xs text-red-100/50 mb-2">(Left & Right)</p>
+                  <p className="text-4xl font-black text-white">{state.scores.team2}</p>
+                  <p className="text-xs mt-2 text-red-300">Round Pts: {state.roundPoints.team2}</p>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => startGame(state.mode!)} 
+              className="px-8 py-4 bg-primary text-primary-foreground rounded-full font-bold text-xl shadow-[0_0_40px_rgba(var(--primary),0.4)] hover:scale-105 hover:shadow-[0_0_60px_rgba(var(--primary),0.6)] transition-all"
+            >
+              Start Next Round
+            </button>
+          </motion.div>
+        </div>
+      )}
+
     </div>
   );
 };

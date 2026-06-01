@@ -60,7 +60,14 @@ export const useTwentyNine = () => {
       currentBid: 15,
       bids: [],
       highestBidder: null,
-      bidWinner: null
+      bidWinner: null,
+      trumpSuit: null,
+      hiddenTrumpCard: null,
+      trumpRevealed: false,
+      trumpRevealer: null,
+      currentTrick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+      tricksWon: { bottom: [], left: [], top: [], right: [] },
+      roundPoints: { team1: 0, team2: 0 },
     } as any));
   };
 
