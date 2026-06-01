@@ -34,9 +34,13 @@ export const CardUI: React.FC<CardUIProps> = ({ card, isHidden = false, onClick,
       <motion.div 
         whileHover={onClick ? { y: -10 } : {}}
         onClick={onClick}
-        className={`w-16 h-24 sm:w-20 sm:h-28 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-800 shadow-lg border-2 border-white/20 flex items-center justify-center cursor-pointer ${className}`}
+        className={`w-16 h-24 sm:w-20 sm:h-28 rounded-xl bg-red-700 shadow-lg border-2 border-white flex items-center justify-center cursor-pointer ${className}`}
       >
-        <div className="w-12 h-20 sm:w-16 sm:h-24 rounded-lg border border-white/30 opacity-50 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.1)_10px,rgba(255,255,255,0.1)_20px)]" />
+        <div className="w-[85%] h-[85%] border-2 border-white/40 flex items-center justify-center bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(255,255,255,0.2)_4px,rgba(255,255,255,0.2)_8px)] overflow-hidden">
+           <div className="w-8 h-8 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
+             <div className="w-4 h-4 bg-red-800 rotate-45" />
+           </div>
+        </div>
       </motion.div>
     );
   }
