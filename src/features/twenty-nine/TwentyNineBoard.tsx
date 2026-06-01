@@ -3,7 +3,6 @@ import { useTwentyNine } from './useTwentyNine';
 import { CardUI } from './CardUI';
 import { PlayerPosition, Card } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User } from 'lucide-react';
 
 // --- Sound Effects ---
 const playCardSound = () => {
@@ -135,129 +134,82 @@ export const TwentyNineBoard: React.FC = () => {
     const isBidder = state.activeBidder === pos && state.phase === 'bidding';
     
     return (
-      <div className={`flex flex-col items-center justify-center z-20 transition-all duration-300 ${isTurn || isBidder ? 'scale-110' : ''}`}>
-        <div className="bg-white/80 backdrop-blur-sm px-3 py-0.5 rounded-t-md text-[10px] sm:text-xs font-bold text-black border-b border-black/10">
-          {player.name}
-        </div>
-        <div className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-300 border-2 flex items-center justify-center overflow-hidden shadow-lg ${isTurn || isBidder ? 'border-amber-400 ring-4 ring-amber-400/40 animate-pulse' : 'border-white/50'}`}>
-          <User className="w-8 h-8 sm:w-10 sm:h-10 text-slate-500 mt-2" />
-        </div>
-        {state.phase === 'playing' && (
-          <div className="bg-black/60 px-2 py-0.5 rounded-b-md text-[10px] font-bold text-white mt-[-2px] z-10">
+      <div className={`bg-card/90 backdrop-blur-md px-2 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg border-2 z-20 ${isTurn || isBidder ? 'border-primary ring-2 sm:ring-4 ring-primary/20 animate-pulse scale-105' : 'border-border'}`}>
+        <div className="font-bold text-xs sm:text-sm truncate max-w-[80px] sm:max-w-none">{player.name}</div>
+        <div className="text-[10px] sm:text-xs text-muted-foreground flex justify-between gap-1 sm:gap-4 mt-0.5 sm:mt-1">
+          <span className="hidden sm:inline">{pos === 'bottom' || pos === 'top' ? 'Team 1' : 'Team 2'}</span>
+          <span className="font-bold text-foreground">
             {state.tricksWon[pos].length} tricks
-          </div>
-        )}
+          </span>
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="relative w-full h-[100dvh] bg-[#3e2723] overflow-hidden flex flex-col justify-between items-center py-4 sm:py-8 font-sans">
-      
-      {/* Wooden Oval Table Background */}
-      <div 
-        className="absolute top-10 sm:top-16 bottom-12 sm:bottom-20 left-0 right-0 sm:left-1/2 sm:-translate-x-1/2 sm:w-[500px] bg-gradient-to-b from-[#8d6e63] via-[#795548] to-[#5d4037] shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_20px_50px_rgba(0,0,0,0.5)] border-[4px] sm:border-[8px] border-[#4e342e] flex flex-col overflow-hidden"
-        style={{ borderRadius: '50%' }}
-      >
-        
-        {/* Table Grain Texture (Subtle) */}
-        <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(0,0,0,0.1)_2px,rgba(0,0,0,0.1)_4px)]" />
-
-        {/* Top HUD / Scoreboard inside the table */}
-        {(state.phase === 'playing' || state.phase === 'bidding' || state.phase === 'dealing_2') && (
-          <div className="absolute top-8 sm:top-12 left-1/2 -translate-x-1/2 w-[80%] max-w-[300px] flex justify-between items-center px-4 py-2 text-white font-bold text-xs sm:text-sm z-10 opacity-90">
-            <div className="text-center">
-              <div className="text-white/70 mb-1">They</div>
-              <div className="text-xl sm:text-2xl">{state.roundPoints.team2}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-white/70 mb-1">Trump</div>
-              <div className="w-10 h-14 sm:w-12 sm:h-16 rounded border border-white/20 bg-white/10 flex items-center justify-center">
-                 {state.trumpRevealed ? (
-                   <span className={`text-2xl ${state.trumpSuit === 'hearts' || state.trumpSuit === 'diamonds' ? 'text-red-400' : 'text-slate-800'}`}>
-                     {state.trumpSuit === 'hearts' && '♥'}
-                     {state.trumpSuit === 'diamonds' && '♦'}
-                     {state.trumpSuit === 'clubs' && '♣'}
-                     {state.trumpSuit === 'spades' && '♠'}
-                   </span>
-                 ) : state.trumpSuit ? (
-                   <span className="text-white/50 text-[10px]">Hidden</span>
-                 ) : (
-                   <span className="text-white/20 text-[10px]">-</span>
-                 )}
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-white/70 mb-1">We</div>
-              <div className="text-xl sm:text-2xl">{state.roundPoints.team1}</div>
-            </div>
-          </div>
-        )}
-
-      {/* Top Player */}
-      <div className="flex flex-col items-center z-20 absolute top-2 w-full">
-        {renderPlayerBadge('top')}
-        <div className="mt-1 scale-[0.6] sm:scale-100">
-          {renderHand('top', false)}
+    <div className="relative w-full h-[85vh] sm:h-[80vh] bg-green-900 rounded-3xl shadow-inner border-[6px] sm:border-8 border-green-950 overflow-hidden flex flex-col justify-between p-2 sm:p-8">
+      {/* Decorative center logo */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+        <div className="w-[40vw] h-[40vw] sm:w-[30vw] sm:h-[30vw] rounded-full border-4 sm:border-8 border-white flex items-center justify-center">
+          <span className="text-[15vw] sm:text-[10vw] font-black text-white">29</span>
         </div>
       </div>
 
+      {/* Top Player */}
+      <div className="flex flex-col items-center gap-2 sm:gap-4">
+        {renderPlayerBadge('top')}
+        {renderHand('top', false)}
+      </div>
+
       {/* Center Area (Left / Tricks / Right) */}
-      <div className="flex justify-between items-center w-full flex-1 z-10 px-0 sm:px-12 relative h-full pointer-events-none">
+      <div className="flex justify-between items-center w-full flex-1 my-2 sm:my-4">
         
         {/* Left Player */}
-        <div className="flex flex-row items-center justify-start absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
-          <div className="scale-75 sm:scale-100 origin-left">
+        <div className="flex flex-row items-center gap-2 sm:gap-4 w-20 sm:w-32 justify-end">
+          <div className="absolute left-2 sm:static z-20">
             {renderPlayerBadge('left')}
           </div>
-          <div className="-ml-8 sm:-ml-4 scale-50 sm:scale-100 opacity-80 sm:opacity-100 origin-left">
+          <div className="ml-8 sm:ml-0">
             {renderHand('left', true)}
           </div>
         </div>
 
         {/* The Trick Table & Game Info Center */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center z-30 pointer-events-none">
+        <div className="relative w-48 h-48 sm:w-80 sm:h-80 rounded-full border border-white/20 flex items-center justify-center bg-black/20 backdrop-blur-sm shadow-2xl z-10 shrink-0">
           
           {/* Phase Overlays */}
           {state.phase === 'bidding' && (
-            <div className="flex flex-col items-center justify-center w-[95%] max-w-[220px] sm:max-w-[240px] mx-auto bg-[#8d6e63]/95 border-[3px] border-[#5d4037] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] p-2 z-50 pointer-events-auto scale-90 sm:scale-100">
-              <div className="grid grid-cols-4 gap-1 sm:gap-2 w-full">
-                {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
-                  <button 
-                    key={bid}
-                    disabled={bid <= state.currentBid}
-                    onClick={() => placeBid(bid)}
-                    className="py-1.5 sm:py-2 bg-[#795548] text-white text-sm sm:text-lg font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.6)] disabled:opacity-40 disabled:shadow-none hover:bg-[#8d6e63] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
-                  >
-                    {bid}
-                  </button>
-                ))}
-                <button 
-                  disabled={28 <= state.currentBid}
-                  onClick={() => placeBid(28)}
-                  className="py-1.5 sm:py-2 bg-[#795548] text-white text-sm sm:text-lg font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.6)] disabled:opacity-40 hover:bg-[#8d6e63] transition-all flex items-center justify-center"
-                >
-                  28
-                </button>
-                <button 
-                  onClick={() => placeBid('pass')} 
-                  className="col-span-3 py-1.5 sm:py-2 bg-[#795548] text-white text-sm sm:text-lg font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.6)] hover:bg-[#8d6e63] active:translate-y-1 transition-all"
-                >
-                  Pass
-                </button>
-              </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-full text-white z-20">
+              <h3 className="font-bold text-lg text-primary">Bidding Phase</h3>
+              <p className="text-sm opacity-80 mb-2">Current Bid: {state.currentBid}</p>
+              
+              {state.activeBidder === state.myPosition ? (
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 sm:gap-2 p-2">
+                  {[16,17,18,19,20,21,22,23,24,25,26,27,28,29].map(bid => (
+                    <button 
+                      key={bid}
+                      disabled={bid <= state.currentBid}
+                      onClick={() => placeBid(bid)}
+                      className="px-1.5 py-1.5 sm:px-2 sm:py-1 bg-white text-black text-[10px] sm:text-xs font-bold rounded disabled:opacity-30 hover:scale-110 transition-transform"
+                    >
+                      {bid}
+                    </button>
+                  ))}
+                  <button onClick={() => placeBid('pass')} className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded col-span-4 sm:col-span-5 hover:bg-red-600 transition-colors">Pass</button>
+                </div>
+              ) : (
+                <p className="text-xs animate-pulse">Waiting for {state.players[state.activeBidder].name}...</p>
+              )}
             </div>
           )}
 
           {state.phase === 'dealing_2' && (
-            <div className="flex flex-col items-center justify-center w-[90%] max-w-[260px] bg-[#8d6e63]/95 border-[4px] border-[#5d4037] rounded-xl shadow-2xl p-6 text-center text-white z-50 pointer-events-auto">
-              <h3 className="font-bold text-xl sm:text-2xl mb-4 drop-shadow-md">
-                {state.players[state.bidWinner!].name} Won Bid ({state.currentBid})
-              </h3>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-full text-white z-20 p-4 text-center">
+              <h3 className="font-bold text-lg text-primary mb-2">Set Trump</h3>
               {state.activeBidder === state.myPosition ? (
-                <p className="text-sm sm:text-base opacity-90">Click a card from your hand below to hide it as the Trump card.</p>
+                <p className="text-sm">Click a card from your hand to hide it as the Trump card.</p>
               ) : (
-                <p className="text-sm sm:text-base animate-pulse">Waiting for them to set Trump...</p>
+                <p className="text-sm animate-pulse">Waiting for {state.players[state.activeBidder].name} to set Trump...</p>
               )}
             </div>
           )}
@@ -286,39 +238,48 @@ export const TwentyNineBoard: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {/* Trump Status Indicator (Only show Ask Trump button, as HUD is at the top now) */}
-          {state.phase === 'playing' && !state.trumpRevealed && state.turn === state.myPosition && (
-            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-[#5d4037]/90 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-[#8d6e63] pointer-events-auto">
-              <button 
-                onClick={revealTrump}
-                className="hover:text-amber-200 transition-colors uppercase tracking-widest"
-              >
-                Reveal Trump
-              </button>
+          {/* Trump Status Indicator */}
+          {state.phase === 'playing' && (
+            <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-1 rounded-full text-xs font-bold flex items-center gap-2">
+              Trump: 
+              {state.trumpRevealed ? (
+                <span className={`text-lg ${state.trumpSuit === 'hearts' || state.trumpSuit === 'diamonds' ? 'text-red-400' : 'text-blue-200'}`}>
+                  {state.trumpSuit === 'hearts' && '♥'}
+                  {state.trumpSuit === 'diamonds' && '♦'}
+                  {state.trumpSuit === 'clubs' && '♣'}
+                  {state.trumpSuit === 'spades' && '♠'}
+                </span>
+              ) : (
+                <span>Hidden (By {state.players[state.bidWinner!].name})</span>
+              )}
+
+              {!state.trumpRevealed && state.turn === state.myPosition && (
+                <button 
+                  onClick={revealTrump}
+                  className="ml-2 px-2 py-0.5 bg-primary rounded text-black hover:bg-primary/80"
+                >
+                  Ask Trump
+                </button>
+              )}
             </div>
           )}
         </div>
 
         {/* Right Player */}
-        <div className="flex flex-row items-center justify-end absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
-          <div className="-mr-8 sm:-mr-4 scale-50 sm:scale-100 opacity-80 sm:opacity-100 z-0 origin-right">
-            {renderHand('right', true)}
-          </div>
-          <div className="scale-75 sm:scale-100 origin-right">
+        <div className="flex flex-row items-center gap-2 sm:gap-4 w-20 sm:w-32 justify-start flex-row-reverse">
+          <div className="absolute right-2 sm:static z-20">
             {renderPlayerBadge('right')}
+          </div>
+          <div className="mr-8 sm:mr-0">
+            {renderHand('right', true)}
           </div>
         </div>
 
-      </div>
-      
-      {/* Table bottom rim finish */}
       </div>
 
       {/* Bottom Player (Self) */}
-      <div className="flex flex-col items-center z-20 absolute bottom-2 w-full pointer-events-auto">
-        <div className="mb-1 scale-[0.85] sm:scale-100 origin-bottom">
-          {renderHand('bottom', false)}
-        </div>
+      <div className="flex flex-col items-center gap-2 sm:gap-4">
+        {renderHand('bottom', false)}
         {renderPlayerBadge('bottom')}
       </div>
 
