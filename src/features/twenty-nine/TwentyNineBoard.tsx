@@ -156,7 +156,7 @@ export const TwentyNineBoard: React.FC = () => {
       
       {/* Wooden Oval Table Background */}
       <div 
-        className="absolute top-12 sm:top-16 bottom-16 sm:bottom-20 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[500px] bg-gradient-to-b from-[#8d6e63] via-[#795548] to-[#5d4037] shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_20px_50px_rgba(0,0,0,0.5)] border-[6px] sm:border-[8px] border-[#4e342e] flex flex-col overflow-hidden"
+        className="absolute top-10 sm:top-16 bottom-12 sm:bottom-20 left-0 right-0 sm:left-1/2 sm:-translate-x-1/2 sm:w-[500px] bg-gradient-to-b from-[#8d6e63] via-[#795548] to-[#5d4037] shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_20px_50px_rgba(0,0,0,0.5)] border-[4px] sm:border-[8px] border-[#4e342e] flex flex-col overflow-hidden"
         style={{ borderRadius: '50%' }}
       >
         
@@ -203,12 +203,14 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Center Area (Left / Tricks / Right) */}
-      <div className="flex justify-between items-center w-full flex-1 z-10 px-1 sm:px-12 relative h-full pointer-events-none">
+      <div className="flex justify-between items-center w-full flex-1 z-10 px-0 sm:px-12 relative h-full pointer-events-none">
         
         {/* Left Player */}
         <div className="flex flex-row items-center justify-start absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
-          {renderPlayerBadge('left')}
-          <div className="-ml-6 sm:-ml-4 scale-[0.6] sm:scale-100 opacity-80 sm:opacity-100">
+          <div className="scale-75 sm:scale-100 origin-left">
+            {renderPlayerBadge('left')}
+          </div>
+          <div className="-ml-8 sm:-ml-4 scale-50 sm:scale-100 opacity-80 sm:opacity-100 origin-left">
             {renderHand('left', true)}
           </div>
         </div>
@@ -218,7 +220,7 @@ export const TwentyNineBoard: React.FC = () => {
           
           {/* Phase Overlays */}
           {state.phase === 'bidding' && (
-            <div className="flex flex-col items-center justify-center w-[90%] max-w-[240px] mx-auto bg-[#8d6e63]/95 border-[3px] border-[#5d4037] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] p-2 z-50 pointer-events-auto">
+            <div className="flex flex-col items-center justify-center w-[95%] max-w-[220px] sm:max-w-[240px] mx-auto bg-[#8d6e63]/95 border-[3px] border-[#5d4037] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] p-2 z-50 pointer-events-auto scale-90 sm:scale-100">
               <div className="grid grid-cols-4 gap-1 sm:gap-2 w-full">
                 {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
                   <button 
@@ -299,10 +301,12 @@ export const TwentyNineBoard: React.FC = () => {
 
         {/* Right Player */}
         <div className="flex flex-row items-center justify-end absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
-          <div className="-mr-6 sm:-mr-4 scale-[0.6] sm:scale-100 opacity-80 sm:opacity-100 z-0">
+          <div className="-mr-8 sm:-mr-4 scale-50 sm:scale-100 opacity-80 sm:opacity-100 z-0 origin-right">
             {renderHand('right', true)}
           </div>
-          {renderPlayerBadge('right')}
+          <div className="scale-75 sm:scale-100 origin-right">
+            {renderPlayerBadge('right')}
+          </div>
         </div>
 
       </div>
