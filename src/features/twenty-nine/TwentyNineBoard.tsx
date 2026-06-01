@@ -99,8 +99,10 @@ export const TwentyNineBoard: React.FC = () => {
               💡
             </button>
           </div>
-          <div className="mt-2 text-white/90">Our Point: {state.scores.team1}</div>
-          <div className="text-white/90">Their Point: {state.scores.team2}</div>
+          <div className="mt-2 text-white/90 font-bold bg-black/40 px-2 py-1 rounded-md border border-white/10 text-right min-w-[100px]">
+            <div className="text-[10px] text-gray-300">Game: {state.scores.team1} - {state.scores.team2}</div>
+            <div className="text-amber-400 text-sm">Cards: {state.roundPoints.team1} - {state.roundPoints.team2}</div>
+          </div>
           <button className="mt-1 px-4 py-1 bg-gradient-to-b from-[#a0744e] to-[#734e30] border border-[#d6af84] rounded-sm shadow-md pointer-events-auto uppercase">
             Skip
           </button>
