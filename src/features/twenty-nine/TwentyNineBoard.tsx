@@ -1,11 +1,62 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTwentyNine } from './useTwentyNine';
 import { CardUI } from './CardUI';
 import { PlayerPosition, Card } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// --- Sound Effects ---
+const playCardSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+  } catch(e) {}
+};
+
+const playTrickWinSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    
+    [400, 500, 600].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + (i * 0.1));
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime + (i * 0.1));
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i * 0.1) + 0.1);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + (i * 0.1));
+      osc.stop(ctx.currentTime + (i * 0.1) + 0.1);
+    });
+  } catch(e) {}
+};
+
 export const TwentyNineBoard: React.FC = () => {
   const { state, startGame, placeBid, setTrump, revealTrump, playCard } = useTwentyNine();
+  const prevTrickWinner = useRef<PlayerPosition | null>(null);
+
+  // Play sound when trick is won
+  useEffect(() => {
+    if (state.currentTrick.winner && !prevTrickWinner.current) {
+      playTrickWinSound();
+    }
+    prevTrickWinner.current = state.currentTrick.winner;
+  }, [state.currentTrick.winner]);
 
   if (state.phase === 'lobby') {
     return (
@@ -44,7 +95,7 @@ export const TwentyNineBoard: React.FC = () => {
     const isMyTurn = state.turn === pos && state.phase === 'playing';
     
     return (
-      <div className={`flex ${isVertical ? 'flex-col -space-y-12' : '-space-x-12'} items-center justify-center`}>
+      <div className={`flex ${isVertical ? 'flex-col -space-y-16 sm:-space-y-12' : '-space-x-8 sm:-space-x-12'} items-center justify-center`}>
         <AnimatePresence>
           {hand.map((card, i) => (
             <motion.div
@@ -62,8 +113,10 @@ export const TwentyNineBoard: React.FC = () => {
                 isPlayable={isMe && isMyTurn}
                 onClick={() => {
                   if (state.phase === 'playing' && isMe && isMyTurn) {
+                    playCardSound();
                     playCard(pos, card);
                   } else if (state.phase === 'dealing_2' && state.activeBidder === pos) {
+                    playCardSound();
                     setTrump(card);
                   }
                 }}
@@ -81,10 +134,10 @@ export const TwentyNineBoard: React.FC = () => {
     const isBidder = state.activeBidder === pos && state.phase === 'bidding';
     
     return (
-      <div className={`bg-card/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border-2 ${isTurn || isBidder ? 'border-primary ring-4 ring-primary/20 animate-pulse' : 'border-border'}`}>
-        <div className="font-bold text-sm">{player.name}</div>
-        <div className="text-xs text-muted-foreground flex justify-between gap-4 mt-1">
-          <span>{pos === 'bottom' || pos === 'top' ? 'Team 1' : 'Team 2'}</span>
+      <div className={`bg-card/90 backdrop-blur-md px-2 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg border-2 z-20 ${isTurn || isBidder ? 'border-primary ring-2 sm:ring-4 ring-primary/20 animate-pulse scale-105' : 'border-border'}`}>
+        <div className="font-bold text-xs sm:text-sm truncate max-w-[80px] sm:max-w-none">{player.name}</div>
+        <div className="text-[10px] sm:text-xs text-muted-foreground flex justify-between gap-1 sm:gap-4 mt-0.5 sm:mt-1">
+          <span className="hidden sm:inline">{pos === 'bottom' || pos === 'top' ? 'Team 1' : 'Team 2'}</span>
           <span className="font-bold text-foreground">
             {state.tricksWon[pos].length} tricks
           </span>
@@ -94,31 +147,35 @@ export const TwentyNineBoard: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[80vh] bg-green-900 rounded-3xl shadow-inner border-8 border-green-950 overflow-hidden flex flex-col justify-between p-4 sm:p-8">
+    <div className="relative w-full h-[85vh] sm:h-[80vh] bg-green-900 rounded-3xl shadow-inner border-[6px] sm:border-8 border-green-950 overflow-hidden flex flex-col justify-between p-2 sm:p-8">
       {/* Decorative center logo */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-        <div className="w-[30vw] h-[30vw] rounded-full border-8 border-white flex items-center justify-center">
-          <span className="text-[10vw] font-black text-white">29</span>
+        <div className="w-[40vw] h-[40vw] sm:w-[30vw] sm:h-[30vw] rounded-full border-4 sm:border-8 border-white flex items-center justify-center">
+          <span className="text-[15vw] sm:text-[10vw] font-black text-white">29</span>
         </div>
       </div>
 
       {/* Top Player */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2 sm:gap-4">
         {renderPlayerBadge('top')}
         {renderHand('top', false)}
       </div>
 
       {/* Center Area (Left / Tricks / Right) */}
-      <div className="flex justify-between items-center w-full flex-1 my-4">
+      <div className="flex justify-between items-center w-full flex-1 my-2 sm:my-4">
         
         {/* Left Player */}
-        <div className="flex flex-row items-center gap-4 w-32 justify-end">
-          {renderPlayerBadge('left')}
-          {renderHand('left', true)}
+        <div className="flex flex-row items-center gap-2 sm:gap-4 w-20 sm:w-32 justify-end">
+          <div className="absolute left-2 sm:static z-20">
+            {renderPlayerBadge('left')}
+          </div>
+          <div className="ml-8 sm:ml-0">
+            {renderHand('left', true)}
+          </div>
         </div>
 
         {/* The Trick Table & Game Info Center */}
-        <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border border-white/20 flex items-center justify-center bg-black/20 backdrop-blur-sm shadow-2xl">
+        <div className="relative w-48 h-48 sm:w-80 sm:h-80 rounded-full border border-white/20 flex items-center justify-center bg-black/20 backdrop-blur-sm shadow-2xl z-10 shrink-0">
           
           {/* Phase Overlays */}
           {state.phase === 'bidding' && (
@@ -127,18 +184,18 @@ export const TwentyNineBoard: React.FC = () => {
               <p className="text-sm opacity-80 mb-2">Current Bid: {state.currentBid}</p>
               
               {state.activeBidder === state.myPosition ? (
-                <div className="grid grid-cols-3 gap-2 p-2">
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 sm:gap-2 p-2">
                   {[16,17,18,19,20,21,22,23,24,25,26,27,28,29].map(bid => (
                     <button 
                       key={bid}
                       disabled={bid <= state.currentBid}
                       onClick={() => placeBid(bid)}
-                      className="px-2 py-1 bg-white text-black text-xs font-bold rounded disabled:opacity-30"
+                      className="px-1.5 py-1.5 sm:px-2 sm:py-1 bg-white text-black text-[10px] sm:text-xs font-bold rounded disabled:opacity-30 hover:scale-110 transition-transform"
                     >
                       {bid}
                     </button>
                   ))}
-                  <button onClick={() => placeBid('pass')} className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded col-span-3">Pass</button>
+                  <button onClick={() => placeBid('pass')} className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded col-span-4 sm:col-span-5 hover:bg-red-600 transition-colors">Pass</button>
                 </div>
               ) : (
                 <p className="text-xs animate-pulse">Waiting for {state.players[state.activeBidder].name}...</p>
@@ -158,26 +215,28 @@ export const TwentyNineBoard: React.FC = () => {
           )}
 
           {/* Played Cards in Trick */}
-          {state.currentTrick.cards.top && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2">
-              <CardUI card={state.currentTrick.cards.top} className="scale-75" />
-            </div>
-          )}
-          {state.currentTrick.cards.bottom && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-              <CardUI card={state.currentTrick.cards.bottom} className="scale-75 shadow-2xl" />
-            </div>
-          )}
-          {state.currentTrick.cards.left && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              <CardUI card={state.currentTrick.cards.left} className="scale-75 rotate-90" />
-            </div>
-          )}
-          {state.currentTrick.cards.right && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <CardUI card={state.currentTrick.cards.right} className="scale-75 -rotate-90" />
-            </div>
-          )}
+          <AnimatePresence>
+            {state.currentTrick.cards.top && (
+              <motion.div initial={{ y: -50, opacity: 0, rotate: 0 }} animate={{ y: 0, opacity: 1, rotate: 5 }} className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2">
+                <CardUI card={state.currentTrick.cards.top} className="scale-[0.6] sm:scale-75 shadow-2xl" />
+              </motion.div>
+            )}
+            {state.currentTrick.cards.bottom && (
+              <motion.div initial={{ y: 50, opacity: 0, rotate: 0 }} animate={{ y: 0, opacity: 1, rotate: -5 }} className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2">
+                <CardUI card={state.currentTrick.cards.bottom} className="scale-[0.6] sm:scale-75 shadow-2xl z-10" />
+              </motion.div>
+            )}
+            {state.currentTrick.cards.left && (
+              <motion.div initial={{ x: -50, opacity: 0, rotate: 90 }} animate={{ x: 0, opacity: 1, rotate: 80 }} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
+                <CardUI card={state.currentTrick.cards.left} className="scale-[0.6] sm:scale-75 shadow-2xl" />
+              </motion.div>
+            )}
+            {state.currentTrick.cards.right && (
+              <motion.div initial={{ x: 50, opacity: 0, rotate: -90 }} animate={{ x: 0, opacity: 1, rotate: -100 }} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2">
+                <CardUI card={state.currentTrick.cards.right} className="scale-[0.6] sm:scale-75 shadow-2xl" />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Trump Status Indicator */}
           {state.phase === 'playing' && (
@@ -207,15 +266,19 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
 
         {/* Right Player */}
-        <div className="flex flex-row items-center gap-4 w-32 justify-start flex-row-reverse">
-          {renderPlayerBadge('right')}
-          {renderHand('right', true)}
+        <div className="flex flex-row items-center gap-2 sm:gap-4 w-20 sm:w-32 justify-start flex-row-reverse">
+          <div className="absolute right-2 sm:static z-20">
+            {renderPlayerBadge('right')}
+          </div>
+          <div className="mr-8 sm:mr-0">
+            {renderHand('right', true)}
+          </div>
         </div>
 
       </div>
 
       {/* Bottom Player (Self) */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2 sm:gap-4">
         {renderHand('bottom', false)}
         {renderPlayerBadge('bottom')}
       </div>
