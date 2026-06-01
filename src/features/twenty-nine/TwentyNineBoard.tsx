@@ -52,6 +52,27 @@ export const TwentyNineBoard: React.FC = () => {
     />
   );
 
+  // Helper to determine if a player is currently active (bidding, selecting trump, or playing)
+  const isPlayerActive = (pos: PlayerPosition) => {
+    if (state.phase === 'bidding' || state.phase === 'dealing_2') return state.activeBidder === pos;
+    if (state.phase === 'playing') return state.turn === pos;
+    return false;
+  };
+
+  // Render a thinking bubble if it's an AI's turn
+  const renderThinking = (pos: PlayerPosition) => {
+    if (isPlayerActive(pos) && state.players[pos].isAI) {
+      return (
+        <div className="absolute -top-6 -right-4 bg-white text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-lg border border-gray-200 animate-bounce flex gap-1 items-center z-50">
+          <div className="w-1 h-1 bg-black rounded-full animate-pulse" />
+          <div className="w-1 h-1 bg-black rounded-full animate-pulse delay-75" />
+          <div className="w-1 h-1 bg-black rounded-full animate-pulse delay-150" />
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="relative w-full h-full bg-[#2d1b11] overflow-hidden font-sans select-none flex justify-center text-white">
       
@@ -103,32 +124,35 @@ export const TwentyNineBoard: React.FC = () => {
       {/* Avatars */}
       <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] pointer-events-none z-30">
         {/* Top Avatar */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center relative">
+          {renderThinking('top')}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
             {state.players['top'].name}
           </div>
-          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center ${state.turn === 'top' ? 'border-amber-400 ring-2 ring-amber-400' : 'border-[#4a2e15]'}`}>
-             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-10px] flex items-center justify-center text-white text-xs">AI</div>
+          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('top') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
           </div>
         </div>
 
         {/* Left Avatar */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 flex flex-col items-center">
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 flex flex-col items-center relative">
+          {renderThinking('left')}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
             {state.players['left'].name}
           </div>
-          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center ${state.turn === 'left' ? 'border-amber-400 ring-2 ring-amber-400' : 'border-[#4a2e15]'}`}>
-             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-10px] flex items-center justify-center text-white text-xs">AI</div>
+          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
           </div>
         </div>
 
         {/* Right Avatar */}
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 flex flex-col items-center">
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 flex flex-col items-center relative">
+          {renderThinking('right')}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
             {state.players['right'].name}
           </div>
-          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center ${state.turn === 'right' ? 'border-amber-400 ring-2 ring-amber-400' : 'border-[#4a2e15]'}`}>
-             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-10px] flex items-center justify-center text-white text-xs">AI</div>
+          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
           </div>
         </div>
       </div>
@@ -248,11 +272,16 @@ export const TwentyNineBoard: React.FC = () => {
       <div className="absolute bottom-4 sm:bottom-6 left-0 w-full z-40 bg-transparent flex flex-col justify-end items-center pointer-events-none">
         
         {/* Bottom Avatar positioned on top of the hand container */}
-        <div className="flex flex-col items-center mb-2 pointer-events-auto">
+        <div className="flex flex-col items-center mb-2 pointer-events-auto relative">
+          {isPlayerActive('bottom') && (
+            <div className="absolute -top-6 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-amber-600 animate-pulse z-50">
+              Your Turn
+            </div>
+          )}
           <div className="bg-white/90 px-3 py-0.5 rounded-t-md text-[10px] font-bold text-black border-b border-black/20 shadow">
             You
           </div>
-          <div className={`w-14 h-14 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center ${state.turn === 'bottom' ? 'border-amber-400 ring-4 ring-amber-400' : 'border-[#4a2e15]'}`}>
+          <div className={`w-14 h-14 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('bottom') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-10 h-10 bg-slate-500 rounded-full mb-[-12px]" />
           </div>
         </div>
