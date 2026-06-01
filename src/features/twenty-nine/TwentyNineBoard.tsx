@@ -123,7 +123,7 @@ export const TwentyNineBoard: React.FC = () => {
       {/* Avatars */}
       <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] pointer-events-none z-30">
         {/* Top Avatar */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
           {renderThinking('top')}
           {state.trumpRevealed && state.trumpRevealer === 'top' && (
              <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
@@ -140,7 +140,7 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Left Avatar (Screen Relative to prevent clipping but keep on sides) */}
-      <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto relative">
+      <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
         {renderThinking('left')}
         {state.trumpRevealed && state.trumpRevealer === 'left' && (
            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
@@ -156,7 +156,7 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Right Avatar (Screen Relative) */}
-      <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto relative">
+      <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
         {renderThinking('right')}
         {state.trumpRevealed && state.trumpRevealer === 'right' && (
            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
