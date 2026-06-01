@@ -152,10 +152,13 @@ export const TwentyNineBoard: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[85vh] sm:h-[80vh] bg-[#3e2723] overflow-hidden flex flex-col justify-between items-center py-2 sm:py-8 font-sans">
+    <div className="relative w-full h-[100dvh] bg-[#3e2723] overflow-hidden flex flex-col justify-between items-center py-4 sm:py-8 font-sans">
       
       {/* Wooden Oval Table Background */}
-      <div className="absolute top-10 sm:top-12 bottom-10 sm:bottom-12 left-2 right-2 sm:left-1/2 sm:-translate-x-1/2 sm:w-[600px] rounded-[100px] sm:rounded-[200px] bg-gradient-to-b from-[#8d6e63] via-[#795548] to-[#5d4037] shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_20px_50px_rgba(0,0,0,0.5)] border-[8px] border-[#4e342e] flex flex-col overflow-hidden">
+      <div 
+        className="absolute top-12 sm:top-16 bottom-16 sm:bottom-20 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[500px] bg-gradient-to-b from-[#8d6e63] via-[#795548] to-[#5d4037] shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_20px_50px_rgba(0,0,0,0.5)] border-[6px] sm:border-[8px] border-[#4e342e] flex flex-col overflow-hidden"
+        style={{ borderRadius: '50%' }}
+      >
         
         {/* Table Grain Texture (Subtle) */}
         <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(0,0,0,0.1)_2px,rgba(0,0,0,0.1)_4px)]" />
@@ -192,37 +195,37 @@ export const TwentyNineBoard: React.FC = () => {
         )}
 
       {/* Top Player */}
-      <div className="flex flex-col items-center z-20 absolute top-2 sm:top-4 w-full">
+      <div className="flex flex-col items-center z-20 absolute top-2 w-full">
         {renderPlayerBadge('top')}
-        <div className="mt-2 scale-75 sm:scale-100">
+        <div className="mt-1 scale-[0.6] sm:scale-100">
           {renderHand('top', false)}
         </div>
       </div>
 
       {/* Center Area (Left / Tricks / Right) */}
-      <div className="flex justify-between items-center w-full flex-1 my-2 sm:my-4 z-10 px-2 sm:px-12 relative h-full">
+      <div className="flex justify-between items-center w-full flex-1 z-10 px-1 sm:px-12 relative h-full pointer-events-none">
         
         {/* Left Player */}
-        <div className="flex flex-row items-center justify-start absolute left-0 top-1/2 -translate-y-1/2 z-20">
+        <div className="flex flex-row items-center justify-start absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
           {renderPlayerBadge('left')}
-          <div className="-ml-4 scale-75 sm:scale-100 opacity-80 sm:opacity-100">
+          <div className="-ml-6 sm:-ml-4 scale-[0.6] sm:scale-100 opacity-80 sm:opacity-100">
             {renderHand('left', true)}
           </div>
         </div>
 
         {/* The Trick Table & Game Info Center */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[320px] sm:max-w-[400px] h-64 sm:h-80 flex items-center justify-center z-30">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[280px] sm:max-w-[400px] h-64 sm:h-80 flex items-center justify-center z-30 pointer-events-auto">
           
           {/* Phase Overlays */}
           {state.phase === 'bidding' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center w-[90%] max-w-[260px] sm:max-w-[320px] mx-auto bg-[#8d6e63]/95 border-[3px] sm:border-[4px] border-[#5d4037] rounded-xl shadow-2xl p-2 sm:p-3 z-50">
-              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full">
+            <div className="absolute inset-0 flex flex-col items-center justify-center w-[90%] max-w-[240px] sm:max-w-[320px] mx-auto bg-[#8d6e63]/95 border-[3px] border-[#5d4037] rounded-xl shadow-2xl p-1.5 sm:p-3 z-50">
+              <div className="grid grid-cols-4 gap-1 sm:gap-2 w-full">
                 {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
                   <button 
                     key={bid}
                     disabled={bid <= state.currentBid}
                     onClick={() => placeBid(bid)}
-                    className="aspect-square bg-[#795548] text-white text-base sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] disabled:opacity-30 disabled:shadow-none hover:bg-[#8d6e63] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
+                    className="aspect-video sm:aspect-square bg-[#795548] text-white text-sm sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] disabled:opacity-30 disabled:shadow-none hover:bg-[#8d6e63] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
                   >
                     {bid}
                   </button>
@@ -230,13 +233,13 @@ export const TwentyNineBoard: React.FC = () => {
                 <button 
                   disabled={28 <= state.currentBid}
                   onClick={() => placeBid(28)}
-                  className="aspect-square bg-[#795548] text-white text-base sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] disabled:opacity-30 hover:bg-[#8d6e63] transition-all flex items-center justify-center"
+                  className="aspect-video sm:aspect-square bg-[#795548] text-white text-sm sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] disabled:opacity-30 hover:bg-[#8d6e63] transition-all flex items-center justify-center"
                 >
                   28
                 </button>
                 <button 
                   onClick={() => placeBid('pass')} 
-                  className="col-span-3 bg-[#795548] text-white text-base sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] hover:bg-[#8d6e63] active:translate-y-1 transition-all"
+                  className="col-span-3 bg-[#795548] text-white text-sm sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] hover:bg-[#8d6e63] active:translate-y-1 transition-all"
                 >
                   Pass
                 </button>
@@ -295,8 +298,8 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
 
         {/* Right Player */}
-        <div className="flex flex-row items-center justify-end absolute right-0 top-1/2 -translate-y-1/2 z-20">
-          <div className="-mr-4 scale-75 sm:scale-100 opacity-80 sm:opacity-100 z-0">
+        <div className="flex flex-row items-center justify-end absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+          <div className="-mr-6 sm:-mr-4 scale-[0.6] sm:scale-100 opacity-80 sm:opacity-100 z-0">
             {renderHand('right', true)}
           </div>
           {renderPlayerBadge('right')}
@@ -308,8 +311,8 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Bottom Player (Self) */}
-      <div className="flex flex-col items-center z-20 absolute bottom-2 sm:bottom-4 w-full">
-        <div className="mb-2 scale-[0.85] sm:scale-100">
+      <div className="flex flex-col items-center z-20 absolute bottom-2 w-full pointer-events-auto">
+        <div className="mb-1 scale-[0.85] sm:scale-100 origin-bottom">
           {renderHand('bottom', false)}
         </div>
         {renderPlayerBadge('bottom')}
