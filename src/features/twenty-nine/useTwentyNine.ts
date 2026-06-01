@@ -15,7 +15,9 @@ const INITIAL_STATE: GameState = {
   hands: { bottom: [], left: [], top: [], right: [] },
   bids: [],
   currentBid: 15,
+  biddingQueue: [],
   highestBidder: null,
+  challenger: null,
   bidWinner: null,
   activeBidder: 'right', // typically player right of dealer starts bidding. Let's assume bottom is dealer for now, so right starts.
   trumpSuit: null,
@@ -58,9 +60,11 @@ export const useTwentyNine = () => {
       hands: newHands,
       remainingDeck: deck.slice(16, 32), // Custom addition not in type, but ok for JS
       activeBidder: 'right', // right of dealer
+      biddingQueue: ['bottom', 'left', 'top'],
+      highestBidder: 'right', // Right is the initial defender
+      challenger: 'bottom',   // Bottom is the first challenger
       currentBid: 15,
       bids: [],
-      highestBidder: null,
       bidWinner: null,
       trumpSuit: null,
       hiddenTrumpCard: null,
@@ -78,38 +82,76 @@ export const useTwentyNine = () => {
       const newBids = [...prev.bids, { player: prev.activeBidder, amount }];
       
       let newPassedPlayers = prev.passedPlayers || [];
-      if (amount === 'pass') {
-        newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
-      }
-      
+      let newQueue = prev.biddingQueue ? [...prev.biddingQueue] : [];
+      let newHighestBidder = prev.highestBidder;
+      let newChallenger = prev.challenger;
+      let newActiveBidder = prev.activeBidder;
       let nextPhase = prev.phase;
       let bidWinner = prev.bidWinner;
-      let highestBidder = prev.highestBidder;
       let currentBid = prev.currentBid;
-      let activeBidder = prev.activeBidder;
 
-      if (amount !== 'pass') {
-        currentBid = amount as number;
-        highestBidder = prev.activeBidder;
-      }
-
-      // If 4 passes at the start, re-deal
-      if (newBids.length === 4 && newPassedPlayers.length === 4) {
-        setTimeout(dealFirstHalf, 1000);
-        return { ...prev, bids: newBids, currentBid: 15, passedPlayers: newPassedPlayers };
-      }
-
-      // If everyone but one has passed and at least one valid bid was placed, bidding is over
       const validBids = newBids.filter(b => b.amount !== 'pass');
-      if (validBids.length >= 1 && newPassedPlayers.length === 3) {
-        nextPhase = 'dealing_2';
-        bidWinner = highestBidder;
-        activeBidder = bidWinner!; // The winner sets the trump
-      } else if (newPassedPlayers.length < 4) {
-        // Find next active bidder who hasn't passed
-        activeBidder = getNextPlayer(activeBidder);
-        while (newPassedPlayers.includes(activeBidder)) {
-          activeBidder = getNextPlayer(activeBidder);
+      const hasValidBid = validBids.length > 0;
+
+      if (!hasValidBid) {
+        // No valid bids yet. Just finding the first person to bid.
+        if (amount === 'pass') {
+          newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
+          if (newPassedPlayers.length === 4) {
+            setTimeout(dealFirstHalf, 1000);
+            return { ...prev, bids: newBids, currentBid: 15, passedPlayers: newPassedPlayers };
+          }
+          
+          newHighestBidder = prev.challenger;
+          if (newQueue.length > 0) {
+            newChallenger = newQueue.shift()!;
+          }
+          newActiveBidder = newHighestBidder!;
+        } else {
+          // First valid bid made!
+          currentBid = amount as number;
+          newHighestBidder = prev.activeBidder;
+          newActiveBidder = prev.challenger!;
+        }
+      } else {
+        // Duel mode
+        if (amount === 'pass') {
+          newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
+          
+          if (prev.activeBidder === prev.highestBidder) {
+            // Defender passed
+            newHighestBidder = prev.challenger;
+            if (newQueue.length > 0) {
+              newChallenger = newQueue.shift()!;
+              newActiveBidder = newChallenger;
+            } else {
+              nextPhase = 'dealing_2';
+              bidWinner = newHighestBidder;
+              newActiveBidder = bidWinner!;
+            }
+          } else if (prev.activeBidder === prev.challenger) {
+            // Challenger passed
+            if (newQueue.length > 0) {
+              newChallenger = newQueue.shift()!;
+              newActiveBidder = newChallenger;
+            } else {
+              nextPhase = 'dealing_2';
+              bidWinner = newHighestBidder;
+              newActiveBidder = bidWinner!;
+            }
+          }
+        } else {
+          // A higher bid was made
+          currentBid = amount as number;
+          newHighestBidder = prev.activeBidder;
+          
+          if (prev.activeBidder === prev.challenger) {
+            newChallenger = prev.highestBidder;
+            newActiveBidder = newChallenger!;
+          } else {
+            newChallenger = prev.challenger;
+            newActiveBidder = newChallenger!;
+          }
         }
       }
 
@@ -117,10 +159,12 @@ export const useTwentyNine = () => {
         ...prev,
         bids: newBids,
         currentBid,
-        highestBidder,
-        activeBidder,
+        highestBidder: newHighestBidder,
+        challenger: newChallenger,
+        activeBidder: newActiveBidder,
         bidWinner,
         passedPlayers: newPassedPlayers,
+        biddingQueue: newQueue,
         phase: nextPhase
       };
     });
@@ -276,7 +320,7 @@ export const useTwentyNine = () => {
           } else {
             placeBid('pass');
           }
-        }, 1000);
+        }, 2000);
         return () => clearTimeout(timer);
       }
     }
@@ -312,7 +356,7 @@ export const useTwentyNine = () => {
             const cardToPlay = validMoves[Math.floor(Math.random() * validMoves.length)] || hand[0];
             playCard(state.turn, cardToPlay);
           }
-        }, 1500);
+        }, 2000);
         return () => clearTimeout(timer);
       }
     }

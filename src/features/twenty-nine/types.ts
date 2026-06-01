@@ -39,9 +39,11 @@ export interface GameState {
   bids: Bid[];
   currentBid: number;
   highestBidder: PlayerPosition | null;
+  challenger: PlayerPosition | null;
   bidWinner: PlayerPosition | null;
   activeBidder: PlayerPosition;
   passedPlayers: PlayerPosition[];
+  biddingQueue: PlayerPosition[];
   
   // Trump
   trumpSuit: Suit | null;
