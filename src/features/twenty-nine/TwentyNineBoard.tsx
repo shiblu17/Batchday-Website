@@ -62,11 +62,10 @@ export const TwentyNineBoard: React.FC = () => {
   // Render a thinking bubble if it's an AI's turn
   const renderThinking = (pos: PlayerPosition) => {
     if (isPlayerActive(pos) && state.players[pos].isAI) {
+      const actionText = state.phase === 'bidding' ? 'Bidding...' : (state.phase === 'dealing_2' ? 'Choosing Trump...' : 'Thinking...');
       return (
-        <div className="absolute -top-6 -right-4 bg-white text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-lg border border-gray-200 animate-bounce flex gap-1 items-center z-50">
-          <div className="w-1 h-1 bg-black rounded-full animate-pulse" />
-          <div className="w-1 h-1 bg-black rounded-full animate-pulse delay-75" />
-          <div className="w-1 h-1 bg-black rounded-full animate-pulse delay-150" />
+        <div className="absolute -top-6 right-0 translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-lg border border-gray-200 animate-bounce flex gap-1 items-center z-50 whitespace-nowrap">
+          <span>{actionText}</span>
         </div>
       );
     }
@@ -274,8 +273,8 @@ export const TwentyNineBoard: React.FC = () => {
         {/* Bottom Avatar positioned on top of the hand container */}
         <div className="flex flex-col items-center mb-2 pointer-events-auto relative">
           {isPlayerActive('bottom') && (
-            <div className="absolute -top-6 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-amber-600 animate-pulse z-50">
-              Your Turn
+            <div className="absolute -top-6 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-amber-600 animate-pulse z-50 whitespace-nowrap">
+              {state.phase === 'bidding' ? 'Your Turn to Bid' : (state.phase === 'dealing_2' ? 'Set Trump' : 'Your Turn')}
             </div>
           )}
           <div className="bg-white/90 px-3 py-0.5 rounded-t-md text-[10px] font-bold text-black border-b border-black/20 shadow">

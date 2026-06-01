@@ -28,7 +28,8 @@ const INITIAL_STATE: GameState = {
   scores: { team1: 0, team2: 0 },
   roundPoints: { team1: 0, team2: 0 },
   pairRevealedBy: null,
-  pairPointsAdded: false
+  pairPointsAdded: false,
+  passedPlayers: []
 };
 
 export const useTwentyNine = () => {
@@ -68,6 +69,7 @@ export const useTwentyNine = () => {
       currentTrick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
       tricksWon: { bottom: [], left: [], top: [], right: [] },
       roundPoints: { team1: 0, team2: 0 },
+      passedPlayers: []
     } as any));
   };
 
@@ -75,15 +77,16 @@ export const useTwentyNine = () => {
     setState(prev => {
       const newBids = [...prev.bids, { player: prev.activeBidder, amount }];
       
-      // Check if bidding is over (3 consecutive passes after a bid)
-      const passCount = newBids.filter(b => b.amount === 'pass').length;
-      const validBids = newBids.filter(b => b.amount !== 'pass');
+      let newPassedPlayers = prev.passedPlayers || [];
+      if (amount === 'pass') {
+        newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
+      }
       
       let nextPhase = prev.phase;
       let bidWinner = prev.bidWinner;
       let highestBidder = prev.highestBidder;
       let currentBid = prev.currentBid;
-      let activeBidder = getNextPlayer(prev.activeBidder);
+      let activeBidder = prev.activeBidder;
 
       if (amount !== 'pass') {
         currentBid = amount as number;
@@ -91,16 +94,23 @@ export const useTwentyNine = () => {
       }
 
       // If 4 passes at the start, re-deal
-      if (newBids.length === 4 && passCount === 4) {
+      if (newBids.length === 4 && newPassedPlayers.length === 4) {
         setTimeout(dealFirstHalf, 1000);
-        return { ...prev, bids: newBids, currentBid: 15 };
+        return { ...prev, bids: newBids, currentBid: 15, passedPlayers: newPassedPlayers };
       }
 
-      // If 3 passes and 1 valid bid, bidding is over
-      if (validBids.length >= 1 && newBids.slice(-3).every(b => b.amount === 'pass')) {
+      // If everyone but one has passed and at least one valid bid was placed, bidding is over
+      const validBids = newBids.filter(b => b.amount !== 'pass');
+      if (validBids.length >= 1 && newPassedPlayers.length === 3) {
         nextPhase = 'dealing_2';
         bidWinner = highestBidder;
         activeBidder = bidWinner!; // The winner sets the trump
+      } else if (newPassedPlayers.length < 4) {
+        // Find next active bidder who hasn't passed
+        activeBidder = getNextPlayer(activeBidder);
+        while (newPassedPlayers.includes(activeBidder)) {
+          activeBidder = getNextPlayer(activeBidder);
+        }
       }
 
       return {
@@ -110,6 +120,7 @@ export const useTwentyNine = () => {
         highestBidder,
         activeBidder,
         bidWinner,
+        passedPlayers: newPassedPlayers,
         phase: nextPhase
       };
     });
