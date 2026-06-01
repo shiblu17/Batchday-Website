@@ -56,7 +56,7 @@ export const TwentyNineBoard: React.FC = () => {
     <div className="relative w-full h-[100dvh] bg-[#2d1b11] overflow-hidden font-sans select-none flex justify-center text-white">
       
       {/* Top HUD */}
-      <div className="absolute top-2 w-full max-w-[500px] px-4 flex justify-between items-start text-[10px] sm:text-xs font-bold z-20 pointer-events-none">
+      <div className="absolute top-6 sm:top-8 w-full max-w-[500px] px-4 flex justify-between items-start text-[10px] sm:text-xs font-bold z-20 pointer-events-none">
         <div className="flex flex-col items-start gap-1">
           <div className="flex gap-2">
             <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#b5b31d] to-[#4c4a03] border-2 border-[#1a1a1a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] flex items-center justify-center text-lg pointer-events-auto active:scale-95">
@@ -113,8 +113,8 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
 
         {/* Left Avatar */}
-        <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 flex flex-col items-center">
+          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
             {state.players['left'].name}
           </div>
           <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center ${state.turn === 'left' ? 'border-amber-400 ring-2 ring-amber-400' : 'border-[#4a2e15]'}`}>
@@ -123,8 +123,8 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
 
         {/* Right Avatar */}
-        <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 flex flex-col items-center">
+          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
             {state.players['right'].name}
           </div>
           <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center ${state.turn === 'right' ? 'border-amber-400 ring-2 ring-amber-400' : 'border-[#4a2e15]'}`}>
@@ -245,10 +245,10 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Bottom Player (Self) Hand - Pinned to bottom exactly like screenshot */}
-      <div className="absolute bottom-0 left-0 w-full z-40 bg-[#3e2723]/30 pt-2 pb-0 flex justify-center border-t-2 border-[#1a0f09]">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 w-full z-40 bg-transparent flex flex-col justify-end items-center pointer-events-none">
         
         {/* Bottom Avatar positioned on top of the hand container */}
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
+        <div className="flex flex-col items-center mb-2 pointer-events-auto">
           <div className="bg-white/90 px-3 py-0.5 rounded-t-md text-[10px] font-bold text-black border-b border-black/20 shadow">
             You
           </div>
@@ -257,9 +257,9 @@ export const TwentyNineBoard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex justify-center bg-white h-24 sm:h-28 mt-4 overflow-hidden shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex justify-center w-full max-w-[500px] pointer-events-auto">
            {state.hands['bottom'].map((card, i) => (
-             <div key={card.id} className="w-[18vw] max-w-[80px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-2 hover:z-50 cursor-pointer border border-slate-200 bg-white rounded-t-lg shadow-[-2px_0_5px_rgba(0,0,0,0.1)]">
+             <div key={card.id} className="w-[18vw] max-w-[70px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
                {renderCard(card, 'bottom', state.turn === 'bottom' && state.phase === 'playing')}
              </div>
            ))}
