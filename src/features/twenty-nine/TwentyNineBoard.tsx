@@ -133,27 +133,27 @@ export const TwentyNineBoard: React.FC = () => {
              <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
           </div>
         </div>
+      </div>
 
-        {/* Left Avatar */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 flex flex-col items-center relative">
-          {renderThinking('left')}
-          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-            {state.players['left'].name}
-          </div>
-          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
-             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
-          </div>
+      {/* Left Avatar (Screen Relative to prevent clipping but keep on sides) */}
+      <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+        {renderThinking('left')}
+        <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
+          {state.players['left'].name}
         </div>
+        <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+           <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
+        </div>
+      </div>
 
-        {/* Right Avatar */}
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 flex flex-col items-center relative">
-          {renderThinking('right')}
-          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-            {state.players['right'].name}
-          </div>
-          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
-             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
-          </div>
+      {/* Right Avatar (Screen Relative) */}
+      <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+        {renderThinking('right')}
+        <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
+          {state.players['right'].name}
+        </div>
+        <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+           <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
         </div>
       </div>
 
