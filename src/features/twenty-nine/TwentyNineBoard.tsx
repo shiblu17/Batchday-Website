@@ -125,6 +125,11 @@ export const TwentyNineBoard: React.FC = () => {
         {/* Top Avatar */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center relative">
           {renderThinking('top')}
+          {state.trumpRevealed && state.trumpRevealer === 'top' && (
+             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
+               Declared Trump!
+             </motion.div>
+          )}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
             {state.players['top'].name}
           </div>
@@ -135,8 +140,13 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Left Avatar (Screen Relative to prevent clipping but keep on sides) */}
-      <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+      <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto relative">
         {renderThinking('left')}
+        {state.trumpRevealed && state.trumpRevealer === 'left' && (
+           <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
+             Declared Trump!
+           </motion.div>
+        )}
         <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
           {state.players['left'].name}
         </div>
@@ -146,8 +156,13 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Right Avatar (Screen Relative) */}
-      <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+      <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto relative">
         {renderThinking('right')}
+        {state.trumpRevealed && state.trumpRevealer === 'right' && (
+           <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
+             Declared Trump!
+           </motion.div>
+        )}
         <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
           {state.players['right'].name}
         </div>
@@ -166,14 +181,13 @@ export const TwentyNineBoard: React.FC = () => {
             <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px]" />
           </div>
           
-          <div className="flex flex-col items-center -mt-4">
-            <span className="text-white text-[9px] font-bold shadow-black drop-shadow-md tracking-wider">
-              {state.trumpCard ? `7th Card: ${state.trumpCard.rank}` : 'Trump'}
-            </span>
+          <div className="flex flex-col items-center -mt-4 relative">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">Trump</span>
             
-            {state.trumpRevealed && state.trumpCard ? (
-              <div className="scale-75 origin-top"><CardUI card={state.trumpCard} /></div>
+            {state.trumpRevealed && state.hiddenTrumpCard ? (
+              <motion.div initial={{ rotateY: 180 }} animate={{ rotateY: 0 }} transition={{ duration: 0.6 }} className="scale-75 origin-top">
+                <CardUI card={state.hiddenTrumpCard} />
+              </motion.div>
             ) : state.trumpSuit ? (
               <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center">
                  <span className="text-white font-bold">?</span>
