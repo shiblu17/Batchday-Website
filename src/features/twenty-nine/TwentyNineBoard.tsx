@@ -214,18 +214,18 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
 
         {/* The Trick Table & Game Info Center */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[280px] sm:max-w-[400px] h-64 sm:h-80 flex items-center justify-center z-30 pointer-events-auto">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center z-30 pointer-events-none">
           
           {/* Phase Overlays */}
           {state.phase === 'bidding' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center w-[90%] max-w-[240px] sm:max-w-[320px] mx-auto bg-[#8d6e63]/95 border-[3px] border-[#5d4037] rounded-xl shadow-2xl p-1.5 sm:p-3 z-50">
-              <div className="grid grid-cols-4 gap-1 sm:gap-2 w-full">
+            <div className="flex flex-col items-center justify-center w-[90%] max-w-[260px] mx-auto bg-[#8d6e63]/95 border-[4px] border-[#5d4037] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] p-3 z-50 pointer-events-auto">
+              <div className="grid grid-cols-4 gap-2 w-full">
                 {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
                   <button 
                     key={bid}
                     disabled={bid <= state.currentBid}
                     onClick={() => placeBid(bid)}
-                    className="aspect-video sm:aspect-square bg-[#795548] text-white text-sm sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] disabled:opacity-30 disabled:shadow-none hover:bg-[#8d6e63] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
+                    className="aspect-square bg-[#795548] text-white text-base sm:text-lg font-bold rounded-md shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.6)] disabled:opacity-40 disabled:shadow-none hover:bg-[#8d6e63] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
                   >
                     {bid}
                   </button>
@@ -233,13 +233,13 @@ export const TwentyNineBoard: React.FC = () => {
                 <button 
                   disabled={28 <= state.currentBid}
                   onClick={() => placeBid(28)}
-                  className="aspect-video sm:aspect-square bg-[#795548] text-white text-sm sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] disabled:opacity-30 hover:bg-[#8d6e63] transition-all flex items-center justify-center"
+                  className="aspect-square bg-[#795548] text-white text-base sm:text-lg font-bold rounded-md shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.6)] disabled:opacity-40 hover:bg-[#8d6e63] transition-all flex items-center justify-center"
                 >
                   28
                 </button>
                 <button 
                   onClick={() => placeBid('pass')} 
-                  className="col-span-3 bg-[#795548] text-white text-sm sm:text-xl font-bold rounded shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_8px_rgba(0,0,0,0.5)] hover:bg-[#8d6e63] active:translate-y-1 transition-all"
+                  className="col-span-3 bg-[#795548] text-white text-base sm:text-lg font-bold rounded-md shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.6)] hover:bg-[#8d6e63] active:translate-y-1 transition-all"
                 >
                   Pass
                 </button>
@@ -248,7 +248,7 @@ export const TwentyNineBoard: React.FC = () => {
           )}
 
           {state.phase === 'dealing_2' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center w-full max-w-[280px] bg-[#8d6e63]/95 border-[4px] border-[#5d4037] rounded-xl shadow-2xl p-6 text-center text-white z-50">
+            <div className="flex flex-col items-center justify-center w-[90%] max-w-[260px] bg-[#8d6e63]/95 border-[4px] border-[#5d4037] rounded-xl shadow-2xl p-6 text-center text-white z-50 pointer-events-auto">
               <h3 className="font-bold text-xl sm:text-2xl mb-4 drop-shadow-md">
                 {state.players[state.bidWinner!].name} Won Bid ({state.currentBid})
               </h3>
@@ -286,10 +286,10 @@ export const TwentyNineBoard: React.FC = () => {
 
           {/* Trump Status Indicator (Only show Ask Trump button, as HUD is at the top now) */}
           {state.phase === 'playing' && !state.trumpRevealed && state.turn === state.myPosition && (
-            <div className="absolute bottom-[-30px] left-1/2 -translate-x-1/2 bg-[#5d4037]/90 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg border border-[#8d6e63]">
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-[#5d4037]/90 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-[#8d6e63] pointer-events-auto">
               <button 
                 onClick={revealTrump}
-                className="hover:text-amber-200 transition-colors"
+                className="hover:text-amber-200 transition-colors uppercase tracking-widest"
               >
                 Reveal Trump
               </button>
