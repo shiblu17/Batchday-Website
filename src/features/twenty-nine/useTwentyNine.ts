@@ -185,11 +185,10 @@ export const useTwentyNine = () => {
       if (cardOrString === '7th_card') {
         // The 7th card is the 3rd card in the next batch of 4
         hiddenCard = nextFour[2];
-        // Remove it from nextFour so they don't get it in their hand
-        nextFour.splice(2, 1);
+        // DO NOT remove it from nextFour! The player gets all 8 cards immediately.
       } else {
         hiddenCard = cardOrString;
-        // If it's a real card from their hand, remove it
+        // If it's a real card from their hand (e.g. AI setting normal trump), remove it
         if (!hiddenCard.id.startsWith('dummy_')) {
           newHand = newHand.filter((c: Card) => c.id !== hiddenCard.id);
         }
@@ -222,7 +221,11 @@ export const useTwentyNine = () => {
       const newHands = { ...prev.hands };
       // Only give the card back if it's not a dummy conceptual card
       if (!prev.hiddenTrumpCard.id.startsWith('dummy_')) {
-        newHands[prev.bidWinner!] = [...newHands[prev.bidWinner!], prev.hiddenTrumpCard];
+        const bidderHand = newHands[prev.bidWinner!];
+        // Only add it if it's not already in their hand (like the 7th card is)
+        if (!bidderHand.some(c => c.id === prev.hiddenTrumpCard!.id)) {
+          newHands[prev.bidWinner!] = [...bidderHand, prev.hiddenTrumpCard];
+        }
       }
 
       return {

@@ -37,10 +37,10 @@ export const TwentyNineBoard: React.FC = () => {
     );
   }
 
-  const renderCard = (card: any, pos: PlayerPosition, isPlayable: boolean) => (
+  const renderCard = (card: any, pos: PlayerPosition, isPlayable: boolean, isHidden: boolean = false) => (
     <CardUI 
       card={card} 
-      isHidden={false} 
+      isHidden={isHidden} 
       isPlayable={isPlayable}
       onClick={() => {
         if (state.phase === 'playing' && isPlayable) {
@@ -344,11 +344,15 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
 
         <div className="flex justify-center w-full max-w-[500px] pointer-events-auto">
-           {state.hands['bottom'].map((card, i) => (
-             <div key={card.id} className="w-[18vw] max-w-[70px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
-               {renderCard(card, 'bottom', state.turn === 'bottom' && state.phase === 'playing')}
-             </div>
-           ))}
+           {state.hands['bottom'].map((card, i) => {
+             const isHiddenTrump = card.id === state.hiddenTrumpCard?.id && !state.trumpRevealed;
+             const isPlayable = state.turn === 'bottom' && state.phase === 'playing' && !isHiddenTrump;
+             return (
+               <div key={card.id} className="w-[18vw] max-w-[70px] -ml-2 sm:-ml-4 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
+                 {renderCard(card, 'bottom', isPlayable, isHiddenTrump)}
+               </div>
+             );
+           })}
         </div>
       </div>
 
