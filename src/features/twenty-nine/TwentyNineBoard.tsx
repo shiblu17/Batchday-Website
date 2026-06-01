@@ -91,7 +91,7 @@ export const TwentyNineBoard: React.FC = () => {
 
       {/* The 3D Wooden Table */}
       <div 
-        className="absolute top-24 bottom-28 w-[90%] max-w-[420px] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col z-0"
+        className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[10/13] sm:aspect-[3/4] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col z-0"
         style={{ 
           borderRadius: '50%',
           background: '#854d27',
@@ -101,7 +101,7 @@ export const TwentyNineBoard: React.FC = () => {
       />
 
       {/* Avatars */}
-      <div className="absolute top-24 bottom-28 w-[90%] max-w-[420px] pointer-events-none z-30">
+      <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[10/13] sm:aspect-[3/4] pointer-events-none z-30">
         {/* Top Avatar */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
@@ -134,7 +134,7 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Internal Table Elements */}
-      <div className="absolute top-24 bottom-28 w-[90%] max-w-[420px] pointer-events-none z-10">
+      <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[10/13] sm:aspect-[3/4] pointer-events-none z-10">
         
         {/* Top Trick / Status Cards */}
         <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-3/4 flex justify-between items-start">
