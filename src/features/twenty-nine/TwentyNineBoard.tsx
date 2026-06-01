@@ -53,7 +53,7 @@ export const TwentyNineBoard: React.FC = () => {
   );
 
   return (
-    <div className="relative w-full h-[75dvh] sm:h-[calc(100dvh-160px)] lg:h-[800px] min-h-[550px] bg-[#2d1b11] overflow-hidden font-sans select-none flex justify-center text-white sm:rounded-xl sm:shadow-2xl">
+    <div className="relative w-full h-full bg-[#2d1b11] overflow-hidden font-sans select-none flex justify-center text-white">
       
       {/* Top HUD */}
       <div className="absolute top-6 sm:top-8 w-full max-w-[500px] px-4 flex justify-between items-start text-[10px] sm:text-xs font-bold z-20 pointer-events-none">
