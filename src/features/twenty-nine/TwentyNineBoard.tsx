@@ -178,7 +178,16 @@ export const TwentyNineBoard: React.FC = () => {
         <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-3/4 flex justify-between items-start">
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">They</span>
-            <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px]" />
+            <div className="relative">
+              <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px]" />
+              {state.roundPoints.team2 > 0 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
+                    {state.roundPoints.team2}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="flex flex-col items-center -mt-4 relative">
@@ -199,7 +208,16 @@ export const TwentyNineBoard: React.FC = () => {
 
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">We</span>
-            <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px]" />
+            <div className="relative">
+              <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px]" />
+              {state.roundPoints.team1 > 0 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
+                    {state.roundPoints.team1}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
