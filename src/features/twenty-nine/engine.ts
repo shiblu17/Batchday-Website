@@ -127,3 +127,23 @@ export const checkPair = (hand: Card[], trumpSuit: Suit): boolean => {
   const hasQueen = hand.some(c => c.suit === trumpSuit && c.rank === 'Q');
   return hasKing && hasQueen;
 };
+
+export const sortHand = (hand: Card[], hiddenTrumpCardId?: string): Card[] => {
+  const suitOrder: Record<Suit, number> = {
+    spades: 4,
+    hearts: 3,
+    diamonds: 2,
+    clubs: 1
+  };
+  
+  return [...hand].sort((a, b) => {
+    // Keep the hidden trump card at the very end so its position doesn't give away its suit
+    if (a.id === hiddenTrumpCardId && b.id !== hiddenTrumpCardId) return 1;
+    if (b.id === hiddenTrumpCardId && a.id !== hiddenTrumpCardId) return -1;
+    
+    if (suitOrder[a.suit] !== suitOrder[b.suit]) {
+      return suitOrder[b.suit] - suitOrder[a.suit];
+    }
+    return RANK_POWER[b.rank] - RANK_POWER[a.rank];
+  });
+};

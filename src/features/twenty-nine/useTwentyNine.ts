@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GameState, PlayerPosition, Card, Bid, Trick, Suit } from './types';
-import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair } from './engine';
+import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair, sortHand } from './engine';
 
 const INITIAL_STATE: GameState = {
   mode: null,
@@ -46,10 +46,10 @@ export const useTwentyNine = () => {
     const deck = shuffleDeck(createDeck());
     // Deal 4 cards to each
     const newHands = {
-      bottom: deck.slice(0, 4),
-      left: deck.slice(4, 8),
-      top: deck.slice(8, 12),
-      right: deck.slice(12, 16)
+      bottom: sortHand(deck.slice(0, 4)),
+      left: sortHand(deck.slice(4, 8)),
+      top: sortHand(deck.slice(8, 12)),
+      right: sortHand(deck.slice(12, 16))
     };
     
     // Store remaining deck temporarily in a ref or state. We'll just put it in a hidden state property.
@@ -194,12 +194,12 @@ export const useTwentyNine = () => {
         }
       }
       
-      // Deal remaining cards
+      // Deal remaining cards and sort
       const finalHands = {
-        bottom: prev.activeBidder === 'bottom' ? [...newHand, ...nextFour] : [...prev.hands.bottom, ...rem.slice(0, 4)],
-        left: prev.activeBidder === 'left' ? [...newHand, ...nextFour] : [...prev.hands.left, ...rem.slice(4, 8)],
-        top: prev.activeBidder === 'top' ? [...newHand, ...nextFour] : [...prev.hands.top, ...rem.slice(8, 12)],
-        right: prev.activeBidder === 'right' ? [...newHand, ...nextFour] : [...prev.hands.right, ...rem.slice(12, 16)]
+        bottom: sortHand(prev.activeBidder === 'bottom' ? [...newHand, ...nextFour] : [...prev.hands.bottom, ...rem.slice(0, 4)], hiddenCard.id),
+        left: sortHand(prev.activeBidder === 'left' ? [...newHand, ...nextFour] : [...prev.hands.left, ...rem.slice(4, 8)], hiddenCard.id),
+        top: sortHand(prev.activeBidder === 'top' ? [...newHand, ...nextFour] : [...prev.hands.top, ...rem.slice(8, 12)], hiddenCard.id),
+        right: sortHand(prev.activeBidder === 'right' ? [...newHand, ...nextFour] : [...prev.hands.right, ...rem.slice(12, 16)], hiddenCard.id)
       };
 
       return {
@@ -224,7 +224,10 @@ export const useTwentyNine = () => {
         const bidderHand = newHands[prev.bidWinner!];
         // Only add it if it's not already in their hand (like the 7th card is)
         if (!bidderHand.some(c => c.id === prev.hiddenTrumpCard!.id)) {
-          newHands[prev.bidWinner!] = [...bidderHand, prev.hiddenTrumpCard];
+          newHands[prev.bidWinner!] = sortHand([...bidderHand, prev.hiddenTrumpCard]);
+        } else {
+          // It's already in the hand (7th card), just re-sort it without the hidden ID to place it correctly
+          newHands[prev.bidWinner!] = sortHand(bidderHand);
         }
       }
 
