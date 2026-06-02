@@ -285,14 +285,30 @@ export const TwentyNineBoard: React.FC = () => {
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">They</span>
             <div className="relative w-10 h-14">
-              <div className={`absolute inset-0 rounded border border-white/50 shadow-md ${state.scores.team2 >= 0 ? 'bg-slate-900' : 'bg-red-700'}`} />
+              {/* Bottom Card (The 6) */}
+              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-1 overflow-hidden">
+                <div className={`text-[9px] font-bold leading-none ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
+                </div>
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl opacity-20 ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  {state.scores.team2 >= 0 ? '♥' : '♠'}
+                </div>
+                <div className={`text-[9px] font-bold leading-none rotate-180 ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
+                </div>
+              </div>
+
+              {/* Top Card (Card Back) */}
               <motion.div 
-                animate={{ y: Math.abs(state.scores.team2) * 6 }} 
+                animate={{ y: Math.abs(state.scores.team2) * 8 }} 
                 transition={{ type: 'spring', damping: 15 }}
-                className={`absolute inset-0 rounded border-2 border-white/80 shadow-[0_2px_5px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px] ${state.scores.team2 >= 0 ? 'bg-red-700' : 'bg-slate-900'}`} 
-              />
+                className="absolute inset-0 bg-blue-800 rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10"
+              >
+                <div className="w-[85%] h-[85%] border border-white/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.2)_3px,rgba(255,255,255,0.2)_6px)]" />
+              </motion.div>
+
               {state.roundPoints.team2 > 0 && (
-                <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none">
+                <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none z-20">
                   <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
                     {state.roundPoints.team2}
                   </div>
@@ -322,14 +338,30 @@ export const TwentyNineBoard: React.FC = () => {
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">We</span>
             <div className="relative w-10 h-14">
-              <div className={`absolute inset-0 rounded border border-white/50 shadow-md ${state.scores.team1 >= 0 ? 'bg-slate-900' : 'bg-red-700'}`} />
+              {/* Bottom Card (The 6) */}
+              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-1 overflow-hidden">
+                <div className={`text-[9px] font-bold leading-none ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
+                </div>
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl opacity-20 ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  {state.scores.team1 >= 0 ? '♥' : '♠'}
+                </div>
+                <div className={`text-[9px] font-bold leading-none rotate-180 ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
+                </div>
+              </div>
+
+              {/* Top Card (Card Back) */}
               <motion.div 
-                animate={{ y: Math.abs(state.scores.team1) * 6 }} 
+                animate={{ y: Math.abs(state.scores.team1) * 8 }} 
                 transition={{ type: 'spring', damping: 15 }}
-                className={`absolute inset-0 rounded border-2 border-white/80 shadow-[0_2px_5px_rgba(0,0,0,0.5)] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_10%,transparent_10%)] bg-[length:4px_4px] ${state.scores.team1 >= 0 ? 'bg-red-700' : 'bg-slate-900'}`} 
-              />
+                className="absolute inset-0 bg-blue-800 rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10"
+              >
+                <div className="w-[85%] h-[85%] border border-white/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.2)_3px,rgba(255,255,255,0.2)_6px)]" />
+              </motion.div>
+
               {state.roundPoints.team1 > 0 && (
-                <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none">
+                <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none z-20">
                   <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
                     {state.roundPoints.team1}
                   </div>
