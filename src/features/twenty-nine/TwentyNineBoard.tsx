@@ -604,8 +604,7 @@ export const TwentyNineBoard: React.FC = () => {
 
         <div className="flex justify-center w-full max-w-[600px] pointer-events-auto px-2">
            {state.hands['bottom'].map((card, i) => {
-             // Local player should always see all their own cards face up
-             const isHiddenTrump = false;
+             const isHiddenTrump = card.id === state.hiddenTrumpCard?.id && !state.trumpRevealed;
              
              // Check if the player has any playable cards of the lead suit
              const leadSuit = state.currentTrick.leadSuit;

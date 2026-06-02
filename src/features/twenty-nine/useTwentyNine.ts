@@ -254,11 +254,25 @@ export const useTwentyNine = () => {
   const dealSecondHalf = () => {
     setState((prev: any) => {
       const rem = prev.remainingDeck;
+      const getSortedWithHidden = (player: PlayerPosition, newCards: Card[]) => {
+        const allCards = [...prev.hands[player], ...newCards];
+        // If this player has the hidden trump card, keep it at index 6
+        if (prev.hiddenTrumpCard && prev.bidWinner === player && !prev.hiddenTrumpCard.id.startsWith('dummy_')) {
+           const hiddenId = prev.hiddenTrumpCard.id;
+           const otherCards = allCards.filter(c => c.id !== hiddenId);
+           const sortedOthers = sortHand(otherCards);
+           // Insert the hidden card at the 7th position (index 6)
+           sortedOthers.splice(6, 0, prev.hiddenTrumpCard);
+           return sortedOthers;
+        }
+        return sortHand(allCards);
+      };
+
       const finalHands = {
-        bottom: sortHand([...prev.hands.bottom, ...rem.slice(0, 4)]),
-        left: sortHand([...prev.hands.left, ...rem.slice(4, 8)]),
-        top: sortHand([...prev.hands.top, ...rem.slice(8, 12)]),
-        right: sortHand([...prev.hands.right, ...rem.slice(12, 16)])
+        bottom: getSortedWithHidden('bottom', rem.slice(0, 4)),
+        left: getSortedWithHidden('left', rem.slice(4, 8)),
+        top: getSortedWithHidden('top', rem.slice(8, 12)),
+        right: getSortedWithHidden('right', rem.slice(12, 16))
       };
       return {
         ...prev,
