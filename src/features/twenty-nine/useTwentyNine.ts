@@ -1,6 +1,195 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GameState, PlayerPosition, Card, Bid, Trick, Suit } from './types';
 import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair, sortHand, evaluateHandStrength, getBestAIPlay } from './engine';
+import { supabase } from '@/integrations/supabase/client';
+
+const order: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
+
+const dbToLocal = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition => {
+  if (!myPos) return pos;
+  const myIndex = order.indexOf(myPos);
+  const posIndex = order.indexOf(pos);
+  return order[(posIndex - myIndex + 4) % 4];
+};
+
+const localToDb = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition => {
+  if (!myPos) return pos;
+  const myIndex = order.indexOf(myPos);
+  const localIndex = order.indexOf(pos);
+  return order[(localIndex + myIndex) % 4];
+};
+
+const rotatePlayerMap = <T>(map: Record<PlayerPosition, T>, myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb'): Record<PlayerPosition, T> => {
+  const rotated = {} as Record<PlayerPosition, T>;
+  (Object.keys(map) as PlayerPosition[]).forEach(pos => {
+    const targetPos = direction === 'dbToLocal' ? dbToLocal(pos, myPos) : localToDb(pos, myPos);
+    rotated[targetPos] = map[pos];
+  });
+  return rotated;
+};
+
+const rotatePlayerArray = (arr: PlayerPosition[], myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb'): PlayerPosition[] => {
+  return arr.map(pos => direction === 'dbToLocal' ? dbToLocal(pos, myPos) : localToDb(pos, myPos));
+};
+
+const rotateTrick = (trick: any, myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb'): any => {
+  if (!trick) return null;
+  return {
+    ...trick,
+    leadPlayer: direction === 'dbToLocal' ? dbToLocal(trick.leadPlayer, myPos) : localToDb(trick.leadPlayer, myPos),
+    winner: trick.winner ? (direction === 'dbToLocal' ? dbToLocal(trick.winner, myPos) : localToDb(trick.winner, myPos)) : null,
+    cards: rotatePlayerMap(trick.cards, myPos, direction)
+  };
+};
+
+const rotateTricksWon = (tricksWon: Record<PlayerPosition, any[]>, myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb') => {
+  const rotated = {} as Record<PlayerPosition, any[]>;
+  (Object.keys(tricksWon) as PlayerPosition[]).forEach(pos => {
+    const targetPos = direction === 'dbToLocal' ? dbToLocal(pos, myPos) : localToDb(pos, myPos);
+    rotated[targetPos] = (tricksWon[pos] || []).map(t => rotateTrick(t, myPos, direction));
+  });
+  return rotated;
+};
+
+const rotateScores = (scores: { team1: number; team2: number }, myPos: PlayerPosition) => {
+  const isMyTeam2 = (myPos === 'left' || myPos === 'right');
+  return isMyTeam2 ? { team1: scores.team2, team2: scores.team1 } : scores;
+};
+
+const rotateStateDbToLocal = (dbState: any, myPos: PlayerPosition): GameState => {
+  return {
+    ...dbState,
+    myPosition: 'bottom',
+    activeBidder: dbToLocal(dbState.activeBidder, myPos),
+    turn: dbToLocal(dbState.turn, myPos),
+    highestBidder: dbState.highestBidder ? dbToLocal(dbState.highestBidder, myPos) : null,
+    challenger: dbState.challenger ? dbToLocal(dbState.challenger, myPos) : null,
+    bidWinner: dbState.bidWinner ? dbToLocal(dbState.bidWinner, myPos) : null,
+    trumpRevealer: dbState.trumpRevealer ? dbToLocal(dbState.trumpRevealer, myPos) : null,
+    pairRevealedBy: dbState.pairRevealedBy ? dbToLocal(dbState.pairRevealedBy, myPos) : null,
+    duelDefender: dbState.duelDefender ? dbToLocal(dbState.duelDefender, myPos) : undefined,
+    players: rotatePlayerMap(dbState.players, myPos, 'dbToLocal'),
+    hands: rotatePlayerMap(dbState.hands, myPos, 'dbToLocal'),
+    currentTrick: rotateTrick(dbState.currentTrick, myPos, 'dbToLocal'),
+    lastTrick: rotateTrick(dbState.lastTrick, myPos, 'dbToLocal'),
+    tricksWon: rotateTricksWon(dbState.tricksWon, myPos, 'dbToLocal'),
+    passedPlayers: rotatePlayerArray(dbState.passedPlayers || [], myPos, 'dbToLocal'),
+    biddingQueue: rotatePlayerArray(dbState.biddingQueue || [], myPos, 'dbToLocal'),
+    scores: rotateScores(dbState.scores, myPos),
+    roundPoints: rotateScores(dbState.roundPoints, myPos)
+  };
+};
+
+const rotateStateLocalToDb = (localState: any, myPos: PlayerPosition): any => {
+  return {
+    ...localState,
+    activeBidder: localToDb(localState.activeBidder, myPos),
+    turn: localToDb(localState.turn, myPos),
+    highestBidder: localState.highestBidder ? localToDb(localState.highestBidder, myPos) : null,
+    challenger: localState.challenger ? localToDb(localState.challenger, myPos) : null,
+    bidWinner: localState.bidWinner ? localToDb(localState.bidWinner, myPos) : null,
+    trumpRevealer: localState.trumpRevealer ? localToDb(localState.trumpRevealer, myPos) : null,
+    pairRevealedBy: localState.pairRevealedBy ? localToDb(localState.pairRevealedBy, myPos) : null,
+    duelDefender: localState.duelDefender ? localToDb(localState.duelDefender, myPos) : undefined,
+    players: rotatePlayerMap(localState.players, myPos, 'localToDb'),
+    hands: rotatePlayerMap(localState.hands, myPos, 'localToDb'),
+    currentTrick: rotateTrick(localState.currentTrick, myPos, 'localToDb'),
+    lastTrick: rotateTrick(localState.lastTrick, myPos, 'localToDb'),
+    tricksWon: rotateTricksWon(localState.tricksWon, myPos, 'localToDb'),
+    passedPlayers: rotatePlayerArray(localState.passedPlayers || [], myPos, 'localToDb'),
+    biddingQueue: rotatePlayerArray(localState.biddingQueue || [], myPos, 'localToDb'),
+    scores: rotateScores(localState.scores, myPos),
+    roundPoints: rotateScores(localState.roundPoints, myPos)
+  };
+};
+
+const mapDbRoomToLocalState = (
+  dbRoom: any,
+  dbPlayers: any[],
+  allHands: any[],
+  myPos: PlayerPosition
+): GameState => {
+  const absPlayers: Record<PlayerPosition, { id: string; name: string; isAI: boolean }> = {
+    bottom: { id: '', name: 'Empty', isAI: false },
+    left: { id: '', name: 'Empty', isAI: false },
+    top: { id: '', name: 'Empty', isAI: false },
+    right: { id: '', name: 'Empty', isAI: false }
+  };
+  dbPlayers.forEach(p => {
+    absPlayers[p.position as PlayerPosition] = {
+      id: p.user_id,
+      name: p.name,
+      isAI: p.is_ai
+    };
+  });
+
+  const absHands: Record<PlayerPosition, Card[]> = {
+    bottom: [],
+    left: [],
+    top: [],
+    right: []
+  };
+
+  const myHandRow = allHands.find(h => h.position === myPos);
+  const myCards = myHandRow ? (myHandRow.cards as Card[]) : [];
+  absHands[myPos] = myCards;
+
+  const isHostPlayer = dbRoom.creator_id === localStorage.getItem('twenty_nine_player_id');
+  
+  order.forEach(pos => {
+    if (pos === myPos) return;
+    if (isHostPlayer) {
+      const handRow = allHands.find(h => h.position === pos);
+      absHands[pos] = handRow ? (handRow.cards as Card[]) : [];
+    } else {
+      const count = dbRoom.card_counts?.[pos] || 0;
+      absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
+        id: `dummy_${pos}_${idx}`,
+        suit: 'hearts',
+        rank: '7',
+        value: 0
+      }));
+    }
+  });
+
+  const absState = {
+    mode: 'multiplayer' as const,
+    phase: dbRoom.phase as any,
+    players: absPlayers,
+    myPosition: myPos,
+    hands: absHands,
+    bids: [] as Bid[],
+    currentBid: dbRoom.current_bid,
+    highestBidder: dbRoom.highest_bidder as PlayerPosition | null,
+    challenger: dbRoom.highest_bidder ? null : ('bottom' as PlayerPosition),
+    bidWinner: dbRoom.bid_winner as PlayerPosition | null,
+    activeBidder: dbRoom.active_bidder as PlayerPosition,
+    passedPlayers: (dbRoom.passed_players || []) as PlayerPosition[],
+    biddingQueue: (dbRoom.bidding_queue || []) as PlayerPosition[],
+    isDoubled: dbRoom.is_doubled,
+    isRedoubled: dbRoom.is_redoubled,
+    isSingleHand: dbRoom.is_single_hand,
+    gameMessage: dbRoom.game_message,
+    trumpSuit: dbRoom.trump_suit as Suit | null,
+    hiddenTrumpCard: dbRoom.hidden_trump_card as Card | null,
+    trumpRevealed: dbRoom.trump_revealed,
+    trumpRevealer: dbRoom.trump_revealer as PlayerPosition | null,
+    pairRevealedBy: dbRoom.pair_revealed_by as PlayerPosition | null,
+    pairPointsAdded: dbRoom.pair_points_added,
+    currentTrick: dbRoom.current_trick,
+    lastTrick: dbRoom.last_trick,
+    tricksWon: dbRoom.tricks_won,
+    turn: dbRoom.turn as PlayerPosition,
+    scores: dbRoom.scores,
+    roundPoints: dbRoom.round_points,
+    settings: {
+      speed: 'normal' as const,
+      theme: 'wooden' as const
+    }
+  };
+
+  return rotateStateDbToLocal(absState, myPos);
+};
 
 const INITIAL_STATE: GameState = {
   mode: null,
@@ -53,9 +242,705 @@ export const useTwentyNine = () => {
 
   const lastPlayKeyRef = useRef<string>('');
 
+  // --- Multiplayer States ---
+  const [userId] = useState(() => {
+    let id = localStorage.getItem('twenty_nine_player_id');
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      localStorage.setItem('twenty_nine_player_id', id);
+    }
+    return id;
+  });
+  const [nickname, setNicknameState] = useState(() => localStorage.getItem('twenty_nine_nickname') || '');
+  const [roomCode, setRoomCode] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [isHost, setIsHost] = useState(false);
+  const [myPosition, setMyPosition] = useState<PlayerPosition>('bottom');
+  const [playersList, setPlayersList] = useState<any[]>([]);
+
+  const isLocalActionRef = useRef(false);
+  const disconnectTimersRef = useRef<Record<PlayerPosition, any>>({
+    bottom: null, left: null, top: null, right: null
+  });
+
+  const saveNickname = (name: string) => {
+    localStorage.setItem('twenty_nine_nickname', name);
+    setNicknameState(name);
+  };
+
+  const updateStateAndSync = useCallback((updater: (prev: GameState) => GameState) => {
+    setState(prev => {
+      const nextState = updater(prev);
+      
+      // If we are in multiplayer mode, we push the state to Supabase
+      if (nextState.mode === 'multiplayer' && roomId) {
+        const dbState = rotateStateLocalToDb(nextState, myPosition);
+        
+        isLocalActionRef.current = true;
+        
+        const dbUpdate = {
+          phase: dbState.phase,
+          active_bidder: dbState.activeBidder,
+          turn: dbState.turn,
+          current_bid: dbState.currentBid,
+          bid_winner: dbState.bidWinner,
+          highest_bidder: dbState.highestBidder,
+          trump_suit: dbState.trumpSuit,
+          hidden_trump_card: dbState.hiddenTrumpCard,
+          trump_revealed: dbState.trumpRevealed,
+          trump_revealer: dbState.trumpRevealer,
+          pair_revealed_by: dbState.pairRevealedBy,
+          pair_points_added: dbState.pairPointsAdded,
+          is_doubled: dbState.isDoubled,
+          is_redoubled: dbState.isRedoubled,
+          is_single_hand: dbState.isSingleHand,
+          game_message: dbState.gameMessage,
+          current_trick: dbState.currentTrick,
+          last_trick: dbState.lastTrick,
+          tricks_won: dbState.tricksWon,
+          scores: dbState.scores,
+          round_points: dbState.roundPoints,
+          passed_players: dbState.passedPlayers,
+          bidding_queue: dbState.biddingQueue,
+          duel_defender: dbState.duelDefender,
+          card_counts: {
+            bottom: dbState.hands.bottom?.length || 0,
+            left: dbState.hands.left?.length || 0,
+            top: dbState.hands.top?.length || 0,
+            right: dbState.hands.right?.length || 0
+          }
+        };
+
+        supabase
+          .from('twenty_nine_rooms')
+          .update(dbUpdate as any)
+          .eq('id', roomId)
+          .then(({ error }) => {
+            if (error) console.error('Error syncing room to Supabase:', error);
+          });
+          
+        const absMyHand = dbState.hands[myPosition];
+        supabase
+          .from('twenty_nine_hands')
+          .update({ cards: absMyHand } as any)
+          .eq('room_id', roomId)
+          .eq('position', myPosition)
+          .then(({ error }) => {
+            if (error) console.error('Error syncing hand to Supabase:', error);
+          });
+      }
+      
+      return nextState;
+    });
+  }, [roomId, myPosition]);
+
+  // --- Room actions ---
+  const createRoom = async (nick: string) => {
+    if (!nick.trim()) return;
+    saveNickname(nick);
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    const { data: room, error: roomError } = await supabase
+      .from('twenty_nine_rooms')
+      .insert({
+        room_code: code,
+        creator_id: userId,
+        status: 'waiting',
+        phase: 'multiplayer_lobby',
+        scores: { team1: 0, team2: 0 },
+        round_points: { team1: 0, team2: 0 },
+        current_trick: { leadPlayer: null, leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+        tricks_won: { bottom: [], left: [], top: [], right: [] }
+      } as any)
+      .select()
+      .single();
+
+    if (roomError || !room) {
+      console.error('Error creating room:', roomError);
+      return;
+    }
+
+    const { error: playerError } = await supabase
+      .from('twenty_nine_players')
+      .insert({
+        room_id: room.id,
+        user_id: userId,
+        name: nick,
+        position: 'bottom',
+        is_ai: false
+      } as any);
+
+    if (playerError) {
+      console.error('Error adding creator to players:', playerError);
+      return;
+    }
+
+    setRoomCode(code);
+    setRoomId(room.id);
+    setIsHost(true);
+    setMyPosition('bottom');
+    
+    setState({
+      ...INITIAL_STATE,
+      mode: 'multiplayer',
+      phase: 'multiplayer_lobby',
+      myPosition: 'bottom',
+      players: {
+        bottom: { id: userId, name: nick, isAI: false },
+        left: { id: '', name: 'Empty', isAI: false },
+        top: { id: '', name: 'Empty', isAI: false },
+        right: { id: '', name: 'Empty', isAI: false }
+      }
+    });
+
+    await fetchRoomState(room.id, 'bottom');
+  };
+
+  const joinRoom = async (code: string, nick: string) => {
+    if (!code.trim() || !nick.trim()) return;
+    saveNickname(nick);
+
+    const { data: room, error: roomError } = await supabase
+      .from('twenty_nine_rooms')
+      .select('*')
+      .eq('room_code', code)
+      .eq('status', 'waiting')
+      .single();
+
+    if (roomError || !room) {
+      alert('Room not found or game already started!');
+      return;
+    }
+
+    const { data: players, error: playersError } = await supabase
+      .from('twenty_nine_players')
+      .select('*')
+      .eq('room_id', room.id);
+
+    if (playersError || !players) {
+      console.error('Error fetching players:', playersError);
+      return;
+    }
+
+    if (players.length >= 4) {
+      alert('Room is full!');
+      return;
+    }
+
+    const takenPositions = players.map(p => p.position);
+    const orderAbs: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
+    const myPos = orderAbs.find(pos => !takenPositions.includes(pos));
+    
+    if (!myPos) {
+      alert('Room is full!');
+      return;
+    }
+
+    const { error: playerError } = await supabase
+      .from('twenty_nine_players')
+      .insert({
+        room_id: room.id,
+        user_id: userId,
+        name: nick,
+        position: myPos,
+        is_ai: false
+      } as any);
+
+    if (playerError) {
+      console.error('Error adding player:', playerError);
+      return;
+    }
+
+    setRoomCode(code);
+    setRoomId(room.id);
+    setIsHost(false);
+    setMyPosition(myPos);
+
+    await fetchRoomState(room.id, myPos);
+  };
+
+  const exitRoom = async () => {
+    if (!roomId) return;
+
+    if (isHost) {
+      await supabase.from('twenty_nine_rooms').delete().eq('id', roomId);
+    } else {
+      await supabase
+        .from('twenty_nine_players')
+        .delete()
+        .eq('room_id', roomId)
+        .eq('user_id', userId);
+    }
+
+    setRoomCode(null);
+    setRoomId(null);
+    setIsHost(false);
+    setMyPosition('bottom');
+    setState(INITIAL_STATE);
+  };
+
+  const addAIBot = async (localPos: PlayerPosition) => {
+    if (!roomId || !isHost) return;
+    const absPos = localToDb(localPos, myPosition);
+    
+    await supabase.from('twenty_nine_players').insert({
+      room_id: roomId,
+      user_id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+      name: `AI ${localPos.charAt(0).toUpperCase() + localPos.slice(1)}`,
+      position: absPos,
+      is_ai: true
+    } as any);
+  };
+
+  const removePlayerOrBot = async (localPos: PlayerPosition) => {
+    if (!roomId || !isHost) return;
+    const absPos = localToDb(localPos, myPosition);
+    await supabase
+      .from('twenty_nine_players')
+      .delete()
+      .eq('room_id', roomId)
+      .eq('position', absPos);
+  };
+
+  const startOnlineGame = async () => {
+    if (!roomId || !isHost) return;
+    
+    const { data: dbPlayers } = await supabase
+      .from('twenty_nine_players')
+      .select('*')
+      .eq('room_id', roomId);
+      
+    if (!dbPlayers) return;
+    
+    const takenPositions = dbPlayers.map(p => p.position);
+    const allPositions: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
+    for (const pos of allPositions) {
+      if (!takenPositions.includes(pos)) {
+        await supabase.from('twenty_nine_players').insert({
+          room_id: roomId,
+          user_id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+          name: `AI Bot`,
+          position: pos,
+          is_ai: true
+        } as any);
+      }
+    }
+
+    await supabase
+      .from('twenty_nine_rooms')
+      .update({
+        status: 'playing',
+        phase: 'dealing_1'
+      } as any)
+      .eq('id', roomId);
+      
+    dealFirstHalfOnline();
+  };
+
+  const fetchRoomState = async (rId: string, currentMyPos: PlayerPosition) => {
+    const { data: dbRoom } = await supabase
+      .from('twenty_nine_rooms')
+      .select('*')
+      .eq('id', rId)
+      .single();
+      
+    const { data: dbPlayers } = await supabase
+      .from('twenty_nine_players')
+      .select('*')
+      .eq('room_id', rId);
+
+    const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', rId);
+    const creatorId = dbRoom?.creator_id;
+    const isHostPlayer = creatorId === userId;
+    if (!isHostPlayer) {
+      handsQuery.eq('position', currentMyPos);
+    }
+    const { data: dbHands } = await handsQuery;
+
+    if (dbRoom && dbPlayers && dbHands) {
+      const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, currentMyPos);
+      setState(nextLocalState);
+      setPlayersList(dbPlayers);
+    }
+  };
+
+  const replacePlayerWithAI = async (localPos: PlayerPosition) => {
+    if (!roomId) return;
+    const absPos = localToDb(localPos, myPosition);
+    
+    await supabase
+      .from('twenty_nine_players')
+      .update({
+        is_ai: true,
+        name: `AI ${localPos.charAt(0).toUpperCase() + localPos.slice(1)}`
+      } as any)
+      .eq('room_id', roomId)
+      .eq('position', absPos);
+  };
+
+  const updateGameMessage = async (msg: string) => {
+    if (!roomId) return;
+    await supabase
+      .from('twenty_nine_rooms')
+      .update({ game_message: msg } as any)
+      .eq('id', roomId);
+  };
+
+  const dealFirstHalfOnline = async () => {
+    if (!roomId || !isHost) return;
+    
+    const deck = shuffleDeck(createDeck());
+    const absHands = {
+      bottom: sortHand(deck.slice(0, 4)),
+      left: sortHand(deck.slice(4, 8)),
+      top: sortHand(deck.slice(8, 12)),
+      right: sortHand(deck.slice(12, 16))
+    };
+    
+    const hasZeroPoints = Object.values(absHands).some(hand => hand.reduce((sum, c) => sum + c.value, 0) === 0);
+    if (hasZeroPoints) {
+      return dealFirstHalfOnline();
+    }
+    
+    await supabase.from('twenty_nine_hands').delete().eq('room_id', roomId);
+    
+    const handsToInsert = Object.keys(absHands).map(pos => {
+      const position = pos as PlayerPosition;
+      return {
+        room_id: roomId,
+        position: position,
+        user_id: position === 'bottom' ? userId : (playersList.find(p => p.position === position)?.user_id || userId),
+        cards: absHands[position]
+      };
+    });
+    await supabase.from('twenty_nine_hands').insert(handsToInsert as any);
+    
+    const cardCounts = {
+      bottom: absHands.bottom.length,
+      left: absHands.left.length,
+      top: absHands.top.length,
+      right: absHands.right.length
+    };
+    
+    isLocalActionRef.current = true;
+    
+    await supabase
+      .from('twenty_nine_rooms')
+      .update({
+        phase: 'bidding',
+        active_bidder: 'right',
+        bidding_queue: ['left', 'top'],
+        highest_bidder: 'right',
+        challenger: 'bottom',
+        current_bid: 15,
+        is_doubled: false,
+        is_redoubled: false,
+        is_single_hand: false,
+        game_message: null,
+        trump_suit: null,
+        hidden_trump_card: null,
+        trump_revealed: false,
+        trump_revealer: null,
+        pair_revealed_by: null,
+        pair_points_added: false,
+        current_trick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+        last_trick: null,
+        tricks_won: { bottom: [], left: [], top: [], right: [] },
+        scores: stateRef.current.scores || { team1: 0, team2: 0 },
+        round_points: { team1: 0, team2: 0 },
+        passed_players: [],
+        card_counts: cardCounts,
+        remaining_deck: deck.slice(16, 32)
+      } as any)
+      .eq('id', roomId);
+  };
+
+  const dealSecondHalfOnline = async () => {
+    if (!roomId || !isHost) return;
+    
+    const { data: dbRoom } = await supabase
+      .from('twenty_nine_rooms')
+      .select('*')
+      .eq('id', roomId)
+      .single();
+      
+    if (!dbRoom) return;
+    
+    const rem = dbRoom.remaining_deck as Card[];
+    const hiddenTrump = dbRoom.hidden_trump_card as Card | null;
+    const bidWinner = dbRoom.bid_winner as PlayerPosition;
+    
+    const { data: dbHands } = await supabase
+      .from('twenty_nine_hands')
+      .select('*')
+      .eq('room_id', roomId);
+      
+    if (!dbHands) return;
+    
+    const getSortedWithHidden = (player: PlayerPosition, currentCards: Card[], newCards: Card[]) => {
+      const allCards = [...currentCards, ...newCards];
+      if (hiddenTrump && bidWinner === player && !hiddenTrump.id.startsWith('dummy_')) {
+         const hiddenSuit = hiddenTrump.suit;
+         const hiddenRank = hiddenTrump.rank;
+         const otherCards = allCards.filter(c => !(c.suit === hiddenSuit && c.rank === hiddenRank));
+         const sortedOthers = sortHand(otherCards);
+         sortedOthers.splice(6, 0, hiddenTrump);
+         return sortedOthers;
+      }
+      return sortHand(allCards);
+    };
+
+    const updatedAbsHands: Record<PlayerPosition, Card[]> = {} as any;
+    const orderAbs: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
+    for (let i = 0; i < 4; i++) {
+      const pos = orderAbs[i];
+      const handRow = dbHands.find(h => h.position === pos);
+      const currentCards = handRow ? (handRow.cards as Card[]) : [];
+      const newCards = rem.slice(i * 4, (i + 1) * 4);
+      const finalHand = getSortedWithHidden(pos, currentCards, newCards);
+      
+      updatedAbsHands[pos] = finalHand;
+      
+      await supabase
+        .from('twenty_nine_hands')
+        .update({ cards: finalHand } as any)
+        .eq('room_id', roomId)
+        .eq('position', pos);
+    }
+    
+    const cardCounts = {
+      bottom: updatedAbsHands.bottom.length,
+      left: updatedAbsHands.left.length,
+      top: updatedAbsHands.top.length,
+      right: updatedAbsHands.right.length
+    };
+    
+    isLocalActionRef.current = true;
+    
+    await supabase
+      .from('twenty_nine_rooms')
+      .update({
+        phase: 'single_hand_decision',
+        active_bidder: bidWinner,
+        remaining_deck: [],
+        card_counts: cardCounts,
+        game_message: null
+      } as any)
+      .eq('id', roomId);
+  };
+
+  // --- Realtime Subscriptions ---
+  useEffect(() => {
+    if (state.mode !== 'multiplayer' || !roomId) return;
+
+    const roomChannel = supabase.channel(`room_sync_${roomId}`);
+    
+    roomChannel
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'twenty_nine_rooms',
+        filter: `id=eq.${roomId}`
+      }, async (payload) => {
+        if (isLocalActionRef.current) {
+          isLocalActionRef.current = false;
+          return;
+        }
+
+        const dbRoom = payload.new;
+        
+        const { data: dbPlayers } = await supabase
+          .from('twenty_nine_players')
+          .select('*')
+          .eq('room_id', roomId);
+          
+        const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', roomId);
+        if (!isHost) {
+          handsQuery.eq('position', myPosition);
+        }
+        const { data: dbHands } = await handsQuery;
+
+        if (dbPlayers && dbHands) {
+          // Referee Marriage / Pair Check
+          if (isHost && dbRoom.trump_revealed && !dbRoom.pair_revealed_by && dbRoom.trump_suit) {
+            const tSuit = dbRoom.trump_suit;
+            let pairPos: string | null = null;
+            for (const h of dbHands) {
+              const cards = h.cards as Card[];
+              const hasKing = cards.some(c => c.suit === tSuit && c.rank === 'K');
+              const hasQueen = cards.some(c => c.suit === tSuit && c.rank === 'Q');
+              if (hasKing && hasQueen) {
+                pairPos = h.position;
+                break;
+              }
+            }
+            if (pairPos) {
+              await supabase
+                .from('twenty_nine_rooms')
+                .update({ pair_revealed_by: pairPos } as any)
+                .eq('id', roomId);
+              return; // wait for next update triggered by this change
+            }
+          }
+
+          const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, myPosition);
+          
+          setState(prev => ({
+            ...nextLocalState,
+            settings: prev.settings
+          }));
+        }
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'twenty_nine_rooms',
+        filter: `id=eq.${roomId}`
+      }, () => {
+        alert('Room has been closed by the host.');
+        setRoomCode(null);
+        setRoomId(null);
+        setIsHost(false);
+        setState(INITIAL_STATE);
+      })
+      .subscribe();
+
+    const playersChannel = supabase.channel(`players_sync_${roomId}`);
+    playersChannel
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'twenty_nine_players',
+        filter: `room_id=eq.${roomId}`
+      }, async () => {
+        const { data: dbPlayers } = await supabase
+          .from('twenty_nine_players')
+          .select('*')
+          .eq('room_id', roomId);
+          
+        if (dbPlayers) {
+          const absPlayers: Record<PlayerPosition, { id: string; name: string; isAI: boolean }> = {
+            bottom: { id: '', name: 'Empty', isAI: false },
+            left: { id: '', name: 'Empty', isAI: false },
+            top: { id: '', name: 'Empty', isAI: false },
+            right: { id: '', name: 'Empty', isAI: false }
+          };
+          dbPlayers.forEach(p => {
+            absPlayers[p.position as PlayerPosition] = {
+              id: p.user_id,
+              name: p.name,
+              isAI: p.is_ai
+            };
+          });
+
+          const localPlayers = rotatePlayerMap(absPlayers, myPosition, 'dbToLocal');
+          
+          setState(prev => ({
+            ...prev,
+            players: localPlayers
+          }));
+          
+          setPlayersList(dbPlayers);
+        }
+      })
+      .subscribe();
+
+    const handChannel = supabase.channel(`hand_sync_${roomId}`);
+    handChannel
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'twenty_nine_hands',
+        filter: `room_id=eq.${roomId}`
+      }, async (payload: any) => {
+        if (payload.new && payload.new.position === myPosition) {
+          const newCards = payload.new.cards as Card[];
+          setState(prev => ({
+            ...prev,
+            hands: {
+              ...prev.hands,
+              bottom: newCards
+            }
+          }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      roomChannel.unsubscribe();
+      playersChannel.unsubscribe();
+      handChannel.unsubscribe();
+    };
+  }, [roomId, myPosition, isHost]);
+
+  // --- Presence ---
+  useEffect(() => {
+    if (state.mode !== 'multiplayer' || !roomId) return;
+
+    const presenceChannel = supabase.channel(`room_presence_${roomId}`);
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = presenceChannel.presenceState();
+        const activeUserIds = new Set<string>();
+        Object.values(presenceState).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p.user_id) activeUserIds.add(p.user_id);
+          });
+        });
+
+        if (isHost && state.phase !== 'lobby' && state.phase !== 'multiplayer_lobby') {
+          (Object.keys(state.players) as PlayerPosition[]).forEach(pos => {
+            const p = state.players[pos];
+            if (p && !p.isAI && p.id !== userId) {
+              const isOnline = activeUserIds.has(p.id);
+              if (!isOnline) {
+                if (!disconnectTimersRef.current[pos]) {
+                  disconnectTimersRef.current[pos] = setTimeout(() => {
+                    replacePlayerWithAI(pos);
+                    disconnectTimersRef.current[pos] = null;
+                  }, 60000);
+                  updateGameMessage(`Player ${p.name} disconnected. Replacing with AI in 60s...`);
+                }
+              } else {
+                if (disconnectTimersRef.current[pos]) {
+                  clearTimeout(disconnectTimersRef.current[pos]);
+                  disconnectTimersRef.current[pos] = null;
+                  updateGameMessage(`Player ${p.name} reconnected.`);
+                }
+              }
+            }
+          });
+        }
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({ user_id: userId, name: nickname });
+        }
+      });
+
+    return () => {
+      presenceChannel.unsubscribe();
+      Object.keys(disconnectTimersRef.current).forEach(key => {
+        const pos = key as PlayerPosition;
+        if (disconnectTimersRef.current[pos]) {
+          clearTimeout(disconnectTimersRef.current[pos]);
+          disconnectTimersRef.current[pos] = null;
+        }
+      });
+    };
+  }, [roomId, isHost, state.players, state.phase]);
+
+  // --- Game State Modifying Handlers ---
+
   const startGame = (mode: 'ai' | 'multiplayer') => {
-    setState(prev => ({ ...prev, mode, phase: 'dealing_1' }));
-    dealFirstHalf();
+    if (mode === 'multiplayer') {
+      startOnlineGame();
+    } else {
+      setState(prev => ({ ...prev, mode, phase: 'dealing_1' }));
+      dealFirstHalf();
+    }
   };
 
   const updateSettings = (speed: 'normal' | 'fast', theme: 'wooden' | 'green') => {
@@ -67,7 +952,6 @@ export const useTwentyNine = () => {
 
   const dealFirstHalf = () => {
     const deck = shuffleDeck(createDeck());
-    // Deal 4 cards to each
     const newHands = {
       bottom: sortHand(deck.slice(0, 4)),
       left: sortHand(deck.slice(4, 8)),
@@ -75,23 +959,20 @@ export const useTwentyNine = () => {
       right: sortHand(deck.slice(12, 16))
     };
     
-    // Check for Round Cancellation (0 points in first 4 cards)
     const hasZeroPoints = Object.values(newHands).some(hand => hand.reduce((sum, c) => sum + c.value, 0) === 0);
     if (hasZeroPoints) {
-      return dealFirstHalf(); // Recursively re-deal until hands are valid
+      return dealFirstHalf();
     }
     
-    // Store remaining deck temporarily in a ref or state. We'll just put it in a hidden state property.
-    // For simplicity, let's just add it to state.
     setState(prev => ({
       ...prev,
       phase: 'bidding',
       hands: newHands,
-      remainingDeck: deck.slice(16, 32), // Custom addition not in type, but ok for JS
-      activeBidder: 'right', // right of dealer
-      biddingQueue: ['left', 'top'], // 'bottom' is already the challenger
-      highestBidder: 'right', // Right is the initial defender
-      challenger: 'bottom',   // Bottom is the first challenger
+      remainingDeck: deck.slice(16, 32),
+      activeBidder: 'right',
+      biddingQueue: ['left', 'top'],
+      highestBidder: 'right',
+      challenger: 'bottom',
       currentBid: 15,
       isDoubled: false,
       isRedoubled: false,
@@ -102,6 +983,8 @@ export const useTwentyNine = () => {
       hiddenTrumpCard: null,
       trumpRevealed: false,
       trumpRevealer: null,
+      pairRevealedBy: null,
+      pairPointsAdded: false,
       currentTrick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
       lastTrick: null,
       tricksWon: { bottom: [], left: [], top: [], right: [] },
@@ -111,7 +994,7 @@ export const useTwentyNine = () => {
   };
 
   const placeBid = (amount: number | 'pass') => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       const newBids = [...prev.bids, { player: prev.activeBidder, amount }];
       
       let newPassedPlayers = prev.passedPlayers || [];
@@ -135,11 +1018,9 @@ export const useTwentyNine = () => {
         newActiveBidder = bidWinner;
       } else if (amount === 'double') {
         isDoubled = true;
-        // Turn goes to the highest bidder to let them redouble or pass/continue
         newActiveBidder = newHighestBidder!;
       } else if (amount === 'redouble') {
         isRedoubled = true;
-        // Bidding ends after redouble
         nextPhase = 'set_trump';
         bidWinner = newHighestBidder;
         newActiveBidder = bidWinner!;
@@ -148,7 +1029,6 @@ export const useTwentyNine = () => {
         const hasValidBid = validBids.length > 0;
 
         if (!hasValidBid) {
-          // No valid bids yet. Just finding the first person to bid.
           if (amount === 'pass') {
             newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
             if (newPassedPlayers.length === 4) {
@@ -162,35 +1042,31 @@ export const useTwentyNine = () => {
             }
             newActiveBidder = newHighestBidder!;
           } else {
-            // First valid bid made!
             currentBid = amount as number;
             newHighestBidder = prev.activeBidder;
             newActiveBidder = prev.challenger!;
-            prev.duelDefender = prev.activeBidder; // The first bidder is the original defender
+            prev.duelDefender = prev.activeBidder;
           }
         } else {
-          // Duel mode
           if (amount === 'pass') {
             newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
             
             if (prev.activeBidder === prev.highestBidder) {
-              // Defender passed
               newHighestBidder = prev.challenger;
               if (newQueue.length > 0) {
                 newChallenger = newQueue.shift()!;
                 newActiveBidder = newChallenger;
-                prev.duelDefender = newHighestBidder; // The winner of this duel becomes the defender for the next
+                prev.duelDefender = newHighestBidder;
               } else {
                 nextPhase = 'doubling_phase';
                 bidWinner = newHighestBidder;
                 newActiveBidder = (bidWinner === 'bottom' || bidWinner === 'top') ? 'right' : 'bottom';
               }
             } else if (prev.activeBidder === prev.challenger) {
-              // Challenger passed
               if (newQueue.length > 0) {
                 newChallenger = newQueue.shift()!;
                 newActiveBidder = newChallenger;
-                prev.duelDefender = newHighestBidder; // highestBidder remains the defender
+                prev.duelDefender = newHighestBidder;
               } else {
                 nextPhase = 'doubling_phase';
                 bidWinner = newHighestBidder;
@@ -198,7 +1074,6 @@ export const useTwentyNine = () => {
               }
             }
           } else {
-            // A higher bid was made
             currentBid = amount as number;
             newHighestBidder = prev.activeBidder;
             
@@ -233,22 +1108,20 @@ export const useTwentyNine = () => {
   };
 
   const handleDoubleDecision = (action: 'double' | 'cancel') => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       if (action === 'double') {
         const nextPhase = 'redoubling_phase';
-        // Give redouble option to the bid winner's team
         const newActiveBidder = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'bottom' : 'right';
         const msg = prev.activeBidder === 'bottom' ? "You doubled the game!" : `${prev.players[prev.activeBidder].name} doubled the game!`;
         return { ...prev, isDoubled: true, phase: nextPhase, activeBidder: newActiveBidder, gameMessage: msg };
       } else {
-        // Continue to set_trump
         return { ...prev, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: null };
       }
     });
   };
 
   const handleRedoubleDecision = (action: 'redouble' | 'cancel') => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       if (action === 'redouble') {
         const msg = prev.activeBidder === 'bottom' ? "You redoubled the game!" : `${prev.players[prev.activeBidder].name} redoubled the game!`;
         return { ...prev, isRedoubled: true, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: msg };
@@ -268,7 +1141,6 @@ export const useTwentyNine = () => {
            const hiddenRank = prev.hiddenTrumpCard.rank;
            const otherCards = allCards.filter(c => !(c.suit === hiddenSuit && c.rank === hiddenRank));
            const sortedOthers = sortHand(otherCards);
-           // Insert the hidden card at the 7th position (index 6)
            sortedOthers.splice(6, 0, prev.hiddenTrumpCard);
            return sortedOthers;
         }
@@ -293,7 +1165,7 @@ export const useTwentyNine = () => {
   };
 
   const handleSingleHandDecision = (action: 'yes' | 'no') => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       if (action === 'yes') {
         return {
           ...prev,
@@ -302,13 +1174,13 @@ export const useTwentyNine = () => {
           trumpRevealed: false,
           trumpSuit: null,
           hiddenTrumpCard: null,
-          turn: prev.bidWinner! // Bid winner always leads
+          turn: prev.bidWinner!
         };
       } else {
         return { 
           ...prev, 
           phase: 'playing',
-          turn: 'right' // Player right of dealer leads the first trick
+          turn: 'right'
         };
       }
     });
@@ -316,23 +1188,28 @@ export const useTwentyNine = () => {
 
   useEffect(() => {
     if (state.phase === 'dealing_2') {
-      const timer = setTimeout(dealSecondHalf, 1000);
-      return () => clearTimeout(timer);
+      if (state.mode === 'multiplayer') {
+        if (isHost) {
+          const timer = setTimeout(dealSecondHalfOnline, 1000);
+          return () => clearTimeout(timer);
+        }
+      } else {
+        const timer = setTimeout(dealSecondHalf, 1000);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [state.phase]);
+  }, [state.phase, state.mode, isHost]);
 
   const setTrump = (suitOrCard: Suit | Card | '7th_card') => {
-    setState((prev: any) => {
+    updateStateAndSync((prev: any) => {
       let hiddenCard: Card;
       let newHand = [...prev.hands[prev.activeBidder]];
       if (suitOrCard === '7th_card') {
         const playerIndex = ['bottom', 'left', 'top', 'right'].indexOf(prev.activeBidder);
         const rem = prev.remainingDeck;
-        // The 7th card is the 3rd card in their 2nd batch (which is index 2 of their 4 cards)
         hiddenCard = rem[playerIndex * 4 + 2];
       } else {
         hiddenCard = suitOrCard as Card;
-        // We no longer remove the card from the hand, so they always play with 8 cards.
       }
       
       const finalHands = {
@@ -352,18 +1229,15 @@ export const useTwentyNine = () => {
   };
 
   const revealTrump = () => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       if (!prev.hiddenTrumpCard || prev.trumpRevealed) return prev;
       
       const newHands = { ...prev.hands };
-      // Only give the card back if it's not a dummy conceptual card
       if (!prev.hiddenTrumpCard.id.startsWith('dummy_')) {
         const bidderHand = newHands[prev.bidWinner!];
-        // Only add it if it's not already in their hand (like the 7th card is)
         if (!bidderHand.some(c => c.id === prev.hiddenTrumpCard!.id)) {
           newHands[prev.bidWinner!] = sortHand([...bidderHand, prev.hiddenTrumpCard]);
         } else {
-          // It's already in the hand (7th card), just re-sort it without the hidden ID to place it correctly
           newHands[prev.bidWinner!] = sortHand(bidderHand);
         }
       }
@@ -371,7 +1245,6 @@ export const useTwentyNine = () => {
       let pairRevealedBy: PlayerPosition | null = null;
       const tSuit = prev.hiddenTrumpCard.suit;
       
-      // Check for Pair (King and Queen of Trump Suit)
       for (const player of Object.keys(newHands) as PlayerPosition[]) {
         const hand = newHands[player];
         const hasKing = hand.some(c => c.suit === tSuit && c.rank === 'K');
@@ -394,7 +1267,7 @@ export const useTwentyNine = () => {
   };
 
   const playCard = (player: PlayerPosition, card: Card) => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       if (prev.turn !== player) return prev;
 
       const newHand = prev.hands[player].filter(c => c.id !== card.id);
@@ -420,7 +1293,6 @@ export const useTwentyNine = () => {
       let newGameMessage = prev.gameMessage;
       let newCurrentBid = prev.currentBid;
 
-      // Check for Marriage Declaration
       const isTrumpKingOrQueen = prev.trumpSuit && card.suit === prev.trumpSuit && (card.rank === 'K' || card.rank === 'Q');
       if (prev.trumpRevealed && prev.pairRevealedBy === player && !prev.pairPointsAdded && isTrumpKingOrQueen) {
          newPairPointsAdded = true;
@@ -444,20 +1316,19 @@ export const useTwentyNine = () => {
          }
       }
       
-      // Check if trick is complete
       const cardsPlayed = Object.values(newTrickCards).filter(c => c !== null).length;
       const requiredCards = prev.isSingleHand ? 3 : 4;
       
       if (cardsPlayed === requiredCards) {
-        // Resolve trick
         const winner = evaluateTrick(newTrick, prev.trumpSuit, prev.trumpRevealed);
         const points = calculateTrickPoints(newTrick);
         newTrick.winner = winner;
         newTrick.points = points;
         
-        // Setup next turn after delay
-        setTimeout(() => resolveTrick(newTrick), 1500);
-        nextTurn = player; // Temporary hold
+        if (prev.mode !== 'multiplayer' || isHost) {
+          setTimeout(() => resolveTrick(newTrick), 1500);
+        }
+        nextTurn = player;
       }
 
       return {
@@ -474,23 +1345,20 @@ export const useTwentyNine = () => {
   };
 
   const resolveTrick = (trick: Trick) => {
-    setState(prev => {
+    updateStateAndSync(prev => {
       const winner = trick.winner!;
       const newTricksWon = { ...prev.tricksWon, [winner]: [...prev.tricksWon[winner], trick] };
       
-      // Calculate points
       const team1Points = (newTricksWon.bottom.reduce((sum, t) => sum + t.points, 0) + newTricksWon.top.reduce((sum, t) => sum + t.points, 0));
       const team2Points = (newTricksWon.left.reduce((sum, t) => sum + t.points, 0) + newTricksWon.right.reduce((sum, t) => sum + t.points, 0));
 
       const bidTeam = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'team1' : 'team2';
       const winnerTeam = (winner === 'bottom' || winner === 'top') ? 'team1' : 'team2';
 
-      // Check if round is over (8 tricks = 32 cards played, or 24 for single hand)
       const totalTricks = Object.values(newTricksWon).reduce((sum, tricks) => sum + tricks.length, 0);
       
       if (prev.isSingleHand) {
         if (winnerTeam !== bidTeam) {
-          // Opponent won a trick! Instant loss.
           return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick, gameMessage: "Opponent won a trick! Single Hand Failed." });
         }
       }
@@ -514,9 +1382,8 @@ export const useTwentyNine = () => {
     let t1Score = state.scores.team1;
     let t2Score = state.scores.team2;
     const bidTeam = (state.bidWinner === 'bottom' || state.bidWinner === 'top') ? 'team1' : 'team2';
-    let bidAmount = state.currentBid; // Already adjusted and clamped to [16, 28] during round gameplay
+    let bidAmount = state.currentBid;
 
-    // Determine stakes
     let stakes = 1;
     if (state.isRedoubled) stakes = 4;
     else if (state.isDoubled) stakes = 2;
@@ -558,13 +1425,14 @@ export const useTwentyNine = () => {
 
   // --- AI LOGIC ---
   useEffect(() => {
-    if (state.mode !== 'ai') return;
+    const isMultiplayerAI = state.mode === 'multiplayer' && isHost;
+    if (state.mode !== 'ai' && !isMultiplayerAI) return;
 
     if (state.phase === 'bidding') {
       const currentBidder = state.activeBidder;
       const currentPhase = state.phase;
       const activePlayer = state.players[currentBidder];
-      if (activePlayer.isAI) {
+      if (activePlayer && activePlayer.isAI) {
         const timer = setTimeout(() => {
           const latestState = stateRef.current;
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
@@ -591,11 +1459,11 @@ export const useTwentyNine = () => {
           if (targetBid !== 'pass') {
             if (isDefender) {
               if (targetBid >= latestState.currentBid) {
-                bidToPlace = latestState.currentBid; // Match!
+                bidToPlace = latestState.currentBid;
               }
             } else {
               if (targetBid > latestState.currentBid) {
-                bidToPlace = latestState.currentBid === 15 ? 16 : latestState.currentBid + 1; // Bid +1
+                bidToPlace = latestState.currentBid === 15 ? 16 : latestState.currentBid + 1;
               }
             }
           }
@@ -610,7 +1478,7 @@ export const useTwentyNine = () => {
       const currentBidder = state.activeBidder;
       const currentPhase = state.phase;
       const activePlayer = state.players[currentBidder];
-      if (activePlayer.isAI) {
+      if (activePlayer && activePlayer.isAI) {
         const timer = setTimeout(() => {
           const latestState = stateRef.current;
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
@@ -638,7 +1506,7 @@ export const useTwentyNine = () => {
       const currentBidder = state.activeBidder;
       const currentPhase = state.phase;
       const activePlayer = state.players[currentBidder];
-      if (activePlayer.isAI) {
+      if (activePlayer && activePlayer.isAI) {
         const timer = setTimeout(() => {
           const latestState = stateRef.current;
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
@@ -666,7 +1534,7 @@ export const useTwentyNine = () => {
       const currentBidder = state.activeBidder;
       const currentPhase = state.phase;
       const activePlayer = state.players[currentBidder];
-      if (activePlayer.isAI) {
+      if (activePlayer && activePlayer.isAI) {
         const timer = setTimeout(() => {
           const latestState = stateRef.current;
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
@@ -688,7 +1556,7 @@ export const useTwentyNine = () => {
       const currentBidder = state.activeBidder;
       const currentPhase = state.phase;
       const activePlayer = state.players[currentBidder];
-      if (activePlayer.isAI) {
+      if (activePlayer && activePlayer.isAI) {
         const timer = setTimeout(() => {
           const latestState = stateRef.current;
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
@@ -701,10 +1569,9 @@ export const useTwentyNine = () => {
           lastPlayKeyRef.current = playKey;
 
           const hand = latestState.hands[currentBidder];
-          if (hand.length > 0) {
-            // Evaluate suits based on both count and power (Jack = 3, 9 = 2, A = 1, 10 = 1)
+          if (hand && hand.length > 0) {
             const suitScores = hand.reduce((acc, card) => {
-              acc[card.suit] = (acc[card.suit] || 0) + (card.value * 2) + 1; // 1 base point per card, plus power value
+              acc[card.suit] = (acc[card.suit] || 0) + (card.value * 2) + 1;
               return acc;
             }, {} as Record<string, number>);
             
@@ -718,10 +1585,8 @@ export const useTwentyNine = () => {
             }
 
             if (maxScore <= 3) {
-              // Weak hand (no suit has strong cards), opt for 7th card trump
               setTrump('7th_card');
             } else {
-              // Pick a card from the strongest suit
               const cardToSet = hand.find(c => c.suit === bestSuit) || hand[0];
               setTrump(cardToSet);
             }
@@ -736,7 +1601,7 @@ export const useTwentyNine = () => {
       const currentPhase = state.phase;
       const activePlayer = state.players[currentTurn];
       const requiredCards = state.isSingleHand ? 3 : 4;
-      if (activePlayer.isAI && Object.values(state.currentTrick.cards).filter(c => c !== null).length < requiredCards) {
+      if (activePlayer && activePlayer.isAI && Object.values(state.currentTrick.cards).filter(c => c !== null).length < requiredCards) {
         const timer = setTimeout(() => {
           const latestState = stateRef.current;
           if (latestState.phase !== currentPhase || latestState.turn !== currentTurn) {
@@ -749,16 +1614,14 @@ export const useTwentyNine = () => {
           }
           lastPlayKeyRef.current = playKey;
 
-          // Guard: If this player has already played a card in the current trick, do not play again.
           if (latestState.currentTrick.cards[currentTurn] !== null) {
             return;
           }
           const hand = latestState.hands[currentTurn];
-          if (hand.length > 0) {
+          if (hand && hand.length > 0) {
             let localHand = [...hand];
             let isTrumpRevealedLocal = latestState.trumpRevealed;
             
-            // AI might want to ask for trump if they can't follow suit and trump isn't revealed
             if (!latestState.trumpRevealed && latestState.currentTrick.leadSuit && !hand.some(c => c.suit === latestState.currentTrick.leadSuit)) {
               const trickPoints = calculateTrickPoints(latestState.currentTrick);
               if (trickPoints > 0 || Math.random() > 0.6) {
@@ -780,14 +1643,31 @@ export const useTwentyNine = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [state.phase, state.turn, state.activeBidder, state.mode, state.currentTrick.cards]);
+  }, [state.phase, state.turn, state.activeBidder, state.mode, state.currentTrick.cards, isHost]);
 
   const returnToLobby = () => {
-    setState(INITIAL_STATE);
+    if (state.mode === 'multiplayer') {
+      exitRoom();
+    } else {
+      setState(INITIAL_STATE);
+    }
   };
 
   return {
     state,
+    roomCode,
+    roomId,
+    isHost,
+    myPosition,
+    playersList,
+    nickname,
+    saveNickname,
+    createRoom,
+    joinRoom,
+    addAIBot,
+    removePlayerOrBot,
+    startOnlineGame,
+    exitRoom,
     startGame,
     placeBid,
     handleDoubleDecision,

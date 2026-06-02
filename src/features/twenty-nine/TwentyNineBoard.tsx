@@ -6,8 +6,54 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
 
 export const TwentyNineBoard: React.FC = () => {
-  const { state, startGame, placeBid, setTrump, revealTrump, playCard, updateSettings, handleDoubleDecision, handleRedoubleDecision, handleSingleHandDecision, returnToLobby } = useTwentyNine();
+  const { 
+    state, 
+    startGame, 
+    placeBid, 
+    setTrump, 
+    revealTrump, 
+    playCard, 
+    updateSettings, 
+    handleDoubleDecision, 
+    handleRedoubleDecision, 
+    handleSingleHandDecision, 
+    returnToLobby,
+    roomCode,
+    roomId,
+    isHost,
+    myPosition,
+    playersList,
+    nickname,
+    saveNickname,
+    createRoom,
+    joinRoom,
+    addAIBot,
+    removePlayerOrBot,
+    startOnlineGame,
+    exitRoom
+  } = useTwentyNine();
+
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
+
+  // Lobby Tab States
+  const [lobbyTab, setLobbyTab] = useState<'selection' | 'multiplayer_home' | 'join_room'>('selection');
+  const [nickInput, setNickInput] = useState('');
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (nickname) {
+      setNickInput(nickname);
+    }
+  }, [nickname]);
+
+  const handleCopyCode = () => {
+    if (roomCode) {
+      navigator.clipboard.writeText(roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Play sound when trick is won
   useEffect(() => {
@@ -41,20 +87,274 @@ export const TwentyNineBoard: React.FC = () => {
   
   if (state.phase === 'lobby') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6 text-white">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-7xl font-black font-display text-amber-500 drop-shadow-lg mb-4">
-            ২৯ <span className="text-white">Twenty-Nine</span>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 text-white px-4 max-w-4xl mx-auto w-full">
+        <div className="text-center mb-4">
+          <h1 className="text-5xl md:text-8xl font-black font-display text-amber-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] mb-2 tracking-wide animate-pulse">
+            ২৯ <span className="text-white font-sans">Twenty-Nine</span>
           </h1>
+          <p className="text-amber-200/60 text-xs md:text-sm uppercase tracking-[0.2em]">The Ultimate Bengali Card Game</p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4 mt-8">
-          <button 
-            onClick={() => startGame('ai')}
-            className="px-8 py-4 bg-amber-600 text-white rounded-2xl font-bold text-xl shadow-xl hover:scale-105 transition-all"
-          >
-            Play vs AI
-          </button>
+
+        {lobbyTab === 'selection' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mt-4">
+            {/* Card 1: Play vs AI */}
+            <div className="bg-[#3a2010]/70 backdrop-blur-md p-6 rounded-3xl border border-[#52321c] shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex flex-col justify-between items-center text-center group hover:border-amber-500/40 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                🤖
+              </div>
+              <h3 className="text-2xl font-black text-amber-400 mb-2">Single Player</h3>
+              <p className="text-slate-300/80 text-sm mb-6 max-w-[240px]">
+                Challenge smart offline bots. Fast-paced, offline friendly, and perfect for practice.
+              </p>
+              <button 
+                onClick={() => startGame('ai')}
+                className="w-full py-4 bg-gradient-to-b from-[#a26842] to-[#734324] text-white border border-[#d6af84]/30 rounded-2xl font-bold text-lg hover:brightness-110 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] active:scale-98 transition-all"
+              >
+                Play vs AI
+              </button>
+            </div>
+
+            {/* Card 2: Play Online Multiplayer */}
+            <div className="bg-[#3a2010]/70 backdrop-blur-md p-6 rounded-3xl border border-[#52321c] shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex flex-col justify-between items-center text-center group hover:border-amber-500/40 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                👥
+              </div>
+              <h3 className="text-2xl font-black text-amber-400 mb-2">Online Multiplayer</h3>
+              <p className="text-slate-300/80 text-sm mb-6 max-w-[240px]">
+                Create a private lobby, invite your friends, or start with bots. Real-time gameplay.
+              </p>
+              <button 
+                onClick={() => setLobbyTab('multiplayer_home')}
+                className="w-full py-4 bg-gradient-to-b from-amber-500 to-amber-700 text-white border-2 border-amber-400 rounded-2xl font-bold text-lg hover:brightness-110 hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] active:scale-98 transition-all"
+              >
+                Play with Friends
+              </button>
+            </div>
+          </div>
+        )}
+
+        {lobbyTab === 'multiplayer_home' && (
+          <div className="bg-[#3a2010]/80 backdrop-blur-md p-8 rounded-3xl border border-[#52321c] shadow-[0_20px_50px_rgba(0,0,0,0.6)] w-full max-w-md flex flex-col items-center">
+            <h3 className="text-2xl font-black text-amber-400 mb-6 uppercase tracking-wider">Multiplayer</h3>
+            
+            <div className="w-full space-y-4 mb-8">
+              <div>
+                <label className="text-xs font-bold text-amber-300/70 uppercase tracking-widest block mb-2">Your Name</label>
+                <input 
+                  type="text" 
+                  value={nickInput}
+                  onChange={e => setNickInput(e.target.value.slice(0, 12))}
+                  placeholder="Enter nickname..."
+                  className="w-full bg-[#1e1008] border border-[#52321c] rounded-2xl px-5 py-4 text-white font-bold text-lg focus:outline-none focus:border-amber-400 text-center uppercase tracking-wider shadow-inner"
+                />
+              </div>
+            </div>
+
+            <div className="w-full space-y-3">
+              <button 
+                onClick={() => createRoom(nickInput)}
+                disabled={!nickInput.trim()}
+                className="w-full py-4 bg-gradient-to-b from-amber-500 to-amber-700 text-white border-2 border-amber-400 disabled:opacity-40 disabled:cursor-not-allowed rounded-2xl font-bold text-lg hover:brightness-110 active:scale-98 transition-all shadow-lg"
+              >
+                Create Private Room
+              </button>
+              
+              <button 
+                onClick={() => setLobbyTab('join_room')}
+                disabled={!nickInput.trim()}
+                className="w-full py-4 bg-[#52321c] border border-amber-500/20 text-white disabled:opacity-40 disabled:cursor-not-allowed rounded-2xl font-bold text-lg hover:bg-[#684128] active:scale-98 transition-all"
+              >
+                Join with Code
+              </button>
+              
+              <button 
+                onClick={() => setLobbyTab('selection')}
+                className="w-full py-2 text-xs text-amber-200/50 hover:text-amber-200 uppercase tracking-widest font-bold mt-2"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        )}
+
+        {lobbyTab === 'join_room' && (
+          <div className="bg-[#3a2010]/80 backdrop-blur-md p-8 rounded-3xl border border-[#52321c] shadow-[0_20px_50px_rgba(0,0,0,0.6)] w-full max-w-md flex flex-col items-center">
+            <h3 className="text-2xl font-black text-amber-400 mb-6 uppercase tracking-wider">Join Room</h3>
+            
+            <div className="w-full space-y-4 mb-8">
+              <div>
+                <label className="text-xs font-bold text-amber-300/70 uppercase tracking-widest block mb-2 text-center">Enter 6-Digit Room Code</label>
+                <input 
+                  type="text" 
+                  value={joinCodeInput}
+                  onChange={e => setJoinCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123 456"
+                  className="w-full bg-[#1e1008] border border-[#52321c] rounded-2xl px-5 py-4 text-amber-400 font-black text-3xl tracking-[0.3em] focus:outline-none focus:border-amber-400 text-center shadow-inner"
+                />
+              </div>
+            </div>
+
+            <div className="w-full space-y-3">
+              <button 
+                onClick={() => joinRoom(joinCodeInput, nickInput)}
+                disabled={joinCodeInput.length !== 6 || !nickInput.trim()}
+                className="w-full py-4 bg-gradient-to-b from-amber-500 to-amber-700 text-white border-2 border-amber-400 disabled:opacity-40 disabled:cursor-not-allowed rounded-2xl font-bold text-lg hover:brightness-110 active:scale-98 transition-all shadow-lg"
+              >
+                Join Room
+              </button>
+              
+              <button 
+                onClick={() => setLobbyTab('multiplayer_home')}
+                className="w-full py-3 bg-[#52321c]/40 border border-white/5 text-slate-300 rounded-2xl font-bold hover:bg-[#52321c]/60 active:scale-98 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (state.phase === 'multiplayer_lobby') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[90vh] text-white p-4 w-full max-w-4xl mx-auto">
+        {/* Lobby Container */}
+        <div className="bg-[#3a2010]/80 backdrop-blur-md p-8 rounded-3xl border border-[#52321c] shadow-[0_20px_50px_rgba(0,0,0,0.7)] w-full max-w-2xl flex flex-col items-center relative">
+          <div className="absolute top-4 right-4 bg-black/40 border border-white/10 px-3 py-1 rounded-full text-xs font-mono text-amber-400 flex items-center gap-1.5 shadow-inner">
+            <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping" />
+            Lobby Connected
+          </div>
+
+          <h2 className="text-3xl md:text-4xl font-black text-amber-500 drop-shadow mb-2 uppercase tracking-wide">Private Lobby</h2>
+          
+          {/* Room Code Display */}
+          <div className="flex flex-col items-center my-6 p-4 bg-[#1e1008] border border-[#52321c] rounded-2xl shadow-inner w-full max-w-sm">
+            <span className="text-[10px] text-amber-200/50 uppercase tracking-[0.2em] font-bold mb-1">Room Access Code</span>
+            <div className="flex items-center gap-3">
+              <span className="text-4xl md:text-5xl font-black text-white tracking-[0.1em]">{roomCode}</span>
+              <button 
+                onClick={handleCopyCode}
+                className="p-2.5 bg-white/5 hover:bg-white/15 text-amber-300 border border-white/10 rounded-xl transition-all shadow-md active:scale-90"
+              >
+                {copied ? '✅' : '📋'}
+              </button>
+            </div>
+            {copied && <span className="text-[10px] text-green-400 font-bold mt-1.5 uppercase tracking-wider animate-bounce">Code Copied!</span>}
+          </div>
+
+          {/* Seat Layout representing the Table */}
+          <div className="w-full grid grid-cols-3 gap-3 aspect-square max-w-[340px] my-6 relative bg-[#1e1008] rounded-full border-4 border-[#52321c] p-4 shadow-inner">
+            {/* Top Seat */}
+            <div className="col-start-2 col-end-3 row-start-1 row-end-2 flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">Top</span>
+              {state.players.top.id ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">🤖</div>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.top.name}</span>
+                  {isHost && state.players.top.isAI && (
+                    <button onClick={() => removePlayerOrBot('top')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="w-11 h-11 border-2 border-white/10 border-dashed rounded-full flex items-center justify-center text-white/20 text-xs">?</div>
+                  {isHost ? (
+                    <button onClick={() => addAIBot('top')} className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded px-1.5 py-0.5 font-bold mt-1 shadow-inner active:scale-95 transition-all">Add Bot</button>
+                  ) : (
+                    <span className="text-[10px] text-white/30 mt-1 uppercase font-bold text-center">Waiting...</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Left Seat */}
+            <div className="col-start-1 col-end-2 row-start-2 row-end-3 flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">Left</span>
+              {state.players.left.id ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">👤</div>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.left.name}</span>
+                  {isHost && state.players.left.isAI && (
+                    <button onClick={() => removePlayerOrBot('left')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="w-11 h-11 border-2 border-white/10 border-dashed rounded-full flex items-center justify-center text-white/20 text-xs">?</div>
+                  {isHost ? (
+                    <button onClick={() => addAIBot('left')} className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded px-1.5 py-0.5 font-bold mt-1 shadow-inner active:scale-95 transition-all">Add Bot</button>
+                  ) : (
+                    <span className="text-[10px] text-white/30 mt-1 uppercase font-bold text-center">Waiting...</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Center Label (29 Logo) */}
+            <div className="col-start-2 col-end-3 row-start-2 row-end-3 flex items-center justify-center">
+              <span className="text-2xl font-black text-amber-500 border border-amber-500/20 w-12 h-12 rounded-full flex items-center justify-center shadow-md bg-black/20">২৯</span>
+            </div>
+
+            {/* Right Seat */}
+            <div className="col-start-3 col-end-4 row-start-2 row-end-3 flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">Right</span>
+              {state.players.right.id ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">👤</div>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.right.name}</span>
+                  {isHost && state.players.right.isAI && (
+                    <button onClick={() => removePlayerOrBot('right')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="w-11 h-11 border-2 border-white/10 border-dashed rounded-full flex items-center justify-center text-white/20 text-xs">?</div>
+                  {isHost ? (
+                    <button onClick={() => addAIBot('right')} className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded px-1.5 py-0.5 font-bold mt-1 shadow-inner active:scale-95 transition-all">Add Bot</button>
+                  ) : (
+                    <span className="text-[10px] text-white/30 mt-1 uppercase font-bold text-center">Waiting...</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Seat (Always Us) */}
+            <div className="col-start-2 col-end-3 row-start-3 row-end-4 flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">You</span>
+              <div className="flex flex-col items-center">
+                <div className="w-11 h-11 bg-amber-600 border-2 border-white shadow-[0_0_10px_rgba(251,191,36,0.5)] rounded-full flex items-center justify-center text-lg">👑</div>
+                <span className="text-xs font-black mt-1 text-white uppercase truncate max-w-[80px] text-center">{state.players.bottom.name}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full border-t border-[#52321c] my-4 pt-4 text-center">
+            <span className="text-xs text-amber-200/50 font-bold tracking-wider uppercase">Lobby Participants ({playersList.length}/4)</span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
+            {isHost ? (
+              <button 
+                onClick={startOnlineGame}
+                className="flex-1 py-4 bg-gradient-to-b from-amber-500 to-amber-700 border-2 border-amber-400 text-white rounded-2xl font-bold text-lg hover:brightness-110 active:scale-95 transition-all shadow-lg uppercase tracking-wider"
+              >
+                Start Game
+              </button>
+            ) : (
+              <div className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-amber-200 font-bold tracking-wider text-center animate-pulse">
+                ⏳ Waiting for host to start...
+              </div>
+            )}
+            
+            <button 
+              onClick={exitRoom}
+              className="py-4 px-6 bg-[#52321c] text-slate-300 border border-white/5 hover:bg-[#684128] rounded-2xl font-bold text-lg active:scale-95 transition-all"
+            >
+              Exit Lobby
+            </button>
+          </div>
         </div>
       </div>
     );

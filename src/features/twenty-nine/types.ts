@@ -24,7 +24,7 @@ export interface Bid {
   amount: number | 'pass' | 'double' | 'redouble' | 'single_hand';
 }
 
-export type GamePhase = 'lobby' | 'dealing_1' | 'bidding' | 'doubling_phase' | 'redoubling_phase' | 'dealing_2' | 'single_hand_decision' | 'set_trump' | 'playing' | 'round_over' | 'game_over';
+export type GamePhase = 'lobby' | 'multiplayer_lobby' | 'dealing_1' | 'bidding' | 'doubling_phase' | 'redoubling_phase' | 'dealing_2' | 'single_hand_decision' | 'set_trump' | 'playing' | 'round_over' | 'game_over';
 
 export interface GameState {
   mode: 'ai' | 'multiplayer' | null;
