@@ -46,6 +46,11 @@ const INITIAL_STATE: GameState = {
 export const useTwentyNine = () => {
   const [state, setState] = useState<GameState>(INITIAL_STATE);
 
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
   const startGame = (mode: 'ai' | 'multiplayer') => {
     setState(prev => ({ ...prev, mode, phase: 'dealing_1' }));
     dealFirstHalf();
@@ -547,10 +552,16 @@ export const useTwentyNine = () => {
     if (state.mode !== 'ai') return;
 
     if (state.phase === 'bidding') {
-      const activePlayer = state.players[state.activeBidder];
+      const currentBidder = state.activeBidder;
+      const currentPhase = state.phase;
+      const activePlayer = state.players[currentBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
-          const hand = state.hands[state.activeBidder];
+          const latestState = stateRef.current;
+          if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
+            return;
+          }
+          const hand = latestState.hands[currentBidder];
           const strength = evaluateHandStrength(hand);
           
           let targetBid: number | 'pass' = 'pass';
@@ -559,34 +570,40 @@ export const useTwentyNine = () => {
           else if (strength >= 3) targetBid = 17;
           else if (strength >= 2) targetBid = 16;
 
-          const isDefender = state.activeBidder === state.duelDefender;
+          const isDefender = currentBidder === latestState.duelDefender;
           let bidToPlace: number | 'pass' = 'pass';
           
           if (targetBid !== 'pass') {
             if (isDefender) {
-              if (targetBid >= state.currentBid) {
-                bidToPlace = state.currentBid; // Match!
+              if (targetBid >= latestState.currentBid) {
+                bidToPlace = latestState.currentBid; // Match!
               }
             } else {
-              if (targetBid > state.currentBid) {
-                bidToPlace = state.currentBid === 15 ? 16 : state.currentBid + 1; // Bid +1
+              if (targetBid > latestState.currentBid) {
+                bidToPlace = latestState.currentBid === 15 ? 16 : latestState.currentBid + 1; // Bid +1
               }
             }
           }
 
           placeBid(bidToPlace);
         }, state.settings.speed === 'fast' ? 400 : 2000);
-          return () => clearTimeout(timer);
-        }
+        return () => clearTimeout(timer);
+      }
     }
 
     if (state.phase === 'doubling_phase') {
-      const activePlayer = state.players[state.activeBidder];
+      const currentBidder = state.activeBidder;
+      const currentPhase = state.phase;
+      const activePlayer = state.players[currentBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
-          const hand = state.hands[state.activeBidder];
+          const latestState = stateRef.current;
+          if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
+            return;
+          }
+          const hand = latestState.hands[currentBidder];
           const strength = evaluateHandStrength(hand);
-          if (strength >= 4 && state.currentBid >= 17) {
+          if (strength >= 4 && latestState.currentBid >= 17) {
             handleDoubleDecision('double');
           } else {
             handleDoubleDecision('cancel');
@@ -597,12 +614,18 @@ export const useTwentyNine = () => {
     }
 
     if (state.phase === 'redoubling_phase') {
-      const activePlayer = state.players[state.activeBidder];
+      const currentBidder = state.activeBidder;
+      const currentPhase = state.phase;
+      const activePlayer = state.players[currentBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
-          const hand = state.hands[state.activeBidder];
+          const latestState = stateRef.current;
+          if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
+            return;
+          }
+          const hand = latestState.hands[currentBidder];
           const strength = evaluateHandStrength(hand);
-          if (strength >= 6 && state.currentBid <= 18) {
+          if (strength >= 6 && latestState.currentBid <= 18) {
             handleRedoubleDecision('redouble');
           } else {
             handleRedoubleDecision('cancel');
@@ -613,9 +636,15 @@ export const useTwentyNine = () => {
     }
 
     if (state.phase === 'single_hand_decision') {
-      const activePlayer = state.players[state.activeBidder];
+      const currentBidder = state.activeBidder;
+      const currentPhase = state.phase;
+      const activePlayer = state.players[currentBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
+          const latestState = stateRef.current;
+          if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
+            return;
+          }
           handleSingleHandDecision('no');
         }, state.settings.speed === 'fast' ? 400 : 1500);
         return () => clearTimeout(timer);
@@ -623,10 +652,16 @@ export const useTwentyNine = () => {
     }
 
     if (state.phase === 'set_trump') {
-      const activePlayer = state.players[state.activeBidder];
+      const currentBidder = state.activeBidder;
+      const currentPhase = state.phase;
+      const activePlayer = state.players[currentBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
-          const hand = state.hands[state.activeBidder];
+          const latestState = stateRef.current;
+          if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
+            return;
+          }
+          const hand = latestState.hands[currentBidder];
           if (hand.length > 0) {
             // Evaluate suits based on both count and power (Jack = 3, 9 = 2, A = 1, 10 = 1)
             const suitScores = hand.reduce((acc, card) => {
@@ -658,24 +693,38 @@ export const useTwentyNine = () => {
     }
 
     if (state.phase === 'playing') {
-      const activePlayer = state.players[state.turn];
+      const currentTurn = state.turn;
+      const currentPhase = state.phase;
+      const activePlayer = state.players[currentTurn];
       const requiredCards = state.isSingleHand ? 3 : 4;
       if (activePlayer.isAI && Object.values(state.currentTrick.cards).filter(c => c !== null).length < requiredCards) {
         const timer = setTimeout(() => {
-          const hand = state.hands[state.turn];
+          const latestState = stateRef.current;
+          if (latestState.phase !== currentPhase || latestState.turn !== currentTurn) {
+            return;
+          }
+          const hand = latestState.hands[currentTurn];
           if (hand.length > 0) {
-            const validMoves = getValidMoves(hand, state.currentTrick.leadSuit, state.trumpSuit, state.trumpRevealed);
+            let localHand = [...hand];
+            let isTrumpRevealedLocal = latestState.trumpRevealed;
             
             // AI might want to ask for trump if they can't follow suit and trump isn't revealed
-            if (!state.trumpRevealed && state.currentTrick.leadSuit && !hand.some(c => c.suit === state.currentTrick.leadSuit)) {
-              const trickPoints = calculateTrickPoints(state.currentTrick);
+            if (!latestState.trumpRevealed && latestState.currentTrick.leadSuit && !hand.some(c => c.suit === latestState.currentTrick.leadSuit)) {
+              const trickPoints = calculateTrickPoints(latestState.currentTrick);
               if (trickPoints > 0 || Math.random() > 0.6) {
-                revealTrump(); 
+                revealTrump();
+                isTrumpRevealedLocal = true;
+                if (latestState.bidWinner === currentTurn && latestState.hiddenTrumpCard && !latestState.hiddenTrumpCard.id.startsWith('dummy_')) {
+                  if (!localHand.some(c => c.id === latestState.hiddenTrumpCard!.id)) {
+                    localHand = sortHand([...localHand, latestState.hiddenTrumpCard]);
+                  }
+                }
               }
             }
 
-            const cardToPlay = getBestAIPlay(validMoves, state.currentTrick, state.trumpSuit, state.trumpRevealed, state.turn);
-            playCard(state.turn, cardToPlay);
+            const validMoves = getValidMoves(localHand, latestState.currentTrick.leadSuit, latestState.trumpSuit, isTrumpRevealedLocal);
+            const cardToPlay = getBestAIPlay(validMoves, latestState.currentTrick, latestState.trumpSuit, isTrumpRevealedLocal, currentTurn);
+            playCard(currentTurn, cardToPlay);
           }
         }, state.settings.speed === 'fast' ? 500 : 1200);
         return () => clearTimeout(timer);
