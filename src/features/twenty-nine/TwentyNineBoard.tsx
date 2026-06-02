@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
 
 export const TwentyNineBoard: React.FC = () => {
-  const { state, startGame, placeBid, setTrump, revealTrump, playCard, updateSettings } = useTwentyNine();
+  const { state, startGame, placeBid, setTrump, revealTrump, playCard, updateSettings, handleDoubleDecision, handleRedoubleDecision, handleSingleHandDecision } = useTwentyNine();
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
 
   // Play sound when trick is won
