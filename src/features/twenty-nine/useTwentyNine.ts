@@ -254,11 +254,12 @@ export const useTwentyNine = () => {
   const dealSecondHalf = () => {
     setState((prev: any) => {
       const rem = prev.remainingDeck;
+      const filterHidden = (cards: Card[]) => cards.filter(c => c.id !== prev.hiddenTrumpCard?.id);
       const finalHands = {
-        bottom: sortHand([...prev.hands.bottom, ...rem.slice(0, 4)]),
-        left: sortHand([...prev.hands.left, ...rem.slice(4, 8)]),
-        top: sortHand([...prev.hands.top, ...rem.slice(8, 12)]),
-        right: sortHand([...prev.hands.right, ...rem.slice(12, 16)])
+        bottom: sortHand(filterHidden([...prev.hands.bottom, ...rem.slice(0, 4)])),
+        left: sortHand(filterHidden([...prev.hands.left, ...rem.slice(4, 8)])),
+        top: sortHand(filterHidden([...prev.hands.top, ...rem.slice(8, 12)])),
+        right: sortHand(filterHidden([...prev.hands.right, ...rem.slice(12, 16)]))
       };
       return {
         ...prev,
@@ -305,8 +306,10 @@ export const useTwentyNine = () => {
       let hiddenCard: Card;
       let newHand = [...prev.hands[prev.activeBidder]];
       if (suitOrCard === '7th_card') {
-        // The 7th card is the 3rd card in their 2nd batch (which is index 6 of their hand)
-        hiddenCard = prev.hands[prev.activeBidder][6];
+        const playerIndex = ['bottom', 'left', 'top', 'right'].indexOf(prev.activeBidder);
+        const rem = prev.remainingDeck;
+        // The 7th card is the 3rd card in their 2nd batch (which is index 2 of their 4 cards)
+        hiddenCard = rem[playerIndex * 4 + 2];
       } else {
         hiddenCard = suitOrCard as Card;
         // If it's a real card from their hand, remove it
