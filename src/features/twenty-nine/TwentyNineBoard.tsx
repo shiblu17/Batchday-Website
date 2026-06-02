@@ -538,9 +538,9 @@ export const TwentyNineBoard: React.FC = () => {
                 <div 
                   key={suit} 
                   className="w-[60px] sm:w-[70px] hover:-translate-y-2 hover:scale-105 transition-all cursor-pointer shadow-lg" 
-                  onClick={() => setTrump({ id: `dummy_${suit}`, suit, rank: '2', value: 0 })}
+                  onClick={() => setTrump({ id: `dummy_${suit}`, suit, rank: 'A', value: 0 })}
                 >
-                  <CardUI card={{ id: `dummy_${suit}`, suit, rank: '2', value: 0 }} isHidden={false} isPlayable={true} />
+                  <CardUI card={{ id: `dummy_${suit}`, suit, rank: 'A', value: 0 }} isHidden={false} isPlayable={true} />
                 </div>
               ))}
             </div>
