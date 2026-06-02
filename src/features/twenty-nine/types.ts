@@ -72,6 +72,9 @@ export interface GameState {
   pairRevealedBy: PlayerPosition | null; // Gives +/- 4 points based on team
   pairPointsAdded: boolean;
 
+  // Round Results
+  lastRoundResult?: { team1Won: boolean };
+
   // Settings
   settings: {
     speed: 'normal' | 'fast';

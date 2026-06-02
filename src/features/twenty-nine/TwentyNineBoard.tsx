@@ -580,11 +580,13 @@ export const TwentyNineBoard: React.FC = () => {
 
       {/* Round Over Overlay */}
       {state.phase === 'round_over' && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-8 text-center pointer-events-auto">
+        <div className={`absolute inset-0 ${state.lastRoundResult?.team1Won ? 'bg-green-900/90' : 'bg-red-900/90'} backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-8 text-center pointer-events-auto transition-colors duration-1000`}>
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
-            <h2 className="text-4xl md:text-6xl font-black mb-2 text-amber-500 drop-shadow-lg">Round Over!</h2>
+            <h2 className={`text-4xl md:text-6xl font-black mb-2 drop-shadow-lg ${state.lastRoundResult?.team1Won ? 'text-green-400' : 'text-red-400'}`}>
+              {state.lastRoundResult?.team1Won ? 'You Won the Round!' : 'You Lost the Round!'}
+            </h2>
             
-            <div className="mb-8 p-4 bg-white/5 rounded-2xl border border-white/10 w-full max-w-md">
+            <div className="mb-8 p-4 bg-black/40 rounded-2xl border border-white/20 w-full max-w-md shadow-2xl backdrop-blur-lg mt-4">
               <h3 className="text-xl font-bold text-slate-300 mb-4">Bid Winner: {state.players[state.bidWinner!].name} ({state.currentBid})</h3>
               <div className="flex justify-between gap-4">
                 <div className="flex-1 bg-gradient-to-br from-green-600/40 to-emerald-900/40 p-4 rounded-xl border border-green-500/30 shadow-inner">
@@ -631,21 +633,37 @@ export const TwentyNineBoard: React.FC = () => {
             >
               <h2 className="text-2xl font-bold text-amber-500 mb-4 text-center font-display">Last Trick</h2>
               <div className="relative w-full aspect-square bg-[#1a0f0a] rounded-xl border border-[#4a2f1d] p-4">
-                <div className="absolute top-4 left-1/2 -translate-x-1/2">
-                  {state.lastTrick.cards['top'] && <CardUI card={state.lastTrick.cards['top']} isPlayable={false} scale={0.8} />}
-                  <span className="text-xs text-center block mt-1">Top</span>
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
+                  {state.lastTrick.cards['top'] && (
+                    <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 15, delay: 0.1 }}>
+                      <CardUI card={state.lastTrick.cards['top']} isPlayable={false} scale={0.8} />
+                    </motion.div>
+                  )}
+                  <span className="text-xs text-center block mt-1 text-white/70">Top</span>
                 </div>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                  {state.lastTrick.cards['bottom'] && <CardUI card={state.lastTrick.cards['bottom']} isPlayable={false} scale={0.8} />}
-                  <span className="text-xs text-center block mt-1">You</span>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
+                  {state.lastTrick.cards['bottom'] && (
+                    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 15, delay: 0.4 }}>
+                      <CardUI card={state.lastTrick.cards['bottom']} isPlayable={false} scale={0.8} />
+                    </motion.div>
+                  )}
+                  <span className="text-xs text-center block mt-1 text-white/70">You</span>
                 </div>
-                <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                  {state.lastTrick.cards['left'] && <CardUI card={state.lastTrick.cards['left']} isPlayable={false} scale={0.8} />}
-                  <span className="text-xs text-center block mt-1">Left</span>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center">
+                  {state.lastTrick.cards['left'] && (
+                    <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ type: 'spring', damping: 15, delay: 0.2 }}>
+                      <CardUI card={state.lastTrick.cards['left']} isPlayable={false} scale={0.8} />
+                    </motion.div>
+                  )}
+                  <span className="text-xs text-center block mt-1 text-white/70">Left</span>
                 </div>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  {state.lastTrick.cards['right'] && <CardUI card={state.lastTrick.cards['right']} isPlayable={false} scale={0.8} />}
-                  <span className="text-xs text-center block mt-1">Right</span>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center">
+                  {state.lastTrick.cards['right'] && (
+                    <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ type: 'spring', damping: 15, delay: 0.3 }}>
+                      <CardUI card={state.lastTrick.cards['right']} isPlayable={false} scale={0.8} />
+                    </motion.div>
+                  )}
+                  <span className="text-xs text-center block mt-1 text-white/70">Right</span>
                 </div>
               </div>
               <div className="mt-4 text-center">

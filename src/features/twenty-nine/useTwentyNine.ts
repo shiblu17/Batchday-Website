@@ -484,30 +484,32 @@ export const useTwentyNine = () => {
     if (state.isRedoubled) stakes = 4;
     else if (state.isDoubled) stakes = 2;
 
+    let team1Won = false;
     if (state.isSingleHand) {
       if (bidTeam === 'team1') {
         const opponentWonTrick = state.tricksWon.left.length > 0 || state.tricksWon.right.length > 0;
-        if (opponentWonTrick) t1Score -= 3;
-        else t1Score += 3;
+        if (opponentWonTrick) { t1Score -= 3; team1Won = false; }
+        else { t1Score += 3; team1Won = true; }
       } else {
         const opponentWonTrick = state.tricksWon.bottom.length > 0 || state.tricksWon.top.length > 0;
-        if (opponentWonTrick) t2Score -= 3;
-        else t2Score += 3;
+        if (opponentWonTrick) { t2Score -= 3; team1Won = true; }
+        else { t2Score += 3; team1Won = false; }
       }
     } else {
       if (bidTeam === 'team1') {
-        if (state.roundPoints.team1 >= bidAmount) t1Score += stakes;
-        else t1Score -= stakes;
+        if (state.roundPoints.team1 >= bidAmount) { t1Score += stakes; team1Won = true; }
+        else { t1Score -= stakes; team1Won = false; }
       } else {
-        if (state.roundPoints.team2 >= bidAmount) t2Score += stakes;
-        else t2Score -= stakes;
+        if (state.roundPoints.team2 >= bidAmount) { t2Score += stakes; team1Won = false; }
+        else { t2Score -= stakes; team1Won = true; }
       }
     }
 
     return {
       ...state,
       phase: 'round_over',
-      scores: { team1: t1Score, team2: t2Score }
+      scores: { team1: t1Score, team2: t2Score },
+      lastRoundResult: { team1Won }
     };
   };
 
