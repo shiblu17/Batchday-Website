@@ -144,10 +144,18 @@ export const TwentyNineBoard: React.FC = () => {
               ⚙
             </button>
           </div>
-          <div className="mt-2 text-white/90">Trump Player</div>
-          <div className="text-white/90">
-            {state.bidWinner ? state.players[state.bidWinner].name : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
-          </div>
+          {state.isSingleHand ? (
+            <div className="mt-2 text-amber-300 font-bold whitespace-nowrap bg-black/40 px-2 py-1 rounded">
+              {state.bidWinner ? state.players[state.bidWinner].name : '-'} is playing Single Hand
+            </div>
+          ) : (
+            <>
+              <div className="mt-2 text-white/90">Trump Player</div>
+              <div className="text-white/90">
+                {state.bidWinner ? state.players[state.bidWinner].name : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
+              </div>
+            </>
+          )}
           <button 
             onClick={() => {
               if (state.lastTrick) setShowLastHand(true);
@@ -184,7 +192,11 @@ export const TwentyNineBoard: React.FC = () => {
                 {state.scores.team2 === 0 && <span className="text-gray-500">-</span>}
               </div>
             </div>
-            <div className="text-amber-400 text-sm text-center pt-1">Cards: {state.roundPoints.team1} - {state.roundPoints.team2}</div>
+            <div className="text-amber-400 text-sm text-center pt-1">
+              {state.isSingleHand 
+                ? `Tricks: ${(state.bidWinner === 'bottom' || state.bidWinner === 'top') ? state.tricksWon.bottom.length + state.tricksWon.top.length : state.tricksWon.left.length + state.tricksWon.right.length}/8` 
+                : `Cards: ${state.roundPoints.team1} - ${state.roundPoints.team2}`}
+            </div>
           </div>
           <button className="mt-1 px-4 py-1 bg-gradient-to-b from-[#a0744e] to-[#734e30] border border-[#d6af84] rounded-sm shadow-md pointer-events-auto uppercase">
             Skip
@@ -284,21 +296,23 @@ export const TwentyNineBoard: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex flex-col items-center -mt-4 relative">
-            <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">Trump</span>
-            
-            {state.trumpRevealed && state.hiddenTrumpCard ? (
-              <motion.div initial={{ rotateY: 180 }} animate={{ rotateY: 0 }} transition={{ duration: 0.6 }} className="scale-75 origin-top">
-                <CardUI card={state.hiddenTrumpCard} />
-              </motion.div>
-            ) : state.trumpSuit ? (
-              <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center">
-                 <span className="text-white font-bold">?</span>
-              </div>
-            ) : (
-              <div className="w-10 h-14 bg-white/5 rounded border border-white/20 border-dashed" />
-            )}
-          </div>
+          {!state.isSingleHand && (
+            <div className="flex flex-col items-center -mt-4 relative">
+              <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">Trump</span>
+              
+              {state.trumpRevealed && state.hiddenTrumpCard ? (
+                <motion.div initial={{ rotateY: 180 }} animate={{ rotateY: 0 }} transition={{ duration: 0.6 }} className="scale-75 origin-top">
+                  <CardUI card={state.hiddenTrumpCard} />
+                </motion.div>
+              ) : state.trumpSuit ? (
+                <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center">
+                   <span className="text-white font-bold">?</span>
+                </div>
+              ) : (
+                <div className="w-10 h-14 bg-white/5 rounded border border-white/20 border-dashed" />
+              )}
+            </div>
+          )}
 
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">We</span>
