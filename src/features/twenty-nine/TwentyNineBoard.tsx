@@ -604,15 +604,19 @@ export const TwentyNineBoard: React.FC = () => {
 
         <div className="flex justify-center w-full max-w-[600px] pointer-events-auto px-2">
            {state.hands['bottom'].map((card, i) => {
-             const isTrumpCard = card.id === state.hiddenTrumpCard?.id || 
-               (state.hiddenTrumpCard && card.suit === state.hiddenTrumpCard.suit && card.rank === state.hiddenTrumpCard.rank);
+             const isTrumpCard = !!(state.hiddenTrumpCard && 
+               !state.hiddenTrumpCard.id.startsWith('dummy_') && 
+               (card.id === state.hiddenTrumpCard.id || 
+                (card.suit === state.hiddenTrumpCard.suit && card.rank === state.hiddenTrumpCard.rank)));
              const isHiddenTrump = isTrumpCard && !state.trumpRevealed;
              
              // Check if the player has any playable cards of the lead suit
              const leadSuit = state.currentTrick.leadSuit;
              const hasLeadSuit = leadSuit ? state.hands['bottom'].some(c => {
-               const isCUndercover = c.id === state.hiddenTrumpCard?.id || 
-                 (state.hiddenTrumpCard && c.suit === state.hiddenTrumpCard.suit && c.rank === state.hiddenTrumpCard.rank);
+               const isCUndercover = !!(state.hiddenTrumpCard && 
+                 !state.hiddenTrumpCard.id.startsWith('dummy_') && 
+                 (c.id === state.hiddenTrumpCard.id || 
+                  (c.suit === state.hiddenTrumpCard.suit && c.rank === state.hiddenTrumpCard.rank)));
                return c.suit === leadSuit && !(isCUndercover && !state.trumpRevealed);
              }) : false;
              
