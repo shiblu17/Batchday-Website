@@ -93,3 +93,10 @@ CREATE POLICY "Allow public select on hands" ON public.twenty_nine_hands FOR SEL
 CREATE POLICY "Allow public insert on hands" ON public.twenty_nine_hands FOR INSERT TO anon, authenticated WITH CHECK (true);
 CREATE POLICY "Allow public update on hands" ON public.twenty_nine_hands FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public delete on hands" ON public.twenty_nine_hands FOR DELETE TO anon, authenticated USING (true);
+
+-- 7. Enable Realtime Replication for these tables
+-- Run this to make sure Supabase broadcasts updates in real-time
+ALTER PUBLICATION supabase_realtime ADD TABLE public.twenty_nine_rooms;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.twenty_nine_players;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.twenty_nine_hands;
+

@@ -5,6 +5,17 @@ import { supabase } from '@/integrations/supabase/client';
 
 const order: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
 
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 const dbToLocal = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition => {
   if (!myPos) return pos;
   const myIndex = order.indexOf(myPos);
@@ -246,7 +257,7 @@ export const useTwentyNine = () => {
   const [userId] = useState(() => {
     let id = localStorage.getItem('twenty_nine_player_id');
     if (!id) {
-      id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      id = generateUUID();
       localStorage.setItem('twenty_nine_player_id', id);
     }
     return id;
@@ -486,7 +497,7 @@ export const useTwentyNine = () => {
     
     await supabase.from('twenty_nine_players').insert({
       room_id: roomId,
-      user_id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+      user_id: generateUUID(),
       name: `AI ${localPos.charAt(0).toUpperCase() + localPos.slice(1)}`,
       position: absPos,
       is_ai: true
@@ -519,7 +530,7 @@ export const useTwentyNine = () => {
       if (!takenPositions.includes(pos)) {
         await supabase.from('twenty_nine_players').insert({
           room_id: roomId,
-          user_id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+          user_id: generateUUID(),
           name: `AI Bot`,
           position: pos,
           is_ai: true
@@ -804,7 +815,9 @@ export const useTwentyNine = () => {
         setIsHost(false);
         setState(INITIAL_STATE);
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log(`room sync status: ${status}`, err || '');
+      });
 
     const playersChannel = supabase.channel(`players_sync_${roomId}`);
     playersChannel
@@ -844,7 +857,9 @@ export const useTwentyNine = () => {
           setPlayersList(dbPlayers);
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log(`players sync status: ${status}`, err || '');
+      });
 
     const handChannel = supabase.channel(`hand_sync_${roomId}`);
     handChannel
@@ -865,7 +880,9 @@ export const useTwentyNine = () => {
           }));
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log(`hand sync status: ${status}`, err || '');
+      });
 
     return () => {
       roomChannel.unsubscribe();
