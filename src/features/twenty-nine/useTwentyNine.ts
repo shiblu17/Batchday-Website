@@ -51,6 +51,8 @@ export const useTwentyNine = () => {
     stateRef.current = state;
   }, [state]);
 
+  const lastPlayKeyRef = useRef<string>('');
+
   const startGame = (mode: 'ai' | 'multiplayer') => {
     setState(prev => ({ ...prev, mode, phase: 'dealing_1' }));
     dealFirstHalf();
@@ -562,6 +564,12 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
             return;
           }
+          const playKey = `${currentPhase}_${currentBidder}_${latestState.bids.length}`;
+          if (lastPlayKeyRef.current === playKey) {
+            return;
+          }
+          lastPlayKeyRef.current = playKey;
+
           const hand = latestState.hands[currentBidder];
           const strength = evaluateHandStrength(hand);
           
@@ -602,6 +610,12 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
             return;
           }
+          const playKey = `${currentPhase}_${currentBidder}_${latestState.isDoubled}`;
+          if (lastPlayKeyRef.current === playKey) {
+            return;
+          }
+          lastPlayKeyRef.current = playKey;
+
           const hand = latestState.hands[currentBidder];
           const strength = evaluateHandStrength(hand);
           if (strength >= 4 && latestState.currentBid >= 17) {
@@ -624,6 +638,12 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
             return;
           }
+          const playKey = `${currentPhase}_${currentBidder}_${latestState.isRedoubled}`;
+          if (lastPlayKeyRef.current === playKey) {
+            return;
+          }
+          lastPlayKeyRef.current = playKey;
+
           const hand = latestState.hands[currentBidder];
           const strength = evaluateHandStrength(hand);
           if (strength >= 6 && latestState.currentBid <= 18) {
@@ -646,6 +666,12 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
             return;
           }
+          const playKey = `${currentPhase}_${currentBidder}`;
+          if (lastPlayKeyRef.current === playKey) {
+            return;
+          }
+          lastPlayKeyRef.current = playKey;
+
           handleSingleHandDecision('no');
         }, state.settings.speed === 'fast' ? 400 : 1500);
         return () => clearTimeout(timer);
@@ -662,6 +688,12 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.activeBidder !== currentBidder) {
             return;
           }
+          const playKey = `${currentPhase}_${currentBidder}`;
+          if (lastPlayKeyRef.current === playKey) {
+            return;
+          }
+          lastPlayKeyRef.current = playKey;
+
           const hand = latestState.hands[currentBidder];
           if (hand.length > 0) {
             // Evaluate suits based on both count and power (Jack = 3, 9 = 2, A = 1, 10 = 1)
@@ -704,6 +736,13 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.turn !== currentTurn) {
             return;
           }
+          const trickNumber = Object.values(latestState.tricksWon).reduce((sum, t) => sum + t.length, 0);
+          const playKey = `${currentPhase}_${currentTurn}_${trickNumber}`;
+          if (lastPlayKeyRef.current === playKey) {
+            return;
+          }
+          lastPlayKeyRef.current = playKey;
+
           // Guard: If this player has already played a card in the current trick, do not play again.
           if (latestState.currentTrick.cards[currentTurn] !== null) {
             return;
