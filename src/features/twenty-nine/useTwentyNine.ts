@@ -23,6 +23,7 @@ const INITIAL_STATE: GameState = {
   isDoubled: false,
   isRedoubled: false,
   isSingleHand: false,
+  gameMessage: null,
   trumpSuit: null,
   hiddenTrumpCard: null,
   trumpRevealed: false,
@@ -171,9 +172,9 @@ export const useTwentyNine = () => {
                 newChallenger = newQueue.shift()!;
                 newActiveBidder = newChallenger;
               } else {
-                nextPhase = 'dealing_2';
+                nextPhase = 'doubling_phase';
                 bidWinner = newHighestBidder;
-                newActiveBidder = bidWinner!;
+                newActiveBidder = (bidWinner === 'bottom' || bidWinner === 'top') ? 'right' : 'bottom';
               }
             } else if (prev.activeBidder === prev.challenger) {
               // Challenger passed
@@ -181,9 +182,9 @@ export const useTwentyNine = () => {
                 newChallenger = newQueue.shift()!;
                 newActiveBidder = newChallenger;
               } else {
-                nextPhase = 'dealing_2';
+                nextPhase = 'doubling_phase';
                 bidWinner = newHighestBidder;
-                newActiveBidder = bidWinner!;
+                newActiveBidder = (bidWinner === 'bottom' || bidWinner === 'top') ? 'right' : 'bottom';
               }
             }
           } else {
@@ -220,36 +221,95 @@ export const useTwentyNine = () => {
     });
   };
 
-  const setTrump = (cardOrString: Card | '7th_card') => {
+  const handleDoubleDecision = (action: 'double' | 'cancel') => {
+    setState(prev => {
+      if (action === 'double') {
+        const nextPhase = 'redoubling_phase';
+        // Give redouble option to the bid winner's team
+        const newActiveBidder = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'bottom' : 'right';
+        const msg = prev.activeBidder === 'bottom' ? "You doubled the game!" : `${prev.players[prev.activeBidder].name} doubled the game!`;
+        return { ...prev, isDoubled: true, phase: nextPhase, activeBidder: newActiveBidder, gameMessage: msg };
+      } else {
+        // Continue to dealing_2
+        return { ...prev, phase: 'dealing_2', activeBidder: prev.bidWinner!, gameMessage: null };
+      }
+    });
+  };
+
+  const handleRedoubleDecision = (action: 'redouble' | 'cancel') => {
+    setState(prev => {
+      if (action === 'redouble') {
+        const msg = prev.activeBidder === 'bottom' ? "You redoubled the game!" : `${prev.players[prev.activeBidder].name} redoubled the game!`;
+        return { ...prev, isRedoubled: true, phase: 'dealing_2', activeBidder: prev.bidWinner!, gameMessage: msg };
+      } else {
+        return { ...prev, phase: 'dealing_2', activeBidder: prev.bidWinner!, gameMessage: null };
+      }
+    });
+  };
+
+  const dealSecondHalf = () => {
+    setState((prev: any) => {
+      const rem = prev.remainingDeck;
+      const finalHands = {
+        bottom: sortHand([...prev.hands.bottom, ...rem.slice(0, 4)]),
+        left: sortHand([...prev.hands.left, ...rem.slice(4, 8)]),
+        top: sortHand([...prev.hands.top, ...rem.slice(8, 12)]),
+        right: sortHand([...prev.hands.right, ...rem.slice(12, 16)])
+      };
+      return {
+        ...prev,
+        hands: finalHands,
+        remainingDeck: [],
+        phase: 'single_hand_decision',
+        activeBidder: prev.bidWinner!,
+        gameMessage: null
+      };
+    });
+  };
+
+  const handleSingleHandDecision = (action: 'yes' | 'no') => {
+    setState(prev => {
+      if (action === 'yes') {
+        return {
+          ...prev,
+          isSingleHand: true,
+          phase: 'playing',
+          trumpRevealed: false,
+          trumpSuit: null,
+          hiddenTrumpCard: null,
+          turn: prev.bidWinner! // Bid winner always leads
+        };
+      } else {
+        return { ...prev, phase: 'set_trump' };
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (state.phase === 'dealing_2') {
+      const timer = setTimeout(dealSecondHalf, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [state.phase]);
+
+  const setTrump = (suitOrCard: Suit | Card | '7th_card') => {
     setState((prev: any) => {
       let hiddenCard: Card;
       let newHand = [...prev.hands[prev.activeBidder]];
-      const rem = prev.remainingDeck;
-      let nextFour: Card[] = [];
-
-      if (prev.activeBidder === 'bottom') nextFour = [...rem.slice(0, 4)];
-      else if (prev.activeBidder === 'left') nextFour = [...rem.slice(4, 8)];
-      else if (prev.activeBidder === 'top') nextFour = [...rem.slice(8, 12)];
-      else if (prev.activeBidder === 'right') nextFour = [...rem.slice(12, 16)];
-
-      if (cardOrString === '7th_card') {
-        // The 7th card is the 3rd card in the next batch of 4
-        hiddenCard = nextFour[2];
-        // DO NOT remove it from nextFour! The player gets all 8 cards immediately.
+      if (suitOrCard === '7th_card') {
+        // The 7th card is the 3rd card in their 2nd batch (which is index 6 of their hand)
+        hiddenCard = prev.hands[prev.activeBidder][6];
       } else {
-        hiddenCard = cardOrString;
-        // If it's a real card from their hand (e.g. AI setting normal trump), remove it
+        hiddenCard = suitOrCard as Card;
+        // If it's a real card from their hand, remove it
         if (!hiddenCard.id.startsWith('dummy_')) {
           newHand = newHand.filter((c: Card) => c.id !== hiddenCard.id);
         }
       }
       
-      // Deal remaining cards and sort
       const finalHands = {
-        bottom: sortHand(prev.activeBidder === 'bottom' ? [...newHand, ...nextFour] : [...prev.hands.bottom, ...rem.slice(0, 4)], hiddenCard.id),
-        left: sortHand(prev.activeBidder === 'left' ? [...newHand, ...nextFour] : [...prev.hands.left, ...rem.slice(4, 8)], hiddenCard.id),
-        top: sortHand(prev.activeBidder === 'top' ? [...newHand, ...nextFour] : [...prev.hands.top, ...rem.slice(8, 12)], hiddenCard.id),
-        right: sortHand(prev.activeBidder === 'right' ? [...newHand, ...nextFour] : [...prev.hands.right, ...rem.slice(12, 16)], hiddenCard.id)
+        ...prev.hands,
+        [prev.activeBidder]: sortHand(newHand, hiddenCard.id)
       };
 
       return {
@@ -321,11 +381,20 @@ export const useTwentyNine = () => {
       };
 
       let nextTurn = getNextPlayer(player);
+      if (prev.isSingleHand) {
+        const partner = prev.bidWinner === 'bottom' ? 'top' : prev.bidWinner === 'top' ? 'bottom' : prev.bidWinner === 'left' ? 'right' : 'left';
+        if (nextTurn === partner) {
+          nextTurn = getNextPlayer(nextTurn);
+        }
+      }
+
       let nextPhase = prev.phase;
       
       // Check if trick is complete
       const cardsPlayed = Object.values(newTrickCards).filter(c => c !== null).length;
-      if (cardsPlayed === 4) {
+      const requiredCards = prev.isSingleHand ? 3 : 4;
+      
+      if (cardsPlayed === requiredCards) {
         // Resolve trick
         const winner = evaluateTrick(newTrick, prev.trumpSuit, prev.trumpRevealed);
         const points = calculateTrickPoints(newTrick);
@@ -356,9 +425,19 @@ export const useTwentyNine = () => {
       const team1Points = (newTricksWon.bottom.reduce((sum, t) => sum + t.points, 0) + newTricksWon.top.reduce((sum, t) => sum + t.points, 0));
       const team2Points = (newTricksWon.left.reduce((sum, t) => sum + t.points, 0) + newTricksWon.right.reduce((sum, t) => sum + t.points, 0));
 
-      // Check if round is over (8 tricks = 32 cards played)
+      const bidTeam = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'team1' : 'team2';
+      const winnerTeam = (winner === 'bottom' || winner === 'top') ? 'team1' : 'team2';
+
+      // Check if round is over (8 tricks = 32 cards played, or 24 for single hand)
       const totalTricks = Object.values(newTricksWon).reduce((sum, tricks) => sum + tricks.length, 0);
       
+      if (prev.isSingleHand) {
+        if (winnerTeam !== bidTeam) {
+          // Opponent won a trick! Instant loss.
+          return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick, gameMessage: "Opponent won a trick! Single Hand Failed." });
+        }
+      }
+
       if (totalTricks === 8) {
         return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick });
       }
@@ -380,8 +459,8 @@ export const useTwentyNine = () => {
     const bidTeam = (state.bidWinner === 'bottom' || state.bidWinner === 'top') ? 'team1' : 'team2';
     let bidAmount = state.currentBid;
 
-    // Apply Pair Rule points
-    if (state.pairRevealedBy) {
+    // Apply Pair Rule points (Only if not single hand)
+    if (state.pairRevealedBy && !state.isSingleHand) {
       const pairTeam = (state.pairRevealedBy === 'bottom' || state.pairRevealedBy === 'top') ? 'team1' : 'team2';
       if (pairTeam === bidTeam) {
         bidAmount -= 4; // Bidding team showed pair, target decreases
@@ -392,16 +471,27 @@ export const useTwentyNine = () => {
 
     // Determine stakes
     let stakes = 1;
-    if (state.isSingleHand) stakes = 3;
-    else if (state.isRedoubled) stakes = 4;
+    if (state.isRedoubled) stakes = 4;
     else if (state.isDoubled) stakes = 2;
 
-    if (bidTeam === 'team1') {
-      if (state.roundPoints.team1 >= bidAmount) t1Score += stakes;
-      else t1Score -= stakes;
+    if (state.isSingleHand) {
+      if (bidTeam === 'team1') {
+        const opponentWonTrick = state.tricksWon.left.length > 0 || state.tricksWon.right.length > 0;
+        if (opponentWonTrick) t1Score -= 3;
+        else t1Score += 3;
+      } else {
+        const opponentWonTrick = state.tricksWon.bottom.length > 0 || state.tricksWon.top.length > 0;
+        if (opponentWonTrick) t2Score -= 3;
+        else t2Score += 3;
+      }
     } else {
-      if (state.roundPoints.team2 >= bidAmount) t2Score += stakes;
-      else t2Score -= stakes;
+      if (bidTeam === 'team1') {
+        if (state.roundPoints.team1 >= bidAmount) t1Score += stakes;
+        else t1Score -= stakes;
+      } else {
+        if (state.roundPoints.team2 >= bidAmount) t2Score += stakes;
+        else t2Score -= stakes;
+      }
     }
 
     return {
@@ -438,7 +528,49 @@ export const useTwentyNine = () => {
         }
     }
 
-    if (state.phase === 'dealing_2') {
+    if (state.phase === 'doubling_phase') {
+      const activePlayer = state.players[state.activeBidder];
+      if (activePlayer.isAI) {
+        const timer = setTimeout(() => {
+          const hand = state.hands[state.activeBidder];
+          const strength = evaluateHandStrength(hand);
+          if (strength >= 4 && state.currentBid >= 17) {
+            handleDoubleDecision('double');
+          } else {
+            handleDoubleDecision('cancel');
+          }
+        }, state.settings.speed === 'fast' ? 400 : 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    if (state.phase === 'redoubling_phase') {
+      const activePlayer = state.players[state.activeBidder];
+      if (activePlayer.isAI) {
+        const timer = setTimeout(() => {
+          const hand = state.hands[state.activeBidder];
+          const strength = evaluateHandStrength(hand);
+          if (strength >= 6 && state.currentBid <= 18) {
+            handleRedoubleDecision('redouble');
+          } else {
+            handleRedoubleDecision('cancel');
+          }
+        }, state.settings.speed === 'fast' ? 400 : 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    if (state.phase === 'single_hand_decision') {
+      const activePlayer = state.players[state.activeBidder];
+      if (activePlayer.isAI) {
+        const timer = setTimeout(() => {
+          handleSingleHandDecision('no');
+        }, state.settings.speed === 'fast' ? 400 : 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    if (state.phase === 'set_trump') {
       const activePlayer = state.players[state.activeBidder];
       if (activePlayer.isAI) {
         const timer = setTimeout(() => {
@@ -502,6 +634,9 @@ export const useTwentyNine = () => {
     state,
     startGame,
     placeBid,
+    handleDoubleDecision,
+    handleRedoubleDecision,
+    handleSingleHandDecision,
     setTrump,
     revealTrump,
     playCard,

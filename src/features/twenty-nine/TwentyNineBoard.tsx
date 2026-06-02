@@ -75,9 +75,29 @@ export const TwentyNineBoard: React.FC = () => {
 
   // Helper to determine if a player is currently active (bidding, selecting trump, or playing)
   const isPlayerActive = (pos: PlayerPosition) => {
-    if (state.phase === 'bidding' || state.phase === 'dealing_2') return state.activeBidder === pos;
+    if (state.phase === 'lobby' || state.phase === 'game_over') return false;
+    
+    // In bidding, it's the active bidder's turn
+    if (state.phase === 'bidding') return state.activeBidder === pos;
+    if (state.phase === 'doubling_phase') return state.activeBidder === pos;
+    if (state.phase === 'redoubling_phase') return state.activeBidder === pos;
+    if (state.phase === 'single_hand_decision') return state.activeBidder === pos;
+    
+    // In setting trump phase, it's the active bidder's turn
+    if (state.phase === 'set_trump') return state.activeBidder === pos;
+    
+    // In playing phase, it's the turn player
     if (state.phase === 'playing') return state.turn === pos;
+    
     return false;
+  };
+
+  const isSittingOut = (pos: PlayerPosition) => {
+    if (!state.isSingleHand) return false;
+    const partnerMap: Record<PlayerPosition, PlayerPosition> = {
+      bottom: 'top', top: 'bottom', left: 'right', right: 'left'
+    };
+    return state.bidWinner ? partnerMap[state.bidWinner] === pos : false;
   };
 
   // Render a thinking bubble if it's an AI's turn
@@ -96,6 +116,20 @@ export const TwentyNineBoard: React.FC = () => {
   return (
     <div className="relative w-full h-full bg-[#2d1b11] overflow-hidden font-sans select-none flex justify-center text-white">
       
+      {/* Game Message Toast */}
+      <AnimatePresence>
+        {state.gameMessage && (
+          <motion.div 
+            initial={{ opacity: 0, y: -50, x: '-50%' }}
+            animate={{ opacity: 1, y: 20, x: '-50%' }}
+            exit={{ opacity: 0, y: -50, x: '-50%' }}
+            className="absolute top-0 left-1/2 z-[100] px-6 py-3 bg-red-600/90 backdrop-blur-md text-white font-bold rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] border border-red-400 text-sm md:text-base pointer-events-none text-center"
+          >
+            {state.gameMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top HUD */}
       <div className="absolute top-6 sm:top-8 w-full max-w-[500px] px-4 flex justify-between items-start text-[10px] sm:text-xs font-bold z-20 pointer-events-none">
         <div className="flex flex-col items-start gap-1">
@@ -177,53 +211,59 @@ export const TwentyNineBoard: React.FC = () => {
       {/* Avatars */}
       <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] pointer-events-none z-30">
         {/* Top Avatar */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-          {renderThinking('top')}
-          {state.trumpRevealed && state.trumpRevealer === 'top' && (
+        {!isSittingOut('top') && (
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+            {renderThinking('top')}
+            {state.trumpRevealed && state.trumpRevealer === 'top' && (
+               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
+                 Declared Trump!
+               </motion.div>
+            )}
+            <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
+              {state.players['top'].name}
+            </div>
+            <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('top') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+               <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Left Avatar (Screen Relative to prevent clipping but keep on sides) */}
+      {!isSittingOut('left') && (
+        <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+          {renderThinking('left')}
+          {state.trumpRevealed && state.trumpRevealer === 'left' && (
              <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
                Declared Trump!
              </motion.div>
           )}
-          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
-            {state.players['top'].name}
+          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
+            {state.players['left'].name}
           </div>
-          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('top') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
           </div>
         </div>
-      </div>
-
-      {/* Left Avatar (Screen Relative to prevent clipping but keep on sides) */}
-      <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
-        {renderThinking('left')}
-        {state.trumpRevealed && state.trumpRevealer === 'left' && (
-           <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
-             Declared Trump!
-           </motion.div>
-        )}
-        <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-          {state.players['left'].name}
-        </div>
-        <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
-           <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
-        </div>
-      </div>
+      )}
 
       {/* Right Avatar (Screen Relative) */}
-      <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
-        {renderThinking('right')}
-        {state.trumpRevealed && state.trumpRevealer === 'right' && (
-           <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
-             Declared Trump!
-           </motion.div>
-        )}
-        <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-          {state.players['right'].name}
+      {!isSittingOut('right') && (
+        <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+          {renderThinking('right')}
+          {state.trumpRevealed && state.trumpRevealer === 'right' && (
+             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
+               Declared Trump!
+             </motion.div>
+          )}
+          <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
+            {state.players['right'].name}
+          </div>
+          <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+             <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
+          </div>
         </div>
-        <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
-           <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
-        </div>
-      </div>
+      )}
 
       {/* Internal Table Elements */}
       <div className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] pointer-events-none z-10">
@@ -355,34 +395,70 @@ export const TwentyNineBoard: React.FC = () => {
                 Pass
               </button>
             </div>
-            
-            {/* Advanced Bids Row */}
-            <div className="grid grid-cols-2 gap-[2px]">
-              {state.currentBid >= 16 && state.activeBidder !== state.highestBidder && !state.isDoubled && !state.isRedoubled && (
-                <button 
-                  onClick={() => placeBid('double')} 
-                  className="col-span-1 h-10 sm:h-12 bg-gradient-to-b from-[#2a5a3a] to-[#13331c] text-white text-sm sm:text-base font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
-                >
-                  Double
-                </button>
-              )}
-              {state.isDoubled && state.activeBidder === state.highestBidder && !state.isRedoubled && (
-                <button 
-                  onClick={() => placeBid('redouble')} 
-                  className="col-span-1 h-10 sm:h-12 bg-gradient-to-b from-[#8a2a2a] to-[#4a1313] text-white text-sm sm:text-base font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
-                >
-                  Redouble
-                </button>
-              )}
-              {!state.isSingleHand && state.currentBid < 29 && (
-                <button 
-                  onClick={() => placeBid('single_hand')} 
-                  className="col-span-2 h-10 sm:h-12 bg-gradient-to-b from-[#8a5a2a] to-[#4a3313] text-amber-200 text-sm sm:text-base font-black tracking-wider shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center border border-amber-600/50"
-                >
-                  SINGLE HAND (29)
-                </button>
-              )}
+          </div>
+        </div>
+      )}
+
+      {/* Doubling Phase UI */}
+      {state.phase === 'doubling_phase' && state.activeBidder === 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
+          <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c] flex flex-col items-center text-center">
+            <h3 className="text-amber-400 font-bold mb-4 text-lg">Opponent bid {state.currentBid}. Double the game?</h3>
+            <div className="flex gap-4 w-full">
+              <button onClick={() => handleDoubleDecision('double')} className="flex-1 h-12 bg-gradient-to-b from-[#2a5a3a] to-[#13331c] text-white font-bold rounded shadow-lg hover:brightness-110 active:scale-95 transition-all">DOUBLE</button>
+              <button onClick={() => handleDoubleDecision('cancel')} className="flex-1 h-12 bg-[#52321c] text-white font-bold rounded shadow-lg hover:brightness-110 active:scale-95 transition-all">Pass</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {state.phase === 'doubling_phase' && state.activeBidder !== 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
+          <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-white/20">
+            Waiting for {state.players[state.activeBidder].name} to Double or Pass...
+          </div>
+        </div>
+      )}
+
+      {/* Redoubling Phase UI */}
+      {state.phase === 'redoubling_phase' && state.activeBidder === 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
+          <div className="bg-[#4a1313] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#ff4444] flex flex-col items-center text-center">
+            <h3 className="text-[#ff8888] font-bold mb-4 text-lg">Opponent Doubled! Redouble?</h3>
+            <div className="flex gap-4 w-full">
+              <button onClick={() => handleRedoubleDecision('redouble')} className="flex-1 h-12 bg-gradient-to-b from-[#8a2a2a] to-[#4a1313] text-white font-bold rounded shadow-lg hover:brightness-110 active:scale-95 transition-all border border-[#ff4444]">REDOUBLE</button>
+              <button onClick={() => handleRedoubleDecision('cancel')} className="flex-1 h-12 bg-[#52321c] text-white font-bold rounded shadow-lg hover:brightness-110 active:scale-95 transition-all">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {state.phase === 'redoubling_phase' && state.activeBidder !== 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
+          <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-[#ff4444]/40">
+            Waiting for {state.players[state.activeBidder].name} to Redouble or Cancel...
+          </div>
+        </div>
+      )}
+
+      {/* Single Hand Decision UI */}
+      {state.phase === 'single_hand_decision' && state.activeBidder === 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
+          <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-amber-500 flex flex-col items-center text-center">
+            <h3 className="text-amber-400 font-bold mb-2 text-lg">Play Single Hand (29)?</h3>
+            <p className="text-xs text-amber-200/70 mb-4 leading-tight">You must win all 8 tricks alone without Trump.</p>
+            <div className="flex gap-4 w-full">
+              <button onClick={() => handleSingleHandDecision('yes')} className="flex-1 h-12 bg-gradient-to-b from-[#8a5a2a] to-[#4a3313] text-white font-bold rounded shadow-lg hover:brightness-110 active:scale-95 transition-all border border-amber-600">PLAY ALONE</button>
+              <button onClick={() => handleSingleHandDecision('no')} className="flex-1 h-12 bg-[#52321c] text-white font-bold rounded shadow-lg hover:brightness-110 active:scale-95 transition-all">Play Normal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {state.phase === 'single_hand_decision' && state.activeBidder !== 'bottom' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
+          <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-amber-500/30">
+            Waiting for {state.players[state.activeBidder].name} to decide Single Hand...
           </div>
         </div>
       )}
@@ -435,7 +511,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Waiting for other players to set trump */}
-      {state.phase === 'dealing_2' && state.activeBidder !== 'bottom' && (
+      {state.phase === 'set_trump' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse">
             Waiting for {state.players[state.activeBidder].name} to set Trump...
