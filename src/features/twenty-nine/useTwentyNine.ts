@@ -81,9 +81,9 @@ export const useTwentyNine = () => {
       hands: newHands,
       remainingDeck: deck.slice(16, 32), // Custom addition not in type, but ok for JS
       activeBidder: 'right', // right of dealer
-      biddingQueue: ['right', 'top', 'left', 'bottom'],
+      biddingQueue: ['left', 'bottom'], // The remaining players
       highestBidder: 'right', // Right is the initial defender
-      challenger: 'bottom',   // Bottom is the first challenger
+      challenger: 'top',   // Top is the first challenger
       currentBid: 15,
       isDoubled: false,
       isRedoubled: false,
