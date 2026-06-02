@@ -15,7 +15,7 @@ const INITIAL_STATE: GameState = {
   hands: { bottom: [], left: [], top: [], right: [] },
   bids: [],
   currentBid: 15,
-  biddingQueue: ['right', 'top', 'left', 'bottom'],
+  biddingQueue: [],
   highestBidder: null,
   challenger: null,
   bidWinner: null,
@@ -81,9 +81,9 @@ export const useTwentyNine = () => {
       hands: newHands,
       remainingDeck: deck.slice(16, 32), // Custom addition not in type, but ok for JS
       activeBidder: 'right', // right of dealer
-      biddingQueue: ['left', 'bottom'], // The remaining players
+      biddingQueue: ['left', 'top'], // 'bottom' is already the challenger
       highestBidder: 'right', // Right is the initial defender
-      challenger: 'top',   // Top is the first challenger
+      challenger: 'bottom',   // Bottom is the first challenger
       currentBid: 15,
       isDoubled: false,
       isRedoubled: false,
@@ -190,7 +190,14 @@ export const useTwentyNine = () => {
             // A higher bid was made
             currentBid = amount as number;
             newHighestBidder = prev.activeBidder;
-            newActiveBidder = prev.activeBidder === prev.highestBidder ? prev.challenger! : prev.highestBidder!;
+            
+            if (prev.activeBidder === prev.challenger) {
+              newChallenger = prev.highestBidder;
+              newActiveBidder = newChallenger!;
+            } else {
+              newChallenger = prev.challenger;
+              newActiveBidder = newChallenger!;
+            }
           }
         }
       }
