@@ -148,6 +148,19 @@ export const TwentyNineBoard: React.FC = () => {
 
   const [showLastHand, setShowLastHand] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [tempRevealTrump, setTempRevealTrump] = useState(false);
+
+  useEffect(() => {
+    if (state.trumpRevealed) {
+      setTempRevealTrump(true);
+      const timer = setTimeout(() => {
+        setTempRevealTrump(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setTempRevealTrump(false);
+    }
+  }, [state.trumpRevealed]);
   
   if (state.phase === 'lobby') {
     return (
@@ -518,9 +531,9 @@ export const TwentyNineBoard: React.FC = () => {
               <div className="text-white/90">
                 {state.bidWinner ? state.players[state.bidWinner].name : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
               </div>
-              {state.bidWinner === 'bottom' && state.trumpSuit && !state.trumpRevealed && (
+              {state.trumpSuit && (state.trumpRevealed || state.bidWinner === 'bottom') && (
                 <div className="text-amber-400 font-bold mt-1 bg-black/40 px-2 py-0.5 rounded border border-amber-400/30">
-                  Trump: {state.trumpSuit === 'hearts' ? '♥' : state.trumpSuit === 'diamonds' ? '♦' : state.trumpSuit === 'clubs' ? '♣' : '♠'}
+                  Trump: {state.trumpSuit === 'hearts' ? '♥' : state.trumpSuit === 'diamonds' ? '♦' : state.trumpSuit === 'clubs' ? '♣' : '♠'} {!state.trumpRevealed && '(Hidden)'}
                 </div>
               )}
             </>
@@ -666,13 +679,13 @@ export const TwentyNineBoard: React.FC = () => {
             <div className="flex flex-col items-center -mt-4 relative">
               <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">Trump</span>
               
-              {state.trumpRevealed && state.hiddenTrumpCard ? (
+              {state.trumpRevealed && tempRevealTrump && state.hiddenTrumpCard ? (
                 <motion.div initial={{ rotateY: 180 }} animate={{ rotateY: 0 }} transition={{ duration: 0.6 }} className="scale-75 origin-top">
                   <CardUI card={state.hiddenTrumpCard} />
                 </motion.div>
               ) : state.trumpSuit ? (
                 <div className="w-10 h-14 bg-red-700 rounded border-2 border-white/80 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center">
-                   <span className="text-white font-bold">?</span>
+                   <span className="text-white font-bold">{state.trumpRevealed ? (state.trumpSuit === 'hearts' ? '♥' : state.trumpSuit === 'diamonds' ? '♦' : state.trumpSuit === 'clubs' ? '♣' : '♠') : '?'}</span>
                 </div>
               ) : (
                 <div className="w-10 h-14 bg-white/5 rounded border border-white/20 border-dashed" />
