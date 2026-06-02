@@ -399,6 +399,17 @@ export const useTwentyNine = () => {
       }
 
       let nextPhase = prev.phase;
+      let newPairPointsAdded = prev.pairPointsAdded;
+      let newGameMessage = prev.gameMessage;
+
+      // Check for Marriage Declaration
+      if (prev.trumpRevealed && prev.pairRevealedBy === player && !prev.pairPointsAdded) {
+         newPairPointsAdded = true;
+         const bidTeam = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'team1' : 'team2';
+         const pairTeam = (player === 'bottom' || player === 'top') ? 'team1' : 'team2';
+         const diff = pairTeam === bidTeam ? 'decreased' : 'increased';
+         newGameMessage = `Marriage Declared! Target bid is ${diff} by 4.`;
+      }
       
       // Check if trick is complete
       const cardsPlayed = Object.values(newTrickCards).filter(c => c !== null).length;
@@ -421,7 +432,9 @@ export const useTwentyNine = () => {
         hands: { ...prev.hands, [player]: newHand },
         currentTrick: newTrick,
         turn: nextTurn,
-        phase: nextPhase
+        phase: nextPhase,
+        pairPointsAdded: newPairPointsAdded,
+        gameMessage: newGameMessage
       };
     });
   };
@@ -470,7 +483,7 @@ export const useTwentyNine = () => {
     let bidAmount = state.currentBid;
 
     // Apply Pair Rule points (Only if not single hand)
-    if (state.pairRevealedBy && !state.isSingleHand) {
+    if (state.pairRevealedBy && state.pairPointsAdded && !state.isSingleHand) {
       const pairTeam = (state.pairRevealedBy === 'bottom' || state.pairRevealedBy === 'top') ? 'team1' : 'team2';
       if (pairTeam === bidTeam) {
         bidAmount -= 4; // Bidding team showed pair, target decreases
