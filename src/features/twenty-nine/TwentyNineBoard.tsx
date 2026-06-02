@@ -154,6 +154,11 @@ export const TwentyNineBoard: React.FC = () => {
               <div className="text-white/90">
                 {state.bidWinner ? state.players[state.bidWinner].name : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
               </div>
+              {state.bidWinner === 'bottom' && state.trumpSuit && !state.trumpRevealed && (
+                <div className="text-amber-400 font-bold mt-1 bg-black/40 px-2 py-0.5 rounded border border-amber-400/30">
+                  Trump: {state.trumpSuit === 'hearts' ? '♥' : state.trumpSuit === 'diamonds' ? '♦' : state.trumpSuit === 'clubs' ? '♣' : '♠'}
+                </div>
+              )}
             </>
           )}
           <button 
@@ -599,7 +604,8 @@ export const TwentyNineBoard: React.FC = () => {
 
         <div className="flex justify-center w-full max-w-[600px] pointer-events-auto px-2">
            {state.hands['bottom'].map((card, i) => {
-             const isHiddenTrump = card.id === state.hiddenTrumpCard?.id && !state.trumpRevealed;
+             // Local player should always see all their own cards face up
+             const isHiddenTrump = false;
              
              // Check if the player has any playable cards of the lead suit
              const leadSuit = state.currentTrick.leadSuit;
