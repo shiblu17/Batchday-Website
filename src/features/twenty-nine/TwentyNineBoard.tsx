@@ -378,28 +378,70 @@ export const TwentyNineBoard: React.FC = () => {
 
         {/* Center Played Cards */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
-          <AnimatePresence>
-            {state.currentTrick.cards.top && (
-              <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute top-[35%] left-1/2 -translate-x-1/2 z-10 scale-[0.65]">
-                <CardUI card={state.currentTrick.cards.top} />
-              </motion.div>
-            )}
-            {state.currentTrick.cards.left && (
-              <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="absolute top-[45%] left-[25%] -translate-x-1/2 z-20 scale-[0.65]">
-                <CardUI card={state.currentTrick.cards.left} />
-              </motion.div>
-            )}
-            {state.currentTrick.cards.right && (
-              <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="absolute top-[45%] right-[25%] translate-x-1/2 z-20 scale-[0.65]">
-                <CardUI card={state.currentTrick.cards.right} />
-              </motion.div>
-            )}
-            {state.currentTrick.cards.bottom && (
-              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-30 scale-[0.65]">
-                <CardUI card={state.currentTrick.cards.bottom} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Top Played Card Slot */}
+          <div className="absolute top-[35%] left-1/2 -translate-x-1/2 z-10 scale-[0.65]">
+            <AnimatePresence mode="wait">
+              {state.currentTrick.cards.top && (
+                <motion.div 
+                  key={`top-${state.currentTrick.cards.top.id}`} 
+                  initial={{ y: -20, opacity: 0 }} 
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                >
+                  <CardUI card={state.currentTrick.cards.top} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Left Played Card Slot */}
+          <div className="absolute top-[45%] left-[25%] -translate-x-1/2 z-20 scale-[0.65]">
+            <AnimatePresence mode="wait">
+              {state.currentTrick.cards.left && (
+                <motion.div 
+                  key={`left-${state.currentTrick.cards.left.id}`} 
+                  initial={{ x: -20, opacity: 0 }} 
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                >
+                  <CardUI card={state.currentTrick.cards.left} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Right Played Card Slot */}
+          <div className="absolute top-[45%] right-[25%] translate-x-1/2 z-20 scale-[0.65]">
+            <AnimatePresence mode="wait">
+              {state.currentTrick.cards.right && (
+                <motion.div 
+                  key={`right-${state.currentTrick.cards.right.id}`} 
+                  initial={{ x: 20, opacity: 0 }} 
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                >
+                  <CardUI card={state.currentTrick.cards.right} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Bottom Played Card Slot */}
+          <div className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-30 scale-[0.65]">
+            <AnimatePresence mode="wait">
+              {state.currentTrick.cards.bottom && (
+                <motion.div 
+                  key={`bottom-${state.currentTrick.cards.bottom.id}`} 
+                  initial={{ y: 20, opacity: 0 }} 
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                >
+                  <CardUI card={state.currentTrick.cards.bottom} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           
           {/* Turn Indicator */}
           {state.phase === 'playing' && state.turn === 'bottom' && (
