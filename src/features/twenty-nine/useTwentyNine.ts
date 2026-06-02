@@ -704,6 +704,10 @@ export const useTwentyNine = () => {
           if (latestState.phase !== currentPhase || latestState.turn !== currentTurn) {
             return;
           }
+          // Guard: If this player has already played a card in the current trick, do not play again.
+          if (latestState.currentTrick.cards[currentTurn] !== null) {
+            return;
+          }
           const hand = latestState.hands[currentTurn];
           if (hand.length > 0) {
             let localHand = [...hand];
