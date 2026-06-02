@@ -3,20 +3,41 @@ import { useTwentyNine } from './useTwentyNine';
 import { CardUI } from './CardUI';
 import { PlayerPosition } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
 
 export const TwentyNineBoard: React.FC = () => {
-  const { state, startGame, placeBid, setTrump, revealTrump, playCard } = useTwentyNine();
+  const { state, startGame, placeBid, setTrump, revealTrump, playCard, updateSettings } = useTwentyNine();
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
 
   // Play sound when trick is won
   useEffect(() => {
     if (state.currentTrick.winner && !prevTrickWinner.current) {
-      // playTrickWinSound();
+      playTrickWinSound();
     }
     prevTrickWinner.current = state.currentTrick.winner;
   }, [state.currentTrick.winner]);
 
+  // Deal sounds
+  const prevPhase = useRef<string | null>(null);
+  useEffect(() => {
+    if ((state.phase === 'dealing_1' || state.phase === 'dealing_2') && prevPhase.current !== state.phase) {
+      playDealSound();
+    }
+    prevPhase.current = state.phase;
+  }, [state.phase]);
+
+  // Card play sounds
+  const prevTrickCards = useRef<number>(0);
+  useEffect(() => {
+    const currentCardsCount = Object.values(state.currentTrick.cards).filter(c => c !== null).length;
+    if (currentCardsCount > prevTrickCards.current) {
+      playCardSwoosh();
+    }
+    prevTrickCards.current = currentCardsCount;
+  }, [state.currentTrick.cards]);
+
   const [showLastHand, setShowLastHand] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   
   if (state.phase === 'lobby') {
     return (
@@ -82,7 +103,10 @@ export const TwentyNineBoard: React.FC = () => {
             <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#b5b31d] to-[#4c4a03] border-2 border-[#1a1a1a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] flex items-center justify-center text-lg pointer-events-auto active:scale-95">
               «
             </button>
-            <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#b5b31d] to-[#4c4a03] border-2 border-[#1a1a1a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] flex items-center justify-center text-lg pointer-events-auto active:scale-95">
+            <button 
+              onClick={() => setShowSettings(true)}
+              className="w-8 h-8 rounded-full bg-gradient-to-b from-[#b5b31d] to-[#4c4a03] border-2 border-[#1a1a1a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] flex items-center justify-center text-lg pointer-events-auto active:scale-95"
+            >
               ⚙
             </button>
           </div>
@@ -107,9 +131,26 @@ export const TwentyNineBoard: React.FC = () => {
               💡
             </button>
           </div>
-          <div className="mt-2 text-white/90 font-bold bg-black/40 px-2 py-1 rounded-md border border-white/10 text-right min-w-[100px]">
-            <div className="text-[10px] text-gray-300">Game: {state.scores.team1} - {state.scores.team2}</div>
-            <div className="text-amber-400 text-sm">Cards: {state.roundPoints.team1} - {state.roundPoints.team2}</div>
+          <div className="mt-2 text-white/90 font-bold bg-black/40 px-3 py-2 rounded-md border border-white/10 flex flex-col gap-2 min-w-[120px]">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-300">Us:</span>
+              <div className="flex gap-1 flex-wrap w-[60px] justify-end">
+                {Array.from({ length: Math.abs(state.scores.team1) }).map((_, i) => (
+                  <div key={i} className={`w-3 h-3 rounded-full border border-white/30 shadow-md ${state.scores.team1 > 0 ? 'bg-red-600' : 'bg-slate-900'}`} />
+                ))}
+                {state.scores.team1 === 0 && <span className="text-gray-500">-</span>}
+              </div>
+            </div>
+            <div className="flex justify-between items-center text-xs border-b border-white/10 pb-1">
+              <span className="text-gray-300">Them:</span>
+              <div className="flex gap-1 flex-wrap w-[60px] justify-end">
+                {Array.from({ length: Math.abs(state.scores.team2) }).map((_, i) => (
+                  <div key={i} className={`w-3 h-3 rounded-full border border-white/30 shadow-md ${state.scores.team2 > 0 ? 'bg-red-600' : 'bg-slate-900'}`} />
+                ))}
+                {state.scores.team2 === 0 && <span className="text-gray-500">-</span>}
+              </div>
+            </div>
+            <div className="text-amber-400 text-sm text-center pt-1">Cards: {state.roundPoints.team1} - {state.roundPoints.team2}</div>
           </div>
           <button className="mt-1 px-4 py-1 bg-gradient-to-b from-[#a0744e] to-[#734e30] border border-[#d6af84] rounded-sm shadow-md pointer-events-auto uppercase">
             Skip
@@ -117,10 +158,15 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       </div>
 
-      {/* The 3D Wooden Table */}
+      {/* The 3D Table */}
       <div 
-        className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col z-0"
-        style={{ 
+        className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col z-0 transition-colors duration-1000"
+        style={state.settings.theme === 'green' ? {
+          borderRadius: '50%',
+          background: '#155227',
+          backgroundImage: 'radial-gradient(circle, #207a3c 0%, #0d3618 100%)',
+          boxShadow: 'inset 0 0 50px rgba(0,0,0,0.9), inset 0 0 0 6px #5c3a21, inset 0 0 0 10px #2a160a, inset 0 0 0 16px #4a2e15'
+        } : { 
           borderRadius: '50%',
           background: '#854d27',
           backgroundImage: 'linear-gradient(90deg, transparent 50%, rgba(255,255,255,0.03) 50%), repeating-linear-gradient(90deg, #7c4521 0px, #7c4521 30px, #633618 30px, #633618 32px)',
@@ -282,31 +328,61 @@ export const TwentyNineBoard: React.FC = () => {
 
       {/* Bidding Grid (Transparent, tightly packed) */}
       {state.phase === 'bidding' && state.activeBidder === 'bottom' && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[80%] max-w-[280px]">
-          <div className="grid grid-cols-4 gap-[2px] bg-[#3a2010] p-[4px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c]">
-            {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
+          <div className="bg-[#3a2010] p-[4px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c]">
+            <div className="grid grid-cols-4 gap-[2px] mb-[2px]">
+              {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
+                <button 
+                  key={bid}
+                  disabled={bid <= state.currentBid}
+                  onClick={() => placeBid(bid)}
+                  className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
+                >
+                  {bid}
+                </button>
+              ))}
               <button 
-                key={bid}
-                disabled={bid <= state.currentBid}
-                onClick={() => placeBid(bid)}
-                className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
+                disabled={28 <= state.currentBid}
+                onClick={() => placeBid(28)}
+                className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm rounded-bl-md flex items-center justify-center"
               >
-                {bid}
+                28
               </button>
-            ))}
-            <button 
-              disabled={28 <= state.currentBid}
-              onClick={() => placeBid(28)}
-              className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm rounded-bl-md flex items-center justify-center"
-            >
-              28
-            </button>
-            <button 
-              onClick={() => placeBid('pass')} 
-              className="col-span-3 h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm rounded-br-md flex items-center justify-center"
-            >
-              Pass
-            </button>
+              <button 
+                onClick={() => placeBid('pass')} 
+                className="col-span-3 h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm rounded-br-md flex items-center justify-center"
+              >
+                Pass
+              </button>
+            </div>
+            
+            {/* Advanced Bids Row */}
+            <div className="grid grid-cols-2 gap-[2px]">
+              {state.currentBid >= 16 && state.activeBidder !== state.highestBidder && !state.isDoubled && !state.isRedoubled && (
+                <button 
+                  onClick={() => placeBid('double')} 
+                  className="col-span-1 h-10 sm:h-12 bg-gradient-to-b from-[#2a5a3a] to-[#13331c] text-white text-sm sm:text-base font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
+                >
+                  Double
+                </button>
+              )}
+              {state.isDoubled && state.activeBidder === state.highestBidder && !state.isRedoubled && (
+                <button 
+                  onClick={() => placeBid('redouble')} 
+                  className="col-span-1 h-10 sm:h-12 bg-gradient-to-b from-[#8a2a2a] to-[#4a1313] text-white text-sm sm:text-base font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
+                >
+                  Redouble
+                </button>
+              )}
+              {!state.isSingleHand && state.currentBid < 29 && (
+                <button 
+                  onClick={() => placeBid('single_hand')} 
+                  className="col-span-2 h-10 sm:h-12 bg-gradient-to-b from-[#8a5a2a] to-[#4a3313] text-amber-200 text-sm sm:text-base font-black tracking-wider shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center border border-amber-600/50"
+                >
+                  SINGLE HAND (29)
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -442,49 +518,117 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       )}
 
-      {/* Last Hand Modal */}
+      {/* Last Trick Modal */}
       <AnimatePresence>
         {showLastHand && state.lastTrick && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white pointer-events-auto"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setShowLastHand(false)}
+            className="absolute inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-auto p-4"
           >
-            <h2 className="text-3xl font-black mb-8 text-amber-500">Previous Trick</h2>
-            
-            <div className="relative w-[300px] h-[300px] mb-8">
-              {state.lastTrick.cards.top && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 scale-75">
-                  <div className="text-center mb-1 text-xs">Partner</div>
-                  <CardUI card={state.lastTrick.cards.top} />
-                </div>
-              )}
-              {state.lastTrick.cards.bottom && (
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 scale-75">
-                  <div className="text-center mt-[70px] text-xs">You</div>
-                  <CardUI card={state.lastTrick.cards.bottom} />
-                </div>
-              )}
-              {state.lastTrick.cards.left && (
-                <div className="absolute top-1/2 left-0 -translate-y-1/2 scale-75">
-                  <div className="text-center mb-1 text-xs">Left</div>
-                  <CardUI card={state.lastTrick.cards.left} />
-                </div>
-              )}
-              {state.lastTrick.cards.right && (
-                <div className="absolute top-1/2 right-0 -translate-y-1/2 scale-75">
-                  <div className="text-center mb-1 text-xs">Right</div>
-                  <CardUI card={state.lastTrick.cards.right} />
-                </div>
-              )}
-            </div>
-
-            <button 
-              onClick={() => setShowLastHand(false)}
-              className="px-6 py-2 bg-amber-600 text-white rounded-full font-bold shadow-lg"
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-[#2d1b11] border-2 border-[#8b5a2b] rounded-2xl p-6 shadow-2xl max-w-md w-full"
             >
-              Close
-            </button>
+              <h2 className="text-2xl font-bold text-amber-500 mb-4 text-center font-display">Last Trick</h2>
+              <div className="relative w-full aspect-square bg-[#1a0f0a] rounded-xl border border-[#4a2f1d] p-4">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2">
+                  {state.lastTrick.cards['top'] && <CardUI card={state.lastTrick.cards['top']} isPlayable={false} scale={0.8} />}
+                  <span className="text-xs text-center block mt-1">Top</span>
+                </div>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+                  {state.lastTrick.cards['bottom'] && <CardUI card={state.lastTrick.cards['bottom']} isPlayable={false} scale={0.8} />}
+                  <span className="text-xs text-center block mt-1">You</span>
+                </div>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                  {state.lastTrick.cards['left'] && <CardUI card={state.lastTrick.cards['left']} isPlayable={false} scale={0.8} />}
+                  <span className="text-xs text-center block mt-1">Left</span>
+                </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  {state.lastTrick.cards['right'] && <CardUI card={state.lastTrick.cards['right']} isPlayable={false} scale={0.8} />}
+                  <span className="text-xs text-center block mt-1">Right</span>
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-white/80">Winner: <strong className="text-amber-400 capitalize">{state.lastTrick.winner === 'bottom' ? 'You' : state.lastTrick.winner}</strong></p>
+                <p className="text-white/80">Points: <strong className="text-amber-400">{state.lastTrick.points}</strong></p>
+              </div>
+              <button
+                onClick={() => setShowLastHand(false)}
+                className="mt-6 w-full py-3 bg-[#8b5a2b] text-white rounded-xl font-bold hover:bg-[#a06b35] transition-colors"
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+        {showSettings && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowSettings(false)}
+            className="absolute inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-auto p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-[#2d1b11] border-2 border-[#8b5a2b] rounded-2xl p-6 shadow-2xl max-w-sm w-full"
+            >
+              <h2 className="text-2xl font-bold text-amber-500 mb-6 text-center font-display">Settings</h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">Game Speed</h3>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => updateSettings('normal', state.settings.theme)}
+                      className={`flex-1 py-2 rounded-lg font-bold border ${state.settings.speed === 'normal' ? 'bg-amber-600 border-amber-400 text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
+                    >
+                      Normal
+                    </button>
+                    <button 
+                      onClick={() => updateSettings('fast', state.settings.theme)}
+                      className={`flex-1 py-2 rounded-lg font-bold border ${state.settings.speed === 'fast' ? 'bg-amber-600 border-amber-400 text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
+                    >
+                      Fast
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">Table Theme</h3>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => updateSettings(state.settings.speed, 'wooden')}
+                      className={`flex-1 py-2 rounded-lg font-bold border ${state.settings.theme === 'wooden' ? 'bg-[#52321c] border-[#a26842] text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
+                    >
+                      Wooden
+                    </button>
+                    <button 
+                      onClick={() => updateSettings(state.settings.speed, 'green')}
+                      className={`flex-1 py-2 rounded-lg font-bold border ${state.settings.theme === 'green' ? 'bg-[#1e4a28] border-[#34a04d] text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
+                    >
+                      Casino Green
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowSettings(false)}
+                className="mt-8 w-full py-3 bg-[#8b5a2b] text-white rounded-xl font-bold hover:bg-[#a06b35] transition-colors"
+              >
+                Done
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

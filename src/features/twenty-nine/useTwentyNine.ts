@@ -15,11 +15,14 @@ const INITIAL_STATE: GameState = {
   hands: { bottom: [], left: [], top: [], right: [] },
   bids: [],
   currentBid: 15,
-  biddingQueue: [],
+  biddingQueue: ['right', 'top', 'left', 'bottom'],
   highestBidder: null,
   challenger: null,
   bidWinner: null,
   activeBidder: 'right', // typically player right of dealer starts bidding. Let's assume bottom is dealer for now, so right starts.
+  isDoubled: false,
+  isRedoubled: false,
+  isSingleHand: false,
   trumpSuit: null,
   hiddenTrumpCard: null,
   trumpRevealed: false,
@@ -32,7 +35,11 @@ const INITIAL_STATE: GameState = {
   roundPoints: { team1: 0, team2: 0 },
   pairRevealedBy: null,
   pairPointsAdded: false,
-  passedPlayers: []
+  passedPlayers: [],
+  settings: {
+    speed: 'normal',
+    theme: 'wooden'
+  }
 };
 
 export const useTwentyNine = () => {
@@ -41,6 +48,13 @@ export const useTwentyNine = () => {
   const startGame = (mode: 'ai' | 'multiplayer') => {
     setState(prev => ({ ...prev, mode, phase: 'dealing_1' }));
     dealFirstHalf();
+  };
+
+  const updateSettings = (speed: 'normal' | 'fast', theme: 'wooden' | 'green') => {
+    setState(prev => ({
+      ...prev,
+      settings: { speed, theme }
+    }));
   };
 
   const dealFirstHalf = () => {
@@ -53,6 +67,12 @@ export const useTwentyNine = () => {
       right: sortHand(deck.slice(12, 16))
     };
     
+    // Check for Round Cancellation (0 points in first 4 cards)
+    const hasZeroPoints = Object.values(newHands).some(hand => hand.reduce((sum, c) => sum + c.value, 0) === 0);
+    if (hasZeroPoints) {
+      return dealFirstHalf(); // Recursively re-deal until hands are valid
+    }
+    
     // Store remaining deck temporarily in a ref or state. We'll just put it in a hidden state property.
     // For simplicity, let's just add it to state.
     setState(prev => ({
@@ -61,10 +81,13 @@ export const useTwentyNine = () => {
       hands: newHands,
       remainingDeck: deck.slice(16, 32), // Custom addition not in type, but ok for JS
       activeBidder: 'right', // right of dealer
-      biddingQueue: ['left', 'top'], // 'bottom' is already the challenger
+      biddingQueue: ['right', 'top', 'left', 'bottom'],
       highestBidder: 'right', // Right is the initial defender
       challenger: 'bottom',   // Bottom is the first challenger
       currentBid: 15,
+      isDoubled: false,
+      isRedoubled: false,
+      isSingleHand: false,
       bids: [],
       bidWinner: null,
       trumpSuit: null,
@@ -92,67 +115,82 @@ export const useTwentyNine = () => {
       let bidWinner = prev.bidWinner;
       let currentBid = prev.currentBid;
 
-      const validBids = newBids.filter(b => b.amount !== 'pass');
-      const hasValidBid = validBids.length > 0;
+      let isDoubled = prev.isDoubled;
+      let isRedoubled = prev.isRedoubled;
+      let isSingleHand = prev.isSingleHand;
 
-      if (!hasValidBid) {
-        // No valid bids yet. Just finding the first person to bid.
-        if (amount === 'pass') {
-          newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
-          if (newPassedPlayers.length === 4) {
-            setTimeout(dealFirstHalf, 1000);
-            return { ...prev, bids: newBids, currentBid: 15, passedPlayers: newPassedPlayers };
-          }
-          
-          newHighestBidder = prev.challenger;
-          if (newQueue.length > 0) {
-            newChallenger = newQueue.shift()!;
-          }
-          newActiveBidder = newHighestBidder!;
-        } else {
-          // First valid bid made!
-          currentBid = amount as number;
-          newHighestBidder = prev.activeBidder;
-          newActiveBidder = prev.challenger!;
-        }
+      if (amount === 'single_hand') {
+        currentBid = 29;
+        isSingleHand = true;
+        bidWinner = prev.activeBidder;
+        nextPhase = 'dealing_2';
+        newActiveBidder = bidWinner;
+      } else if (amount === 'double') {
+        isDoubled = true;
+        // Turn goes to the highest bidder to let them redouble or pass/continue
+        newActiveBidder = newHighestBidder!;
+      } else if (amount === 'redouble') {
+        isRedoubled = true;
+        // Bidding ends after redouble
+        nextPhase = 'dealing_2';
+        bidWinner = newHighestBidder;
+        newActiveBidder = bidWinner!;
       } else {
-        // Duel mode
-        if (amount === 'pass') {
-          newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
-          
-          if (prev.activeBidder === prev.highestBidder) {
-            // Defender passed
+        const validBids = newBids.filter(b => typeof b.amount === 'number');
+        const hasValidBid = validBids.length > 0;
+
+        if (!hasValidBid) {
+          // No valid bids yet. Just finding the first person to bid.
+          if (amount === 'pass') {
+            newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
+            if (newPassedPlayers.length === 4) {
+              setTimeout(dealFirstHalf, 1000);
+              return { ...prev, bids: newBids, currentBid: 15, passedPlayers: newPassedPlayers };
+            }
+            
             newHighestBidder = prev.challenger;
             if (newQueue.length > 0) {
               newChallenger = newQueue.shift()!;
-              newActiveBidder = newChallenger;
-            } else {
-              nextPhase = 'dealing_2';
-              bidWinner = newHighestBidder;
-              newActiveBidder = bidWinner!;
             }
-          } else if (prev.activeBidder === prev.challenger) {
-            // Challenger passed
-            if (newQueue.length > 0) {
-              newChallenger = newQueue.shift()!;
-              newActiveBidder = newChallenger;
-            } else {
-              nextPhase = 'dealing_2';
-              bidWinner = newHighestBidder;
-              newActiveBidder = bidWinner!;
-            }
+            newActiveBidder = newHighestBidder!;
+          } else {
+            // First valid bid made!
+            currentBid = amount as number;
+            newHighestBidder = prev.activeBidder;
+            newActiveBidder = prev.challenger!;
           }
         } else {
-          // A higher bid was made
-          currentBid = amount as number;
-          newHighestBidder = prev.activeBidder;
-          
-          if (prev.activeBidder === prev.challenger) {
-            newChallenger = prev.highestBidder;
-            newActiveBidder = newChallenger!;
+          // Duel mode
+          if (amount === 'pass') {
+            newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
+            
+            if (prev.activeBidder === prev.highestBidder) {
+              // Defender passed
+              newHighestBidder = prev.challenger;
+              if (newQueue.length > 0) {
+                newChallenger = newQueue.shift()!;
+                newActiveBidder = newChallenger;
+              } else {
+                nextPhase = 'dealing_2';
+                bidWinner = newHighestBidder;
+                newActiveBidder = bidWinner!;
+              }
+            } else if (prev.activeBidder === prev.challenger) {
+              // Challenger passed
+              if (newQueue.length > 0) {
+                newChallenger = newQueue.shift()!;
+                newActiveBidder = newChallenger;
+              } else {
+                nextPhase = 'dealing_2';
+                bidWinner = newHighestBidder;
+                newActiveBidder = bidWinner!;
+              }
+            }
           } else {
-            newChallenger = prev.challenger;
-            newActiveBidder = newChallenger!;
+            // A higher bid was made
+            currentBid = amount as number;
+            newHighestBidder = prev.activeBidder;
+            newActiveBidder = prev.activeBidder === prev.highestBidder ? prev.challenger! : prev.highestBidder!;
           }
         }
       }
@@ -164,10 +202,13 @@ export const useTwentyNine = () => {
         highestBidder: newHighestBidder,
         challenger: newChallenger,
         activeBidder: newActiveBidder,
+        phase: nextPhase,
         bidWinner,
         passedPlayers: newPassedPlayers,
         biddingQueue: newQueue,
-        phase: nextPhase
+        isDoubled,
+        isRedoubled,
+        isSingleHand
       };
     });
   };
@@ -233,12 +274,28 @@ export const useTwentyNine = () => {
         }
       }
 
+      let pairRevealedBy: PlayerPosition | null = null;
+      const tSuit = prev.hiddenTrumpCard.suit;
+      
+      // Check for Pair (King and Queen of Trump Suit)
+      for (const player of Object.keys(newHands) as PlayerPosition[]) {
+        const hand = newHands[player];
+        const hasKing = hand.some(c => c.suit === tSuit && c.rank === 'K');
+        const hasQueen = hand.some(c => c.suit === tSuit && c.rank === 'Q');
+        if (hasKing && hasQueen) {
+          pairRevealedBy = player;
+          break;
+        }
+      }
+
       return {
         ...prev,
         trumpRevealed: true,
         trumpRevealer: prev.turn,
-        hands: newHands
-      }
+        hands: newHands,
+        pairRevealedBy,
+        pairPointsAdded: false
+      };
     });
   };
 
@@ -313,20 +370,31 @@ export const useTwentyNine = () => {
   const handleRoundEnd = (state: GameState) => {
     let t1Score = state.scores.team1;
     let t2Score = state.scores.team2;
-    
-    // Last trick point rule disabled as per user request (strict 28 points)
-
-    // Apply Pair Rule points if applicable (simplified for MVP)
-    
     const bidTeam = (state.bidWinner === 'bottom' || state.bidWinner === 'top') ? 'team1' : 'team2';
-    const bidAmount = state.currentBid;
+    let bidAmount = state.currentBid;
+
+    // Apply Pair Rule points
+    if (state.pairRevealedBy) {
+      const pairTeam = (state.pairRevealedBy === 'bottom' || state.pairRevealedBy === 'top') ? 'team1' : 'team2';
+      if (pairTeam === bidTeam) {
+        bidAmount -= 4; // Bidding team showed pair, target decreases
+      } else {
+        bidAmount += 4; // Defending team showed pair, target increases
+      }
+    }
+
+    // Determine stakes
+    let stakes = 1;
+    if (state.isSingleHand) stakes = 3;
+    else if (state.isRedoubled) stakes = 4;
+    else if (state.isDoubled) stakes = 2;
 
     if (bidTeam === 'team1') {
-      if (state.roundPoints.team1 >= bidAmount) t1Score += 1;
-      else t1Score -= 1;
+      if (state.roundPoints.team1 >= bidAmount) t1Score += stakes;
+      else t1Score -= stakes;
     } else {
-      if (state.roundPoints.team2 >= bidAmount) t2Score += 1;
-      else t2Score -= 1;
+      if (state.roundPoints.team2 >= bidAmount) t2Score += stakes;
+      else t2Score -= stakes;
     }
 
     return {
@@ -355,12 +423,12 @@ export const useTwentyNine = () => {
 
           if (targetBid !== 'pass' && targetBid > state.currentBid) {
             placeBid(targetBid);
-          } else {
-            placeBid('pass');
-          }
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
+            } else {
+              placeBid('pass');
+            }
+          }, state.settings.speed === 'fast' ? 400 : 2000);
+          return () => clearTimeout(timer);
+        }
     }
 
     if (state.phase === 'dealing_2') {
@@ -393,7 +461,7 @@ export const useTwentyNine = () => {
               setTrump(cardToSet);
             }
           }
-        }, 1500);
+        }, state.settings.speed === 'fast' ? 400 : 1500);
         return () => clearTimeout(timer);
       }
     }
@@ -417,7 +485,7 @@ export const useTwentyNine = () => {
             const cardToPlay = getBestAIPlay(validMoves, state.currentTrick, state.trumpSuit, state.trumpRevealed, state.turn);
             playCard(state.turn, cardToPlay);
           }
-        }, 2000);
+        }, state.settings.speed === 'fast' ? 500 : 1200);
         return () => clearTimeout(timer);
       }
     }
@@ -429,6 +497,7 @@ export const useTwentyNine = () => {
     placeBid,
     setTrump,
     revealTrump,
-    playCard
+    playCard,
+    updateSettings
   };
 };

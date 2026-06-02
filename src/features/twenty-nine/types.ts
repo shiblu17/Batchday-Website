@@ -21,7 +21,7 @@ export interface Trick {
 
 export interface Bid {
   player: PlayerPosition;
-  amount: number | 'pass';
+  amount: number | 'pass' | 'double' | 'redouble' | 'single_hand';
 }
 
 export interface GameState {
@@ -44,6 +44,9 @@ export interface GameState {
   activeBidder: PlayerPosition;
   passedPlayers: PlayerPosition[];
   biddingQueue: PlayerPosition[];
+  isDoubled: boolean;
+  isRedoubled: boolean;
+  isSingleHand: boolean;
   
   // Trump
   trumpSuit: Suit | null;
@@ -64,4 +67,10 @@ export interface GameState {
   // Pair Rule
   pairRevealedBy: PlayerPosition | null; // Gives +/- 4 points based on team
   pairPointsAdded: boolean;
+
+  // Settings
+  settings: {
+    speed: 'normal' | 'fast';
+    theme: 'wooden' | 'green';
+  };
 }
