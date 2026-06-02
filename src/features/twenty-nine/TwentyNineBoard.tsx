@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
 
 export const TwentyNineBoard: React.FC = () => {
-  const { state, startGame, placeBid, setTrump, revealTrump, playCard, updateSettings, handleDoubleDecision, handleRedoubleDecision, handleSingleHandDecision } = useTwentyNine();
+  const { state, startGame, placeBid, setTrump, revealTrump, playCard, updateSettings, handleDoubleDecision, handleRedoubleDecision, handleSingleHandDecision, returnToLobby } = useTwentyNine();
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
 
   // Play sound when trick is won
@@ -290,24 +290,36 @@ export const TwentyNineBoard: React.FC = () => {
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">They</span>
             <div className="relative w-10 h-14">
-              {/* Bottom Card (The 6) */}
-              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-1 overflow-hidden">
-                <div className={`text-[9px] font-bold leading-none ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                  6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
+              {/* Bottom Card (The 6 of Hearts or Spades) */}
+              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-0.5 overflow-hidden">
+                {/* Corner Labels */}
+                <div className="flex justify-between items-start w-full pointer-events-none">
+                  <div className={`text-[7px] font-bold leading-none ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                    6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
+                  </div>
+                  <div className={`text-[7px] font-bold leading-none rotate-180 ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                    6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
+                  </div>
                 </div>
-                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl opacity-20 ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                  {state.scores.team2 >= 0 ? '♥' : '♠'}
-                </div>
-                <div className={`text-[9px] font-bold leading-none rotate-180 ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                  6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
+
+                {/* 6 Pips arranged vertically for sliding reveal */}
+                <div className="absolute inset-x-0 top-3 bottom-3 flex flex-col justify-between items-center py-0.5 pointer-events-none">
+                  {[0, 1, 2, 3, 4, 5].map((idx) => (
+                    <span 
+                      key={idx} 
+                      className={`text-[8px] leading-none ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}
+                    >
+                      {state.scores.team2 >= 0 ? '♥' : '♠'}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              {/* Top Card (Card Back) */}
+              {/* Top Card (Card Back representing the covering card) */}
               <motion.div 
                 animate={{ y: Math.abs(state.scores.team2) * 8 }} 
                 transition={{ type: 'spring', damping: 15 }}
-                className="absolute inset-0 bg-blue-800 rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10"
+                className={`absolute inset-0 ${state.scores.team2 >= 0 ? 'bg-blue-800' : 'bg-red-800'} rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10`}
               >
                 <div className="w-[85%] h-[85%] border border-white/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.2)_3px,rgba(255,255,255,0.2)_6px)]" />
               </motion.div>
@@ -343,24 +355,36 @@ export const TwentyNineBoard: React.FC = () => {
           <div className="flex flex-col items-center">
             <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">We</span>
             <div className="relative w-10 h-14">
-              {/* Bottom Card (The 6) */}
-              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-1 overflow-hidden">
-                <div className={`text-[9px] font-bold leading-none ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                  6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
+              {/* Bottom Card (The 6 of Hearts or Spades) */}
+              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-0.5 overflow-hidden">
+                {/* Corner Labels */}
+                <div className="flex justify-between items-start w-full pointer-events-none">
+                  <div className={`text-[7px] font-bold leading-none ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                    6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
+                  </div>
+                  <div className={`text-[7px] font-bold leading-none rotate-180 ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                    6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
+                  </div>
                 </div>
-                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl opacity-20 ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                  {state.scores.team1 >= 0 ? '♥' : '♠'}
-                </div>
-                <div className={`text-[9px] font-bold leading-none rotate-180 ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                  6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
+
+                {/* 6 Pips arranged vertically for sliding reveal */}
+                <div className="absolute inset-x-0 top-3 bottom-3 flex flex-col justify-between items-center py-0.5 pointer-events-none">
+                  {[0, 1, 2, 3, 4, 5].map((idx) => (
+                    <span 
+                      key={idx} 
+                      className={`text-[8px] leading-none ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}
+                    >
+                      {state.scores.team1 >= 0 ? '♥' : '♠'}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              {/* Top Card (Card Back) */}
+              {/* Top Card (Card Back representing the covering card) */}
               <motion.div 
                 animate={{ y: Math.abs(state.scores.team1) * 8 }} 
                 transition={{ type: 'spring', damping: 15 }}
-                className="absolute inset-0 bg-blue-800 rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10"
+                className={`absolute inset-0 ${state.scores.team1 >= 0 ? 'bg-blue-800' : 'bg-red-800'} rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10`}
               >
                 <div className="w-[85%] h-[85%] border border-white/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.2)_3px,rgba(255,255,255,0.2)_6px)]" />
               </motion.div>
@@ -711,7 +735,49 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       )}
 
-      {/* Last Trick Modal */}
+      {/* Game Over Overlay */}
+      {state.phase === 'game_over' && (
+        <div className="absolute inset-0 bg-amber-950/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-8 text-center pointer-events-auto">
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
+            <div className="w-20 h-20 bg-amber-500/20 border-2 border-amber-400 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_30px_rgba(245,158,11,0.3)] animate-pulse">
+              🏆
+            </div>
+            
+            <h2 className="text-3xl md:text-5xl font-black mb-2 text-amber-400 drop-shadow-lg font-display">
+              {state.scores.team1 >= 6 || state.scores.team2 <= -6 ? 'Team 1 Wins the Game!' : 'Team 2 Wins the Game!'}
+            </h2>
+            <p className="text-xs md:text-sm text-amber-200/70 mb-8 max-w-sm leading-relaxed">
+              {state.scores.team1 >= 6 || state.scores.team2 <= -6 
+                ? 'Congratulations! You and your AI Partner reached +6 points (or opponents reached -6) and won the game!' 
+                : 'Opponents (AI Left & Right) reached +6 points (or your team reached -6) and won the game!'}
+            </p>
+            
+            <div className="mb-8 p-6 bg-black/40 rounded-2xl border border-white/20 w-full max-w-md shadow-2xl backdrop-blur-lg">
+              <h3 className="text-base font-bold text-slate-300 mb-4">Final Scoreboard</h3>
+              <div className="flex justify-between gap-4">
+                <div className="flex-1 bg-gradient-to-br from-green-600/40 to-emerald-900/40 p-4 rounded-xl border border-green-500/30">
+                  <h3 className="text-xs font-bold text-green-200">Team 1</h3>
+                  <p className="text-[10px] text-green-100/50 mb-2">(You & Partner)</p>
+                  <p className="text-4xl font-black text-white">{state.scores.team1}</p>
+                </div>
+                <div className="flex-1 bg-gradient-to-br from-red-600/40 to-rose-900/40 p-4 rounded-xl border border-red-500/30">
+                  <h3 className="text-xs font-bold text-red-200">Team 2</h3>
+                  <p className="text-[10px] text-red-100/50 mb-2">(Left & Right)</p>
+                  <p className="text-4xl font-black text-white">{state.scores.team2}</p>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={returnToLobby} 
+              className="px-8 py-3.5 bg-gradient-to-r from-amber-500 to-amber-700 text-white rounded-full font-bold text-lg shadow-[0_0_45px_rgba(217,119,6,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-400/50"
+            >
+              Return to Lobby
+            </button>
+          </motion.div>
+        </div>
+      )}
+
       <AnimatePresence>
         {showLastHand && state.lastTrick && (
           <motion.div

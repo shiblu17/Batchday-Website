@@ -542,9 +542,15 @@ export const useTwentyNine = () => {
       }
     }
 
+    t1Score = Math.max(-6, Math.min(6, t1Score));
+    t2Score = Math.max(-6, Math.min(6, t2Score));
+
+    const isGameOver = (t1Score >= 6 || t1Score <= -6 || t2Score >= 6 || t2Score <= -6);
+    const nextPhase = isGameOver ? 'game_over' : 'round_over';
+
     return {
       ...state,
-      phase: 'round_over',
+      phase: nextPhase,
       scores: { team1: t1Score, team2: t2Score },
       lastRoundResult: { team1Won }
     };
@@ -776,6 +782,10 @@ export const useTwentyNine = () => {
     }
   }, [state.phase, state.turn, state.activeBidder, state.mode, state.currentTrick.cards]);
 
+  const returnToLobby = () => {
+    setState(INITIAL_STATE);
+  };
+
   return {
     state,
     startGame,
@@ -786,6 +796,7 @@ export const useTwentyNine = () => {
     setTrump,
     revealTrump,
     playCard,
-    updateSettings
+    updateSettings,
+    returnToLobby
   };
 };
