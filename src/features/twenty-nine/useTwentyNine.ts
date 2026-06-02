@@ -411,14 +411,29 @@ export const useTwentyNine = () => {
       let nextPhase = prev.phase;
       let newPairPointsAdded = prev.pairPointsAdded;
       let newGameMessage = prev.gameMessage;
+      let newCurrentBid = prev.currentBid;
 
       // Check for Marriage Declaration
       if (prev.trumpRevealed && prev.pairRevealedBy === player && !prev.pairPointsAdded) {
          newPairPointsAdded = true;
          const bidTeam = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'team1' : 'team2';
          const pairTeam = (player === 'bottom' || player === 'top') ? 'team1' : 'team2';
+         
+         let changeAmount = 0;
+         if (pairTeam === bidTeam) {
+           newCurrentBid = Math.max(16, prev.currentBid - 4);
+           changeAmount = prev.currentBid - newCurrentBid;
+         } else {
+           newCurrentBid = Math.min(28, prev.currentBid + 4);
+           changeAmount = newCurrentBid - prev.currentBid;
+         }
+         
          const diff = pairTeam === bidTeam ? 'decreased' : 'increased';
-         newGameMessage = `Marriage Declared! Target bid is ${diff} by 4.`;
+         if (changeAmount > 0) {
+           newGameMessage = `Marriage Declared! Target bid is ${diff} by ${changeAmount}.`;
+         } else {
+           newGameMessage = `Marriage Declared! Target bid remains ${newCurrentBid} (Limit reached).`;
+         }
       }
       
       // Check if trick is complete
@@ -444,7 +459,8 @@ export const useTwentyNine = () => {
         turn: nextTurn,
         phase: nextPhase,
         pairPointsAdded: newPairPointsAdded,
-        gameMessage: newGameMessage
+        gameMessage: newGameMessage,
+        currentBid: newCurrentBid
       };
     });
   };
@@ -490,17 +506,7 @@ export const useTwentyNine = () => {
     let t1Score = state.scores.team1;
     let t2Score = state.scores.team2;
     const bidTeam = (state.bidWinner === 'bottom' || state.bidWinner === 'top') ? 'team1' : 'team2';
-    let bidAmount = state.currentBid;
-
-    // Apply Pair Rule points (Only if not single hand)
-    if (state.pairRevealedBy && state.pairPointsAdded && !state.isSingleHand) {
-      const pairTeam = (state.pairRevealedBy === 'bottom' || state.pairRevealedBy === 'top') ? 'team1' : 'team2';
-      if (pairTeam === bidTeam) {
-        bidAmount -= 4; // Bidding team showed pair, target decreases
-      } else {
-        bidAmount += 4; // Defending team showed pair, target increases
-      }
-    }
+    let bidAmount = state.currentBid; // Already adjusted and clamped to [16, 28] during round gameplay
 
     // Determine stakes
     let stakes = 1;
