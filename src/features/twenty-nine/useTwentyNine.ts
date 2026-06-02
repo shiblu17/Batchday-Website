@@ -254,12 +254,11 @@ export const useTwentyNine = () => {
   const dealSecondHalf = () => {
     setState((prev: any) => {
       const rem = prev.remainingDeck;
-      const filterHidden = (cards: Card[]) => cards.filter(c => c.id !== prev.hiddenTrumpCard?.id);
       const finalHands = {
-        bottom: sortHand(filterHidden([...prev.hands.bottom, ...rem.slice(0, 4)])),
-        left: sortHand(filterHidden([...prev.hands.left, ...rem.slice(4, 8)])),
-        top: sortHand(filterHidden([...prev.hands.top, ...rem.slice(8, 12)])),
-        right: sortHand(filterHidden([...prev.hands.right, ...rem.slice(12, 16)]))
+        bottom: sortHand([...prev.hands.bottom, ...rem.slice(0, 4)]),
+        left: sortHand([...prev.hands.left, ...rem.slice(4, 8)]),
+        top: sortHand([...prev.hands.top, ...rem.slice(8, 12)]),
+        right: sortHand([...prev.hands.right, ...rem.slice(12, 16)])
       };
       return {
         ...prev,
@@ -312,10 +311,7 @@ export const useTwentyNine = () => {
         hiddenCard = rem[playerIndex * 4 + 2];
       } else {
         hiddenCard = suitOrCard as Card;
-        // If it's a real card from their hand, remove it
-        if (!hiddenCard.id.startsWith('dummy_')) {
-          newHand = newHand.filter((c: Card) => c.id !== hiddenCard.id);
-        }
+        // We no longer remove the card from the hand, so they always play with 8 cards.
       }
       
       const finalHands = {
