@@ -280,7 +280,11 @@ export const useTwentyNine = () => {
           turn: prev.bidWinner! // Bid winner always leads
         };
       } else {
-        return { ...prev, phase: 'set_trump' };
+        return { 
+          ...prev, 
+          phase: 'playing',
+          turn: 'right' // Player right of dealer leads the first trick
+        };
       }
     });
   };
@@ -314,12 +318,11 @@ export const useTwentyNine = () => {
 
       return {
         ...prev,
-        phase: 'playing',
+        phase: 'dealing_2',
         trumpSuit: hiddenCard.suit,
         hiddenTrumpCard: hiddenCard,
         trumpRevealed: false,
-        hands: finalHands,
-        turn: 'right' // Player right of dealer leads the first trick
+        hands: finalHands
       };
     });
   };
@@ -607,7 +610,8 @@ export const useTwentyNine = () => {
 
     if (state.phase === 'playing') {
       const activePlayer = state.players[state.turn];
-      if (activePlayer.isAI && Object.values(state.currentTrick.cards).filter(c => c !== null).length < 4) {
+      const requiredCards = state.isSingleHand ? 3 : 4;
+      if (activePlayer.isAI && Object.values(state.currentTrick.cards).filter(c => c !== null).length < requiredCards) {
         const timer = setTimeout(() => {
           const hand = state.hands[state.turn];
           if (hand.length > 0) {

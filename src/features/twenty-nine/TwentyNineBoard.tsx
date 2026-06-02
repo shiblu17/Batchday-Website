@@ -464,7 +464,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Trump Selection Grid */}
-      {state.phase === 'dealing_2' && state.activeBidder === 'bottom' && (
+      {state.phase === 'set_trump' && state.activeBidder === 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[340px]">
           <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c] flex flex-col items-center">
             <h3 className="text-amber-400 font-bold mb-4 text-center text-lg drop-shadow-md">Select Trump Suit</h3>
