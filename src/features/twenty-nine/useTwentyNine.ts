@@ -256,10 +256,10 @@ export const useTwentyNine = () => {
       const rem = prev.remainingDeck;
       const getSortedWithHidden = (player: PlayerPosition, newCards: Card[]) => {
         const allCards = [...prev.hands[player], ...newCards];
-        // If this player has the hidden trump card, keep it at index 6
         if (prev.hiddenTrumpCard && prev.bidWinner === player && !prev.hiddenTrumpCard.id.startsWith('dummy_')) {
-           const hiddenId = prev.hiddenTrumpCard.id;
-           const otherCards = allCards.filter(c => c.id !== hiddenId);
+           const hiddenSuit = prev.hiddenTrumpCard.suit;
+           const hiddenRank = prev.hiddenTrumpCard.rank;
+           const otherCards = allCards.filter(c => !(c.suit === hiddenSuit && c.rank === hiddenRank));
            const sortedOthers = sortHand(otherCards);
            // Insert the hidden card at the 7th position (index 6)
            sortedOthers.splice(6, 0, prev.hiddenTrumpCard);
