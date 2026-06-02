@@ -151,7 +151,7 @@ export const TwentyNineBoard: React.FC = () => {
   
   if (state.phase === 'lobby') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 text-white px-4 max-w-4xl mx-auto w-full">
+      <div className="w-full h-full overflow-y-auto flex flex-col items-center justify-start py-12 px-4 gap-6 text-white max-w-4xl mx-auto scrollbar-thin">
         <div className="text-center mb-4">
           <h1 className="text-5xl md:text-8xl font-black font-display text-amber-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] mb-2 tracking-wide animate-pulse">
             ২৯ <span className="text-white font-sans">Twenty-Nine</span>
@@ -282,7 +282,7 @@ export const TwentyNineBoard: React.FC = () => {
 
   if (state.phase === 'multiplayer_lobby') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[90vh] text-white p-4 w-full max-w-4xl mx-auto">
+      <div className="w-full h-full overflow-y-auto flex flex-col items-center justify-start py-12 px-4 text-white max-w-4xl mx-auto scrollbar-thin">
         {/* Lobby Container */}
         <div className="bg-[#3a2010]/80 backdrop-blur-md p-8 rounded-3xl border border-[#52321c] shadow-[0_20px_50px_rgba(0,0,0,0.7)] w-full max-w-2xl flex flex-col items-center relative">
           <div className="absolute top-4 right-4 bg-black/40 border border-white/10 px-3 py-1 rounded-full text-xs font-mono text-amber-400 flex items-center gap-1.5 shadow-inner">
@@ -993,7 +993,7 @@ export const TwentyNineBoard: React.FC = () => {
 
       {/* Round Over Overlay */}
       {state.phase === 'round_over' && (
-        <div className={`absolute inset-0 ${state.lastRoundResult?.team1Won ? 'bg-green-900/90' : 'bg-red-900/90'} backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-8 text-center pointer-events-auto transition-colors duration-1000`}>
+        <div className={`absolute inset-0 ${state.lastRoundResult?.team1Won ? 'bg-green-900/90' : 'bg-red-900/90'} backdrop-blur-md z-50 overflow-y-auto flex flex-col items-center justify-start py-12 px-6 text-white text-center pointer-events-auto transition-colors duration-1000`}>
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
             <h2 className={`text-4xl md:text-6xl font-black mb-2 drop-shadow-lg ${state.lastRoundResult?.team1Won ? 'text-green-400' : 'text-red-400'}`}>
               {state.lastRoundResult?.team1Won ? 'You Won the Round!' : 'You Lost the Round!'}
@@ -1029,7 +1029,7 @@ export const TwentyNineBoard: React.FC = () => {
 
       {/* Game Over Overlay */}
       {state.phase === 'game_over' && (
-        <div className="absolute inset-0 bg-amber-950/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-8 text-center pointer-events-auto">
+        <div className="absolute inset-0 bg-amber-950/95 backdrop-blur-md z-50 overflow-y-auto flex flex-col items-center justify-start py-12 px-6 text-white text-center pointer-events-auto">
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
             <div className="w-20 h-20 bg-amber-500/20 border-2 border-amber-400 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_30px_rgba(245,158,11,0.3)] animate-pulse">
               🏆
