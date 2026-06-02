@@ -159,6 +159,7 @@ export const useTwentyNine = () => {
             currentBid = amount as number;
             newHighestBidder = prev.activeBidder;
             newActiveBidder = prev.challenger!;
+            prev.duelDefender = prev.activeBidder; // The first bidder is the original defender
           }
         } else {
           // Duel mode
@@ -171,6 +172,7 @@ export const useTwentyNine = () => {
               if (newQueue.length > 0) {
                 newChallenger = newQueue.shift()!;
                 newActiveBidder = newChallenger;
+                prev.duelDefender = newHighestBidder; // The winner of this duel becomes the defender for the next
               } else {
                 nextPhase = 'doubling_phase';
                 bidWinner = newHighestBidder;
@@ -181,6 +183,7 @@ export const useTwentyNine = () => {
               if (newQueue.length > 0) {
                 newChallenger = newQueue.shift()!;
                 newActiveBidder = newChallenger;
+                prev.duelDefender = newHighestBidder; // highestBidder remains the defender
               } else {
                 nextPhase = 'doubling_phase';
                 bidWinner = newHighestBidder;
@@ -210,6 +213,7 @@ export const useTwentyNine = () => {
         highestBidder: newHighestBidder,
         challenger: newChallenger,
         activeBidder: newActiveBidder,
+        duelDefender: prev.duelDefender,
         phase: nextPhase,
         bidWinner,
         passedPlayers: newPassedPlayers,
@@ -521,12 +525,23 @@ export const useTwentyNine = () => {
           else if (strength >= 3) targetBid = 17;
           else if (strength >= 2) targetBid = 16;
 
-          if (targetBid !== 'pass' && targetBid > state.currentBid) {
-            placeBid(targetBid);
+          const isDefender = state.activeBidder === state.duelDefender;
+          let bidToPlace: number | 'pass' = 'pass';
+          
+          if (targetBid !== 'pass') {
+            if (isDefender) {
+              if (targetBid >= state.currentBid) {
+                bidToPlace = state.currentBid; // Match!
+              }
             } else {
-              placeBid('pass');
+              if (targetBid > state.currentBid) {
+                bidToPlace = state.currentBid === 15 ? 16 : state.currentBid + 1; // Bid +1
+              }
             }
-          }, state.settings.speed === 'fast' ? 400 : 2000);
+          }
+
+          placeBid(bidToPlace);
+        }, state.settings.speed === 'fast' ? 400 : 2000);
           return () => clearTimeout(timer);
         }
     }

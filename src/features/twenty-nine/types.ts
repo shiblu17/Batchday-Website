@@ -46,6 +46,7 @@ export interface GameState {
   activeBidder: PlayerPosition;
   passedPlayers: PlayerPosition[];
   biddingQueue: PlayerPosition[];
+  duelDefender?: PlayerPosition;
   isDoubled: boolean;
   isRedoubled: boolean;
   isSingleHand: boolean;

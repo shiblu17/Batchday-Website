@@ -371,18 +371,22 @@ export const TwentyNineBoard: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
           <div className="bg-[#3a2010] p-[4px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c]">
             <div className="grid grid-cols-4 gap-[2px] mb-[2px]">
-              {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => (
-                <button 
-                  key={bid}
-                  disabled={bid <= state.currentBid}
-                  onClick={() => placeBid(bid)}
-                  className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
-                >
-                  {bid}
-                </button>
-              ))}
+              {[16,17,18,19,20,21,22,23,24,25,26,27].map(bid => {
+                const isDefender = state.activeBidder === state.duelDefender;
+                const disabled = isDefender ? bid < state.currentBid : bid <= state.currentBid;
+                return (
+                  <button 
+                    key={bid}
+                    disabled={disabled}
+                    onClick={() => placeBid(bid)}
+                    className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm flex items-center justify-center"
+                  >
+                    {bid}
+                  </button>
+                );
+              })}
               <button 
-                disabled={28 <= state.currentBid}
+                disabled={state.activeBidder === state.duelDefender ? 28 < state.currentBid : 28 <= state.currentBid}
                 onClick={() => placeBid(28)}
                 className="h-10 sm:h-12 bg-gradient-to-b from-[#a26842] to-[#734324] text-white text-base sm:text-lg font-bold shadow-[inset_0_2px_2px_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-40 hover:brightness-110 active:translate-y-px transition-all rounded-sm rounded-bl-md flex items-center justify-center"
               >
