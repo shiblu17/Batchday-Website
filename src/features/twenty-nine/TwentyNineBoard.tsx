@@ -5,6 +5,17 @@ import { PlayerPosition } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
 
+const getCoverTransform = (score: number) => {
+  const S = Math.min(6, Math.abs(score));
+  if (S === 0) return { y: 0, x: 0, rotate: 0 };
+  if (S === 1) return { y: 13, x: 13, rotate: 38 };
+  if (S === 2) return { y: 17, x: 0, rotate: 0 };
+  if (S === 3) return { y: 27, x: 13, rotate: 38 };
+  if (S === 4) return { y: 31, x: 0, rotate: 0 };
+  if (S === 5) return { y: 41, x: 13, rotate: 38 };
+  return { y: 56, x: 0, rotate: 0 }; // S === 6
+};
+
 export const TwentyNineBoard: React.FC = () => {
   const { 
     state, 
@@ -34,6 +45,59 @@ export const TwentyNineBoard: React.FC = () => {
   } = useTwentyNine();
 
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
+
+  const renderScoreCard = (score: number, teamLabel: string) => {
+    const isRed = score >= 0;
+    const suit = isRed ? '♥' : '♠';
+    const colorClass = isRed ? 'text-red-600' : 'text-slate-900';
+    const coverBg = isRed ? 'bg-blue-800' : 'bg-red-800';
+    const transform = getCoverTransform(score);
+
+    return (
+      <div className="flex flex-col items-center">
+        <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">{teamLabel}</span>
+        <div className="relative w-10 h-14 bg-white rounded shadow-sm border border-gray-300 overflow-hidden select-none">
+          {/* Top-Left Corner Label */}
+          <div className={`absolute top-[2px] left-[2px] text-[7px] font-bold leading-none ${colorClass}`}>
+            6<br/>{suit}
+          </div>
+          
+          {/* Bottom-Right Corner Label (rotated 180) */}
+          <div className={`absolute bottom-[2px] right-[2px] text-[7px] font-bold leading-none rotate-180 ${colorClass}`}>
+            6<br/>{suit}
+          </div>
+
+          {/* 6 Pips in a 3x2 Grid */}
+          <div className="absolute inset-0 flex items-center justify-center p-2 pointer-events-none">
+            <div className="grid grid-cols-2 grid-rows-3 gap-x-2 gap-y-[5px]">
+              {[0, 1, 2, 3, 4, 5].map((idx) => (
+                <span 
+                  key={idx} 
+                  className={`text-[9px] leading-none select-none ${colorClass}`}
+                >
+                  {suit}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Top Cover Card */}
+          <motion.div 
+            animate={transform} 
+            transition={{ type: 'spring', damping: 15 }}
+            className={`absolute inset-0 ${coverBg} rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10`}
+          >
+            <img 
+              src="/cards/back.png" 
+              alt="Card Back Pattern" 
+              className="w-full h-full object-fill opacity-25 mix-blend-overlay pointer-events-none select-none"
+            />
+            <div className="absolute inset-[3px] border border-white/30 rounded-sm pointer-events-none" />
+          </motion.div>
+        </div>
+      </div>
+    );
+  };
 
   // Lobby Tab States
   const [lobbyTab, setLobbyTab] = useState<'selection' | 'multiplayer_home' | 'join_room'>('selection');
@@ -587,51 +651,15 @@ export const TwentyNineBoard: React.FC = () => {
         
         {/* Top Trick / Status Cards */}
         <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[60%] flex justify-between items-start">
-          <div className="flex flex-col items-center">
-            <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">They</span>
-            <div className="relative w-10 h-14">
-              {/* Bottom Card (The 6 of Hearts or Spades) */}
-              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-0.5 overflow-hidden">
-                {/* Corner Labels */}
-                <div className="flex justify-between items-start w-full pointer-events-none">
-                  <div className={`text-[7px] font-bold leading-none ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                    6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
-                  </div>
-                  <div className={`text-[7px] font-bold leading-none rotate-180 ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                    6<br/>{state.scores.team2 >= 0 ? '♥' : '♠'}
-                  </div>
-                </div>
-
-                {/* 6 Pips arranged vertically for sliding reveal */}
-                <div className="absolute inset-x-0 top-3 bottom-3 flex flex-col justify-between items-center py-0.5 pointer-events-none">
-                  {[0, 1, 2, 3, 4, 5].map((idx) => (
-                    <span 
-                      key={idx} 
-                      className={`text-[8px] leading-none ${state.scores.team2 >= 0 ? 'text-red-600' : 'text-slate-900'}`}
-                    >
-                      {state.scores.team2 >= 0 ? '♥' : '♠'}
-                    </span>
-                  ))}
+          <div className="relative">
+            {renderScoreCard(state.scores.team2, "They")}
+            {state.roundPoints.team2 > 0 && (
+              <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none z-20">
+                <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
+                  {state.roundPoints.team2}
                 </div>
               </div>
-
-              {/* Top Card (Card Back representing the covering card) */}
-              <motion.div 
-                animate={{ y: Math.abs(state.scores.team2) * 8 }} 
-                transition={{ type: 'spring', damping: 15 }}
-                className={`absolute inset-0 ${state.scores.team2 >= 0 ? 'bg-blue-800' : 'bg-red-800'} rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10`}
-              >
-                <div className="w-[85%] h-[85%] border border-white/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.2)_3px,rgba(255,255,255,0.2)_6px)]" />
-              </motion.div>
-
-              {state.roundPoints.team2 > 0 && (
-                <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none z-20">
-                  <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
-                    {state.roundPoints.team2}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
           
           {!state.isSingleHand && (
@@ -652,51 +680,15 @@ export const TwentyNineBoard: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-col items-center">
-            <span className="text-white text-xs font-bold mb-1 shadow-black drop-shadow-md">We</span>
-            <div className="relative w-10 h-14">
-              {/* Bottom Card (The 6 of Hearts or Spades) */}
-              <div className="absolute inset-0 bg-white rounded shadow-sm border border-gray-300 flex flex-col justify-between p-0.5 overflow-hidden">
-                {/* Corner Labels */}
-                <div className="flex justify-between items-start w-full pointer-events-none">
-                  <div className={`text-[7px] font-bold leading-none ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                    6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
-                  </div>
-                  <div className={`text-[7px] font-bold leading-none rotate-180 ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}>
-                    6<br/>{state.scores.team1 >= 0 ? '♥' : '♠'}
-                  </div>
-                </div>
-
-                {/* 6 Pips arranged vertically for sliding reveal */}
-                <div className="absolute inset-x-0 top-3 bottom-3 flex flex-col justify-between items-center py-0.5 pointer-events-none">
-                  {[0, 1, 2, 3, 4, 5].map((idx) => (
-                    <span 
-                      key={idx} 
-                      className={`text-[8px] leading-none ${state.scores.team1 >= 0 ? 'text-red-600' : 'text-slate-900'}`}
-                    >
-                      {state.scores.team1 >= 0 ? '♥' : '♠'}
-                    </span>
-                  ))}
+          <div className="relative">
+            {renderScoreCard(state.scores.team1, "We")}
+            {state.roundPoints.team1 > 0 && (
+              <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none z-20">
+                <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
+                  {state.roundPoints.team1}
                 </div>
               </div>
-
-              {/* Top Card (Card Back representing the covering card) */}
-              <motion.div 
-                animate={{ y: Math.abs(state.scores.team1) * 8 }} 
-                transition={{ type: 'spring', damping: 15 }}
-                className={`absolute inset-0 ${state.scores.team1 >= 0 ? 'bg-blue-800' : 'bg-red-800'} rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-white flex items-center justify-center overflow-hidden z-10`}
-              >
-                <div className="w-[85%] h-[85%] border border-white/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.2)_3px,rgba(255,255,255,0.2)_6px)]" />
-              </motion.div>
-
-              {state.roundPoints.team1 > 0 && (
-                <div className="absolute inset-x-0 -bottom-8 flex justify-center pointer-events-none z-20">
-                  <div className="bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-amber-400 font-bold text-[11px] shadow-lg border border-white/20">
-                    {state.roundPoints.team1}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
