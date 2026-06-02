@@ -189,6 +189,16 @@ export const getBestAIPlay = (
 ): Card => {
   if (validMoves.length === 1) return validMoves[0];
 
+  // Prioritize declaring marriage if AI holds both King and Queen of trump
+  if (trumpRevealed && trumpSuit) {
+    const hasKing = validMoves.some(c => c.suit === trumpSuit && c.rank === 'K');
+    const hasQueen = validMoves.some(c => c.suit === trumpSuit && c.rank === 'Q');
+    if (hasKing && hasQueen) {
+      const marriageCard = validMoves.find(c => c.suit === trumpSuit && (c.rank === 'K' || c.rank === 'Q'));
+      if (marriageCard) return marriageCard;
+    }
+  }
+
   const leadSuit = trick.leadSuit;
   const partnerMap: Record<PlayerPosition, PlayerPosition> = {
     bottom: 'top', top: 'bottom', left: 'right', right: 'left'

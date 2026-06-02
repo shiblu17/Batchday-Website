@@ -419,7 +419,8 @@ export const useTwentyNine = () => {
       let newCurrentBid = prev.currentBid;
 
       // Check for Marriage Declaration
-      if (prev.trumpRevealed && prev.pairRevealedBy === player && !prev.pairPointsAdded) {
+      const isTrumpKingOrQueen = prev.trumpSuit && card.suit === prev.trumpSuit && (card.rank === 'K' || card.rank === 'Q');
+      if (prev.trumpRevealed && prev.pairRevealedBy === player && !prev.pairPointsAdded && isTrumpKingOrQueen) {
          newPairPointsAdded = true;
          const bidTeam = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'team1' : 'team2';
          const pairTeam = (player === 'bottom' || player === 'top') ? 'team1' : 'team2';
