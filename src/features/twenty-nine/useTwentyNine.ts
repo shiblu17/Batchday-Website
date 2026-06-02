@@ -133,7 +133,7 @@ export const useTwentyNine = () => {
       } else if (amount === 'redouble') {
         isRedoubled = true;
         // Bidding ends after redouble
-        nextPhase = 'dealing_2';
+        nextPhase = 'set_trump';
         bidWinner = newHighestBidder;
         newActiveBidder = bidWinner!;
       } else {
@@ -234,8 +234,8 @@ export const useTwentyNine = () => {
         const msg = prev.activeBidder === 'bottom' ? "You doubled the game!" : `${prev.players[prev.activeBidder].name} doubled the game!`;
         return { ...prev, isDoubled: true, phase: nextPhase, activeBidder: newActiveBidder, gameMessage: msg };
       } else {
-        // Continue to dealing_2
-        return { ...prev, phase: 'dealing_2', activeBidder: prev.bidWinner!, gameMessage: null };
+        // Continue to set_trump
+        return { ...prev, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: null };
       }
     });
   };
@@ -244,9 +244,9 @@ export const useTwentyNine = () => {
     setState(prev => {
       if (action === 'redouble') {
         const msg = prev.activeBidder === 'bottom' ? "You redoubled the game!" : `${prev.players[prev.activeBidder].name} redoubled the game!`;
-        return { ...prev, isRedoubled: true, phase: 'dealing_2', activeBidder: prev.bidWinner!, gameMessage: msg };
+        return { ...prev, isRedoubled: true, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: msg };
       } else {
-        return { ...prev, phase: 'dealing_2', activeBidder: prev.bidWinner!, gameMessage: null };
+        return { ...prev, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: null };
       }
     });
   };
