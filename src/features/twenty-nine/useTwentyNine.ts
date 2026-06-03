@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { GameState, PlayerPosition, Card, Bid, Trick, Suit } from './types';
 import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair, sortHand, evaluateHandStrength, getBestAIPlay } from './engine';
 import { supabase } from '@/integrations/supabase/client';
+import votersData from '@/data/voters.json';
 
 const order: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
 
@@ -263,7 +264,7 @@ export const useTwentyNine = () => {
     }
     return id;
   });
-  const [nickname, setNicknameState] = useState(() => localStorage.getItem('twenty_nine_nickname') || '');
+  const [nickname, setNicknameState] = useState(() => localStorage.getItem('ju_game_nickname_v2') || '');
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
@@ -276,9 +277,223 @@ export const useTwentyNine = () => {
   });
 
   const saveNickname = (name: string) => {
-    localStorage.setItem('twenty_nine_nickname', name);
+    localStorage.setItem('ju_game_nickname_v2', name);
     setNicknameState(name);
   };
+
+  // --- Profile & Stats Integration ---
+  const [profile, setProfile] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  // Local match stats tracking (for user at 'bottom' position)
+  const matchSingleHandsTriedRef = useRef(0);
+  const matchSingleHandsWonRef = useRef(0);
+  const matchHighestBidWonRef = useRef(0);
+  const statsUploadedRef = useRef(false);
+
+  const resetMatchStats = () => {
+    matchSingleHandsTriedRef.current = 0;
+    matchSingleHandsWonRef.current = 0;
+    matchHighestBidWonRef.current = 0;
+  };
+
+  // Fetch or create profile when nickname changes
+  useEffect(() => {
+    if (!nickname) {
+      setProfile(null);
+      return;
+    }
+
+    const loadProfile = async () => {
+      setLoadingProfile(true);
+      try {
+        let deviceUuid = localStorage.getItem('twenty_nine_device_uuid');
+        if (!deviceUuid) {
+          deviceUuid = generateUUID();
+          localStorage.setItem('twenty_nine_device_uuid', deviceUuid);
+        }
+
+        const isVerified = nickname.endsWith(' ✅');
+        const cleanName = isVerified ? nickname.slice(0, -2).trim() : nickname.trim();
+
+        let dept = '';
+        let hall = '';
+        if (isVerified) {
+          const voter = (votersData as any[]).find(v => v.name.toLowerCase() === cleanName.toLowerCase());
+          if (voter) {
+            dept = voter.dept;
+            hall = voter.hall;
+          }
+        }
+
+        const profileId = isVerified ? `${cleanName}:${dept}:${hall}` : deviceUuid;
+
+        const { data, error } = await supabase
+          .from('twenty_nine_profiles')
+          .select('*')
+          .eq('id', profileId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          setLoadingProfile(false);
+          return;
+        }
+
+        if (data) {
+          // If guest and name has changed, update name in DB
+          if (!isVerified && data.name !== cleanName) {
+            const { error: updateErr } = await supabase
+              .from('twenty_nine_profiles')
+              .update({ name: cleanName })
+              .eq('id', profileId);
+            if (!updateErr) {
+              data.name = cleanName;
+            }
+          }
+          setProfile(data);
+        } else {
+          // Create default profile
+          const newProfile = {
+            id: profileId,
+            is_verified: isVerified,
+            name: cleanName,
+            department: dept || null,
+            hall: hall || null,
+            games_played: 0,
+            games_won: 0,
+            single_hands_tried: 0,
+            single_hands_won: 0,
+            highest_bid_won: 0,
+            practice_played: 0,
+            practice_won: 0
+          };
+
+          const { error: insertErr } = await supabase
+            .from('twenty_nine_profiles')
+            .insert(newProfile);
+
+          if (insertErr) {
+            console.error('Error creating profile:', insertErr);
+          } else {
+            setProfile(newProfile);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    loadProfile();
+  }, [nickname]);
+
+  // Save game stats to Supabase
+  const saveStatsToDatabase = async (t1Score: number, t2Score: number, mode: 'ai' | 'multiplayer' | null) => {
+    if (!nickname) return;
+
+    // LocalStorage lookup to get fresh profile info
+    let deviceUuid = localStorage.getItem('twenty_nine_device_uuid');
+    if (!deviceUuid) return;
+
+    const isVerified = nickname.endsWith(' ✅');
+    const cleanName = isVerified ? nickname.slice(0, -2).trim() : nickname.trim();
+
+    let dept = '';
+    let hall = '';
+    if (isVerified) {
+      const voter = (votersData as any[]).find(v => v.name.toLowerCase() === cleanName.toLowerCase());
+      if (voter) {
+        dept = voter.dept;
+        hall = voter.hall;
+      }
+    }
+
+    const profileId = isVerified ? `${cleanName}:${dept}:${hall}` : deviceUuid;
+    const userWonGame = (t1Score >= 6 || t2Score <= -6);
+
+    try {
+      const { data: currentProfile, error: fetchErr } = await supabase
+        .from('twenty_nine_profiles')
+        .select('*')
+        .eq('id', profileId)
+        .maybeSingle();
+
+      if (fetchErr) {
+        console.error('Error fetching profile for stats update:', fetchErr);
+        return;
+      }
+
+      const baseProfile = currentProfile || {
+        id: profileId,
+        is_verified: isVerified,
+        name: cleanName,
+        department: dept || null,
+        hall: hall || null,
+        games_played: 0,
+        games_won: 0,
+        single_hands_tried: 0,
+        single_hands_won: 0,
+        highest_bid_won: 0,
+        practice_played: 0,
+        practice_won: 0
+      };
+
+      const updates: any = {};
+      if (mode === 'multiplayer') {
+        updates.games_played = baseProfile.games_played + 1;
+        updates.games_won = baseProfile.games_won + (userWonGame ? 1 : 0);
+        updates.single_hands_tried = baseProfile.single_hands_tried + matchSingleHandsTriedRef.current;
+        updates.single_hands_won = baseProfile.single_hands_won + matchSingleHandsWonRef.current;
+        updates.highest_bid_won = Math.max(baseProfile.highest_bid_won, matchHighestBidWonRef.current);
+      } else if (mode === 'ai') {
+        updates.practice_played = baseProfile.practice_played + 1;
+        updates.practice_won = baseProfile.practice_won + (userWonGame ? 1 : 0);
+      }
+
+      if (!currentProfile) {
+        // Perform insert if profile doesn't exist
+        const { data: inserted, error: insertErr } = await supabase
+          .from('twenty_nine_profiles')
+          .insert({ ...baseProfile, ...updates })
+          .select()
+          .single();
+        if (!insertErr && inserted) {
+          setProfile(inserted);
+        } else if (insertErr) {
+          console.error('Error inserting profile with stats:', insertErr);
+        }
+      } else {
+        // Perform update
+        const { data: updated, error: updateErr } = await supabase
+          .from('twenty_nine_profiles')
+          .update(updates)
+          .eq('id', profileId)
+          .select()
+          .single();
+        if (!updateErr && updated) {
+          setProfile(updated);
+        } else if (updateErr) {
+          console.error('Error updating stats in database:', updateErr);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save stats to database:', err);
+    }
+  };
+
+  // Trigger stats upload when phase becomes game_over
+  useEffect(() => {
+    if (state.phase === 'game_over' && !statsUploadedRef.current) {
+      statsUploadedRef.current = true;
+      saveStatsToDatabase(state.scores.team1, state.scores.team2, state.mode);
+    } else if (state.phase === 'dealing_1') {
+      statsUploadedRef.current = false;
+      resetMatchStats();
+    }
+  }, [state.phase]);
+
 
   const updateStateAndSync = useCallback((updater: (prev: GameState) => GameState) => {
     setState(prev => {
@@ -1342,6 +1557,9 @@ export const useTwentyNine = () => {
     updateStateAndSync(prev => {
       console.log(`[Single Hand Decision] prev.isSingleHand was: ${prev.isSingleHand}`);
       if (action === 'yes') {
+        if (prev.bidWinner === 'bottom') {
+          matchSingleHandsTriedRef.current += 1;
+        }
         return {
           ...prev,
           isSingleHand: true,
@@ -1582,6 +1800,18 @@ export const useTwentyNine = () => {
       } else {
         if (state.roundPoints.team2 >= bidAmount) { t2Score += stakes; team1Won = false; }
         else { t2Score -= stakes; team1Won = true; }
+      }
+    }
+
+    // Track stats if the user was the bid winner
+    if (state.bidWinner === 'bottom') {
+      if (team1Won) {
+        if (state.isSingleHand) {
+          matchSingleHandsWonRef.current += 1;
+        }
+        if (bidAmount > matchHighestBidWonRef.current) {
+          matchHighestBidWonRef.current = bidAmount;
+        }
       }
     }
 
@@ -1868,6 +2098,8 @@ export const useTwentyNine = () => {
     revealTrump,
     playCard,
     updateSettings,
-    returnToLobby
+    returnToLobby,
+    profile,
+    loadingProfile
   };
 };

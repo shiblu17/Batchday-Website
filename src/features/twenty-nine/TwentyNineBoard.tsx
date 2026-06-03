@@ -4,6 +4,21 @@ import { CardUI } from './CardUI';
 import { PlayerPosition } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
+import GameLoginModal from '@/components/GameLoginModal';
+import { shortenName } from './utils';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  Trophy, 
+  BarChart3, 
+  LogOut, 
+  ShieldCheck, 
+  Award, 
+  Medal, 
+  Gamepad2, 
+  Zap,
+  Target,
+  Crown
+} from 'lucide-react';
 
 const getCoverTransform = (score: number) => {
   const S = Math.min(6, Math.abs(score));
@@ -41,10 +56,120 @@ export const TwentyNineBoard: React.FC = () => {
     addAIBot,
     removePlayerOrBot,
     startOnlineGame,
-    exitRoom
+    exitRoom,
+    profile,
+    loadingProfile
   } = useTwentyNine();
 
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
+
+  // Stats and Leaderboard Modals state
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
+  const [leaderboardTab, setLeaderboardTab] = useState<'batch52' | 'guest'>('batch52');
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+
+  const fetchLeaderboard = async (tab: 'batch52' | 'guest') => {
+    setLoadingLeaderboard(true);
+    try {
+      const isVerified = tab === 'batch52';
+      const { data, error } = await supabase
+        .from('twenty_nine_profiles')
+        .select('*')
+        .eq('is_verified', isVerified)
+        .order('games_won', { ascending: false })
+        .order('games_played', { ascending: true })
+        .limit(10);
+
+      if (!error && data) {
+        setLeaderboardData(data);
+      } else {
+        console.error('Error fetching leaderboard:', error);
+      }
+    } catch (err) {
+      console.error('Failed to fetch leaderboard:', err);
+    } finally {
+      setLoadingLeaderboard(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showLeaderboardModal) {
+      fetchLeaderboard(leaderboardTab);
+    }
+  }, [showLeaderboardModal, leaderboardTab]);
+
+  const renderProfileHUD = () => {
+    if (!profile) return null;
+    const isVerified = profile.is_verified;
+    
+    return (
+      <div className="w-full max-w-md bg-gradient-to-br from-[#2a170b]/90 to-[#1b0e06]/95 border-2 border-amber-800/40 rounded-3xl p-5 shadow-2xl backdrop-blur-md flex flex-col gap-4 text-white relative overflow-hidden group">
+        {/* Decorative lighting background */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        
+        {/* Profile Card Header */}
+        <div className="flex items-center gap-3.5 z-10">
+          <div className="relative">
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl flex items-center justify-center text-2xl border-2 border-amber-400/40 shadow-inner">
+              {isVerified ? '🎓' : '👑'}
+            </div>
+            {isVerified && (
+              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[8px] font-bold p-0.5 rounded-full border border-white shadow-md flex items-center justify-center w-4 h-4" title="Verified Member">
+                ✓
+              </span>
+            )}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <h4 className="text-lg font-black tracking-wide text-amber-300 truncate flex items-center gap-1.5 uppercase font-display">
+              {profile.name}
+              {isVerified && <ShieldCheck className="w-4 h-4 text-green-400 inline" />}
+            </h4>
+            {isVerified ? (
+              <p className="text-[10px] text-amber-200/50 uppercase tracking-widest font-bold truncate mt-0.5">
+                {profile.department} • {profile.hall}
+              </p>
+            ) : (
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-0.5">
+                Guest Player
+              </p>
+            )}
+          </div>
+          
+          <button 
+            onClick={() => saveNickname('')} 
+            className="p-2 hover:bg-red-500/10 hover:text-red-400 text-slate-400/70 rounded-xl transition-all active:scale-90"
+            title="Sign Out / Change Profile"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+        
+        {/* Stats Buttons & Navigation */}
+        <div className="grid grid-cols-2 gap-3 z-10 mt-1">
+          <button
+            onClick={() => setShowStatsModal(true)}
+            className="flex items-center justify-center gap-2 py-3 bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/40 hover:bg-amber-500/20 text-amber-300 rounded-xl font-bold text-xs uppercase tracking-wider transition-all active:scale-95 shadow-sm"
+          >
+            <BarChart3 className="w-4 h-4" />
+            My Stats
+          </button>
+          <button
+            onClick={() => {
+              setLeaderboardTab(isVerified ? 'batch52' : 'guest');
+              setShowLeaderboardModal(true);
+            }}
+            className="flex items-center justify-center gap-2 py-3 bg-amber-500 border border-amber-400 hover:brightness-110 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-amber-500/10"
+          >
+            <Trophy className="w-4 h-4" />
+            Leaderboard
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const renderScoreCard = (score: number, teamLabel: string) => {
     const isRed = score >= 0;
@@ -161,7 +286,18 @@ export const TwentyNineBoard: React.FC = () => {
       setTempRevealTrump(false);
     }
   }, [state.trumpRevealed]);
-  
+
+  if (!nickname) {
+    return (
+      <div className="relative w-full h-full min-h-screen bg-[#2d1b11] flex items-center justify-center">
+        <GameLoginModal 
+          gameTitle="Batchday Twenty-Nine Pro" 
+          onStart={(nick) => saveNickname(nick)} 
+        />
+      </div>
+    );
+  }
+
   if (state.phase === 'lobby') {
     return (
       <div className="w-full h-full overflow-y-auto flex flex-col items-center justify-start py-12 px-4 gap-6 text-white max-w-4xl mx-auto scrollbar-thin">
@@ -171,6 +307,8 @@ export const TwentyNineBoard: React.FC = () => {
           </h1>
           <p className="text-amber-200/60 text-xs md:text-sm uppercase tracking-[0.2em]">The Ultimate Bengali Card Game</p>
         </div>
+
+        {lobbyTab === 'selection' && renderProfileHUD()}
 
         {lobbyTab === 'selection' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mt-4">
@@ -328,7 +466,7 @@ export const TwentyNineBoard: React.FC = () => {
               {state.players.top?.id ? (
                 <div className="flex flex-col items-center">
                   <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">🤖</div>
-                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.top?.name || 'Empty'}</span>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{shortenName(state.players.top?.name || 'Empty')}</span>
                   {isHost && state.players.top.isAI && (
                     <button onClick={() => removePlayerOrBot('top')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
                   )}
@@ -351,7 +489,7 @@ export const TwentyNineBoard: React.FC = () => {
               {state.players.left?.id ? (
                 <div className="flex flex-col items-center">
                   <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">👤</div>
-                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.left?.name || 'Empty'}</span>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{shortenName(state.players.left?.name || 'Empty')}</span>
                   {isHost && state.players.left.isAI && (
                     <button onClick={() => removePlayerOrBot('left')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
                   )}
@@ -379,7 +517,7 @@ export const TwentyNineBoard: React.FC = () => {
               {state.players.right?.id ? (
                 <div className="flex flex-col items-center">
                   <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">👤</div>
-                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.right?.name || 'Empty'}</span>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{shortenName(state.players.right?.name || 'Empty')}</span>
                   {isHost && state.players.right.isAI && (
                     <button onClick={() => removePlayerOrBot('right')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
                   )}
@@ -401,7 +539,7 @@ export const TwentyNineBoard: React.FC = () => {
               <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">You</span>
               <div className="flex flex-col items-center">
                 <div className="w-11 h-11 bg-amber-600 border-2 border-white shadow-[0_0_10px_rgba(251,191,36,0.5)] rounded-full flex items-center justify-center text-lg">👑</div>
-                <span className="text-xs font-black mt-1 text-white uppercase truncate max-w-[80px] text-center">{state.players.bottom?.name || 'Empty'}</span>
+                <span className="text-xs font-black mt-1 text-white uppercase truncate max-w-[80px] text-center">{shortenName(state.players.bottom?.name || 'Empty')}</span>
               </div>
             </div>
           </div>
@@ -614,7 +752,7 @@ export const TwentyNineBoard: React.FC = () => {
                </motion.div>
             )}
             <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
-              {state.players['top']?.name || 'Empty'}
+              {shortenName(state.players['top']?.name || 'Empty')}
             </div>
             <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('top') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
                <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
@@ -633,7 +771,7 @@ export const TwentyNineBoard: React.FC = () => {
              </motion.div>
           )}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-            {state.players['left']?.name || 'Empty'}
+            {shortenName(state.players['left']?.name || 'Empty')}
           </div>
           <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
@@ -651,7 +789,7 @@ export const TwentyNineBoard: React.FC = () => {
              </motion.div>
           )}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-            {state.players['right']?.name || 'Empty'}
+            {shortenName(state.players['right']?.name || 'Empty')}
           </div>
           <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
@@ -1208,6 +1346,258 @@ export const TwentyNineBoard: React.FC = () => {
                 className="mt-8 w-full py-3 bg-[#8b5a2b] text-white rounded-xl font-bold hover:bg-[#a06b35] transition-colors"
               >
                 Done
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showStatsModal && profile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowStatsModal(false)}
+            className="absolute inset-0 z-[110] bg-black/75 backdrop-blur-md flex items-center justify-center pointer-events-auto p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-gradient-to-b from-[#2a170b] to-[#140b05] border-2 border-amber-600/40 rounded-3xl p-6 shadow-2xl max-w-md w-full text-white relative overflow-hidden"
+            >
+              {/* Border accents */}
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
+              
+              <h2 className="text-2xl font-black text-amber-300 mb-2 text-center font-display uppercase tracking-wider">
+                খেলোয়াড় প্রোফাইল
+              </h2>
+              
+              {/* User Identity Details */}
+              <div className="flex flex-col items-center gap-1.5 py-4 border-b border-amber-800/20 mb-5">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl flex items-center justify-center text-3xl border border-amber-400/30 shadow-lg">
+                  {profile.is_verified ? '🎓' : '👑'}
+                </div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-1.5 mt-2 text-center uppercase">
+                  {profile.name}
+                  {profile.is_verified && <ShieldCheck className="w-5 h-5 text-green-400 animate-pulse" />}
+                </h3>
+                {profile.is_verified ? (
+                  <p className="text-xs text-amber-200/60 uppercase font-semibold tracking-wider text-center">
+                    {profile.department} • {profile.hall}
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-400 uppercase font-semibold tracking-wider text-center">
+                    Guest Player (Local Profile)
+                  </p>
+                )}
+              </div>
+
+              {/* Stats Grid */}
+              <div className="space-y-4">
+                {/* Section: Multiplayer Record */}
+                <div>
+                  <h4 className="text-xs font-bold text-amber-400/80 uppercase tracking-widest mb-2 flex items-center gap-1">
+                    <Trophy className="w-3.5 h-3.5" />
+                    Multiplayer Stats (Leaderboard)
+                  </h4>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-black/30 p-2.5 rounded-xl border border-amber-800/10">
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Played</p>
+                      <p className="text-lg font-black text-white">{profile.games_played}</p>
+                    </div>
+                    <div className="bg-black/30 p-2.5 rounded-xl border border-amber-800/10">
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Won</p>
+                      <p className="text-lg font-black text-white">{profile.games_won}</p>
+                    </div>
+                    <div className="bg-black/30 p-2.5 rounded-xl border border-amber-800/10">
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Win Rate</p>
+                      <p className="text-lg font-black text-amber-300">
+                        {profile.games_played > 0 
+                          ? `${((profile.games_won / profile.games_played) * 100).toFixed(1)}%` 
+                          : '0%'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section: Single Hand & Bid stats */}
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="bg-black/30 p-3 rounded-xl border border-amber-800/10 flex flex-col justify-between">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-amber-400" />
+                      Single Hand
+                    </p>
+                    <p className="text-lg font-black text-white">
+                      {profile.single_hands_won} / {profile.single_hands_tried}
+                    </p>
+                    <p className="text-[9px] text-amber-200/50 font-bold uppercase mt-0.5">
+                      Success Rate: {profile.single_hands_tried > 0 
+                        ? `${((profile.single_hands_won / profile.single_hands_tried) * 100).toFixed(0)}%` 
+                        : '0%'}
+                    </p>
+                  </div>
+                  <div className="bg-black/30 p-3 rounded-xl border border-amber-800/10 flex flex-col justify-between">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 flex items-center gap-1">
+                      <Target className="w-3 h-3 text-amber-400" />
+                      Highest Bid Won
+                    </p>
+                    <p className="text-2xl font-black text-amber-300">
+                      {profile.highest_bid_won > 0 ? profile.highest_bid_won : '-'}
+                    </p>
+                    <p className="text-[9px] text-amber-200/50 font-bold uppercase mt-0.5">
+                      Points out of 28
+                    </p>
+                  </div>
+                </div>
+
+                {/* Section: Practice Stats */}
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400/80 uppercase tracking-widest mb-2 flex items-center gap-1">
+                    <Gamepad2 className="w-3.5 h-3.5" />
+                    Practice Stats (Vs AI)
+                  </h4>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Played</p>
+                      <p className="text-lg font-black text-white">{profile.practice_played}</p>
+                    </div>
+                    <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Won</p>
+                      <p className="text-lg font-black text-white">{profile.practice_won}</p>
+                    </div>
+                    <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Win Rate</p>
+                      <p className="text-lg font-black text-amber-300/80">
+                        {profile.practice_played > 0 
+                          ? `${((profile.practice_won / profile.practice_played) * 100).toFixed(1)}%` 
+                          : '0%'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowStatsModal(false)}
+                className="mt-6 w-full py-3.5 bg-gradient-to-b from-amber-600 to-amber-800 text-white rounded-2xl font-bold uppercase tracking-wider border border-amber-500/30 hover:brightness-110 active:scale-98 transition-all shadow-md"
+              >
+                Close Stats
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showLeaderboardModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLeaderboardModal(false)}
+            className="absolute inset-0 z-[110] bg-black/75 backdrop-blur-md flex items-center justify-center pointer-events-auto p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-gradient-to-b from-[#2a170b] to-[#140b05] border-2 border-amber-600/40 rounded-3xl p-6 shadow-2xl max-w-md w-full text-white relative overflow-hidden flex flex-col max-h-[90%]"
+            >
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
+              
+              <h2 className="text-2xl font-black text-amber-300 mb-4 text-center font-display uppercase tracking-wider flex items-center justify-center gap-2">
+                <Trophy className="w-6 h-6 text-amber-400 animate-pulse" />
+                লিডারবোর্ড
+              </h2>
+
+              {/* Tabs */}
+              <div className="flex p-1 bg-black/40 border border-amber-950 rounded-2xl mb-4">
+                <button
+                  onClick={() => setLeaderboardTab('batch52')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    leaderboardTab === 'batch52' 
+                      ? 'bg-gradient-to-b from-amber-500 to-amber-700 text-white border border-amber-400/35 shadow' 
+                      : 'text-amber-200/50 hover:text-amber-200'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  ৫২ ব্যাচ
+                </button>
+                <button
+                  onClick={() => setLeaderboardTab('guest')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    leaderboardTab === 'guest' 
+                      ? 'bg-gradient-to-b from-amber-500 to-amber-700 text-white border border-amber-400/35 shadow' 
+                      : 'text-amber-200/50 hover:text-amber-200'
+                  }`}
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  গেস্ট
+                </button>
+              </div>
+
+              {/* Leaderboard Lists */}
+              <div className="flex-1 overflow-y-auto min-h-[250px] pr-1 scrollbar-thin divide-y divide-amber-950">
+                {loadingLeaderboard ? (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
+                  </div>
+                ) : leaderboardData.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8">
+                    <p className="text-center font-bold">No records found yet.</p>
+                    <p className="text-[10px] text-center mt-1">Be the first to play and lead the board!</p>
+                  </div>
+                ) : (
+                  leaderboardData.map((row, index) => {
+                    const isCurrentUser = profile && row.id === profile.id;
+                    const rank = index + 1;
+                    
+                    let rankBadge = `${rank}`;
+                    let badgeClass = "text-slate-400 font-black";
+                    if (rank === 1) {
+                      rankBadge = "🥇";
+                    } else if (rank === 2) {
+                      rankBadge = "🥈";
+                    } else if (rank === 3) {
+                      rankBadge = "🥉";
+                    }
+
+                    return (
+                      <div 
+                        key={row.id} 
+                        className={`flex items-center justify-between py-3 px-2 transition-all ${
+                          isCurrentUser ? 'bg-amber-500/10 border-l-2 border-amber-500 rounded-lg font-bold' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`w-6 text-center text-sm ${badgeClass}`}>{rankBadge}</span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-black tracking-wide text-amber-100 flex items-center gap-1 select-none">
+                              {row.name}
+                              {row.is_verified && <ShieldCheck className="w-3.5 h-3.5 text-green-400 inline" />}
+                            </p>
+                            {row.is_verified && (
+                              <p className="text-[9px] text-amber-200/40 uppercase tracking-widest font-bold truncate">
+                                {row.department}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-amber-300">{row.games_won} Wins</p>
+                          <p className="text-[9px] text-slate-400 uppercase font-bold">{row.games_played} Played</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <button
+                onClick={() => setShowLeaderboardModal(false)}
+                className="mt-4 w-full py-3.5 bg-gradient-to-b from-amber-600 to-amber-800 text-white rounded-2xl font-bold uppercase tracking-wider border border-amber-500/30 hover:brightness-110 active:scale-98 transition-all shadow-md"
+              >
+                Close Leaderboard
               </button>
             </motion.div>
           </motion.div>
