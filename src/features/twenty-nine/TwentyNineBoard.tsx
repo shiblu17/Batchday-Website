@@ -8,11 +8,11 @@ import { playCardSwoosh, playDealSound, playTrickWinSound } from './audio';
 const getCoverTransform = (score: number) => {
   const S = Math.min(6, Math.abs(score));
   if (S === 0) return { y: 0, x: 0, rotate: 0 };
-  if (S === 1) return { y: 13, x: 13, rotate: 38 };
+  if (S === 1) return { y: 13, x: 13, rotate: -38 };
   if (S === 2) return { y: 17, x: 0, rotate: 0 };
-  if (S === 3) return { y: 27, x: 13, rotate: 38 };
+  if (S === 3) return { y: 27, x: 13, rotate: -38 };
   if (S === 4) return { y: 31, x: 0, rotate: 0 };
-  if (S === 5) return { y: 41, x: 13, rotate: 38 };
+  if (S === 5) return { y: 41, x: 13, rotate: -38 };
   return { y: 56, x: 0, rotate: 0 }; // S === 6
 };
 
