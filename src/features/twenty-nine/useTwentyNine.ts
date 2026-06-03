@@ -347,11 +347,31 @@ export const useTwentyNine = () => {
               alert(`Hand Sync Error: ${error.message}`);
             }
           });
+
+        // If we are the host, we also sync the hands of all AI players in the database
+        if (isHost && dbState.players) {
+          (Object.keys(dbState.players) as PlayerPosition[]).forEach(absPos => {
+            const p = dbState.players[absPos];
+            if (p && p.isAI) {
+              const absAIHand = dbState.hands[absPos] || [];
+              supabase
+                .from('twenty_nine_hands')
+                .update({ cards: absAIHand } as any)
+                .eq('room_id', roomId)
+                .eq('position', absPos)
+                .then(({ error }) => {
+                  if (error) {
+                    console.error(`Error syncing AI (${absPos}) hand to Supabase:`, error);
+                  }
+                });
+            }
+          });
+        }
       }
       
       return nextState;
     });
-  }, [roomId, myPosition]);
+  }, [roomId, myPosition, isHost]);
 
   // --- Room actions ---
   const createRoom = async (nick: string) => {
