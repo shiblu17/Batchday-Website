@@ -785,6 +785,7 @@ export const TwentyNineBoard: React.FC = () => {
          !state.trumpRevealed && 
          state.turn === 'bottom' && 
          state.currentTrick.leadSuit !== null &&
+         state.currentTrick.cards['bottom'] === null &&
          !state.hands['bottom'].some(c => c.suit === state.currentTrick.leadSuit) && (
           <div className="absolute top-[60%] sm:top-[65%] left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
              <button 

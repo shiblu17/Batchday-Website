@@ -820,47 +820,143 @@ export const useTwentyNine = () => {
         }
 
         const dbRoom = payload.new;
+        const currentLocalState = stateRef.current;
+        const phaseChanged = dbRoom.phase !== currentLocalState.phase;
         
-        const { data: dbPlayers } = await supabase
-          .from('twenty_nine_players')
-          .select('*')
-          .eq('room_id', roomId);
-          
-        const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', roomId);
-        if (!isHost) {
-          handsQuery.eq('position', myPosition);
-        }
-        const { data: dbHands } = await handsQuery;
+        // Only perform a full DB select fetch if:
+        // 1. Phase changed (e.g. lobby to bidding, set_trump to dealing_2)
+        // 2. Local state is not yet populated
+        const needsFullFetch = phaseChanged || 
+                               !currentLocalState.players || 
+                               Object.values(currentLocalState.players).some(p => p.id === '') || 
+                               !currentLocalState.hands ||
+                               currentLocalState.hands.bottom.length === 0;
 
-        if (dbPlayers && dbHands) {
-          // Referee Marriage / Pair Check
-          if (isHost && dbRoom.trump_revealed && !dbRoom.pair_revealed_by && dbRoom.trump_suit) {
-            const tSuit = dbRoom.trump_suit;
-            let pairPos: string | null = null;
-            for (const h of dbHands) {
-              const cards = h.cards as Card[];
-              const hasKing = cards.some(c => c.suit === tSuit && c.rank === 'K');
-              const hasQueen = cards.some(c => c.suit === tSuit && c.rank === 'Q');
-              if (hasKing && hasQueen) {
-                pairPos = h.position;
-                break;
+        if (needsFullFetch) {
+          console.log('[Room Subscription] Phase changed or state unpopulated, performing full DB fetch');
+          const { data: dbPlayers } = await supabase
+            .from('twenty_nine_players')
+            .select('*')
+            .eq('room_id', roomId);
+            
+          const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', roomId);
+          if (!isHost) {
+            handsQuery.eq('position', myPosition);
+          }
+          const { data: dbHands } = await handsQuery;
+
+          if (dbPlayers && dbHands) {
+            // Referee Marriage / Pair Check
+            if (isHost && dbRoom.trump_revealed && !dbRoom.pair_revealed_by && dbRoom.trump_suit) {
+              const tSuit = dbRoom.trump_suit;
+              let pairPos: string | null = null;
+              for (const h of dbHands) {
+                const cards = h.cards as Card[];
+                const hasKing = cards.some(c => c.suit === tSuit && c.rank === 'K');
+                const hasQueen = cards.some(c => c.suit === tSuit && c.rank === 'Q');
+                if (hasKing && hasQueen) {
+                  pairPos = h.position;
+                  break;
+                }
+              }
+              if (pairPos) {
+                await supabase
+                  .from('twenty_nine_rooms')
+                  .update({ pair_revealed_by: pairPos } as any)
+                  .eq('id', roomId);
+                return; // wait for next update triggered by this change
               }
             }
-            if (pairPos) {
-              await supabase
-                .from('twenty_nine_rooms')
-                .update({ pair_revealed_by: pairPos } as any)
-                .eq('id', roomId);
-              return; // wait for next update triggered by this change
-            }
-          }
 
-          const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, myPosition);
-          
-          setState(prev => ({
-            ...nextLocalState,
-            settings: prev.settings
-          }));
+            const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, myPosition);
+            
+            setState(prev => ({
+              ...nextLocalState,
+              settings: prev.settings
+            }));
+          }
+        } else {
+          // Perform synchronous local state merge to avoid DB select roundtrips
+          console.log('[Room Subscription] Fast synchronous state merge');
+          setState(prev => {
+            const dbPrevState = rotateStateLocalToDb(prev, myPosition);
+            const absPlayers = dbPrevState.players;
+            const absHands = { ...dbPrevState.hands };
+            
+            const isHostPlayer = dbRoom.creator_id === userId;
+            order.forEach(pos => {
+              if (pos === myPosition) return;
+              if (!isHostPlayer) {
+                const count = dbRoom.card_counts?.[pos] || 0;
+                const currentCount = absHands[pos]?.length || 0;
+                if (currentCount !== count) {
+                  absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
+                    id: `dummy_${pos}_${idx}`,
+                    suit: 'hearts',
+                    rank: '7',
+                    value: 0
+                  }));
+                }
+              }
+            });
+
+            // Referee Marriage / Pair Check (Synchronous check using local hands for host)
+            if (isHost && dbRoom.trump_revealed && !dbRoom.pair_revealed_by && dbRoom.trump_suit) {
+              const tSuit = dbRoom.trump_suit;
+              let pairPos: string | null = null;
+              for (const pos of Object.keys(absHands) as PlayerPosition[]) {
+                const cards = absHands[pos] || [];
+                const hasKing = cards.some(c => c.suit === tSuit && c.rank === 'K');
+                const hasQueen = cards.some(c => c.suit === tSuit && c.rank === 'Q');
+                if (hasKing && hasQueen) {
+                  pairPos = pos;
+                  break;
+                }
+              }
+              if (pairPos) {
+                supabase
+                  .from('twenty_nine_rooms')
+                  .update({ pair_revealed_by: pairPos } as any)
+                  .eq('id', roomId);
+              }
+            }
+
+            const absState = {
+              mode: 'multiplayer' as const,
+              phase: dbRoom.phase as any,
+              players: absPlayers,
+              myPosition: myPosition,
+              hands: absHands,
+              bids: [] as Bid[],
+              currentBid: dbRoom.current_bid,
+              highestBidder: dbRoom.highest_bidder as PlayerPosition | null,
+              challenger: dbRoom.challenger as PlayerPosition | null,
+              bidWinner: dbRoom.bid_winner as PlayerPosition | null,
+              activeBidder: dbRoom.active_bidder as PlayerPosition,
+              passedPlayers: (dbRoom.passed_players || []) as PlayerPosition[],
+              biddingQueue: (dbRoom.bidding_queue || []) as PlayerPosition[],
+              duelDefender: dbRoom.duel_defender as PlayerPosition | undefined,
+              isDoubled: dbRoom.is_doubled,
+              isRedoubled: dbRoom.is_redoubled,
+              isSingleHand: dbRoom.is_single_hand,
+              gameMessage: dbRoom.game_message,
+              trumpSuit: dbRoom.trump_suit as Suit | null,
+              hiddenTrumpCard: dbRoom.hidden_trump_card as Card | null,
+              trumpRevealed: dbRoom.trump_revealed,
+              trumpRevealer: dbRoom.trump_revealer as PlayerPosition | null,
+              pairRevealedBy: dbRoom.pair_revealed_by as PlayerPosition | null,
+              pairPointsAdded: dbRoom.pair_points_added,
+              currentTrick: dbRoom.current_trick,
+              lastTrick: dbRoom.last_trick,
+              tricksWon: dbRoom.tricks_won,
+              turn: dbRoom.turn as PlayerPosition,
+              scores: dbRoom.scores,
+              roundPoints: dbRoom.round_points,
+              settings: prev.settings
+            };
+
+            return rotateStateDbToLocal(absState, myPosition);
+          });
         }
       })
       .on('postgres_changes', {
