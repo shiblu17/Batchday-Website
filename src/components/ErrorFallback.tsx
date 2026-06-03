@@ -1,6 +1,8 @@
 import { AlertTriangle, RefreshCcw, Home } from "lucide-react";
 
 export default function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+  console.error("Runtime error caught by boundary:", error);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="max-w-md w-full bg-card p-8 rounded-3xl shadow-card border border-border text-center relative overflow-hidden">

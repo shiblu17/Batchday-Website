@@ -172,11 +172,12 @@ const mapDbRoomToLocalState = (
     bids: [] as Bid[],
     currentBid: dbRoom.current_bid,
     highestBidder: dbRoom.highest_bidder as PlayerPosition | null,
-    challenger: dbRoom.highest_bidder ? null : ('bottom' as PlayerPosition),
+    challenger: dbRoom.challenger as PlayerPosition | null,
     bidWinner: dbRoom.bid_winner as PlayerPosition | null,
     activeBidder: dbRoom.active_bidder as PlayerPosition,
     passedPlayers: (dbRoom.passed_players || []) as PlayerPosition[],
     biddingQueue: (dbRoom.bidding_queue || []) as PlayerPosition[],
+    duelDefender: dbRoom.duel_defender as PlayerPosition | undefined,
     isDoubled: dbRoom.is_doubled,
     isRedoubled: dbRoom.is_redoubled,
     isSingleHand: dbRoom.is_single_hand,
@@ -314,6 +315,7 @@ export const useTwentyNine = () => {
           passed_players: dbState.passedPlayers,
           bidding_queue: dbState.biddingQueue,
           duel_defender: dbState.duelDefender,
+          challenger: dbState.challenger,
           card_counts: {
             bottom: dbState.hands.bottom?.length || 0,
             left: dbState.hands.left?.length || 0,
@@ -327,7 +329,10 @@ export const useTwentyNine = () => {
           .update(dbUpdate as any)
           .eq('id', roomId)
           .then(({ error }) => {
-            if (error) console.error('Error syncing room to Supabase:', error);
+            if (error) {
+              console.error('Error syncing room to Supabase:', error);
+              alert(`Room Sync Error: ${error.message}`);
+            }
           });
           
         const absMyHand = dbState.hands[myPosition];
@@ -337,7 +342,10 @@ export const useTwentyNine = () => {
           .eq('room_id', roomId)
           .eq('position', myPosition)
           .then(({ error }) => {
-            if (error) console.error('Error syncing hand to Supabase:', error);
+            if (error) {
+              console.error('Error syncing hand to Supabase:', error);
+              alert(`Hand Sync Error: ${error.message}`);
+            }
           });
       }
       
@@ -517,40 +525,57 @@ export const useTwentyNine = () => {
   const startOnlineGame = async () => {
     if (!roomId || !isHost) return;
     
-    const { data: dbPlayers } = await supabase
+    const { data: dbPlayers, error: fetchErr } = await supabase
       .from('twenty_nine_players')
       .select('*')
       .eq('room_id', roomId);
       
-    if (!dbPlayers) return;
+    if (fetchErr || !dbPlayers) {
+      alert(`Failed to fetch players: ${fetchErr?.message}`);
+      return;
+    }
     
     const takenPositions = dbPlayers.map(p => p.position);
     const allPositions: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
     for (const pos of allPositions) {
       if (!takenPositions.includes(pos)) {
-        await supabase.from('twenty_nine_players').insert({
+        const { error: botErr } = await supabase.from('twenty_nine_players').insert({
           room_id: roomId,
           user_id: generateUUID(),
           name: `AI Bot`,
           position: pos,
           is_ai: true
         } as any);
+        if (botErr) {
+          alert(`Failed to add bot for ${pos}: ${botErr.message}`);
+          return;
+        }
       }
     }
 
     // Query players again to ensure we have the newly added bots in our list
-    const { data: latestPlayers } = await supabase
+    const { data: latestPlayers, error: latestErr } = await supabase
       .from('twenty_nine_players')
       .select('*')
       .eq('room_id', roomId);
 
-    await supabase
+    if (latestErr || !latestPlayers) {
+      alert(`Failed to refresh players: ${latestErr?.message}`);
+      return;
+    }
+
+    const { error: roomErr } = await supabase
       .from('twenty_nine_rooms')
       .update({
         status: 'playing',
         phase: 'dealing_1'
       } as any)
       .eq('id', roomId);
+      
+    if (roomErr) {
+      alert(`Failed to start game: ${roomErr.message}`);
+      return;
+    }
       
     dealFirstHalfOnline(latestPlayers || dbPlayers);
   };
@@ -620,7 +645,11 @@ export const useTwentyNine = () => {
       return dealFirstHalfOnline(players);
     }
     
-    await supabase.from('twenty_nine_hands').delete().eq('room_id', roomId);
+    const { error: deleteErr } = await supabase.from('twenty_nine_hands').delete().eq('room_id', roomId);
+    if (deleteErr) {
+      alert(`Failed to delete old hands: ${deleteErr.message}`);
+      return;
+    }
     
     const handsToInsert = Object.keys(absHands).map(pos => {
       const position = pos as PlayerPosition;
@@ -631,7 +660,11 @@ export const useTwentyNine = () => {
         cards: absHands[position]
       };
     });
-    await supabase.from('twenty_nine_hands').insert(handsToInsert as any);
+    const { error: insertErr } = await supabase.from('twenty_nine_hands').insert(handsToInsert as any);
+    if (insertErr) {
+      alert(`Failed to insert hands: ${insertErr.message}`);
+      return;
+    }
     
     const cardCounts = {
       bottom: absHands.bottom.length,
@@ -640,7 +673,7 @@ export const useTwentyNine = () => {
       right: absHands.right.length
     };
     
-    await supabase
+    const { error: updateErr } = await supabase
       .from('twenty_nine_rooms')
       .update({
         phase: 'bidding',
@@ -669,6 +702,11 @@ export const useTwentyNine = () => {
         remaining_deck: deck.slice(16, 32)
       } as any)
       .eq('id', roomId);
+
+    if (updateErr) {
+      alert(`Failed to update room to bidding phase: ${updateErr.message}`);
+      return;
+    }
   };
 
   const dealSecondHalfOnline = async () => {
@@ -1131,7 +1169,7 @@ export const useTwentyNine = () => {
       if (action === 'double') {
         const nextPhase = 'redoubling_phase';
         const newActiveBidder = (prev.bidWinner === 'bottom' || prev.bidWinner === 'top') ? 'bottom' : 'right';
-        const msg = prev.activeBidder === 'bottom' ? "You doubled the game!" : `${prev.players[prev.activeBidder].name} doubled the game!`;
+        const msg = prev.activeBidder === 'bottom' ? "You doubled the game!" : `${prev.players[prev.activeBidder]?.name || 'Player'} doubled the game!`;
         return { ...prev, isDoubled: true, phase: nextPhase, activeBidder: newActiveBidder, gameMessage: msg };
       } else {
         return { ...prev, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: null };
@@ -1142,7 +1180,7 @@ export const useTwentyNine = () => {
   const handleRedoubleDecision = (action: 'redouble' | 'cancel') => {
     updateStateAndSync(prev => {
       if (action === 'redouble') {
-        const msg = prev.activeBidder === 'bottom' ? "You redoubled the game!" : `${prev.players[prev.activeBidder].name} redoubled the game!`;
+        const msg = prev.activeBidder === 'bottom' ? "You redoubled the game!" : `${prev.players[prev.activeBidder]?.name || 'Player'} redoubled the game!`;
         return { ...prev, isRedoubled: true, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: msg };
       } else {
         return { ...prev, phase: 'set_trump', activeBidder: prev.bidWinner!, gameMessage: null };

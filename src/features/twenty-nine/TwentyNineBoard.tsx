@@ -325,10 +325,10 @@ export const TwentyNineBoard: React.FC = () => {
             {/* Top Seat */}
             <div className="col-start-2 col-end-3 row-start-1 row-end-2 flex flex-col items-center justify-center">
               <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">Top</span>
-              {state.players.top.id ? (
+              {state.players.top?.id ? (
                 <div className="flex flex-col items-center">
                   <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">🤖</div>
-                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.top.name}</span>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.top?.name || 'Empty'}</span>
                   {isHost && state.players.top.isAI && (
                     <button onClick={() => removePlayerOrBot('top')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
                   )}
@@ -348,10 +348,10 @@ export const TwentyNineBoard: React.FC = () => {
             {/* Left Seat */}
             <div className="col-start-1 col-end-2 row-start-2 row-end-3 flex flex-col items-center justify-center">
               <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">Left</span>
-              {state.players.left.id ? (
+              {state.players.left?.id ? (
                 <div className="flex flex-col items-center">
                   <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">👤</div>
-                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.left.name}</span>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.left?.name || 'Empty'}</span>
                   {isHost && state.players.left.isAI && (
                     <button onClick={() => removePlayerOrBot('left')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
                   )}
@@ -376,10 +376,10 @@ export const TwentyNineBoard: React.FC = () => {
             {/* Right Seat */}
             <div className="col-start-3 col-end-4 row-start-2 row-end-3 flex flex-col items-center justify-center">
               <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">Right</span>
-              {state.players.right.id ? (
+              {state.players.right?.id ? (
                 <div className="flex flex-col items-center">
                   <div className="w-11 h-11 bg-slate-700 border-2 border-amber-400 shadow-md rounded-full flex items-center justify-center text-lg">👤</div>
-                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.right.name}</span>
+                  <span className="text-xs font-bold mt-1 truncate max-w-[70px] uppercase text-amber-300 text-center">{state.players.right?.name || 'Empty'}</span>
                   {isHost && state.players.right.isAI && (
                     <button onClick={() => removePlayerOrBot('right')} className="text-[9px] text-red-400 font-bold hover:underline mt-0.5">Remove</button>
                   )}
@@ -401,7 +401,7 @@ export const TwentyNineBoard: React.FC = () => {
               <span className="text-[9px] font-bold text-amber-200/40 uppercase mb-1">You</span>
               <div className="flex flex-col items-center">
                 <div className="w-11 h-11 bg-amber-600 border-2 border-white shadow-[0_0_10px_rgba(251,191,36,0.5)] rounded-full flex items-center justify-center text-lg">👑</div>
-                <span className="text-xs font-black mt-1 text-white uppercase truncate max-w-[80px] text-center">{state.players.bottom.name}</span>
+                <span className="text-xs font-black mt-1 text-white uppercase truncate max-w-[80px] text-center">{state.players.bottom?.name || 'Empty'}</span>
               </div>
             </div>
           </div>
@@ -523,13 +523,13 @@ export const TwentyNineBoard: React.FC = () => {
           </div>
           {state.isSingleHand ? (
             <div className="mt-2 text-amber-300 font-bold whitespace-nowrap bg-black/40 px-2 py-1 rounded">
-              {state.bidWinner ? state.players[state.bidWinner].name : '-'} is playing Single Hand
+              {state.bidWinner ? (state.players[state.bidWinner]?.name || 'Unknown') : '-'} is playing Single Hand
             </div>
           ) : (
             <>
               <div className="mt-2 text-white/90">Trump Player</div>
               <div className="text-white/90">
-                {state.bidWinner ? state.players[state.bidWinner].name : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
+                {state.bidWinner ? (state.players[state.bidWinner]?.name || 'Unknown') : '-'} {state.currentBid > 15 ? `- ${state.currentBid}` : ''}
               </div>
               {state.trumpSuit && (state.trumpRevealed || state.bidWinner === 'bottom') && (
                 <div className="text-amber-400 font-bold mt-1 bg-black/40 px-2 py-0.5 rounded border border-amber-400/30">
@@ -614,7 +614,7 @@ export const TwentyNineBoard: React.FC = () => {
                </motion.div>
             )}
             <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow">
-              {state.players['top'].name}
+              {state.players['top']?.name || 'Empty'}
             </div>
             <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('top') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
                <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
@@ -633,7 +633,7 @@ export const TwentyNineBoard: React.FC = () => {
              </motion.div>
           )}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-            {state.players['left'].name}
+            {state.players['left']?.name || 'Empty'}
           </div>
           <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('left') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
@@ -651,7 +651,7 @@ export const TwentyNineBoard: React.FC = () => {
              </motion.div>
           )}
           <div className="bg-white/90 px-2 py-0.5 rounded-sm text-[10px] font-bold text-black mb-1 shadow whitespace-nowrap">
-            {state.players['right'].name}
+            {state.players['right']?.name || 'Empty'}
           </div>
           <div className={`w-12 h-12 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('right') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-8 h-8 bg-slate-500 rounded-full mb-[-8px]" />
@@ -851,7 +851,7 @@ export const TwentyNineBoard: React.FC = () => {
       {state.phase === 'doubling_phase' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-white/20">
-            Waiting for {state.players[state.activeBidder].name} to Double or Pass...
+            Waiting for {state.players[state.activeBidder]?.name || 'Player'} to Double or Pass...
           </div>
         </div>
       )}
@@ -872,7 +872,7 @@ export const TwentyNineBoard: React.FC = () => {
       {state.phase === 'redoubling_phase' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-[#ff4444]/40">
-            Waiting for {state.players[state.activeBidder].name} to Redouble or Cancel...
+            Waiting for {state.players[state.activeBidder]?.name || 'Player'} to Redouble or Cancel...
           </div>
         </div>
       )}
@@ -894,7 +894,7 @@ export const TwentyNineBoard: React.FC = () => {
       {state.phase === 'single_hand_decision' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-amber-500/30">
-            Waiting for {state.players[state.activeBidder].name} to decide Single Hand...
+            Waiting for {state.players[state.activeBidder]?.name || 'Player'} to decide Single Hand...
           </div>
         </div>
       )}
@@ -936,11 +936,11 @@ export const TwentyNineBoard: React.FC = () => {
       {state.phase === 'bidding' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center">
           <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse text-center">
-            Waiting for {state.players[state.activeBidder].name} to bid...
+            Waiting for {state.players[state.activeBidder]?.name || 'Player'} to bid...
           </div>
           {state.currentBid > 15 && state.highestBidder && (
             <div className="text-amber-400 text-xl font-black mt-3 drop-shadow-lg shadow-black bg-black/60 px-6 py-2 rounded-lg border border-amber-500/30">
-              Highest Bid: {state.currentBid} (by {state.players[state.highestBidder].name})
+              Highest Bid: {state.currentBid} (by {state.players[state.highestBidder]?.name || 'Player'})
             </div>
           )}
         </div>
@@ -950,7 +950,7 @@ export const TwentyNineBoard: React.FC = () => {
       {state.phase === 'set_trump' && state.activeBidder !== 'bottom' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse">
-            Waiting for {state.players[state.activeBidder].name} to set Trump...
+            Waiting for {state.players[state.activeBidder]?.name || 'Player'} to set Trump...
           </div>
         </div>
       )}
@@ -1013,7 +1013,7 @@ export const TwentyNineBoard: React.FC = () => {
             </h2>
             
             <div className="mb-8 p-4 bg-black/40 rounded-2xl border border-white/20 w-full max-w-md shadow-2xl backdrop-blur-lg mt-4">
-              <h3 className="text-xl font-bold text-slate-300 mb-4">Bid Winner: {state.players[state.bidWinner!].name} ({state.currentBid})</h3>
+              <h3 className="text-xl font-bold text-slate-300 mb-4">Bid Winner: {state.players[state.bidWinner!]?.name || 'Player'} ({state.currentBid})</h3>
               <div className="flex justify-between gap-4">
                 <div className="flex-1 bg-gradient-to-br from-green-600/40 to-emerald-900/40 p-4 rounded-xl border border-green-500/30 shadow-inner">
                   <h3 className="text-sm font-bold text-green-200 mb-1">Team 1</h3>

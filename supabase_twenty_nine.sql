@@ -41,6 +41,7 @@ CREATE TABLE public.twenty_nine_rooms (
     passed_players JSONB DEFAULT '[]'::jsonb,
     bidding_queue JSONB DEFAULT '[]'::jsonb,
     duel_defender VARCHAR(20),
+    challenger VARCHAR(20),
     card_counts JSONB DEFAULT '{"bottom": 0, "left": 0, "top": 0, "right": 0}'::jsonb,
     remaining_deck JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
