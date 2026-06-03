@@ -1,7 +1,12 @@
 // Simple Web Audio API sound synthesizer
 const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
 
+const isSoundEnabled = () => {
+  return localStorage.getItem('ju_twenty_nine_sound_enabled') !== 'false';
+};
+
 export const playCardSwoosh = () => {
+  if (!isSoundEnabled()) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
@@ -22,6 +27,7 @@ export const playCardSwoosh = () => {
 };
 
 export const playDealSound = () => {
+  if (!isSoundEnabled()) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
   // Play 4 rapid swooshes
   for (let i = 0; i < 4; i++) {
@@ -30,6 +36,7 @@ export const playDealSound = () => {
 };
 
 export const playTrickWinSound = () => {
+  if (!isSoundEnabled()) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();

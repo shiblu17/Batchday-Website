@@ -58,7 +58,9 @@ export const TwentyNineBoard: React.FC = () => {
     startOnlineGame,
     exitRoom,
     profile,
-    loadingProfile
+    loadingProfile,
+    sendReaction,
+    isSpectator
   } = useTwentyNine();
 
   const prevTrickWinner = useRef<PlayerPosition | null>(null);
@@ -69,6 +71,16 @@ export const TwentyNineBoard: React.FC = () => {
   const [leaderboardTab, setLeaderboardTab] = useState<'batch52' | 'guest'>('batch52');
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('ju_twenty_nine_sound_enabled') !== 'false');
+  const [showReactionPopup, setShowReactionPopup] = useState(false);
+  const [aiDiff, setAiDiff] = useState<'easy' | 'medium' | 'hard'>(() => (localStorage.getItem('ju_twenty_nine_ai_difficulty') as any) || 'medium');
+
+  const toggleSound = () => {
+    const nextVal = !soundEnabled;
+    setSoundEnabled(nextVal);
+    localStorage.setItem('ju_twenty_nine_sound_enabled', String(nextVal));
+  };
 
   const fetchLeaderboard = async (tab: 'batch52' | 'guest') => {
     setLoadingLeaderboard(true);
@@ -318,9 +330,40 @@ export const TwentyNineBoard: React.FC = () => {
                 🤖
               </div>
               <h3 className="text-2xl font-black text-amber-400 mb-2">Single Player</h3>
-              <p className="text-slate-300/80 text-sm mb-6 max-w-[240px]">
+              <p className="text-slate-300/80 text-sm mb-4 max-w-[240px]">
                 Challenge smart offline bots. Fast-paced, offline friendly, and perfect for practice.
               </p>
+              
+              {/* Bot Difficulty Selector */}
+              <div className="w-full mb-4 flex flex-col items-center">
+                <span className="text-[10px] text-amber-300/70 font-bold uppercase tracking-wider mb-2">Bot Difficulty</span>
+                <div className="flex bg-[#1e1008]/80 p-1 rounded-xl border border-amber-800/20 w-full max-w-[220px]">
+                  {([
+                    { val: 'easy', label: 'Easy' },
+                    { val: 'medium', label: 'Medium' },
+                    { val: 'hard', label: 'Hard' }
+                  ] as const).map(({ val, label }) => {
+                    const active = aiDiff === val;
+                    return (
+                      <button
+                        key={val}
+                        onClick={() => {
+                          localStorage.setItem('ju_twenty_nine_ai_difficulty', val);
+                          setAiDiff(val);
+                        }}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          active 
+                            ? 'bg-gradient-to-b from-amber-500 to-amber-700 text-white border border-amber-400 shadow-md scale-105' 
+                            : 'text-amber-100/50 hover:text-amber-200'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <button 
                 onClick={() => startGame('ai')}
                 className="w-full py-4 bg-gradient-to-b from-[#a26842] to-[#734324] text-white border border-[#d6af84]/30 rounded-2xl font-bold text-lg hover:brightness-110 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] active:scale-98 transition-all"
@@ -545,7 +588,7 @@ export const TwentyNineBoard: React.FC = () => {
           </div>
 
           <div className="w-full border-t border-[#52321c] my-4 pt-4 text-center">
-            <span className="text-xs text-amber-200/50 font-bold tracking-wider uppercase">Lobby Participants ({playersList.length}/4)</span>
+            <span className="text-xs text-amber-200/50 font-bold tracking-wider uppercase">Lobby Participants ({playersList.filter(p => p.role !== 'spectator').length}/4)</span>
           </div>
 
           {/* Action Buttons */}
@@ -559,7 +602,7 @@ export const TwentyNineBoard: React.FC = () => {
               </button>
             ) : (
               <div className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-amber-200 font-bold tracking-wider text-center animate-pulse">
-                ⏳ Waiting for host to start...
+                {isSpectator ? "SPECTATING - WAITING FOR HOST TO START..." : "WAITING FOR HOST TO START..."}
               </div>
             )}
             
@@ -581,7 +624,7 @@ export const TwentyNineBoard: React.FC = () => {
       isHidden={isHidden} 
       isPlayable={isPlayable}
       onClick={() => {
-        if (state.phase === 'playing' && isPlayable) {
+        if (state.phase === 'playing' && isPlayable && !isSpectator) {
           playCard(pos, card);
         }
       }}
@@ -628,6 +671,28 @@ export const TwentyNineBoard: React.FC = () => {
     return null;
   };
 
+  // Render a reaction bubble above avatars or hand
+  const renderReactionBubble = (pos: PlayerPosition) => {
+    const reaction = state.activeReactions?.[pos];
+    if (!reaction) return null;
+    
+    // Show only if within 3 seconds (3000ms)
+    const isRecent = Date.now() - reaction.timestamp < 3000;
+    if (!isRecent) return null;
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: -10 }}
+        exit={{ opacity: 0, scale: 0.8, y: -20 }}
+        className="absolute -top-12 bg-amber-950/90 border border-amber-500/30 text-white font-bold text-xs px-3 py-2 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.5)] flex items-center gap-1.5 whitespace-nowrap z-50 pointer-events-none"
+      >
+        {reaction.emoji && <span className="text-lg">{reaction.emoji}</span>}
+        {reaction.message && <span>{reaction.message}</span>}
+      </motion.div>
+    );
+  };
+
   return (
     <div className="relative w-full h-full bg-[#2d1b11] overflow-hidden font-sans select-none flex justify-center text-white">
       
@@ -658,7 +723,21 @@ export const TwentyNineBoard: React.FC = () => {
             >
               ⚙
             </button>
+            <button 
+              onClick={() => setShowReactionPopup(prev => !prev)}
+              className="w-8 h-8 rounded-full bg-gradient-to-b from-[#b5b31d] to-[#4c4a03] border-2 border-[#1a1a1a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] flex items-center justify-center text-lg pointer-events-auto active:scale-95"
+              title="Reactions"
+            >
+              💬
+            </button>
           </div>
+
+          {isSpectator && (
+            <div className="mt-2 flex items-center gap-1.5 px-3 py-1 bg-red-950/80 border border-red-500/30 rounded-full text-red-400 text-[10px] font-black tracking-widest uppercase animate-pulse shadow-inner">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+              Spectating
+            </div>
+          )}
           {state.isSingleHand ? (
             <div className="mt-2 text-amber-300 font-bold whitespace-nowrap bg-black/40 px-2 py-1 rounded">
               {state.bidWinner ? (state.players[state.bidWinner]?.name || 'Unknown') : '-'} is playing Single Hand
@@ -723,7 +802,86 @@ export const TwentyNineBoard: React.FC = () => {
           </button>
         </div>
       </div>
+      {/* Reaction / Emoji Picker Popup */}
+      <AnimatePresence>
+        {showReactionPopup && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            className="absolute top-16 left-4 z-[99] w-72 bg-amber-950/95 border border-[#d6af84]/40 backdrop-blur-md rounded-2xl p-4 shadow-[0_10px_25px_rgba(0,0,0,0.8)] pointer-events-auto flex flex-col gap-3"
+          >
+            <div className="flex justify-between items-center border-b border-[#d6af84]/20 pb-2">
+              <span className="text-amber-400 font-bold text-xs uppercase tracking-wider">Reactions & Chat</span>
+              <button onClick={() => setShowReactionPopup(false)} className="text-white/60 hover:text-white text-xs">Close</button>
+            </div>
+            
+            {/* Emojis Grid */}
+            <div className="grid grid-cols-4 gap-2">
+              {['👍', '😂', '🔥', '😮', '😢', '👏', '🤔', '🤬'].map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => {
+                    sendReaction(emoji, null);
+                    setShowReactionPopup(false);
+                  }}
+                  className="w-10 h-10 rounded-xl bg-amber-900/50 border border-amber-600/20 hover:border-amber-400 hover:bg-amber-800/60 active:scale-90 transition-all text-xl flex items-center justify-center"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
 
+            {/* Quick Messages List */}
+            <div className="flex flex-col gap-1.5 border-t border-[#d6af84]/20 pt-2">
+              {[
+                "দারুণ চাল!",
+                "কেমন খেললেন ভাই?",
+                "আমার কাছে কিন্তু ট্রাম্প আছে!",
+                "মাফ করবেন ভুল হয়ে গেছে!"
+              ].map(msg => (
+                <button
+                  key={msg}
+                  onClick={() => {
+                    sendReaction(null, msg);
+                    setShowReactionPopup(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg bg-amber-900/30 hover:bg-amber-800/60 border border-transparent hover:border-amber-500/20 text-xs font-semibold text-amber-100 hover:text-white transition-all whitespace-normal"
+                >
+                  {msg}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Spectator Reactions Toast / Overlay */}
+      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none">
+        {Object.keys(state.activeReactions || {}).map(pos => {
+          if (!pos.startsWith('spec_')) return null;
+          const reaction = state.activeReactions?.[pos];
+          if (!reaction) return null;
+          const isRecent = Date.now() - reaction.timestamp < 3000;
+          if (!isRecent) return null;
+          
+          const specName = playersList.find(p => p.position === pos)?.name || "Spectator";
+
+          return (
+            <motion.div
+              key={pos}
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -10 }}
+              className="bg-amber-950/90 border border-amber-500/20 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap font-bold"
+            >
+              <span className="text-amber-300 font-bold">{specName}:</span>
+              {reaction.emoji && <span className="text-sm">{reaction.emoji}</span>}
+              {reaction.message && <span>{reaction.message}</span>}
+            </motion.div>
+          );
+        })}
+      </div>
       {/* The 3D Table */}
       <div 
         className="absolute top-[48%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[420px] aspect-[8/9] sm:aspect-[4/5] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col z-0 transition-colors duration-1000"
@@ -745,6 +903,7 @@ export const TwentyNineBoard: React.FC = () => {
         {/* Top Avatar */}
         {!isSittingOut('top') && (
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+            {renderReactionBubble('top')}
             {renderThinking('top')}
             {state.trumpRevealed && state.trumpRevealer === 'top' && (
                <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
@@ -764,6 +923,7 @@ export const TwentyNineBoard: React.FC = () => {
       {/* Left Avatar (Screen Relative to prevent clipping but keep on sides) */}
       {!isSittingOut('left') && (
         <div className="absolute top-[48%] sm:top-1/2 left-2 sm:left-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+          {renderReactionBubble('left')}
           {renderThinking('left')}
           {state.trumpRevealed && state.trumpRevealer === 'left' && (
              <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
@@ -782,6 +942,7 @@ export const TwentyNineBoard: React.FC = () => {
       {/* Right Avatar (Screen Relative) */}
       {!isSittingOut('right') && (
         <div className="absolute top-[48%] sm:top-1/2 right-2 sm:right-4 -translate-y-1/2 flex flex-col items-center z-30 pointer-events-auto">
+          {renderReactionBubble('right')}
           {renderThinking('right')}
           {state.trumpRevealed && state.trumpRevealer === 'right' && (
              <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute -top-6 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-xl border border-red-400 whitespace-nowrap z-50">
@@ -924,7 +1085,8 @@ export const TwentyNineBoard: React.FC = () => {
          state.turn === 'bottom' && 
          state.currentTrick.leadSuit !== null &&
          state.currentTrick.cards['bottom'] === null &&
-         !state.hands['bottom'].some(c => c.suit === state.currentTrick.leadSuit) && (
+         !state.hands['bottom'].some(c => c.suit === state.currentTrick.leadSuit) && 
+         !isSpectator && (
           <div className="absolute top-[60%] sm:top-[65%] left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
              <button 
                onClick={revealTrump}
@@ -938,7 +1100,7 @@ export const TwentyNineBoard: React.FC = () => {
       </div>
 
       {/* Bidding Grid (Transparent, tightly packed) */}
-      {state.phase === 'bidding' && state.activeBidder === 'bottom' && (
+      {state.phase === 'bidding' && state.activeBidder === 'bottom' && !isSpectator && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
           <div className="bg-[#3a2010] p-[4px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c]">
             <div className="grid grid-cols-4 gap-[2px] mb-[2px]">
@@ -975,7 +1137,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Doubling Phase UI */}
-      {state.phase === 'doubling_phase' && state.activeBidder === 'bottom' && (
+      {state.phase === 'doubling_phase' && state.activeBidder === 'bottom' && !isSpectator && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
           <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c] flex flex-col items-center text-center">
             <h3 className="text-amber-400 font-bold mb-4 text-lg">Opponent bid {state.currentBid}. Double the game?</h3>
@@ -987,7 +1149,7 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       )}
 
-      {state.phase === 'doubling_phase' && state.activeBidder !== 'bottom' && (
+      {state.phase === 'doubling_phase' && (state.activeBidder !== 'bottom' || isSpectator) && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-white/20">
             Waiting for {state.players[state.activeBidder]?.name || 'Player'} to Double or Pass...
@@ -996,7 +1158,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Redoubling Phase UI */}
-      {state.phase === 'redoubling_phase' && state.activeBidder === 'bottom' && (
+      {state.phase === 'redoubling_phase' && state.activeBidder === 'bottom' && !isSpectator && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
           <div className="bg-[#4a1313] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#ff4444] flex flex-col items-center text-center">
             <h3 className="text-[#ff8888] font-bold mb-4 text-lg">Opponent Doubled! Redouble?</h3>
@@ -1008,7 +1170,7 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       )}
 
-      {state.phase === 'redoubling_phase' && state.activeBidder !== 'bottom' && (
+      {state.phase === 'redoubling_phase' && (state.activeBidder !== 'bottom' || isSpectator) && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-[#ff4444]/40">
             Waiting for {state.players[state.activeBidder]?.name || 'Player'} to Redouble or Cancel...
@@ -1017,7 +1179,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Single Hand Decision UI */}
-      {state.phase === 'single_hand_decision' && state.activeBidder === 'bottom' && (
+      {state.phase === 'single_hand_decision' && state.activeBidder === 'bottom' && !isSpectator && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[320px]">
           <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-amber-500 flex flex-col items-center text-center">
             <h3 className="text-amber-400 font-bold mb-2 text-lg">Play Single Hand (29)?</h3>
@@ -1030,7 +1192,7 @@ export const TwentyNineBoard: React.FC = () => {
         </div>
       )}
 
-      {state.phase === 'single_hand_decision' && state.activeBidder !== 'bottom' && (
+      {state.phase === 'single_hand_decision' && (state.activeBidder !== 'bottom' || isSpectator) && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold bg-black/60 px-6 py-2 rounded-full animate-pulse border border-amber-500/30">
             Waiting for {state.players[state.activeBidder]?.name || 'Player'} to decide Single Hand...
@@ -1039,7 +1201,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Trump Selection Grid */}
-      {state.phase === 'set_trump' && state.activeBidder === 'bottom' && (
+      {state.phase === 'set_trump' && state.activeBidder === 'bottom' && !isSpectator && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto w-[90%] max-w-[340px]">
           <div className="bg-[#3a2010] p-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-2 border-[#52321c] flex flex-col items-center">
             <h3 className="text-amber-400 font-bold mb-4 text-center text-lg drop-shadow-md">Select Trump Suit</h3>
@@ -1086,7 +1248,7 @@ export const TwentyNineBoard: React.FC = () => {
       )}
 
       {/* Waiting for other players to set trump */}
-      {state.phase === 'set_trump' && state.activeBidder !== 'bottom' && (
+      {state.phase === 'set_trump' && (state.activeBidder !== 'bottom' || isSpectator) && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none flex flex-col items-center text-center">
           <div className="text-white text-lg font-bold shadow-black drop-shadow-md bg-black/40 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm animate-pulse">
             Waiting for {state.players[state.activeBidder]?.name || 'Player'} to set Trump...
@@ -1099,15 +1261,16 @@ export const TwentyNineBoard: React.FC = () => {
         
         {/* Bottom Avatar positioned on top of the hand container */}
         <div className="flex flex-col items-center mb-2 pointer-events-auto relative">
-          {isPlayerActive('bottom') && (
+          {renderReactionBubble('bottom')}
+          {isPlayerActive('bottom') && !isSpectator && (
             <div className="absolute -top-6 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-amber-600 animate-pulse z-50 whitespace-nowrap">
               {state.phase === 'bidding' ? 'Your Turn to Bid' : (state.phase === 'dealing_2' ? 'Set Trump' : 'Your Turn')}
             </div>
           )}
           <div className="bg-white/90 px-3 py-0.5 rounded-t-md text-[10px] font-bold text-black border-b border-black/20 shadow">
-            You
+            {isSpectator ? (state.players['bottom']?.name || 'Player') : 'You'}
           </div>
-          <div className={`w-14 h-14 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('bottom') ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
+          <div className={`w-14 h-14 bg-[#e0d6c8] rounded-full border-[3px] overflow-hidden shadow-lg flex items-end justify-center transition-all duration-300 ${isPlayerActive('bottom') && !isSpectator ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : 'border-[#4a2e15]'}`}>
              <div className="w-10 h-10 bg-slate-500 rounded-full mb-[-12px]" />
           </div>
         </div>
@@ -1133,7 +1296,7 @@ export const TwentyNineBoard: React.FC = () => {
              // The card is valid if there's no lead suit, or the player doesn't have the lead suit, or the card matches the lead suit
              const isValidSuit = !leadSuit || !hasLeadSuit || card.suit === leadSuit;
              
-             const isPlayable = state.turn === 'bottom' && state.phase === 'playing' && !isHiddenTrump && isValidSuit;
+             const isPlayable = state.turn === 'bottom' && state.phase === 'playing' && !isHiddenTrump && isValidSuit && !isSpectator;
              return (
                <div key={card.id} className="w-[14vw] sm:w-[12vw] max-w-[70px] -ml-[6vw] sm:-ml-[3vw] md:-ml-6 first:ml-0 transform transition-transform hover:-translate-y-4 hover:z-50 cursor-pointer">
                  {renderCard(card, 'bottom', isPlayable, isHiddenTrump)}
@@ -1338,6 +1501,16 @@ export const TwentyNineBoard: React.FC = () => {
                       Casino Green
                     </button>
                   </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">Sound Effects</h3>
+                  <button 
+                    onClick={toggleSound}
+                    className={`w-full py-2.5 rounded-lg font-bold border transition-all ${soundEnabled ? 'bg-amber-600 border-amber-400 text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
+                  >
+                    {soundEnabled ? '🔊 Sounds On' : '🔇 Muted'}
+                  </button>
                 </div>
               </div>
 

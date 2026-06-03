@@ -185,9 +185,16 @@ export const getBestAIPlay = (
   trick: Trick,
   trumpSuit: Suit | null,
   trumpRevealed: boolean,
-  aiPosition: PlayerPosition
+  aiPosition: PlayerPosition,
+  difficulty: 'easy' | 'medium' | 'hard' = 'medium',
+  playedCards: Card[] = []
 ): Card => {
   if (validMoves.length === 1) return validMoves[0];
+
+  // 1. Easy Mode: Completely Random
+  if (difficulty === 'easy') {
+    return validMoves[Math.floor(Math.random() * validMoves.length)];
+  }
 
   // Prioritize declaring marriage if AI holds both King and Queen of trump
   if (trumpRevealed && trumpSuit) {
@@ -207,6 +214,95 @@ export const getBestAIPlay = (
   const currentWinner = evaluateTrick(trick, trumpSuit, trumpRevealed);
   const isPartnerWinning = currentWinner === partner;
 
+  // 2. Hard Mode: Card Counting, Boss cards, Partner feeding, saving trumps
+  if (difficulty === 'hard') {
+    const deck = createDeck();
+    const myHandIds = new Set(validMoves.map(c => c.id));
+    const playedIds = new Set(playedCards.map(c => c.id));
+    const remainingCards = deck.filter(c => !myHandIds.has(c.id) && !playedIds.has(c.id));
+
+    const isBossCard = (card: Card) => {
+      const remainingOfSuit = remainingCards.filter(c => c.suit === card.suit);
+      if (remainingOfSuit.length === 0) return true;
+      return !remainingOfSuit.some(c => RANK_POWER[c.rank] > RANK_POWER[card.rank]);
+    };
+
+    if (!leadSuit) {
+      // AI is leading the trick
+      // Try to lead a boss card to secure the trick
+      const bossCards = validMoves.filter(isBossCard);
+      if (bossCards.length > 0) {
+        // Play highest power boss card
+        return bossCards.sort((a, b) => RANK_POWER[b.rank] - RANK_POWER[a.rank])[0];
+      }
+      // If no boss card, lead a low power card (value = 0) of a non-trump suit to avoid bleeding points
+      const nonTrumpLows = validMoves.filter(c => c.suit !== trumpSuit && c.value === 0);
+      if (nonTrumpLows.length > 0) {
+        return nonTrumpLows.sort((a, b) => RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+      }
+      // Otherwise lead lowest power card
+      return validMoves.sort((a, b) => RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+    }
+
+    const hasLeadSuit = validMoves.some(c => c.suit === leadSuit);
+    if (hasLeadSuit) {
+      const sortedLeadSuit = validMoves.filter(c => c.suit === leadSuit).sort((a, b) => RANK_POWER[b.rank] - RANK_POWER[a.rank]);
+      const currentWinningCard = currentWinner ? trick.cards[currentWinner] : null;
+
+      if (isPartnerWinning) {
+        // Feed partner point cards!
+        const pointCards = sortedLeadSuit.filter(c => c.value > 0).sort((a, b) => b.value - a.value);
+        if (pointCards.length > 0) return pointCards[0];
+        // Otherwise play lowest card
+        return sortedLeadSuit[sortedLeadSuit.length - 1];
+      } else {
+        // Partner is not winning, try to win the trick with the lowest possible card that beats it
+        if (currentWinningCard) {
+          const isWinningTrump = trumpRevealed && currentWinningCard.suit === trumpSuit;
+          if (!isWinningTrump && currentWinningCard.suit === leadSuit) {
+            const winningMoves = sortedLeadSuit.filter(c => RANK_POWER[c.rank] > RANK_POWER[currentWinningCard.rank]);
+            if (winningMoves.length > 0) {
+              // Play the lowest winning card to save higher cards
+              return winningMoves.sort((a, b) => RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+            }
+          }
+        }
+        // If we can't win, throw the lowest value / power card
+        return sortedLeadSuit.sort((a, b) => a.value - b.value || RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+      }
+    }
+
+    // AI does not have the lead suit
+    const trumps = validMoves.filter(c => c.suit === trumpSuit);
+    if (trumpRevealed && trumpSuit && trumps.length > 0 && !isPartnerWinning) {
+      const currentWinningCard = currentWinner ? trick.cards[currentWinner] : null;
+      if (currentWinningCard) {
+        const isWinningTrump = currentWinningCard.suit === trumpSuit;
+        if (isWinningTrump) {
+          const winningTrumps = trumps.filter(c => RANK_POWER[c.rank] > RANK_POWER[currentWinningCard.rank]);
+          if (winningTrumps.length > 0) {
+            // Play lowest trump that wins
+            return winningTrumps.sort((a, b) => RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+          }
+        } else {
+          // Current winner is not a trump, so any trump wins! Play lowest trump.
+          return trumps.sort((a, b) => RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+        }
+      }
+    }
+
+    if (isPartnerWinning) {
+      // Feed partner with high point cards
+      const nonTrumps = validMoves.filter(c => c.suit !== trumpSuit);
+      const feedCards = (nonTrumps.length > 0 ? nonTrumps : validMoves).sort((a, b) => b.value - a.value || RANK_POWER[b.rank] - RANK_POWER[a.rank]);
+      return feedCards[0];
+    }
+
+    // Play lowest value / power card
+    return validMoves.sort((a, b) => a.value - b.value || RANK_POWER[a.rank] - RANK_POWER[b.rank])[0];
+  }
+
+  // 3. Medium Mode: Original Heuristic
   if (!leadSuit) {
     const sortedByPower = [...validMoves].sort((a, b) => RANK_POWER[b.rank] - RANK_POWER[a.rank]);
     const safeLeads = sortedByPower.filter(c => c.rank === 'J' || c.rank === '9' || c.value === 0);

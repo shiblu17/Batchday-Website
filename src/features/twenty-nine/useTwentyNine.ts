@@ -19,6 +19,7 @@ const generateUUID = () => {
 
 const dbToLocal = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition => {
   if (!myPos) return pos;
+  if (!order.includes(pos)) return pos;
   const myIndex = order.indexOf(myPos);
   const posIndex = order.indexOf(pos);
   return order[(posIndex - myIndex + 4) % 4];
@@ -26,6 +27,7 @@ const dbToLocal = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition =
 
 const localToDb = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition => {
   if (!myPos) return pos;
+  if (!order.includes(pos)) return pos;
   const myIndex = order.indexOf(myPos);
   const localIndex = order.indexOf(pos);
   return order[(localIndex + myIndex) % 4];
@@ -88,7 +90,8 @@ const rotateStateDbToLocal = (dbState: any, myPos: PlayerPosition): GameState =>
     passedPlayers: rotatePlayerArray(dbState.passedPlayers || [], myPos, 'dbToLocal'),
     biddingQueue: rotatePlayerArray(dbState.biddingQueue || [], myPos, 'dbToLocal'),
     scores: rotateScores(dbState.scores, myPos),
-    roundPoints: rotateScores(dbState.roundPoints, myPos)
+    roundPoints: rotateScores(dbState.roundPoints, myPos),
+    activeReactions: rotatePlayerMap(dbState.activeReactions || {}, myPos, 'dbToLocal')
   };
 };
 
@@ -111,7 +114,8 @@ const rotateStateLocalToDb = (localState: any, myPos: PlayerPosition): any => {
     passedPlayers: rotatePlayerArray(localState.passedPlayers || [], myPos, 'localToDb'),
     biddingQueue: rotatePlayerArray(localState.biddingQueue || [], myPos, 'localToDb'),
     scores: rotateScores(localState.scores, myPos),
-    roundPoints: rotateScores(localState.roundPoints, myPos)
+    roundPoints: rotateScores(localState.roundPoints, myPos),
+    activeReactions: rotatePlayerMap(localState.activeReactions || {}, myPos, 'localToDb')
   };
 };
 
@@ -119,7 +123,8 @@ const mapDbRoomToLocalState = (
   dbRoom: any,
   dbPlayers: any[],
   allHands: any[],
-  myPos: PlayerPosition
+  myPos: PlayerPosition,
+  isSpectator: boolean = false
 ): GameState => {
   const absPlayers: Record<PlayerPosition, { id: string; name: string; isAI: boolean }> = {
     bottom: { id: '', name: 'Empty', isAI: false },
@@ -128,11 +133,13 @@ const mapDbRoomToLocalState = (
     right: { id: '', name: 'Empty', isAI: false }
   };
   dbPlayers.forEach(p => {
-    absPlayers[p.position as PlayerPosition] = {
-      id: p.user_id,
-      name: p.name,
-      isAI: p.is_ai
-    };
+    if (p.position === 'bottom' || p.position === 'left' || p.position === 'top' || p.position === 'right') {
+      absPlayers[p.position as PlayerPosition] = {
+        id: p.user_id,
+        name: p.name,
+        isAI: p.is_ai
+      };
+    }
   });
 
   const absHands: Record<PlayerPosition, Card[]> = {
@@ -142,18 +149,8 @@ const mapDbRoomToLocalState = (
     right: []
   };
 
-  const myHandRow = allHands.find(h => h.position === myPos);
-  const myCards = myHandRow ? (myHandRow.cards as Card[]) : [];
-  absHands[myPos] = myCards;
-
-  const isHostPlayer = dbRoom.creator_id === localStorage.getItem('twenty_nine_player_id');
-  
-  order.forEach(pos => {
-    if (pos === myPos) return;
-    if (isHostPlayer) {
-      const handRow = allHands.find(h => h.position === pos);
-      absHands[pos] = handRow ? (handRow.cards as Card[]) : [];
-    } else {
+  if (isSpectator) {
+    order.forEach(pos => {
       const count = dbRoom.card_counts?.[pos] || 0;
       absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
         id: `dummy_${pos}_${idx}`,
@@ -161,8 +158,30 @@ const mapDbRoomToLocalState = (
         rank: '7',
         value: 0
       }));
-    }
-  });
+    });
+  } else {
+    const myHandRow = allHands.find(h => h.position === myPos);
+    const myCards = myHandRow ? (myHandRow.cards as Card[]) : [];
+    absHands[myPos] = myCards;
+
+    const isHostPlayer = dbRoom.creator_id === localStorage.getItem('twenty_nine_player_id');
+    
+    order.forEach(pos => {
+      if (pos === myPos) return;
+      if (isHostPlayer) {
+        const handRow = allHands.find(h => h.position === pos);
+        absHands[pos] = handRow ? (handRow.cards as Card[]) : [];
+      } else {
+        const count = dbRoom.card_counts?.[pos] || 0;
+        absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
+          id: `dummy_${pos}_${idx}`,
+          suit: 'hearts',
+          rank: '7',
+          value: 0
+        }));
+      }
+    });
+  }
 
   const absState = {
     mode: 'multiplayer' as const,
@@ -198,7 +217,8 @@ const mapDbRoomToLocalState = (
     settings: {
       speed: 'normal' as const,
       theme: 'wooden' as const
-    }
+    },
+    activeReactions: dbRoom.active_reactions || {}
   };
 
   return rotateStateDbToLocal(absState, myPos);
@@ -659,11 +679,11 @@ export const useTwentyNine = () => {
       .from('twenty_nine_rooms')
       .select('*')
       .eq('room_code', code)
-      .eq('status', 'waiting')
+      .neq('status', 'finished')
       .single();
 
     if (roomError || !room) {
-      alert('Room not found or game already started!');
+      alert('Room not found or game already finished!');
       return;
     }
 
@@ -677,18 +697,25 @@ export const useTwentyNine = () => {
       return;
     }
 
-    if (players.length >= 4) {
-      alert('Room is full!');
-      return;
-    }
+    const activePlayers = players.filter(p => p.role !== 'spectator');
+    const isRoomFull = activePlayers.length >= 4;
+    const isSpectator = isRoomFull || room.status === 'playing';
 
-    const takenPositions = players.map(p => p.position);
-    const orderAbs: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
-    const myPos = orderAbs.find(pos => !takenPositions.includes(pos));
-    
-    if (!myPos) {
-      alert('Room is full!');
-      return;
+    let myPos: PlayerPosition;
+    let role = 'player';
+
+    if (isSpectator) {
+      myPos = `spec_${userId.substring(0, 10)}` as any;
+      role = 'spectator';
+    } else {
+      const takenPositions = activePlayers.map(p => p.position);
+      const orderAbs: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
+      const foundPos = orderAbs.find(pos => !takenPositions.includes(pos));
+      if (!foundPos) {
+        alert('Room is full!');
+        return;
+      }
+      myPos = foundPos;
     }
 
     const { error: playerError } = await supabase
@@ -696,9 +723,10 @@ export const useTwentyNine = () => {
       .insert({
         room_id: room.id,
         user_id: userId,
-        name: nick,
+        name: nick + (role === 'spectator' ? ' (Spectator)' : ''),
         position: myPos,
-        is_ai: false
+        is_ai: false,
+        role: role
       } as any);
 
     if (playerError) {
@@ -709,9 +737,11 @@ export const useTwentyNine = () => {
     setRoomCode(code);
     setRoomId(room.id);
     setIsHost(false);
-    setMyPosition(myPos);
+    
+    const clientPos = role === 'spectator' ? 'bottom' : myPos;
+    setMyPosition(clientPos);
 
-    await fetchRoomState(room.id, myPos);
+    await fetchRoomState(room.id, clientPos);
   };
 
   const exitRoom = async () => {
@@ -732,6 +762,36 @@ export const useTwentyNine = () => {
     setIsHost(false);
     setMyPosition('bottom');
     setState(INITIAL_STATE);
+  };
+
+  const sendReaction = async (emoji: string | null, message: string | null) => {
+    if (!roomId) return;
+    const reactionObj = {
+      emoji: emoji || null,
+      message: message || null,
+      timestamp: Date.now()
+    };
+    const { data: dbRoom } = await supabase
+      .from('twenty_nine_rooms')
+      .select('active_reactions')
+      .eq('id', roomId)
+      .single();
+    const currentReactions = dbRoom?.active_reactions || {};
+    const updatedReactions = {
+      ...currentReactions,
+      [myPosition]: reactionObj
+    };
+    const cleanReactions: any = {};
+    Object.keys(updatedReactions).forEach(key => {
+      const reaction = updatedReactions[key];
+      if (reaction && Date.now() - reaction.timestamp < 3000) {
+        cleanReactions[key] = reaction;
+      }
+    });
+    await supabase
+      .from('twenty_nine_rooms')
+      .update({ active_reactions: cleanReactions } as any)
+      .eq('id', roomId);
   };
 
   const addAIBot = async (localPos: PlayerPosition) => {
@@ -827,18 +887,22 @@ export const useTwentyNine = () => {
       .select('*')
       .eq('room_id', rId);
 
-    const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', rId);
-    const creatorId = dbRoom?.creator_id;
-    const isHostPlayer = creatorId === userId;
-    if (!isHostPlayer) {
-      handsQuery.eq('position', currentMyPos);
-    }
-    const { data: dbHands } = await handsQuery;
+    if (dbRoom && dbPlayers) {
+      const isSpec = dbPlayers.some(p => p.user_id === userId && p.role === 'spectator');
+      
+      const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', rId);
+      const creatorId = dbRoom?.creator_id;
+      const isHostPlayer = creatorId === userId;
+      if (!isHostPlayer && !isSpec) {
+        handsQuery.eq('position', currentMyPos);
+      }
+      const { data: dbHands } = await handsQuery;
 
-    if (dbRoom && dbPlayers && dbHands) {
-      const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, currentMyPos);
-      setState(nextLocalState);
-      setPlayersList(dbPlayers);
+      if (dbHands) {
+        const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, currentMyPos, isSpec);
+        setState(nextLocalState);
+        setPlayersList(dbPlayers);
+      }
     }
   };
 
@@ -1054,8 +1118,10 @@ export const useTwentyNine = () => {
             .select('*')
             .eq('room_id', roomId);
             
+          const isSpec = dbPlayers ? dbPlayers.some(p => p.user_id === userId && p.role === 'spectator') : false;
+
           const handsQuery = supabase.from('twenty_nine_hands').select('*').eq('room_id', roomId);
-          if (!isHost) {
+          if (!isHost && !isSpec) {
             handsQuery.eq('position', myPosition);
           }
           const { data: dbHands } = await handsQuery;
@@ -1083,7 +1149,7 @@ export const useTwentyNine = () => {
               }
             }
 
-            const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, myPosition);
+            const nextLocalState = mapDbRoomToLocalState(dbRoom, dbPlayers, dbHands, myPosition, isSpec);
             
             setState(prev => ({
               ...nextLocalState,
@@ -1098,22 +1164,36 @@ export const useTwentyNine = () => {
             const absPlayers = dbPrevState.players;
             const absHands = { ...dbPrevState.hands };
             
-            const isHostPlayer = dbRoom.creator_id === userId;
-            order.forEach(pos => {
-              if (pos === myPosition) return;
-              if (!isHostPlayer) {
+            const isSpec = playersList.some(p => p.user_id === userId && p.role === 'spectator');
+
+            if (isSpec) {
+              order.forEach(pos => {
                 const count = dbRoom.card_counts?.[pos] || 0;
-                const currentCount = absHands[pos]?.length || 0;
-                if (currentCount !== count) {
-                  absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
-                    id: `dummy_${pos}_${idx}`,
-                    suit: 'hearts',
-                    rank: '7',
-                    value: 0
-                  }));
+                absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
+                  id: `dummy_${pos}_${idx}`,
+                  suit: 'hearts',
+                  rank: '7',
+                  value: 0
+                }));
+              });
+            } else {
+              const isHostPlayer = dbRoom.creator_id === userId;
+              order.forEach(pos => {
+                if (pos === myPosition) return;
+                if (!isHostPlayer) {
+                  const count = dbRoom.card_counts?.[pos] || 0;
+                  const currentCount = absHands[pos]?.length || 0;
+                  if (currentCount !== count) {
+                    absHands[pos] = Array.from({ length: count }).map((_, idx) => ({
+                      id: `dummy_${pos}_${idx}`,
+                      suit: 'hearts',
+                      rank: '7',
+                      value: 0
+                    }));
+                  }
                 }
-              }
-            });
+              });
+            }
 
             // Referee Marriage / Pair Check (Synchronous check using local hands for host)
             if (isHost && dbRoom.trump_revealed && !dbRoom.pair_revealed_by && dbRoom.trump_suit) {
@@ -1167,7 +1247,8 @@ export const useTwentyNine = () => {
               turn: dbRoom.turn as PlayerPosition,
               scores: dbRoom.scores,
               roundPoints: dbRoom.round_points,
-              settings: prev.settings
+              settings: prev.settings,
+              activeReactions: dbRoom.active_reactions || {}
             };
 
             return rotateStateDbToLocal(absState, myPosition);
@@ -1211,11 +1292,13 @@ export const useTwentyNine = () => {
             right: { id: '', name: 'Empty', isAI: false }
           };
           dbPlayers.forEach(p => {
-            absPlayers[p.position as PlayerPosition] = {
-              id: p.user_id,
-              name: p.name,
-              isAI: p.is_ai
-            };
+            if (p.position === 'bottom' || p.position === 'left' || p.position === 'top' || p.position === 'right') {
+              absPlayers[p.position as PlayerPosition] = {
+                id: p.user_id,
+                name: p.name,
+                isAI: p.is_ai
+              };
+            }
           });
 
           const localPlayers = rotatePlayerMap(absPlayers, myPosition, 'dbToLocal');
@@ -2056,8 +2139,29 @@ export const useTwentyNine = () => {
               }
             }
 
+            const playedCards: Card[] = [];
+            Object.values(latestState.tricksWon).forEach((tricks: any[]) => {
+              tricks.forEach(t => {
+                Object.values(t.cards).forEach((c: any) => {
+                  if (c) playedCards.push(c);
+                });
+              });
+            });
+            Object.values(latestState.currentTrick.cards).forEach((c: any) => {
+              if (c) playedCards.push(c);
+            });
+
+            const difficulty = localStorage.getItem('ju_twenty_nine_ai_difficulty') || 'medium';
             const validMoves = getValidMoves(localHand, latestState.currentTrick.leadSuit, latestState.trumpSuit, isTrumpRevealedLocal);
-            const cardToPlay = getBestAIPlay(validMoves, latestState.currentTrick, latestState.trumpSuit, isTrumpRevealedLocal, currentTurn);
+            const cardToPlay = getBestAIPlay(
+              validMoves, 
+              latestState.currentTrick, 
+              latestState.trumpSuit, 
+              isTrumpRevealedLocal, 
+              currentTurn, 
+              difficulty as any, 
+              playedCards
+            );
             playCard(currentTurn, cardToPlay);
           }
         }, state.settings.speed === 'fast' ? 500 : 1200);
@@ -2073,6 +2177,8 @@ export const useTwentyNine = () => {
       setState(INITIAL_STATE);
     }
   };
+
+  const isSpectator = playersList.some(p => p.user_id === userId && p.role === 'spectator');
 
   return {
     state,
@@ -2100,6 +2206,8 @@ export const useTwentyNine = () => {
     updateSettings,
     returnToLobby,
     profile,
-    loadingProfile
+    loadingProfile,
+    sendReaction,
+    isSpectator
   };
 };

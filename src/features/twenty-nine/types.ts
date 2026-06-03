@@ -80,4 +80,5 @@ export interface GameState {
     speed: 'normal' | 'fast';
     theme: 'wooden' | 'green';
   };
+  activeReactions?: Record<PlayerPosition, { emoji: string | null; message: string | null; timestamp: number }>;
 }
