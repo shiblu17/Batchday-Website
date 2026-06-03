@@ -1242,7 +1242,9 @@ export const useTwentyNine = () => {
   };
 
   const handleSingleHandDecision = (action: 'yes' | 'no') => {
+    console.log(`[Single Hand Decision] Action chosen: ${action}`);
     updateStateAndSync(prev => {
+      console.log(`[Single Hand Decision] prev.isSingleHand was: ${prev.isSingleHand}`);
       if (action === 'yes') {
         return {
           ...prev,
@@ -1256,6 +1258,7 @@ export const useTwentyNine = () => {
       } else {
         return { 
           ...prev, 
+          isSingleHand: false,
           phase: 'playing',
           turn: 'right'
         };
@@ -1485,6 +1488,21 @@ export const useTwentyNine = () => {
         else { t2Score -= stakes; team1Won = true; }
       }
     }
+
+    console.log(`[Round End Calculation]`, {
+      bidTeam,
+      bidAmount,
+      isSingleHand: state.isSingleHand,
+      isDoubled: state.isDoubled,
+      isRedoubled: state.isRedoubled,
+      stakes,
+      roundPoints: state.roundPoints,
+      team1Won,
+      t1ScoreBefore: state.scores.team1,
+      t2ScoreBefore: state.scores.team2,
+      t1ScoreAfter: t1Score,
+      t2ScoreAfter: t2Score
+    });
 
     t1Score = Math.max(-6, Math.min(6, t1Score));
     t2Score = Math.max(-6, Math.min(6, t2Score));
