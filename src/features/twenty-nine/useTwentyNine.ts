@@ -291,6 +291,11 @@ export const useTwentyNine = () => {
   const [myPosition, setMyPosition] = useState<PlayerPosition>('bottom');
   const [playersList, setPlayersList] = useState<any[]>([]);
 
+  const playersListRef = useRef(playersList);
+  useEffect(() => {
+    playersListRef.current = playersList;
+  }, [playersList]);
+
   const isLocalActionRef = useRef(false);
   const disconnectTimersRef = useRef<Record<PlayerPosition, any>>({
     bottom: null, left: null, top: null, right: null
@@ -1176,7 +1181,7 @@ export const useTwentyNine = () => {
             const absPlayers = dbPrevState.players;
             const absHands = { ...dbPrevState.hands };
             
-            const isSpec = playersList.some(p => p.user_id === userId && p.role === 'spectator');
+            const isSpec = playersListRef.current.some(p => p.user_id === userId && p.role === 'spectator');
 
             if (isSpec) {
               order.forEach(pos => {
@@ -1355,7 +1360,7 @@ export const useTwentyNine = () => {
       playersChannel.unsubscribe();
       handChannel.unsubscribe();
     };
-  }, [roomId, myPosition, isHost]);
+  }, [roomId, myPosition, isHost, state.mode]);
 
   // --- Presence ---
   useEffect(() => {
@@ -1413,7 +1418,7 @@ export const useTwentyNine = () => {
         }
       });
     };
-  }, [roomId, isHost, state.players, state.phase]);
+  }, [roomId, isHost, state.players, state.phase, state.mode]);
 
   // --- Game State Modifying Handlers ---
 
