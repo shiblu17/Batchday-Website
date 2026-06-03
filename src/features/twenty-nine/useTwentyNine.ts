@@ -538,6 +538,12 @@ export const useTwentyNine = () => {
       }
     }
 
+    // Query players again to ensure we have the newly added bots in our list
+    const { data: latestPlayers } = await supabase
+      .from('twenty_nine_players')
+      .select('*')
+      .eq('room_id', roomId);
+
     await supabase
       .from('twenty_nine_rooms')
       .update({
@@ -546,7 +552,7 @@ export const useTwentyNine = () => {
       } as any)
       .eq('id', roomId);
       
-    dealFirstHalfOnline();
+    dealFirstHalfOnline(latestPlayers || dbPlayers);
   };
 
   const fetchRoomState = async (rId: string, currentMyPos: PlayerPosition) => {
@@ -598,7 +604,7 @@ export const useTwentyNine = () => {
       .eq('id', roomId);
   };
 
-  const dealFirstHalfOnline = async () => {
+  const dealFirstHalfOnline = async (players: any[] = playersList) => {
     if (!roomId || !isHost) return;
     
     const deck = shuffleDeck(createDeck());
@@ -611,7 +617,7 @@ export const useTwentyNine = () => {
     
     const hasZeroPoints = Object.values(absHands).some(hand => hand.reduce((sum, c) => sum + c.value, 0) === 0);
     if (hasZeroPoints) {
-      return dealFirstHalfOnline();
+      return dealFirstHalfOnline(players);
     }
     
     await supabase.from('twenty_nine_hands').delete().eq('room_id', roomId);
@@ -621,7 +627,7 @@ export const useTwentyNine = () => {
       return {
         room_id: roomId,
         position: position,
-        user_id: position === 'bottom' ? userId : (playersList.find(p => p.position === position)?.user_id || userId),
+        user_id: position === 'bottom' ? userId : (players.find(p => p.position === position)?.user_id || userId),
         cards: absHands[position]
       };
     });
@@ -633,8 +639,6 @@ export const useTwentyNine = () => {
       top: absHands.top.length,
       right: absHands.right.length
     };
-    
-    isLocalActionRef.current = true;
     
     await supabase
       .from('twenty_nine_rooms')
@@ -726,8 +730,6 @@ export const useTwentyNine = () => {
       top: updatedAbsHands.top.length,
       right: updatedAbsHands.right.length
     };
-    
-    isLocalActionRef.current = true;
     
     await supabase
       .from('twenty_nine_rooms')
