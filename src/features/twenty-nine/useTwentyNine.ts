@@ -311,6 +311,9 @@ export const useTwentyNine = () => {
     bottom: null, left: null, top: null, right: null
   });
 
+  const resolvingTrickIdRef = useRef<string>('');
+  const trickTimeoutRef = useRef<any>(null);
+
   const saveNickname = (name: string) => {
     localStorage.setItem('ju_game_nickname_v2', name);
     setNicknameState(name);
@@ -1969,7 +1972,31 @@ export const useTwentyNine = () => {
     const cardsPlayed = Object.values(state.currentTrick.cards).filter(c => c !== null).length;
     const requiredCards = state.isSingleHand ? 3 : 4;
 
-    if (cardsPlayed === requiredCards && !state.currentTrick.winner) {
+    if (cardsPlayed < requiredCards) {
+      resolvingTrickIdRef.current = '';
+      if (trickTimeoutRef.current) {
+        clearTimeout(trickTimeoutRef.current);
+        trickTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    if (cardsPlayed === requiredCards) {
+      const trickId = Object.values(state.currentTrick.cards)
+        .map(c => c?.id)
+        .filter(Boolean)
+        .sort()
+        .join(',');
+
+      if (resolvingTrickIdRef.current === trickId) {
+        return; // Already scheduled or resolving this exact trick
+      }
+
+      resolvingTrickIdRef.current = trickId;
+      if (trickTimeoutRef.current) {
+        clearTimeout(trickTimeoutRef.current);
+      }
+
       const winner = evaluateTrick(state.currentTrick, state.trumpSuit, state.trumpRevealed);
       const points = calculateTrickPoints(state.currentTrick);
       
@@ -1979,13 +2006,21 @@ export const useTwentyNine = () => {
         points
       };
 
-      console.log('[Host Trick Resolver] Trick is complete, scheduling resolution');
-      const timer = setTimeout(() => {
+      console.log('[Host Trick Resolver] Trick is complete, scheduling resolution for trick:', trickId);
+      trickTimeoutRef.current = setTimeout(() => {
         resolveTrick(completedTrick);
+        trickTimeoutRef.current = null;
       }, 1500);
-      return () => clearTimeout(timer);
     }
   }, [state.currentTrick, state.phase, state.mode, isHost, state.isSingleHand, state.trumpSuit, state.trumpRevealed]);
+
+  useEffect(() => {
+    return () => {
+      if (trickTimeoutRef.current) {
+        clearTimeout(trickTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // --- AI LOGIC ---
   useEffect(() => {
