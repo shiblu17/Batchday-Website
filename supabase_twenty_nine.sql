@@ -39,6 +39,8 @@ CREATE TABLE public.twenty_nine_rooms (
     scores JSONB DEFAULT '{"team1": 0, "team2": 0}'::jsonb,
     round_points JSONB DEFAULT '{"team1": 0, "team2": 0}'::jsonb,
     bids JSONB DEFAULT '[]'::jsonb,
+    tricks_history JSONB DEFAULT '[]'::jsonb,
+    active_reactions JSONB DEFAULT '{}'::jsonb,
     passed_players JSONB DEFAULT '[]'::jsonb,
     bidding_queue JSONB DEFAULT '[]'::jsonb,
     duel_defender VARCHAR(20),
@@ -57,6 +59,7 @@ CREATE TABLE public.twenty_nine_players (
     name TEXT NOT NULL,
     position VARCHAR(20) NOT NULL, -- 'bottom', 'left', 'top', 'right'
     is_ai BOOLEAN DEFAULT false NOT NULL, -- Tracks if this slot is filled by an AI bot
+    role VARCHAR(20) DEFAULT 'player' NOT NULL,
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     CONSTRAINT unique_room_position UNIQUE (room_id, position),
     CONSTRAINT unique_room_user UNIQUE (room_id, user_id)

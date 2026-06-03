@@ -81,4 +81,5 @@ export interface GameState {
     theme: 'wooden' | 'green';
   };
   activeReactions?: Record<PlayerPosition, { emoji: string | null; message: string | null; timestamp: number }>;
+  tricksHistory: Trick[];
 }

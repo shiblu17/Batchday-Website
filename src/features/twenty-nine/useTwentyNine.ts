@@ -3,6 +3,7 @@ import { GameState, PlayerPosition, Card, Bid, Trick, Suit } from './types';
 import { createDeck, shuffleDeck, getNextPlayer, evaluateTrick, calculateTrickPoints, getValidMoves, checkPair, sortHand, evaluateHandStrength, getBestAIPlay } from './engine';
 import { supabase } from '@/integrations/supabase/client';
 import votersData from '@/data/voters.json';
+import { speakBengaliVoice } from './audio';
 
 const order: PlayerPosition[] = ['bottom', 'left', 'top', 'right'];
 
@@ -100,7 +101,8 @@ const rotateStateDbToLocal = (dbState: any, myPos: PlayerPosition): GameState =>
     biddingQueue: rotatePlayerArray(dbState.biddingQueue || [], myPos, 'dbToLocal'),
     scores: rotateScores(dbState.scores, myPos),
     roundPoints: rotateScores(dbState.roundPoints, myPos),
-    activeReactions: rotatePlayerMap(dbState.activeReactions || {}, myPos, 'dbToLocal')
+    activeReactions: rotatePlayerMap(dbState.activeReactions || {}, myPos, 'dbToLocal'),
+    tricksHistory: (dbState.tricksHistory || []).map((t: any) => rotateTrick(t, myPos, 'dbToLocal'))
   };
 };
 
@@ -125,7 +127,8 @@ const rotateStateLocalToDb = (localState: any, myPos: PlayerPosition): any => {
     biddingQueue: rotatePlayerArray(localState.biddingQueue || [], myPos, 'localToDb'),
     scores: rotateScores(localState.scores, myPos),
     roundPoints: rotateScores(localState.roundPoints, myPos),
-    activeReactions: rotatePlayerMap(localState.activeReactions || {}, myPos, 'localToDb')
+    activeReactions: rotatePlayerMap(localState.activeReactions || {}, myPos, 'localToDb'),
+    tricksHistory: (localState.tricksHistory || []).map((t: any) => rotateTrick(t, myPos, 'localToDb'))
   };
 };
 
@@ -228,7 +231,8 @@ const mapDbRoomToLocalState = (
       speed: 'normal' as const,
       theme: 'wooden' as const
     },
-    activeReactions: dbRoom.active_reactions || {}
+    activeReactions: dbRoom.active_reactions || {},
+    tricksHistory: dbRoom.tricks_history || []
   };
 
   return rotateStateDbToLocal(absState, myPos);
@@ -272,7 +276,27 @@ const INITIAL_STATE: GameState = {
   settings: {
     speed: 'normal',
     theme: 'wooden'
-  }
+  },
+  tricksHistory: []
+};
+
+const getBengaliNumber = (num: number): string => {
+  const bnNums: Record<number, string> = {
+    15: 'পনেরো', 16: 'ষোলো', 17: 'সতেরো', 18: 'আঠারো', 19: 'উনিশ',
+    20: 'বিশ', 21: 'একুশ', 22: 'বাইশ', 23: 'তেইশ', 24: 'চব্বিশ',
+    25: 'পঁচিশ', 26: 'ছাব্বিশ', 27: 'সাতাশ', 28: 'আটাশ', 29: 'উনত্রিশ'
+  };
+  return bnNums[num] || num.toString();
+};
+
+const getBengaliSuitName = (suit: string): string => {
+  const bnSuits: Record<string, string> = {
+    hearts: 'হরতন',
+    diamonds: 'রুইতন',
+    clubs: 'চিড়িতন',
+    spades: 'ইস্কাপন'
+  };
+  return bnSuits[suit] || suit;
 };
 
 export const useTwentyNine = () => {
@@ -566,6 +590,7 @@ export const useTwentyNine = () => {
           scores: dbState.scores,
           round_points: dbState.roundPoints,
           bids: dbState.bids,
+          tricks_history: dbState.tricksHistory,
           passed_players: dbState.passedPlayers,
           bidding_queue: dbState.biddingQueue,
           duel_defender: dbState.duelDefender,
@@ -1025,6 +1050,7 @@ export const useTwentyNine = () => {
         current_trick: { leadPlayer: 'right', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
         last_trick: null,
         tricks_won: { bottom: [], left: [], top: [], right: [] },
+        tricks_history: [],
         scores: stateRef.current.scores || { team1: 0, team2: 0 },
         round_points: { team1: 0, team2: 0 },
         passed_players: [],
@@ -1491,7 +1517,8 @@ export const useTwentyNine = () => {
       lastTrick: null,
       tricksWon: { bottom: [], left: [], top: [], right: [] },
       roundPoints: { team1: 0, team2: 0 },
-      passedPlayers: []
+      passedPlayers: [],
+      tricksHistory: []
     } as any));
   };
 
@@ -1862,6 +1889,7 @@ export const useTwentyNine = () => {
     updateStateAndSync(prev => {
       const winner = trick.winner!;
       const newTricksWon = { ...prev.tricksWon, [winner]: [...prev.tricksWon[winner], trick] };
+      const newHistory = [...(prev.tricksHistory || []), trick];
       
       const team1Points = (newTricksWon.bottom.reduce((sum, t) => sum + t.points, 0) + newTricksWon.top.reduce((sum, t) => sum + t.points, 0));
       const team2Points = (newTricksWon.left.reduce((sum, t) => sum + t.points, 0) + newTricksWon.right.reduce((sum, t) => sum + t.points, 0));
@@ -1873,17 +1901,18 @@ export const useTwentyNine = () => {
       
       if (prev.isSingleHand) {
         if (winnerTeam !== bidTeam) {
-          return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick, gameMessage: "Opponent won a trick! Single Hand Failed." });
+          return handleRoundEnd({ ...prev, tricksWon: newTricksWon, tricksHistory: newHistory, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick, gameMessage: "Opponent won a trick! Single Hand Failed." });
         }
       }
 
       if (totalTricks === 8) {
-        return handleRoundEnd({ ...prev, tricksWon: newTricksWon, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick });
+        return handleRoundEnd({ ...prev, tricksWon: newTricksWon, tricksHistory: newHistory, roundPoints: { team1: team1Points, team2: team2Points }, lastTrick: trick });
       }
 
       return {
         ...prev,
         tricksWon: newTricksWon,
+        tricksHistory: newHistory,
         roundPoints: { team1: team1Points, team2: team2Points },
         currentTrick: { leadPlayer: winner, leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
         lastTrick: trick,
@@ -2264,6 +2293,155 @@ export const useTwentyNine = () => {
       }
     }
   }, [state.phase, state.turn, state.activeBidder, state.mode, state.currentTrick.cards, isHost]);
+
+  // --- Bengali Voice Reactions (TTS Speech triggers) ---
+  const prevBidsLenRef = useRef(0);
+  const prevIsDoubledRef = useRef(false);
+  const prevIsRedoubledRef = useRef(false);
+  const prevTrumpRevealedRef = useRef(false);
+  const prevPairPointsAddedRef = useRef(false);
+  const prevIsSingleHandRef = useRef(false);
+  const prevPhaseRef = useRef<string>('lobby');
+
+  useEffect(() => {
+    // Reset refs if we go back to lobby or dealing_1
+    if (state.phase === 'lobby' || state.phase === 'multiplayer_lobby' || state.phase === 'dealing_1') {
+      prevBidsLenRef.current = 0;
+      prevIsDoubledRef.current = false;
+      prevIsRedoubledRef.current = false;
+      prevTrumpRevealedRef.current = false;
+      prevPairPointsAddedRef.current = false;
+      prevIsSingleHandRef.current = false;
+      prevPhaseRef.current = state.phase;
+      return;
+    }
+
+    // 1. Bid Change
+    const currentBids = state.bids || [];
+    if (currentBids.length > prevBidsLenRef.current) {
+      const newBid = currentBids[currentBids.length - 1];
+      if (newBid) {
+        const bidderPos = newBid.player;
+        const bidderName = state.players[bidderPos]?.name || 'প্লেয়ার';
+        
+        if (bidderPos === 'bottom') {
+          // Current user bid
+          if (newBid.amount === 'pass') {
+            speakBengaliVoice('আমি পাস দিলাম');
+          } else if (newBid.amount === 'double') {
+            speakBengaliVoice('আমি ডাবল দিলাম!');
+          } else if (newBid.amount === 'redouble') {
+            speakBengaliVoice('আমি রিডাবল দিলাম! এবার ঠ্যালা সামলাও!');
+          } else if (newBid.amount === 'single_hand') {
+            speakBengaliVoice('আমি ২৯ খেলবো! একাই একশো!');
+          } else if (typeof newBid.amount === 'number') {
+            speakBengaliVoice(`আমি ${getBengaliNumber(newBid.amount)} ডাকলাম`);
+          }
+        } else {
+          // AI or Other player bid
+          if (newBid.amount === 'pass') {
+            speakBengaliVoice(`${bidderName} পাস দিলো`);
+          } else if (newBid.amount === 'double') {
+            speakBengaliVoice(`${bidderName} ডাবল দিয়েছে!`);
+          } else if (newBid.amount === 'redouble') {
+            speakBengaliVoice(`${bidderName} রিডাবল দিলো! খেলা জমবে এবার!`);
+          } else if (newBid.amount === 'single_hand') {
+            speakBengaliVoice(`${bidderName} ২৯ ডেকেছে! ও একাই খেলবে!`);
+          } else if (typeof newBid.amount === 'number') {
+            speakBengaliVoice(`${bidderName} ${getBengaliNumber(newBid.amount)} ডেকেছে`);
+          }
+        }
+      }
+    }
+    prevBidsLenRef.current = currentBids.length;
+
+    // 2. Double Decision (Independent check, just in case bids array isn't updated)
+    if (state.isDoubled && !prevIsDoubledRef.current) {
+      speakBengaliVoice('খেলা ডাবল হয়েছে! পয়েন্ট কিন্তু দ্বিগুণ!');
+    }
+    prevIsDoubledRef.current = state.isDoubled;
+
+    // 3. Redouble Decision
+    if (state.isRedoubled && !prevIsRedoubledRef.current) {
+      speakBengaliVoice('বাপরে বাপ! খেলা রিডাবল হয়ে গেছে! এবার চরম উত্তেজনা!');
+    }
+    prevIsRedoubledRef.current = state.isRedoubled;
+
+    // 4. Trump Reveal
+    if (state.trumpRevealed && !prevTrumpRevealedRef.current) {
+      const revealerPos = state.trumpRevealer || 'bottom';
+      const revealerName = state.players[revealerPos]?.name || 'প্লেয়ার';
+      const suitName = getBengaliSuitName(state.trumpSuit || '');
+      
+      if (revealerPos === 'bottom') {
+        speakBengaliVoice(`আমি ট্রাম্প রিভিল করলাম! রং হলো ${suitName}`);
+      } else {
+        speakBengaliVoice(`${revealerName} রং দেখিয়েছে! ট্রাম্প হলো ${suitName}`);
+      }
+    }
+    prevTrumpRevealedRef.current = state.trumpRevealed;
+
+    // 5. Marriage Declaration
+    if (state.pairPointsAdded && !prevPairPointsAddedRef.current) {
+      const playerPos = state.pairRevealedBy || 'bottom';
+      const playerName = state.players[playerPos]?.name || 'প্লেয়ার';
+      if (playerPos === 'bottom') {
+        speakBengaliVoice('আমার কিন্তু ম্যারিজ আছে!');
+      } else {
+        speakBengaliVoice(`${playerName} ম্যারিজ ঘোষণা করেছে!`);
+      }
+    }
+    prevPairPointsAddedRef.current = state.pairPointsAdded;
+
+    // 6. Single Hand Bid
+    if (state.isSingleHand && !prevIsSingleHandRef.current) {
+      const bidderPos = state.bidWinner || 'bottom';
+      const bidderName = state.players[bidderPos]?.name || 'প্লেয়ার';
+      if (bidderPos === 'bottom') {
+        speakBengaliVoice('আমি ২৯ খেলবো! এক চালও দিবো না কাউকে!');
+      } else {
+        speakBengaliVoice(`${bidderName} একাই ২৯ খেলবে!`);
+      }
+    }
+    prevIsSingleHandRef.current = state.isSingleHand;
+
+    // 7. Phase Changes (Round End / Game End)
+    if (state.phase !== prevPhaseRef.current) {
+      if (state.phase === 'round_over') {
+        const team1Won = state.lastRoundResult?.team1Won;
+        const isMyTeamWon = team1Won; // Local client team is always team1
+        if (isMyTeamWon) {
+          speakBengaliVoice('দুর্দান্ত! এই রাউন্ডে আমরা জিতে গেছি!');
+        } else {
+          speakBengaliVoice('ইস! এই রাউন্ডটা হেরে গেলাম! পরেরবার দেখাবো!');
+        }
+      } else if (state.phase === 'game_over') {
+        const finalScore1 = state.scores.team1;
+        if (finalScore1 >= 6) {
+          speakBengaliVoice('অভিনন্দন! আমরা পুরো টুর্নামেন্ট জিতে গেছি! আমরাই চ্যাম্পিয়ন!');
+        } else {
+          speakBengaliVoice('হায়রে কপাল! পুরো ম্যাচটাই হেরে গেলাম!');
+        }
+      }
+    }
+    prevPhaseRef.current = state.phase;
+
+  }, [
+    state.phase,
+    state.bids,
+    state.isDoubled,
+    state.isRedoubled,
+    state.trumpRevealed,
+    state.trumpRevealer,
+    state.trumpSuit,
+    state.pairPointsAdded,
+    state.pairRevealedBy,
+    state.isSingleHand,
+    state.bidWinner,
+    state.scores,
+    state.lastRoundResult,
+    state.players
+  ]);
 
   const returnToLobby = () => {
     if (state.mode === 'multiplayer') {

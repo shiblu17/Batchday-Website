@@ -9,7 +9,7 @@ import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useRegistrations } from "@/hooks/useRegistrations";
+import { useQuery } from "@tanstack/react-query";
 import { CountdownTimer } from "@/components/CountdownTimer";
 
 function useCountdown(target: Date) {
@@ -75,12 +75,21 @@ export default function Index() {
     };
     fetchLeaderboard();
   }, []);
-  const { data: registrations = [] } = useRegistrations();
+  const { data: verifiedCount = 0 } = useQuery({
+    queryKey: ["verified-registrations-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("registrations")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "verified");
+      if (error) throw error;
+      return count || 0;
+    },
+    staleTime: 30_000,
+  });
 
   const eventDate = new Date(settings?.event_date || "2025-06-15T10:00:00+06:00");
   const countdown = useCountdown(eventDate);
-
-  const verifiedCount = registrations.filter((r) => r.status === "verified").length;
 
   if (settingsLoading) {
     return (

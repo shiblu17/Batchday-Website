@@ -31,6 +31,22 @@ const getCoverTransform = (score: number) => {
   return { y: 56, x: 0, rotate: 0 }; // S === 6
 };
 
+const getTrickResolveAnimation = (winner: PlayerPosition | null) => {
+  if (!winner) return {};
+  switch (winner) {
+    case 'top':
+      return { y: -250, x: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+    case 'bottom':
+      return { y: 250, x: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+    case 'left':
+      return { x: -250, y: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+    case 'right':
+      return { x: 250, y: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+    default:
+      return {};
+  }
+};
+
 export const TwentyNineBoard: React.FC = () => {
   const { 
     state, 
@@ -71,6 +87,7 @@ export const TwentyNineBoard: React.FC = () => {
   const [leaderboardTab, setLeaderboardTab] = useState<'batch52' | 'guest'>('batch52');
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
 
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('ju_twenty_nine_sound_enabled') !== 'false');
   const [showReactionPopup, setShowReactionPopup] = useState(false);
@@ -730,6 +747,13 @@ export const TwentyNineBoard: React.FC = () => {
             >
               💬
             </button>
+            <button 
+              onClick={() => setShowHistoryDrawer(true)}
+              className="w-8 h-8 rounded-full bg-gradient-to-b from-[#b5b31d] to-[#4c4a03] border-2 border-[#1a1a1a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] flex items-center justify-center text-lg pointer-events-auto active:scale-95"
+              title="Trick History"
+            >
+              📜
+            </button>
           </div>
 
           {isSpectator && (
@@ -1013,7 +1037,10 @@ export const TwentyNineBoard: React.FC = () => {
                 <motion.div 
                   key={`top-${state.currentTrick.cards.top.id}`} 
                   initial={{ y: -20, opacity: 0 }} 
-                  animate={{ y: 0, opacity: 1 }}
+                  animate={state.currentTrick.winner 
+                    ? getTrickResolveAnimation(state.currentTrick.winner)
+                    : { y: 0, x: 0, opacity: 1, scale: 1 }
+                  }
                   exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
                 >
                   <CardUI card={state.currentTrick.cards.top} />
@@ -1029,7 +1056,10 @@ export const TwentyNineBoard: React.FC = () => {
                 <motion.div 
                   key={`left-${state.currentTrick.cards.left.id}`} 
                   initial={{ x: -20, opacity: 0 }} 
-                  animate={{ x: 0, opacity: 1 }}
+                  animate={state.currentTrick.winner 
+                    ? getTrickResolveAnimation(state.currentTrick.winner)
+                    : { x: 0, y: 0, opacity: 1, scale: 1 }
+                  }
                   exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
                 >
                   <CardUI card={state.currentTrick.cards.left} />
@@ -1045,7 +1075,10 @@ export const TwentyNineBoard: React.FC = () => {
                 <motion.div 
                   key={`right-${state.currentTrick.cards.right.id}`} 
                   initial={{ x: 20, opacity: 0 }} 
-                  animate={{ x: 0, opacity: 1 }}
+                  animate={state.currentTrick.winner 
+                    ? getTrickResolveAnimation(state.currentTrick.winner)
+                    : { x: 0, y: 0, opacity: 1, scale: 1 }
+                  }
                   exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
                 >
                   <CardUI card={state.currentTrick.cards.right} />
@@ -1061,7 +1094,10 @@ export const TwentyNineBoard: React.FC = () => {
                 <motion.div 
                   key={`bottom-${state.currentTrick.cards.bottom.id}`} 
                   initial={{ y: 20, opacity: 0 }} 
-                  animate={{ y: 0, opacity: 1 }}
+                  animate={state.currentTrick.winner 
+                    ? getTrickResolveAnimation(state.currentTrick.winner)
+                    : { y: 0, x: 0, opacity: 1, scale: 1 }
+                  }
                   exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
                 >
                   <CardUI card={state.currentTrick.cards.bottom} />
@@ -1774,6 +1810,116 @@ export const TwentyNineBoard: React.FC = () => {
               </button>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Trick History Drawer */}
+      <AnimatePresence>
+        {showHistoryDrawer && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowHistoryDrawer(false)}
+              className="absolute inset-0 z-[120] bg-black/60 pointer-events-auto"
+            />
+            {/* Drawer Container */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute top-0 right-0 bottom-0 w-80 sm:w-96 z-[125] bg-gradient-to-b from-[#2a170b] to-[#140b05] border-l-2 border-[#8b5a2b]/30 shadow-2xl backdrop-blur-md pointer-events-auto p-5 flex flex-col text-white"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center border-b border-[#8b5a2b]/30 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-normal">📜</span>
+                  <h3 className="text-lg font-black tracking-wide text-amber-400 uppercase font-display">Trick History</h3>
+                </div>
+                <button
+                  onClick={() => setShowHistoryDrawer(false)}
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-sm hover:bg-white/15 transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Tricks list */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 scrollbar-thin">
+                {(!state.tricksHistory || state.tricksHistory.length === 0) ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-slate-400/60 p-6">
+                    <span className="text-4xl mb-2">🃏</span>
+                    <p className="text-sm font-bold uppercase tracking-wider">No tricks played yet</p>
+                    <p className="text-xs mt-1">Tricks will appear here in chronological order after they resolve.</p>
+                  </div>
+                ) : (
+                  state.tricksHistory.map((trick, index) => {
+                    const winnerName = state.players[trick.winner || 'bottom']?.name || 'Unknown';
+                    const leadSuitSymbol = trick.leadSuit === 'hearts' ? '♥' : trick.leadSuit === 'diamonds' ? '♦' : trick.leadSuit === 'clubs' ? '♣' : trick.leadSuit === 'spades' ? '♠' : '';
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        className="bg-black/30 border border-[#8b5a2b]/25 rounded-xl p-3.5 flex flex-col gap-2.5 shadow-md relative overflow-hidden group text-left"
+                      >
+                        {/* Corner Index */}
+                        <div className="absolute top-0 right-0 bg-[#8b5a2b]/25 px-2.5 py-0.5 rounded-bl-lg text-[9px] font-black font-mono text-amber-400">
+                          TRICK {index + 1}
+                        </div>
+
+                        {/* Title Info */}
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider text-left">Winner</span>
+                          <span className="text-sm font-black text-amber-300 uppercase truncate text-left">
+                            {trick.winner === 'bottom' ? 'You' : winnerName}
+                          </span>
+                        </div>
+
+                        {/* Played Cards Thumbnails */}
+                        <div className="grid grid-cols-4 gap-1.5 mt-1">
+                          {(['bottom', 'left', 'top', 'right'] as PlayerPosition[]).map(pos => {
+                            const card = trick.cards[pos];
+                            const playerLabel = pos === 'bottom' ? 'You' : (state.players[pos]?.name || pos);
+                            
+                            return (
+                              <div 
+                                key={pos} 
+                                className={`flex flex-col items-center p-1 bg-black/20 rounded-md border ${trick.winner === pos ? 'border-amber-400/60 bg-amber-500/5' : 'border-white/5'}`}
+                              >
+                                <span className={`text-[8px] truncate font-bold text-center w-full mb-1 opacity-70 ${trick.winner === pos ? 'text-amber-400 font-extrabold' : 'text-slate-300'}`}>
+                                  {shortenName(playerLabel)}
+                                </span>
+                                {card ? (
+                                  <div className="scale-75 origin-top -mb-4">
+                                    <CardUI card={card} isPlayable={false} />
+                                  </div>
+                                ) : (
+                                  <div className="w-7 h-10 border border-dashed border-white/10 rounded flex items-center justify-center text-[10px] text-white/20">-</div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Trick Summary Footer */}
+                        <div className="flex justify-between items-center border-t border-white/5 pt-2 mt-2 text-[10px] font-bold text-slate-400">
+                          <span className="flex items-center gap-1">
+                            Lead: <span className={`text-xs ${trick.leadSuit === 'hearts' || trick.leadSuit === 'diamonds' ? 'text-red-500' : 'text-slate-300'}`}>{leadSuitSymbol}</span>
+                          </span>
+                          <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                            Points: {trick.points}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

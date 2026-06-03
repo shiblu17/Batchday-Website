@@ -17,3 +17,7 @@ ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'player' NOT NULL;
 -- 3. Add bids column to twenty_nine_rooms to track bidding history
 ALTER TABLE public.twenty_nine_rooms 
 ADD COLUMN IF NOT EXISTS bids JSONB DEFAULT '[]'::jsonb;
+
+-- 4. Add tricks_history column to twenty_nine_rooms to track trick history
+ALTER TABLE public.twenty_nine_rooms 
+ADD COLUMN IF NOT EXISTS tricks_history JSONB DEFAULT '[]'::jsonb;

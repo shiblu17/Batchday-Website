@@ -55,3 +55,24 @@ export const playTrickWinSound = () => {
   osc.start();
   osc.stop(audioCtx.currentTime + 0.3);
 };
+
+export const speakBengaliVoice = (text: string) => {
+  if (!isSoundEnabled()) return;
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+  // Cancel any ongoing speech to avoid overlay queuing delays
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'bn-BD';
+  utterance.rate = 1.15; // slightly faster for normal human tempo
+  utterance.pitch = 1.0;
+
+  const voices = window.speechSynthesis.getVoices();
+  const bnVoice = voices.find(v => v.lang.startsWith('bn-') || v.lang.includes('Bengali') || v.lang.includes('bn_'));
+  if (bnVoice) {
+    utterance.voice = bnVoice;
+  }
+  
+  window.speechSynthesis.speak(utterance);
+};
