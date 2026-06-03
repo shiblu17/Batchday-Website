@@ -1836,7 +1836,7 @@ export const useTwentyNine = () => {
         newTrick.winner = winner;
         newTrick.points = points;
         
-        if (prev.mode !== 'multiplayer' || isHost) {
+        if (prev.mode !== 'multiplayer') {
           setTimeout(() => resolveTrick(newTrick), 1500);
         }
         nextTurn = player;
@@ -1960,6 +1960,32 @@ export const useTwentyNine = () => {
       lastRoundResult: { team1Won }
     };
   };
+
+  // --- Multiplayer Host Trick Resolver ---
+  useEffect(() => {
+    if (state.mode !== 'multiplayer' || !isHost) return;
+    if (state.phase !== 'playing') return;
+
+    const cardsPlayed = Object.values(state.currentTrick.cards).filter(c => c !== null).length;
+    const requiredCards = state.isSingleHand ? 3 : 4;
+
+    if (cardsPlayed === requiredCards && !state.currentTrick.winner) {
+      const winner = evaluateTrick(state.currentTrick, state.trumpSuit, state.trumpRevealed);
+      const points = calculateTrickPoints(state.currentTrick);
+      
+      const completedTrick: Trick = {
+        ...state.currentTrick,
+        winner,
+        points
+      };
+
+      console.log('[Host Trick Resolver] Trick is complete, scheduling resolution');
+      const timer = setTimeout(() => {
+        resolveTrick(completedTrick);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [state.currentTrick, state.phase, state.mode, isHost, state.isSingleHand, state.trumpSuit, state.trumpRevealed]);
 
   // --- AI LOGIC ---
   useEffect(() => {
