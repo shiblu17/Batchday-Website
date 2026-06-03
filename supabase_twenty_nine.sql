@@ -38,6 +38,7 @@ CREATE TABLE public.twenty_nine_rooms (
     tricks_won JSONB DEFAULT '{"bottom": [], "left": [], "top": [], "right": []}'::jsonb,
     scores JSONB DEFAULT '{"team1": 0, "team2": 0}'::jsonb,
     round_points JSONB DEFAULT '{"team1": 0, "team2": 0}'::jsonb,
+    bids JSONB DEFAULT '[]'::jsonb,
     passed_players JSONB DEFAULT '[]'::jsonb,
     bidding_queue JSONB DEFAULT '[]'::jsonb,
     duel_defender VARCHAR(20),

@@ -13,3 +13,7 @@ ADD COLUMN IF NOT EXISTS active_reactions JSONB DEFAULT '{}'::jsonb;
 -- 2. Add role column to player profiles to support Spectators
 ALTER TABLE public.twenty_nine_players 
 ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'player' NOT NULL;
+
+-- 3. Add bids column to twenty_nine_rooms to track bidding history
+ALTER TABLE public.twenty_nine_rooms 
+ADD COLUMN IF NOT EXISTS bids JSONB DEFAULT '[]'::jsonb;

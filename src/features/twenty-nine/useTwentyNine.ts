@@ -70,6 +70,14 @@ const rotateScores = (scores: { team1: number; team2: number }, myPos: PlayerPos
   return isMyTeam2 ? { team1: scores.team2, team2: scores.team1 } : scores;
 };
 
+const rotateBids = (bids: Bid[], myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb'): Bid[] => {
+  if (!bids) return [];
+  return bids.map(b => ({
+    ...b,
+    player: direction === 'dbToLocal' ? dbToLocal(b.player, myPos) : localToDb(b.player, myPos)
+  }));
+};
+
 const rotateStateDbToLocal = (dbState: any, myPos: PlayerPosition): GameState => {
   return {
     ...dbState,
@@ -84,6 +92,7 @@ const rotateStateDbToLocal = (dbState: any, myPos: PlayerPosition): GameState =>
     duelDefender: dbState.duelDefender ? dbToLocal(dbState.duelDefender, myPos) : undefined,
     players: rotatePlayerMap(dbState.players, myPos, 'dbToLocal'),
     hands: rotatePlayerMap(dbState.hands, myPos, 'dbToLocal'),
+    bids: rotateBids(dbState.bids || [], myPos, 'dbToLocal'),
     currentTrick: rotateTrick(dbState.currentTrick, myPos, 'dbToLocal'),
     lastTrick: rotateTrick(dbState.lastTrick, myPos, 'dbToLocal'),
     tricksWon: rotateTricksWon(dbState.tricksWon, myPos, 'dbToLocal'),
@@ -108,6 +117,7 @@ const rotateStateLocalToDb = (localState: any, myPos: PlayerPosition): any => {
     duelDefender: localState.duelDefender ? localToDb(localState.duelDefender, myPos) : undefined,
     players: rotatePlayerMap(localState.players, myPos, 'localToDb'),
     hands: rotatePlayerMap(localState.hands, myPos, 'localToDb'),
+    bids: rotateBids(localState.bids || [], myPos, 'localToDb'),
     currentTrick: rotateTrick(localState.currentTrick, myPos, 'localToDb'),
     lastTrick: rotateTrick(localState.lastTrick, myPos, 'localToDb'),
     tricksWon: rotateTricksWon(localState.tricksWon, myPos, 'localToDb'),
@@ -189,7 +199,7 @@ const mapDbRoomToLocalState = (
     players: absPlayers,
     myPosition: myPos,
     hands: absHands,
-    bids: [] as Bid[],
+    bids: (dbRoom.bids || []) as Bid[],
     currentBid: dbRoom.current_bid,
     highestBidder: dbRoom.highest_bidder as PlayerPosition | null,
     challenger: dbRoom.challenger as PlayerPosition | null,
@@ -552,6 +562,7 @@ export const useTwentyNine = () => {
           tricks_won: dbState.tricksWon,
           scores: dbState.scores,
           round_points: dbState.roundPoints,
+          bids: dbState.bids,
           passed_players: dbState.passedPlayers,
           bidding_queue: dbState.biddingQueue,
           duel_defender: dbState.duelDefender,
@@ -945,7 +956,7 @@ export const useTwentyNine = () => {
       .eq('id', roomId);
   };
 
-  const dealFirstHalfOnline = async (players: any[] = playersList) => {
+  const dealFirstHalfOnline = async (players: any[] = playersListRef.current) => {
     if (!roomId || !isHost) return;
     
     const deck = shuffleDeck(createDeck());
@@ -1239,7 +1250,7 @@ export const useTwentyNine = () => {
               players: absPlayers,
               myPosition: myPosition,
               hands: absHands,
-              bids: [] as Bid[],
+              bids: (dbRoom.bids || []) as Bid[],
               currentBid: dbRoom.current_bid,
               highestBidder: dbRoom.highest_bidder as PlayerPosition | null,
               challenger: dbRoom.challenger as PlayerPosition | null,
@@ -1520,7 +1531,13 @@ export const useTwentyNine = () => {
           if (amount === 'pass') {
             newPassedPlayers = [...newPassedPlayers, prev.activeBidder];
             if (newPassedPlayers.length === 4) {
-              setTimeout(dealFirstHalf, 1000);
+              if (prev.mode === 'multiplayer') {
+                if (isHost) {
+                  setTimeout(dealFirstHalfOnline, 1000);
+                }
+              } else {
+                setTimeout(dealFirstHalf, 1000);
+              }
               return { ...prev, bids: newBids, currentBid: 15, passedPlayers: newPassedPlayers };
             }
             
