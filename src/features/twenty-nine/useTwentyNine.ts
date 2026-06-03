@@ -697,6 +697,17 @@ export const useTwentyNine = () => {
       return;
     }
 
+    const existingPlayer = players.find(p => p.user_id === userId);
+    if (existingPlayer) {
+      setRoomCode(code);
+      setRoomId(room.id);
+      setIsHost(room.creator_id === userId);
+      const clientPos = existingPlayer.role === 'spectator' ? 'bottom' : existingPlayer.position;
+      setMyPosition(clientPos as any);
+      await fetchRoomState(room.id, clientPos as any);
+      return;
+    }
+
     const activePlayers = players.filter(p => p.role !== 'spectator');
     const isRoomFull = activePlayers.length >= 4;
     const isSpectator = isRoomFull || room.status === 'playing';
@@ -731,6 +742,7 @@ export const useTwentyNine = () => {
 
     if (playerError) {
       console.error('Error adding player:', playerError);
+      alert(`Error joining room: ${playerError.message}\n\nDid you run the SQL migration (supabase_future_enhancements.sql) in your Supabase SQL Editor?`);
       return;
     }
 
