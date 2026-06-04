@@ -91,31 +91,50 @@ export const playTrickWinSound = () => {
   osc.stop(audioCtx.currentTime + 0.3);
 };
 
+let activeFallbackAudio: HTMLAudioElement | null = null;
+
 export const speakBengaliVoice = (text: string) => {
   if (!isVoiceEnabled()) return;
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+  // Stop any active fallback audio playback
+  if (activeFallbackAudio) {
+    try {
+      activeFallbackAudio.pause();
+      activeFallbackAudio = null;
+    } catch (e) {
+      console.error('Error stopping fallback audio:', e);
+    }
+  }
+
+  if (typeof window === 'undefined') return;
 
   try {
-    // Cancel any ongoing speech to avoid overlay queuing delays
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'bn-BD';
-    utterance.rate = 1.15; // slightly faster for normal human tempo
-    utterance.pitch = 1.0;
-
     const bnVoice = getBengaliVoice();
-    if (bnVoice) {
+
+    if (bnVoice && window.speechSynthesis) {
+      // Cancel any ongoing speech to avoid overlay queuing delays
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'bn-BD';
+      utterance.rate = 1.15; // slightly faster for normal human tempo
+      utterance.pitch = 1.0;
       utterance.voice = bnVoice;
-      console.log(`[SpeechSynthesis] Speaking Bengali with voice: ${bnVoice.name} (${bnVoice.lang})`);
+      
+      console.log(`[SpeechSynthesis] Speaking Bengali with native voice: ${bnVoice.name} (${bnVoice.lang})`);
+      window.speechSynthesis.speak(utterance);
     } else {
-      console.warn(`[SpeechSynthesis] No Bengali voice profile found. Falling back to default browser engine. Available voices in this browser:`, 
-        window.speechSynthesis.getVoices().map(v => `${v.name} (${v.lang})`).join(', ')
-      );
+      console.warn(`[SpeechSynthesis] No native Bengali voice profile found. Falling back to Google Translate TTS API.`);
+      
+      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=bn&client=tw-ob&q=${encodeURIComponent(text)}`;
+      const audio = new Audio(fallbackUrl);
+      audio.playbackRate = 1.1; // adjust speed for fallback
+      activeFallbackAudio = audio;
+      audio.play().catch(e => {
+        console.error("Google Translate TTS fallback audio play failed:", e);
+      });
     }
-    
-    window.speechSynthesis.speak(utterance);
   } catch (e) {
-    console.error('SpeechSynthesis error:', e);
+    console.error('Speech synthesis/fallback error:', e);
   }
 };
