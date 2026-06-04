@@ -124,9 +124,9 @@ export const speakBengaliVoice = (text: string) => {
       console.log(`[SpeechSynthesis] Speaking Bengali with native voice: ${bnVoice.name} (${bnVoice.lang})`);
       window.speechSynthesis.speak(utterance);
     } else {
-      console.warn(`[SpeechSynthesis] No native Bengali voice profile found. Falling back to Google Translate TTS API.`);
+      console.warn(`[SpeechSynthesis] No native Bengali voice profile found. Falling back to Google Translate TTS API via proxy.`);
       
-      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=bn&client=tw-ob&q=${encodeURIComponent(text)}`;
+      const fallbackUrl = `/api/tts?ie=UTF-8&tl=bn&client=tw-ob&q=${encodeURIComponent(text)}`;
       const audio = new Audio(fallbackUrl);
       audio.playbackRate = 1.1; // adjust speed for fallback
       activeFallbackAudio = audio;
