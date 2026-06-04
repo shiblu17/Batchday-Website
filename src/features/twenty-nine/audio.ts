@@ -124,10 +124,16 @@ export const speakBengaliVoice = (text: string) => {
       console.log(`[SpeechSynthesis] Speaking Bengali with native voice: ${bnVoice.name} (${bnVoice.lang})`);
       window.speechSynthesis.speak(utterance);
     } else {
-      console.warn(`[SpeechSynthesis] No native Bengali voice profile found. Falling back to Google Translate TTS API via proxy.`);
+      console.warn(`[SpeechSynthesis] No native Bengali voice profile found. Falling back to Google Translate TTS API client-side.`);
       
-      const fallbackUrl = `/api/tts?ie=UTF-8&tl=bn&client=tw-ob&q=${encodeURIComponent(text)}`;
-      const audio = new Audio(fallbackUrl);
+      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=bn&client=tw-ob&q=${encodeURIComponent(text)}`;
+      const audio = new Audio();
+      try {
+        (audio as any).referrerPolicy = "no-referrer";
+      } catch (err) {
+        console.error("Failed to set referrerPolicy:", err);
+      }
+      audio.src = fallbackUrl;
       audio.playbackRate = 1.1; // adjust speed for fallback
       activeFallbackAudio = audio;
       audio.play().catch(e => {
