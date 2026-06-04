@@ -31,20 +31,38 @@ const getCoverTransform = (score: number) => {
   return { y: 56, x: 0, rotate: 0 }; // S === 6
 };
 
-const getTrickResolveAnimation = (winner: PlayerPosition | null) => {
+const getTrickResolveAnimation = (winner: PlayerPosition | null): any => {
   if (!winner) return {};
+  
+  let targetX = 0;
+  let targetY = 0;
+  
   switch (winner) {
     case 'top':
-      return { y: -250, x: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+      targetY = -250;
+      break;
     case 'bottom':
-      return { y: 250, x: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+      targetY = 250;
+      break;
     case 'left':
-      return { x: -250, y: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
+      targetX = -250;
+      break;
     case 'right':
-      return { x: 250, y: 0, opacity: 0, scale: 0.3, transition: { delay: 0.5, duration: 0.6, ease: "easeIn" } };
-    default:
-      return {};
+      targetX = 250;
+      break;
   }
+
+  return {
+    x: [null, 0, targetX],
+    y: [null, 0, targetY],
+    opacity: [null, 1, 0],
+    scale: [null, 1, 0.3],
+    transition: {
+      times: [0, 0.3, 1],
+      duration: 1.2,
+      ease: "easeInOut"
+    }
+  };
 };
 
 export const TwentyNineBoard: React.FC = () => {
