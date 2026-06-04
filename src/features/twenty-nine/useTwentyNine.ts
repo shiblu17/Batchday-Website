@@ -36,6 +36,7 @@ const localToDb = (pos: PlayerPosition, myPos: PlayerPosition): PlayerPosition =
 
 const rotatePlayerMap = <T>(map: Record<PlayerPosition, T>, myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb'): Record<PlayerPosition, T> => {
   const rotated = {} as Record<PlayerPosition, T>;
+  if (!map) return rotated;
   (Object.keys(map) as PlayerPosition[]).forEach(pos => {
     const targetPos = direction === 'dbToLocal' ? dbToLocal(pos, myPos) : localToDb(pos, myPos);
     rotated[targetPos] = map[pos];
@@ -44,6 +45,7 @@ const rotatePlayerMap = <T>(map: Record<PlayerPosition, T>, myPos: PlayerPositio
 };
 
 const rotatePlayerArray = (arr: PlayerPosition[], myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb'): PlayerPosition[] => {
+  if (!arr) return [];
   return arr.map(pos => direction === 'dbToLocal' ? dbToLocal(pos, myPos) : localToDb(pos, myPos));
 };
 
@@ -51,14 +53,15 @@ const rotateTrick = (trick: any, myPos: PlayerPosition, direction: 'dbToLocal' |
   if (!trick) return null;
   return {
     ...trick,
-    leadPlayer: direction === 'dbToLocal' ? dbToLocal(trick.leadPlayer, myPos) : localToDb(trick.leadPlayer, myPos),
+    leadPlayer: trick.leadPlayer ? (direction === 'dbToLocal' ? dbToLocal(trick.leadPlayer, myPos) : localToDb(trick.leadPlayer, myPos)) : null,
     winner: trick.winner ? (direction === 'dbToLocal' ? dbToLocal(trick.winner, myPos) : localToDb(trick.winner, myPos)) : null,
-    cards: rotatePlayerMap(trick.cards, myPos, direction)
+    cards: rotatePlayerMap(trick.cards || {}, myPos, direction)
   };
 };
 
 const rotateTricksWon = (tricksWon: Record<PlayerPosition, any[]>, myPos: PlayerPosition, direction: 'dbToLocal' | 'localToDb') => {
   const rotated = {} as Record<PlayerPosition, any[]>;
+  if (!tricksWon) return rotated;
   (Object.keys(tricksWon) as PlayerPosition[]).forEach(pos => {
     const targetPos = direction === 'dbToLocal' ? dbToLocal(pos, myPos) : localToDb(pos, myPos);
     rotated[targetPos] = (tricksWon[pos] || []).map(t => rotateTrick(t, myPos, direction));
@@ -221,12 +224,12 @@ const mapDbRoomToLocalState = (
     trumpRevealer: dbRoom.trump_revealer as PlayerPosition | null,
     pairRevealedBy: dbRoom.pair_revealed_by as PlayerPosition | null,
     pairPointsAdded: dbRoom.pair_points_added,
-    currentTrick: dbRoom.current_trick,
-    lastTrick: dbRoom.last_trick,
-    tricksWon: dbRoom.tricks_won,
-    turn: dbRoom.turn as PlayerPosition,
-    scores: dbRoom.scores,
-    roundPoints: dbRoom.round_points,
+    currentTrick: dbRoom.current_trick || { leadPlayer: dbRoom.turn || 'bottom', leadSuit: null, cards: { bottom: null, left: null, top: null, right: null }, winner: null, points: 0 },
+    lastTrick: dbRoom.last_trick || null,
+    tricksWon: dbRoom.tricks_won || { bottom: [], top: [], left: [], right: [] },
+    turn: (dbRoom.turn || 'bottom') as PlayerPosition,
+    scores: dbRoom.scores || { team1: 0, team2: 0 },
+    roundPoints: dbRoom.round_points || { team1: 0, team2: 0 },
     settings: {
       speed: 'normal' as const,
       theme: 'wooden' as const

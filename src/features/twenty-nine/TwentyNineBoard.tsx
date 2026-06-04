@@ -319,7 +319,7 @@ export const TwentyNineBoard: React.FC = () => {
   // Card play sounds
   const prevTrickCards = useRef<number>(0);
   useEffect(() => {
-    const currentCardsCount = Object.values(state.currentTrick.cards).filter(c => c !== null).length;
+    const currentCardsCount = Object.values(state.currentTrick?.cards || {}).filter(c => c !== null).length;
     if (currentCardsCount > prevTrickCards.current) {
       playCardSwoosh();
     }
@@ -1059,7 +1059,7 @@ export const TwentyNineBoard: React.FC = () => {
           {/* Top Played Card Slot */}
           <div className="absolute top-[35%] left-1/2 -translate-x-1/2 z-10 scale-[0.65]">
             <AnimatePresence mode="wait">
-              {state.currentTrick.cards.top && (
+              {state.currentTrick?.cards?.top && (
                 <motion.div 
                   key={`top-${state.currentTrick.cards.top.id}`} 
                   initial={{ y: -20, opacity: 0 }} 
@@ -1078,7 +1078,7 @@ export const TwentyNineBoard: React.FC = () => {
           {/* Left Played Card Slot */}
           <div className="absolute top-[45%] left-[25%] -translate-x-1/2 z-20 scale-[0.65]">
             <AnimatePresence mode="wait">
-              {state.currentTrick.cards.left && (
+              {state.currentTrick?.cards?.left && (
                 <motion.div 
                   key={`left-${state.currentTrick.cards.left.id}`} 
                   initial={{ x: -20, opacity: 0 }} 
@@ -1097,7 +1097,7 @@ export const TwentyNineBoard: React.FC = () => {
           {/* Right Played Card Slot */}
           <div className="absolute top-[45%] right-[25%] translate-x-1/2 z-20 scale-[0.65]">
             <AnimatePresence mode="wait">
-              {state.currentTrick.cards.right && (
+              {state.currentTrick?.cards?.right && (
                 <motion.div 
                   key={`right-${state.currentTrick.cards.right.id}`} 
                   initial={{ x: 20, opacity: 0 }} 
@@ -1116,7 +1116,7 @@ export const TwentyNineBoard: React.FC = () => {
           {/* Bottom Played Card Slot */}
           <div className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-30 scale-[0.65]">
             <AnimatePresence mode="wait">
-              {state.currentTrick.cards.bottom && (
+              {state.currentTrick?.cards?.bottom && (
                 <motion.div 
                   key={`bottom-${state.currentTrick.cards.bottom.id}`} 
                   initial={{ y: 20, opacity: 0 }} 
