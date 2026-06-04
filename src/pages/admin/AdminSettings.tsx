@@ -121,8 +121,10 @@ export default function AdminSettings() {
   };
 
   const handleSave = async () => {
+    console.log("Save button clicked. Current form:", form);
     setSaving(true);
     try {
+      console.log("Sending update request to Supabase...");
       const { error } = await (supabase.from("site_settings") as any)
         .update({
           event_date: form.event_date,
@@ -144,13 +146,18 @@ export default function AdminSettings() {
         })
         .eq("id", 1);
       
+      console.log("Update response error:", error);
       if (error) throw error;
 
+      console.log("Invalidating queries...");
       await queryClient.invalidateQueries({ queryKey: ["site-settings"] });
+      console.log("Query invalidated. Showing toast.");
       toast({ title: "সেটিংস সেভ হয়েছে ✅" });
     } catch (err: any) {
+      console.error("Save error caught:", err);
       toast({ title: "সেভ ব্যর্থ হয়েছে", description: err.message, variant: "destructive" });
     } finally {
+      console.log("Finally block running, stopping spinner.");
       setSaving(false);
     }
   };
