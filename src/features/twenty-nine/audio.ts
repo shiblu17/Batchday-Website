@@ -91,56 +91,29 @@ export const playTrickWinSound = () => {
   osc.stop(audioCtx.currentTime + 0.3);
 };
 
-let activeFallbackAudio: HTMLAudioElement | null = null;
-
 export const speakBengaliVoice = (text: string) => {
   if (!isVoiceEnabled()) return;
-
-  // Stop any active fallback audio playback
-  if (activeFallbackAudio) {
-    try {
-      activeFallbackAudio.pause();
-      activeFallbackAudio = null;
-    } catch (e) {
-      console.error('Error stopping fallback audio:', e);
-    }
-  }
-
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
 
   try {
     const bnVoice = getBengaliVoice();
-
-    if (bnVoice && window.speechSynthesis) {
-      // Cancel any ongoing speech to avoid overlay queuing delays
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'bn-BD';
-      utterance.rate = 1.15; // slightly faster for normal human tempo
-      utterance.pitch = 1.0;
-      utterance.voice = bnVoice;
-      
-      console.log(`[SpeechSynthesis] Speaking Bengali with native voice: ${bnVoice.name} (${bnVoice.lang})`);
-      window.speechSynthesis.speak(utterance);
-    } else {
-      console.warn(`[SpeechSynthesis] No native Bengali voice profile found. Falling back to Google Translate TTS API client-side.`);
-      
-      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=bn&client=tw-ob&q=${encodeURIComponent(text)}`;
-      const audio = new Audio();
-      try {
-        (audio as any).referrerPolicy = "no-referrer";
-      } catch (err) {
-        console.error("Failed to set referrerPolicy:", err);
-      }
-      audio.src = fallbackUrl;
-      audio.playbackRate = 1.1; // adjust speed for fallback
-      activeFallbackAudio = audio;
-      audio.play().catch(e => {
-        console.error("Google Translate TTS fallback audio play failed:", e);
-      });
+    if (!bnVoice) {
+      console.warn(`[SpeechSynthesis] No Bengali voice profile found. Speech output skipped to avoid phonetic language mismatch.`);
+      return;
     }
+
+    // Cancel any ongoing speech to avoid overlay queuing delays
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'bn-BD';
+    utterance.rate = 1.15; // slightly faster for normal human tempo
+    utterance.pitch = 1.0;
+    utterance.voice = bnVoice;
+    
+    console.log(`[SpeechSynthesis] Speaking Bengali with voice: ${bnVoice.name} (${bnVoice.lang})`);
+    window.speechSynthesis.speak(utterance);
   } catch (e) {
-    console.error('Speech synthesis/fallback error:', e);
+    console.error('SpeechSynthesis error:', e);
   }
 };
