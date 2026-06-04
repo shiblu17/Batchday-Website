@@ -2330,6 +2330,16 @@ export const useTwentyNine = () => {
     }
   }, [state.phase, state.turn, state.activeBidder, state.mode, state.currentTrick.cards, isHost]);
 
+  // Automatically clear game message after 4 seconds
+  useEffect(() => {
+    if (state.gameMessage) {
+      const timer = setTimeout(() => {
+        updateStateAndSync(prev => ({ ...prev, gameMessage: null }));
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [state.gameMessage, updateStateAndSync]);
+
   // --- Bengali Voice Reactions (TTS Speech triggers) ---
   const prevBidsLenRef = useRef(0);
   const prevIsDoubledRef = useRef(false);
