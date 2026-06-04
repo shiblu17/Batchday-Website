@@ -1751,9 +1751,27 @@ export const useTwentyNine = () => {
       if (suitOrCard === '7th_card') {
         const playerIndex = ['bottom', 'left', 'top', 'right'].indexOf(prev.activeBidder);
         const rem = prev.remainingDeck;
-        hiddenCard = rem[playerIndex * 4 + 2];
+        const realCard = rem[playerIndex * 4 + 2];
+        hiddenCard = {
+          id: `dummy_${realCard.suit}`,
+          suit: realCard.suit,
+          rank: 'A',
+          value: 0
+        };
+      } else if (typeof suitOrCard === 'string') {
+        hiddenCard = {
+          id: `dummy_${suitOrCard}`,
+          suit: suitOrCard as Suit,
+          rank: 'A',
+          value: 0
+        };
       } else {
-        hiddenCard = suitOrCard as Card;
+        hiddenCard = {
+          id: `dummy_${suitOrCard.suit}`,
+          suit: suitOrCard.suit,
+          rank: 'A',
+          value: 0
+        };
       }
       
       const finalHands = {
@@ -1813,6 +1831,17 @@ export const useTwentyNine = () => {
   const playCard = (player: PlayerPosition, card: Card) => {
     updateStateAndSync(prev => {
       if (prev.turn !== player) return prev;
+
+      // Prevent playing the hidden trump card before it is revealed
+      const isHiddenTrump = prev.hiddenTrumpCard && 
+                            !prev.trumpRevealed && 
+                            prev.bidWinner === player && 
+                            (card.id === prev.hiddenTrumpCard.id || 
+                             (card.suit === prev.hiddenTrumpCard.suit && card.rank === prev.hiddenTrumpCard.rank));
+      if (isHiddenTrump) {
+        console.warn("Cannot play hidden trump card before it is revealed!");
+        return prev;
+      }
 
       const newHand = prev.hands[player].filter(c => c.id !== card.id);
       const newTrickCards = { ...prev.currentTrick.cards, [player]: card };
@@ -2218,8 +2247,7 @@ export const useTwentyNine = () => {
             if (maxScore <= 3) {
               setTrump('7th_card');
             } else {
-              const cardToSet = hand.find(c => c.suit === bestSuit) || hand[0];
-              setTrump(cardToSet);
+              setTrump(bestSuit as Suit);
             }
           }
         }, state.settings.speed === 'fast' ? 400 : 1500);
@@ -2264,6 +2292,11 @@ export const useTwentyNine = () => {
                   }
                 }
               }
+            }
+
+            if (!isTrumpRevealedLocal && latestState.hiddenTrumpCard && latestState.bidWinner === currentTurn) {
+              localHand = localHand.filter(c => c.id !== latestState.hiddenTrumpCard!.id && 
+                !(c.suit === latestState.hiddenTrumpCard!.suit && c.rank === latestState.hiddenTrumpCard!.rank));
             }
 
             const playedCards: Card[] = [];
