@@ -320,18 +320,9 @@ export default function AdminSettings() {
                 <Input
                   value={form.sponsor_video_url}
                   onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url: e.target.value }))}
-                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  placeholder="https://youtu.be/..."
                   className="flex-1"
                 />
-                <label className="shrink-0 cursor-pointer">
-                  <Button disabled={uploadingVideo === 'video1'} asChild variant="secondary">
-                    <span>
-                      {uploadingVideo === 'video1' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                      সরাসরি আপলোড
-                    </span>
-                  </Button>
-                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video1')} disabled={uploadingVideo === 'video1'} />
-                </label>
               </div>
             </div>
 
@@ -341,18 +332,9 @@ export default function AdminSettings() {
                 <Input
                   value={form.sponsor_video_url_2}
                   onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url_2: e.target.value }))}
-                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  placeholder="https://youtu.be/..."
                   className="flex-1"
                 />
-                <label className="shrink-0 cursor-pointer">
-                  <Button disabled={uploadingVideo === 'video2'} asChild variant="secondary">
-                    <span>
-                      {uploadingVideo === 'video2' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                      সরাসরি আপলোড
-                    </span>
-                  </Button>
-                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video2')} disabled={uploadingVideo === 'video2'} />
-                </label>
               </div>
             </div>
 
@@ -362,18 +344,9 @@ export default function AdminSettings() {
                 <Input
                   value={form.sponsor_video_url_3}
                   onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url_3: e.target.value }))}
-                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  placeholder="https://youtu.be/..."
                   className="flex-1"
                 />
-                <label className="shrink-0 cursor-pointer">
-                  <Button disabled={uploadingVideo === 'video3'} asChild variant="secondary">
-                    <span>
-                      {uploadingVideo === 'video3' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                      সরাসরি আপলোড
-                    </span>
-                  </Button>
-                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video3')} disabled={uploadingVideo === 'video3'} />
-                </label>
               </div>
             </div>
 
@@ -383,18 +356,9 @@ export default function AdminSettings() {
                 <Input
                   value={form.sponsor_video_url_4}
                   onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url_4: e.target.value }))}
-                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  placeholder="https://youtu.be/..."
                   className="flex-1"
                 />
-                <label className="shrink-0 cursor-pointer">
-                  <Button disabled={uploadingVideo === 'video4'} asChild variant="secondary">
-                    <span>
-                      {uploadingVideo === 'video4' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                      সরাসরি আপলোড
-                    </span>
-                  </Button>
-                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video4')} disabled={uploadingVideo === 'video4'} />
-                </label>
               </div>
             </div>
 
@@ -404,23 +368,14 @@ export default function AdminSettings() {
                 <Input
                   value={form.sponsor_video_url_5}
                   onChange={(e) => setForm((f) => ({ ...f, sponsor_video_url_5: e.target.value }))}
-                  placeholder="https://youtu.be/... অথবা https://.../video.mp4"
+                  placeholder="https://youtu.be/..."
                   className="flex-1"
                 />
-                <label className="shrink-0 cursor-pointer">
-                  <Button disabled={uploadingVideo === 'video5'} asChild variant="secondary">
-                    <span>
-                      {uploadingVideo === 'video5' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                      সরাসরি আপলোড
-                    </span>
-                  </Button>
-                  <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleVideoUpload(e, 'video5')} disabled={uploadingVideo === 'video5'} />
-                </label>
               </div>
             </div>
             
             <p className="text-xs text-muted-foreground mt-1">
-              ইউটিউব লিংক অথবা সরাসরি .mp4 আপলোড করলে সেটি নিজে থেকেই এডজাস্ট হয়ে যাবে। (সর্বোচ্চ ২০MB)
+              ইউটিউব লিংক পেস্ট করুন, সেটি নিজে থেকেই ব্যাকগ্রাউন্ডে প্লে হবে।
             </p>
           </div>
         </div>
