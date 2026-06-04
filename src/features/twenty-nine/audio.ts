@@ -16,11 +16,16 @@ const getBengaliVoice = () => {
   if (cachedBengaliVoice) return cachedBengaliVoice;
 
   const voices = window.speechSynthesis.getVoices();
-  const bnVoice = voices.find(v => 
-    v.lang.toLowerCase().startsWith('bn') || 
-    v.lang.toLowerCase().includes('bengali') || 
-    v.lang.toLowerCase().includes('bangla')
-  );
+  const bnVoice = voices.find(v => {
+    const l = v.lang.toLowerCase();
+    const n = v.name.toLowerCase();
+    return l.startsWith('bn') || 
+           l.startsWith('ben') || 
+           l.includes('bengali') || 
+           l.includes('bangla') ||
+           n.includes('bengali') ||
+           n.includes('bangla');
+  });
   if (bnVoice) {
     cachedBengaliVoice = bnVoice;
   }
@@ -102,6 +107,11 @@ export const speakBengaliVoice = (text: string) => {
     const bnVoice = getBengaliVoice();
     if (bnVoice) {
       utterance.voice = bnVoice;
+      console.log(`[SpeechSynthesis] Speaking Bengali with voice: ${bnVoice.name} (${bnVoice.lang})`);
+    } else {
+      console.warn(`[SpeechSynthesis] No Bengali voice profile found. Falling back to default browser engine. Available voices in this browser:`, 
+        window.speechSynthesis.getVoices().map(v => `${v.name} (${v.lang})`).join(', ')
+      );
     }
     
     window.speechSynthesis.speak(utterance);
