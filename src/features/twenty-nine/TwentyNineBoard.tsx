@@ -90,6 +90,14 @@ export const TwentyNineBoard: React.FC = () => {
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
 
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('ju_twenty_nine_sound_enabled') !== 'false');
+  const [voiceEnabled, setVoiceEnabled] = useState(() => localStorage.getItem('ju_twenty_nine_voice_enabled') !== 'false');
+
+  const toggleVoice = () => {
+    const nextVal = !voiceEnabled;
+    setVoiceEnabled(nextVal);
+    localStorage.setItem('ju_twenty_nine_voice_enabled', String(nextVal));
+  };
+
   const [showReactionPopup, setShowReactionPopup] = useState(false);
   const [aiDiff, setAiDiff] = useState<'easy' | 'medium' | 'hard'>(() => (localStorage.getItem('ju_twenty_nine_ai_difficulty') as any) || 'medium');
 
@@ -1546,6 +1554,16 @@ export const TwentyNineBoard: React.FC = () => {
                     className={`w-full py-2.5 rounded-lg font-bold border transition-all ${soundEnabled ? 'bg-amber-600 border-amber-400 text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
                   >
                     {soundEnabled ? '🔊 Sounds On' : '🔇 Muted'}
+                  </button>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">Bengali Voice Pack</h3>
+                  <button 
+                    onClick={toggleVoice}
+                    className={`w-full py-2.5 rounded-lg font-bold border transition-all ${voiceEnabled ? 'bg-amber-600 border-amber-400 text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:bg-black/60'}`}
+                  >
+                    {voiceEnabled ? '🗣️ Bengali Voice On' : '🔇 Voice Muted'}
                   </button>
                 </div>
               </div>

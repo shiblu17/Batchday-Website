@@ -5,6 +5,36 @@ const isSoundEnabled = () => {
   return localStorage.getItem('ju_twenty_nine_sound_enabled') !== 'false';
 };
 
+const isVoiceEnabled = () => {
+  return localStorage.getItem('ju_twenty_nine_voice_enabled') !== 'false';
+};
+
+let cachedBengaliVoice: SpeechSynthesisVoice | null = null;
+
+const getBengaliVoice = () => {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+  if (cachedBengaliVoice) return cachedBengaliVoice;
+
+  const voices = window.speechSynthesis.getVoices();
+  const bnVoice = voices.find(v => 
+    v.lang.toLowerCase().startsWith('bn') || 
+    v.lang.toLowerCase().includes('bengali') || 
+    v.lang.toLowerCase().includes('bangla')
+  );
+  if (bnVoice) {
+    cachedBengaliVoice = bnVoice;
+  }
+  return cachedBengaliVoice;
+};
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      getBengaliVoice();
+    };
+  }
+}
+
 export const playCardSwoosh = () => {
   if (!isSoundEnabled()) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -57,22 +87,25 @@ export const playTrickWinSound = () => {
 };
 
 export const speakBengaliVoice = (text: string) => {
-  if (!isSoundEnabled()) return;
+  if (!isVoiceEnabled()) return;
   if (typeof window === 'undefined' || !window.speechSynthesis) return;
 
-  // Cancel any ongoing speech to avoid overlay queuing delays
-  window.speechSynthesis.cancel();
+  try {
+    // Cancel any ongoing speech to avoid overlay queuing delays
+    window.speechSynthesis.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'bn-BD';
-  utterance.rate = 1.15; // slightly faster for normal human tempo
-  utterance.pitch = 1.0;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'bn-BD';
+    utterance.rate = 1.15; // slightly faster for normal human tempo
+    utterance.pitch = 1.0;
 
-  const voices = window.speechSynthesis.getVoices();
-  const bnVoice = voices.find(v => v.lang.startsWith('bn-') || v.lang.includes('Bengali') || v.lang.includes('bn_'));
-  if (bnVoice) {
-    utterance.voice = bnVoice;
+    const bnVoice = getBengaliVoice();
+    if (bnVoice) {
+      utterance.voice = bnVoice;
+    }
+    
+    window.speechSynthesis.speak(utterance);
+  } catch (e) {
+    console.error('SpeechSynthesis error:', e);
   }
-  
-  window.speechSynthesis.speak(utterance);
 };
