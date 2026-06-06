@@ -11103,5 +11103,255 @@
     "name": "AKASH KUNDU",
     "dept": "ICLC",
     "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "NOOR JAHAN AKTER",
+    "dept": "Statistics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "NUSRAT JAHAN",
+    "dept": "Chemistry",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MISS ETIYARA KHATUN",
+    "dept": "Chemistry",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "ANIKA ZARIN HRIDI",
+    "dept": "Physics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SANJANA MEHRIN PREDITA",
+    "dept": "Physics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "FARIA KHANAM",
+    "dept": "Environmental Sciences",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "OLIVA KHATUN",
+    "dept": "Environmental Sciences",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "WARDUN SULTANA",
+    "dept": "Environmental Sciences",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "ARMIN AKTER MIM",
+    "dept": "Economics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SALMA AKTER KEYA",
+    "dept": "Geography and Environment",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MST. RAFIA SULTANA ORIN",
+    "dept": "Government and Politics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "FATEMA AKTER",
+    "dept": "Government and Politics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SADIA URMI",
+    "dept": "Government and Politics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "JANNAT SARKAR JUI",
+    "dept": "Public Administration",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MEHNAZ    FARJANA",
+    "dept": "Bangla",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "FARIYA FERDIOUS",
+    "dept": "Bangla",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MOST. ROSE DANIA",
+    "dept": "English",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MST.SADIA MEH JABIN",
+    "dept": "English",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MST.SATHE AKTER",
+    "dept": "English",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "PRIONTY RASHID PRETTY",
+    "dept": "English",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "RIFAH TASFIA OWISHI",
+    "dept": "English",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "NIPA RANI ROY",
+    "dept": "History",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SHAHINUR KHATUN",
+    "dept": "History",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "KRISHNA MUNDA",
+    "dept": "History",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SRABONTI HAJONG",
+    "dept": "History",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "ESRAT JERIN",
+    "dept": "Philosophy",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "PARBOTI MAHATO",
+    "dept": "Philosophy",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "UMMY ANISA TABASSUM",
+    "dept": "International Relations",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "EBONG OWE",
+    "dept": "Fine Arts",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "PAMA SAHA",
+    "dept": "Fine Arts",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "REZWANA TANJIN SUCHI",
+    "dept": "Botany",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SURAIYA EASMIN",
+    "dept": "Botany",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "NUSRAT ZAMAN RIDI",
+    "dept": "Botany",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "JANNATUL FERDUS RINI",
+    "dept": "Zoology",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "ARIANA AKTER",
+    "dept": "Zoology",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SWARNA SARKER",
+    "dept": "Zoology",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "RUMAIYA KARIM",
+    "dept": "Zoology",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SADIA SULTANA",
+    "dept": "Microbiology",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "LUBNA AKTER",
+    "dept": "Microbiology",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MST. SUMI AKTER",
+    "dept": "Public Health and Informatics",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SHARMIN AKTER SHAMU",
+    "dept": "Finance and Banking",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "RIDIKA BARAI ESHA",
+    "dept": "Finance and Banking",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "AUTHOI AKHANDA",
+    "dept": "Finance and Banking",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "HELENA AKTER ORIN",
+    "dept": "Marketing",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MASHFIA BINTE HASAN",
+    "dept": "Marketing",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "FABIHA AREFIN",
+    "dept": "Accounting and Information Systems",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "SAIMA HOQUE",
+    "dept": "Management Studies",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "S. M. TAUHIDUNNESA",
+    "dept": "Law and Justice",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "JANNATUN NAIM SAKIRA",
+    "dept": "Law and Justice",
+    "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "RAFIYA BINTE ISLAM MAHIA",
+    "dept": "Law and Justice",
+    "hall": "13 No. Students (Female) Hall"
   }
 ]
