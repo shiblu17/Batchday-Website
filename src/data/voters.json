@@ -1195,946 +1195,6 @@
     "hall": "Jatiya Kabi Kazi Nazrul Islam Hall"
   },
   {
-    "name": "MD. MINHAJUL ISLAM SHINHA",
-    "dept": "Mathematics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RAHIM",
-    "dept": "Mathematics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "PRANTO ROY UTSHO",
-    "dept": "Mathematics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SHUVRO PAUL",
-    "dept": "Mathematics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SHAKIL AHMED SHUVO",
-    "dept": "Mathematics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ROFIKUL ISLAM",
-    "dept": "Mathematics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. FARDIN AHOMMED",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "S.M. MASUD ALAM",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SAFUYAT MAHADI SIYAM",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ARAFATH ISLAM SAKIB",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MAHIN HASAN",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "RUBAYET HASAN NOMAN",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SHEAK MOHAMMAD RABBI",
-    "dept": "Geological Science",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. HARICHUR RAHMAN SHAFIN",
-    "dept": "Geological Science",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SONJEEB KUMAR RUDRA",
-    "dept": "Geological Science",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SHAHRIAR NUR DHRUBO",
-    "dept": "Geological Science",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MEZBAH UDDIN AQIB",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ASIF HOSSAIN TAMBIR",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SIAMUL AREFIN",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MAZBAUL ALAM",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "WASIK AHMED",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "FAHIM AHMAD",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ABDULLAH AR RAFI",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. JARIF FAHAD JUVIN",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD ABIDUR RAHMAN",
-    "dept": "Environmental Sciences",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "DRIK SAHA",
-    "dept": "Environmental Sciences",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. NAEEM",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "HUZAIFA AL AMIN",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MOSABBERUL ISLAM",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "AKASH SARKAR",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ABU RAHAT KHANDOKER",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ABIR HOSSAIN MUNNA",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "TUTUL KUMER PK.",
-    "dept": "Geography and Environment",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "RAJAUL HAKIM",
-    "dept": "Geography and Environment",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SHAHEDI HASAN",
-    "dept": "Geography and Environment",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ARIFUL ISLAM",
-    "dept": "Geography and Environment",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ASHIKUZZAMAN",
-    "dept": "Geography and Environment",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ASHIQUL ISLAM RAYHAN",
-    "dept": "Geography and Environment",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ABU SAYEM",
-    "dept": "Government and Politics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "NABIL HASAN",
-    "dept": "Government and Politics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "TAREQUL ISLAM",
-    "dept": "Government and Politics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD TAREK AZIZ",
-    "dept": "Government and Politics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ABDULLAH MAHDI SAMI",
-    "dept": "Anthropology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. REDOWAN SIKDER",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "DIP BISWAS  PRANTA",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "FARHAN MAHMUD TASIN",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SHEIKH RAHMOTULLAH BIN RAFIQ",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "RAZBIR TALUKDER",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MOHIM BISWAS PRINCE",
-    "dept": "Public Administration",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MOTIUR RAHMAN",
-    "dept": "Bangla",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SABBIR HASHIM",
-    "dept": "Bangla",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RAKIBUL HASAN RAKIB",
-    "dept": "Bangla",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. IMRAN HOSEN BIJOY",
-    "dept": "Bangla",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ZAWYAD BIN SABIT",
-    "dept": "Bangla",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SHOYAD HASSAN CHOWDHURY",
-    "dept": "Bangla",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ISMAIL HOSSEN",
-    "dept": "English",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SABBIR HOSSEN",
-    "dept": "English",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "JAHIDUL ISLAM SAKIB",
-    "dept": "English",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "IMRAN PRAMANIK",
-    "dept": "English",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. GOLAM MAWLA",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RUBAID HASSAN RAFIN",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. JONAID HOSEN",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RAKIB KHAN",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SUBROTO KUMAR SUTRODHOR",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MESBAH UL HAQUE",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SUMAN HOSSAIN",
-    "dept": "Philosophy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SHEIKH FARID",
-    "dept": "Philosophy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RAZU AHAMMED",
-    "dept": "Philosophy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. JIBON SHIKDER",
-    "dept": "Philosophy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. NAHID HASAN BAPPY",
-    "dept": "Philosophy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MAHBUB ALAM",
-    "dept": "Philosophy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "TANBIR AHMAD",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SALMAN MOLLAH",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "OMAR FARUK SABIT",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ANGGUR MIA",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD HAMIM PRODHANIA",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MANIK CHANDRA ROY",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. AL NAHIAN NOOR",
-    "dept": "Journalism and Media Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "KAZI SAADUL HAQUE",
-    "dept": "Journalism and Media Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. AKRAM HOSSAIN",
-    "dept": "Journalism and Media Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ARIFUR RAHMAN",
-    "dept": "Journalism and Media Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "PRONOY SHAHA",
-    "dept": "Fine Arts",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "K. M. A. WAZID",
-    "dept": "Fine Arts",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. TANZID HOSSAN RAKIB",
-    "dept": "Zoology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MOJAHARUL ISLAM",
-    "dept": "Pharmacy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RUKUNU ZZAMAN MINAR",
-    "dept": "Pharmacy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD NAZMUL HASAN",
-    "dept": "Pharmacy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SAYONTON ROY SAYON",
-    "dept": "Pharmacy",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "FARHAN SADIK SOWROV",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SYED MUAMMAR FATTHA",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ROBIUL ISLAM",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SHAHOMARAJ KONIK",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. JAHASAM UDDIN",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "S.M. MAHINUR KABIR",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MOHAMMAD ZUNAYED AHMAD SIAM",
-    "dept": "Marketing",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "PRIYAM CHAKMA",
-    "dept": "Marketing",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. JAED SIAM",
-    "dept": "Marketing",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SAHID ALI",
-    "dept": "Marketing",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SACHIN SOREN",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MAHATHIR HOSSAIN",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MOSANNEF  BILLAH  SIFAT",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD ARIFUL ISLAM",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. FOYAD HASAN",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "AFAT RAIHAN RAFY",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ABDULLAH AL NOMAN CHOWDHURY",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. NAZMUL ISLAM",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SUJON",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD.SHIFAT HASAN",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MASRUR RAHMAN",
-    "dept": "IBA",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "EFAZ CHOWDHURY",
-    "dept": "IBA",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "S.M.TANZIM",
-    "dept": "IBA",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ZULHAS RAZIN",
-    "dept": "Anthropology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "JAHIDUL ISLAM",
-    "dept": "Archaeology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "K.M.MIRAJ HOSSAIN",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. MILON AHMED",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "BADHAN SAHA",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. NOOR HOSSAIN",
-    "dept": "Accounting and Information Systems",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RAHAN ISLAM",
-    "dept": "ICLC",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MEHEDI HASAN",
-    "dept": "ICLC",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "JAHIDUL ISLAM",
-    "dept": "Botany",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SHIFATI RABBI",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SAKIB ZAMAN SABBIR",
-    "dept": "Environmental Sciences",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "FAHIM MUNTASIR",
-    "dept": "Environmental Sciences",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "NAHID HASAN",
-    "dept": "Environmental Sciences",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. RAFI RAHMAN",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "KH. FARDIN ZUBAIR NAFIS",
-    "dept": "Geological Science",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SHOYKUT RAIHAN BHUIYAN",
-    "dept": "IIT",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. IBRAHIM KHALIL",
-    "dept": "Public Health and Informatics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. SHAHRIAR KHAN EMON",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Omar Faruk",
-    "dept": "Anthropology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Abdul Mannan",
-    "dept": "Botany",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Farhad Hossain",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md.Abdul Momin",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Anith Ahmed",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Musharraf Hossain",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Shadman Nazib",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD.Mominur Islam",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Mojnu Mia",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "AL AMIN MIAH",
-    "dept": "Chemistry",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Emmanuel Hembrom",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MUBASHER ADNAN JIHAD",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md.Sagor Islam",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Ruhul Amin Togor",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md Mahfujur Rahman Khan",
-    "dept": "Computer Science and Engineering",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "স্বদেশ কুমার বিশ্বাস",
-    "dept": "Economics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. BODIUZZAMAN",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD JOBAYER AHMED SHOVON",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD AKASH ALI",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "SAIFUL ISLAM",
-    "dept": "Finance and Banking",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Alfaj Hossain",
-    "dept": "History",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. AZIZUL ISLAM",
-    "dept": "IBA",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "RANA BASU",
-    "dept": "IBA",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Mehedi Hasan",
-    "dept": "IIT",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Tajul Islam",
-    "dept": "IIT",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ALI AKBAR SARKER",
-    "dept": "International Relations",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD RASEL ALI",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "IFTHEKHARUL ISLAM",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ABIR HASSAN SHANTO",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MEHEDI HASAN",
-    "dept": "Management Studies",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "IMTIYAZ MAHMUD",
-    "dept": "Marketing",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD. ATAUR RAHMAN",
-    "dept": "Marketing",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Tanvir Ahmed Sourov",
-    "dept": "Microbiology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "AKRAM HOSSAIN",
-    "dept": "Microbiology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD BIPLAB SHEIKH",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Shipon Shikder",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Tanvir Jaman",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Prodip Bosak",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "NASIR UDDIN",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "MD JOHIRUL ISLAM",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Kazi Nahid",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Mainul hossan",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Lingkon Gain",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Ashraful Alam",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Sifat Karim",
-    "dept": "Physics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "ABUL HASNAT",
-    "dept": "Public Health and Informatics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "IFTEKER UDDIN SAKIB",
-    "dept": "Public Health and Informatics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Habibullah Bahar",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Rifat Mahmud",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Atikul Islam",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Ahashan Habib",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Rijoan Khan",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Amartay Kumar Dhar",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Humait Ahmed",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Ekramul Islam Rijon",
-    "dept": "Statistics",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Sukur Ali",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Abu Zubaer",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Niamul Islam",
-    "dept": "Urban and Regional Planning",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
-    "name": "Md. Tarikul Islam",
-    "dept": "Zoology",
-    "hall": "Shaheed Rafiq Jabbar Hall"
-  },
-  {
     "name": "SYED MANSUR ALI BAPPI",
     "dept": "Accounting and Information Systems",
     "hall": "Al-Beruni Hall"
@@ -11383,5 +10443,560 @@
     "name": "MOST. MAHMUDA AKTAR",
     "dept": "ICLC",
     "hall": "13 No. Students (Female) Hall"
+  },
+  {
+    "name": "MD. MINHAJUL ISLAM SHINHA",
+    "dept": "Mathematics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. RAHIM",
+    "dept": "Mathematics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "PRANTO ROY UTSHO",
+    "dept": "Mathematics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SHUVRO PAUL",
+    "dept": "Mathematics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SHAKIL AHMED SHUVO",
+    "dept": "Mathematics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ROFIKUL ISLAM",
+    "dept": "Mathematics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. FARDIN AHOMMED",
+    "dept": "Statistics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "S.M. MASUD ALAM",
+    "dept": "Statistics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SAFUYAT MAHADI SIYAM",
+    "dept": "Statistics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ARAFATH ISLAM SAKIB",
+    "dept": "Statistics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MAHIN HASAN",
+    "dept": "Statistics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "RUBAYET HASAN NOMAN",
+    "dept": "Physics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SHEAK MOHAMMAD RABBI",
+    "dept": "Geological Science",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. HARICHUR RAHMAN SHAFIN",
+    "dept": "Geological Science",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SONJEEB KUMAR RUDRA",
+    "dept": "Geological Science",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SHAHRIAR NUR DHRUBO",
+    "dept": "Geological Science",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MEZBAH UDDIN AQIB",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ASIF HOSSAIN TAMBIR",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SIAMUL AREFIN",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MAZBAUL ALAM",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "WASIK AHMED",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "FAHIM AHMAD",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ABDULLAH AR RAFI",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. JARIF FAHAD JUVIN",
+    "dept": "Computer Science and Engineering",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD ABIDUR RAHMAN",
+    "dept": "Environmental Sciences",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "DRIK SAHA",
+    "dept": "Environmental Sciences",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. NAEEM",
+    "dept": "Economics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "HUZAIFA AL AMIN",
+    "dept": "Economics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MOSABBERUL ISLAM",
+    "dept": "Economics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "AKASH SARKAR",
+    "dept": "Economics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ABU RAHAT KHANDOKER",
+    "dept": "Economics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ABIR HOSSAIN MUNNA",
+    "dept": "Economics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "TUTUL KUMER PK.",
+    "dept": "Geography and Environment",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "RAJAUL HAKIM",
+    "dept": "Geography and Environment",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SHAHEDI HASAN",
+    "dept": "Geography and Environment",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ARIFUL ISLAM",
+    "dept": "Geography and Environment",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ASHIKUZZAMAN",
+    "dept": "Geography and Environment",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ASHIQUL ISLAM RAYHAN",
+    "dept": "Geography and Environment",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ABU SAYEM",
+    "dept": "Government and Politics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "NABIL HASAN",
+    "dept": "Government and Politics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "TAREQUL ISLAM",
+    "dept": "Government and Politics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD TAREK AZIZ",
+    "dept": "Government and Politics",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ABDULLAH MAHDI SAMI",
+    "dept": "Anthropology",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. REDOWAN SIKDER",
+    "dept": "Urban and Regional Planning",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "DIP BISWAS  PRANTA",
+    "dept": "Urban and Regional Planning",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "FARHAN MAHMUD TASIN",
+    "dept": "Urban and Regional Planning",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SHEIKH RAHMOTULLAH BIN RAFIQ",
+    "dept": "Urban and Regional Planning",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "RAZBIR TALUKDER",
+    "dept": "Urban and Regional Planning",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MOHIM BISWAS PRINCE",
+    "dept": "Public Administration",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MOTIUR RAHMAN",
+    "dept": "Bangla",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SABBIR HASHIM",
+    "dept": "Bangla",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. RAKIBUL HASAN RAKIB",
+    "dept": "Bangla",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. IMRAN HOSEN BIJOY",
+    "dept": "Bangla",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ZAWYAD BIN SABIT",
+    "dept": "Bangla",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SHOYAD HASSAN CHOWDHURY",
+    "dept": "Bangla",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ISMAIL HOSSEN",
+    "dept": "English",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SABBIR HOSSEN",
+    "dept": "English",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "JAHIDUL ISLAM SAKIB",
+    "dept": "English",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "IMRAN PRAMANIK",
+    "dept": "English",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. GOLAM MAWLA",
+    "dept": "History",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. RUBAID HASSAN RAFIN",
+    "dept": "History",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. JONAID HOSEN",
+    "dept": "History",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. RAKIB KHAN",
+    "dept": "History",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SUBROTO KUMAR SUTRODHOR",
+    "dept": "History",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MESBAH UL HAQUE",
+    "dept": "History",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SUMAN HOSSAIN",
+    "dept": "Philosophy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SHEIKH FARID",
+    "dept": "Philosophy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. RAZU AHAMMED",
+    "dept": "Philosophy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. JIBON SHIKDER",
+    "dept": "Philosophy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. NAHID HASAN BAPPY",
+    "dept": "Philosophy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MAHBUB ALAM",
+    "dept": "Philosophy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "TANBIR AHMAD",
+    "dept": "International Relations",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SALMAN MOLLAH",
+    "dept": "International Relations",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "OMAR FARUK SABIT",
+    "dept": "International Relations",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. ANGGUR MIA",
+    "dept": "International Relations",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD HAMIM PRODHANIA",
+    "dept": "International Relations",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MANIK CHANDRA ROY",
+    "dept": "International Relations",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. AL NAHIAN NOOR",
+    "dept": "Journalism and Media Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "KAZI SAADUL HAQUE",
+    "dept": "Journalism and Media Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. AKRAM HOSSAIN",
+    "dept": "Journalism and Media Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ARIFUR RAHMAN",
+    "dept": "Journalism and Media Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "PRONOY SHAHA",
+    "dept": "Fine Arts",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "K. M. A. WAZID",
+    "dept": "Fine Arts",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. TANZID HOSSAN RAKIB",
+    "dept": "Zoology",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MOJAHARUL ISLAM",
+    "dept": "Pharmacy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. RUKUNU ZZAMAN MINAR",
+    "dept": "Pharmacy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD NAZMUL HASAN",
+    "dept": "Pharmacy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SAYONTON ROY SAYON",
+    "dept": "Pharmacy",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "FARHAN SADIK SOWROV",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SYED MUAMMAR FATTHA",
+    "dept": "Finance and Banking",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ROBIUL ISLAM",
+    "dept": "Finance and Banking",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SHAHOMARAJ KONIK",
+    "dept": "Finance and Banking",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. JAHASAM UDDIN",
+    "dept": "Finance and Banking",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "S.M. MAHINUR KABIR",
+    "dept": "Finance and Banking",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MOHAMMAD ZUNAYED AHMAD SIAM",
+    "dept": "Marketing",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "PRIYAM CHAKMA",
+    "dept": "Marketing",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. JAED SIAM",
+    "dept": "Marketing",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SAHID ALI",
+    "dept": "Marketing",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "SACHIN SOREN",
+    "dept": "Accounting and Information Systems",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. MAHATHIR HOSSAIN",
+    "dept": "Accounting and Information Systems",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MOSANNEF  BILLAH  SIFAT",
+    "dept": "Accounting and Information Systems",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD ARIFUL ISLAM",
+    "dept": "Accounting and Information Systems",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. FOYAD HASAN",
+    "dept": "Management Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "AFAT RAIHAN RAFY",
+    "dept": "Management Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "ABDULLAH AL NOMAN CHOWDHURY",
+    "dept": "Management Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. NAZMUL ISLAM",
+    "dept": "Management Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD. SUJON",
+    "dept": "Management Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MD.SHIFAT HASAN",
+    "dept": "Management Studies",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "MASRUR RAHMAN",
+    "dept": "IBA",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "EFAZ CHOWDHURY",
+    "dept": "IBA",
+    "hall": "Shaheed Rafiq Jabbar Hall"
+  },
+  {
+    "name": "S.M.TANZIM",
+    "dept": "IBA",
+    "hall": "Shaheed Rafiq Jabbar Hall"
   }
 ]
