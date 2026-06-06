@@ -3070,666 +3070,6 @@
     "hall": "Maulana Bhashani Hall"
   },
   {
-    "name": "RITI RAHA",
-    "dept": "Mathematics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. SAMIA AKTER OISHE",
-    "dept": "Mathematics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. SANZIDA PARVIN",
-    "dept": "Mathematics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. ROKSANA KHATUN",
-    "dept": "Mathematics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NUSRAT ALAMGIR EASHA",
-    "dept": "Mathematics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. NAHADIYA AKHTER",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "PRIONTY DAS",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SYEDA NUJHAT NOWSHIN",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "FARZANA FARIHA DIBA",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AMINA AIRIN ESHA",
-    "dept": "Chemistry",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NAZMUN NAHAR",
-    "dept": "Chemistry",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHARMIN ISLAM SUMA",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "KANI TAH ZAMAN",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NEHALIN ANIQUA",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "FAHEMA FERDOUS",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SUMAIYA KHANAM",
-    "dept": "Geological Science",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "ANIKA ANJUM BUSHRA",
-    "dept": "Environmental Sciences",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "PROGGA LABONI GHOSH",
-    "dept": "Environmental Sciences",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SAMIA ENAM",
-    "dept": "Economics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHUBORNA MUSTARIN",
-    "dept": "Economics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "JARIN ANJUM BORSHA",
-    "dept": "Geography and Environment",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "DOLA BISWAS",
-    "dept": "Geography and Environment",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHOVA",
-    "dept": "Geography and Environment",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHAKILAH AFNAN",
-    "dept": "Government and Politics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MOST. HUMAYRA AKTAR",
-    "dept": "Government and Politics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "JANNATUL FERDAUS",
-    "dept": "Anthropology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "HUMAYRA CHOWDHURY",
-    "dept": "Urban and Regional Planning",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "RUBAIA JABIN TAHMINA",
-    "dept": "Urban and Regional Planning",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "RABEYA RAHMAN MUKTA",
-    "dept": "Urban and Regional Planning",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "UMAIYA WOHAB",
-    "dept": "Urban and Regional Planning",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. AYSHA",
-    "dept": "Urban and Regional Planning",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHAMIMA AKTAR",
-    "dept": "Public Administration",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SUMAIYA ISLAM",
-    "dept": "Public Administration",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. MIM KHATUN",
-    "dept": "Public Administration",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "TAMANNA AKTER",
-    "dept": "Public Administration",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AYAMI SULTANA",
-    "dept": "Bangla",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "TANIA KHATUN",
-    "dept": "English",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SADIA AKTER BRISTY",
-    "dept": "English",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NISHAT JAHAN",
-    "dept": "English",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NUSHRAT JAHAN RITU",
-    "dept": "History",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MOST. NADIA AFRIN",
-    "dept": "Philosophy",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "ANNESA DAS ABBRITE",
-    "dept": "Drama and Dramatics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AYSHA AKTER KAKON",
-    "dept": "Drama and Dramatics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHATU AKTER",
-    "dept": "Archaeology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AKHI AKTER",
-    "dept": "Archaeology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. SUMAYEA RAHMAN",
-    "dept": "Archaeology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MAHFUZA MAHJABIN MIM",
-    "dept": "International Relations",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "WADRIP SARKER",
-    "dept": "International Relations",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. ASMAUL HUSNA ANANNA",
-    "dept": "Journalism and Media Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AMENRA SADIA",
-    "dept": "Journalism and Media Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AHONA RANI PAL",
-    "dept": "Botany",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "UMME SHAMEM ARA ETU",
-    "dept": "Botany",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SUMAIYA AKTER",
-    "dept": "Botany",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. JANNATUN FERDOUS",
-    "dept": "Zoology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. SUMAYA RINKU",
-    "dept": "Zoology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SUMAIYA ISLAM MUKTI",
-    "dept": "Zoology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MISS. AMENA AKTER",
-    "dept": "Pharmacy",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MUSFIQA HELAL TONNI",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MOWMITA TABASSUM",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MARIA AKTER EFA",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SOMA AKTER",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST.SANZIDA AKTER ETI",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. AKHI ARA KHATUN",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NUSAIBA IFFAT",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "ATIYA SANJETA",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "JANNATUL ARBI",
-    "dept": "Public Health and Informatics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MARIA RAHMAN MIM",
-    "dept": "Public Health and Informatics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MAHEE TASNIM",
-    "dept": "Finance and Banking",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "HALIMA AKTHER",
-    "dept": "Marketing",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SUMAIYA",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHAHNAJ PADMA",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MOUMETA AKTER",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NABILA FATEMA RIMI",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "LAMISA RAWNAK",
-    "dept": "Management Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "TANSIM JANNAT LABIBA",
-    "dept": "Management Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. MEHZABIN HASAN HRIDY",
-    "dept": "Law and Justice",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "AMREEN QUAYUM",
-    "dept": "IBA",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHEGUFTA SHARMIN",
-    "dept": "IBA",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MST. SAMIA AFROSE SRUTY",
-    "dept": "IIT",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Setu Alam",
-    "dept": "Bangla",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Fatema Tuz Jahura Jannat",
-    "dept": "Bangla",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Tapaswi Rabya",
-    "dept": "Archaeology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Tasnim Binte Alam",
-    "dept": "Botany",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Safia Jerin Nosi",
-    "dept": "Botany",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Prama Rani Sarker",
-    "dept": "Chemistry",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Tanni Sarker",
-    "dept": "Chemistry",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Rabeya Akter",
-    "dept": "Chemistry",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Nasrin Akter Shimu",
-    "dept": "Computer Science and Engineering",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Mangsura Kabir Oni",
-    "dept": "Computer Science and Engineering",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Khandoker Nosiba Arifin",
-    "dept": "Computer Science and Engineering",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Faria Tasnim Lamia",
-    "dept": "Environmental Sciences",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Tanzina Rahman",
-    "dept": "Environmental Sciences",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Farial Orion",
-    "dept": "Environmental Sciences",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Sanjida Tasnia Niti",
-    "dept": "Environmental Sciences",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "ROBAYAT JAHAN",
-    "dept": "Finance and Banking",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "TASLIM JANNAT",
-    "dept": "Finance and Banking",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "NAZIA ISMA",
-    "dept": "Finance and Banking",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "KONIKA SULTANA KONA",
-    "dept": "Geological Science",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SUSHMITA HOWLADER",
-    "dept": "IBA",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Afroza Ahmed Srity",
-    "dept": "IIT",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Mst. Sanzida Islam Promi",
-    "dept": "IIT",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Zarin Tasnim Khan",
-    "dept": "International Relations",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Nishat Anjum",
-    "dept": "Management Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "ATKIA NAJIFA MAYISHA",
-    "dept": "Management Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SRUTI MALLIK",
-    "dept": "Management Studies",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Mst. Riya",
-    "dept": "Marketing",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "PUROBI DEBNATH",
-    "dept": "Marketing",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Shakila Khatun",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Ainun Afroz Sristy",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Joyeta Nondy",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Fatema Tuz Zohara",
-    "dept": "Microbiology",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SHARMIN AKTER MIM",
-    "dept": "Philosophy",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Samorita Islam Moon",
-    "dept": "Philosophy",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Susmita  Podder",
-    "dept": "Pharmacy",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Swarna Rani Saha",
-    "dept": "Pharmacy",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Fahmida akter julie",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Morium Akter",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Tasmia Islam",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Raisa Nehal",
-    "dept": "Physics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Khadiza Akter Mim",
-    "dept": "Public Administration",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Mst. Mamotaj Jahan Mita",
-    "dept": "Public Administration",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "RIJWANA BUSHRA",
-    "dept": "Public Health and Informatics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SAYEDA SAMIRA BINTE HOQUE",
-    "dept": "Public Health and Informatics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Habibun Nahar Laboni",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Jannatul Mim",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Shahrin Kabir Prity",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Sabina Akter",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Shahana Tamanna Sathi",
-    "dept": "Statistics",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "MAHMUDA AKTER",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "SALMA AKTER",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "FARJANA RAHMAN",
-    "dept": "Accounting and Information Systems",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
-    "name": "Amrin Zaman Omi",
-    "dept": "Urban and Regional Planning",
-    "hall": "Jahanara Imam Hall"
-  },
-  {
     "name": "HUMAIRA RASHID",
     "dept": "Mathematics",
     "hall": "Pritilata Hall"
@@ -10038,5 +9378,410 @@
     "name": "MD. MEHEDI HASAN",
     "dept": "IIT",
     "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "RITI RAHA",
+    "dept": "Mathematics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. SAMIA AKTER OISHE",
+    "dept": "Mathematics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. SANZIDA PARVIN",
+    "dept": "Mathematics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. ROKSANA KHATUN",
+    "dept": "Mathematics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NUSRAT ALAMGIR EASHA",
+    "dept": "Mathematics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. NAHADIYA AKHTER",
+    "dept": "Statistics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "PRIONTY DAS",
+    "dept": "Statistics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SYEDA NUJHAT NOWSHIN",
+    "dept": "Statistics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "FARZANA FARIHA DIBA",
+    "dept": "Statistics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AMINA AIRIN ESHA",
+    "dept": "Chemistry",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NAZMUN NAHAR",
+    "dept": "Chemistry",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHARMIN ISLAM SUMA",
+    "dept": "Physics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "KANI TAH ZAMAN",
+    "dept": "Physics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NEHALIN ANIQUA",
+    "dept": "Physics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "FAHEMA FERDOUS",
+    "dept": "Physics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SUMAIYA KHANAM",
+    "dept": "Geological Science",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "ANIKA ANJUM BUSHRA",
+    "dept": "Environmental Sciences",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "PROGGA LABONI GHOSH",
+    "dept": "Environmental Sciences",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SAMIA ENAM",
+    "dept": "Economics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHUBORNA MUSTARIN",
+    "dept": "Economics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "JARIN ANJUM BORSHA",
+    "dept": "Geography and Environment",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "DOLA BISWAS",
+    "dept": "Geography and Environment",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHOVA",
+    "dept": "Geography and Environment",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHAKILAH AFNAN",
+    "dept": "Government and Politics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MOST. HUMAYRA AKTAR",
+    "dept": "Government and Politics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "JANNATUL FERDAUS",
+    "dept": "Anthropology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "HUMAYRA CHOWDHURY",
+    "dept": "Urban and Regional Planning",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "RUBAIA JABIN TAHMINA",
+    "dept": "Urban and Regional Planning",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "RABEYA RAHMAN MUKTA",
+    "dept": "Urban and Regional Planning",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "UMAIYA WOHAB",
+    "dept": "Urban and Regional Planning",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. AYSHA",
+    "dept": "Urban and Regional Planning",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHAMIMA AKTAR",
+    "dept": "Public Administration",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SUMAIYA ISLAM",
+    "dept": "Public Administration",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. MIM KHATUN",
+    "dept": "Public Administration",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "TAMANNA AKTER",
+    "dept": "Public Administration",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AYAMI SULTANA",
+    "dept": "Bangla",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "TANIA KHATUN",
+    "dept": "English",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SADIA AKTER BRISTY",
+    "dept": "English",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NISHAT JAHAN",
+    "dept": "English",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NUSHRAT JAHAN RITU",
+    "dept": "History",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MOST. NADIA AFRIN",
+    "dept": "Philosophy",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "ANNESA DAS ABBRITE",
+    "dept": "Drama and Dramatics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AYSHA AKTER KAKON",
+    "dept": "Drama and Dramatics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHATU AKTER",
+    "dept": "Archaeology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AKHI AKTER",
+    "dept": "Archaeology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. SUMAYEA RAHMAN",
+    "dept": "Archaeology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MAHFUZA MAHJABIN MIM",
+    "dept": "International Relations",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "WADRIP SARKER",
+    "dept": "International Relations",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. ASMAUL HUSNA ANANNA",
+    "dept": "Journalism and Media Studies",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AMENRA SADIA",
+    "dept": "Journalism and Media Studies",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AHONA RANI PAL",
+    "dept": "Botany",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "UMME SHAMEM ARA ETU",
+    "dept": "Botany",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SUMAIYA AKTER",
+    "dept": "Botany",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. JANNATUN FERDOUS",
+    "dept": "Zoology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. SUMAYA RINKU",
+    "dept": "Zoology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SUMAIYA ISLAM MUKTI",
+    "dept": "Zoology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MISS. AMENA AKTER",
+    "dept": "Pharmacy",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MUSFIQA HELAL TONNI",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MOWMITA TABASSUM",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MARIA AKTER EFA",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SOMA AKTER",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST.SANZIDA AKTER ETI",
+    "dept": "Microbiology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. AKHI ARA KHATUN",
+    "dept": "Microbiology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NUSAIBA IFFAT",
+    "dept": "Microbiology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "ATIYA SANJETA",
+    "dept": "Microbiology",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "JANNATUL ARBI",
+    "dept": "Public Health and Informatics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MARIA RAHMAN MIM",
+    "dept": "Public Health and Informatics",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MAHEE TASNIM",
+    "dept": "Finance and Banking",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "HALIMA AKTHER",
+    "dept": "Marketing",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SUMAIYA",
+    "dept": "Accounting and Information Systems",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHAHNAJ PADMA",
+    "dept": "Accounting and Information Systems",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MOUMETA AKTER",
+    "dept": "Accounting and Information Systems",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "NABILA FATEMA RIMI",
+    "dept": "Accounting and Information Systems",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "LAMISA RAWNAK",
+    "dept": "Management Studies",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "TANSIM JANNAT LABIBA",
+    "dept": "Management Studies",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. MEHZABIN HASAN HRIDY",
+    "dept": "Law and Justice",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "AMREEN QUAYUM",
+    "dept": "IBA",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "SHEGUFTA SHARMIN",
+    "dept": "IBA",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "MST. SAMIA AFROSE SRUTY",
+    "dept": "IIT",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "Setu Alam",
+    "dept": "Bangla",
+    "hall": "Jahanara Imam Hall"
+  },
+  {
+    "name": "Fatema Tuz Jahura Jannat",
+    "dept": "Bangla",
+    "hall": "Jahanara Imam Hall"
   }
 ]
