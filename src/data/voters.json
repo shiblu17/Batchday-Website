@@ -1755,746 +1755,6 @@
     "hall": "A. F. M. Kamaluddin Hall"
   },
   {
-    "name": "MD. KHADEMUL ISLAM",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MASNUN AL MASANI",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. NAKIBUL HASANAT TAMIM",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "RAFID HASAN",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RIAZUL ISLAM",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MUHAIMINUL ISLAM",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "GAZI FARHAN SADIK",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "AMRAN SIDDIK APU",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SHAYAN CHANDRA BORMON",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SYED MAJHARUL ISLAM",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MAHATHIR MOHAMMAD",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SABBIR AHAMED",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABID HOSSAIN",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. NAHIDUR RAHAMAN SAGOR",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SHAHREAR NAZIM SHIFAT",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAKIBUL HASAN",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. ARIFUL ISLAM",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. ABDULLAH",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. MAKSUDUL ISLAM MASUM",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "NURUZZAMAN HOSSAIN",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RABIUL ISLAM BABU",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SOWKOT ALI CHAN",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "JEFFRI OVISHEK SIKDER",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "NAFIZ FUAD ALVEE",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SAIMON HOSSAIN RATUL",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "DIPTA KUMAR DAS",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. MUKTADIRUL HAQUE MARUF",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "JUBAIR MUNSHI",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SOUMITRA SAHA",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ADNAN SHAHRIAR OYON",
-    "dept": "Economics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "RAJU AHMMED REZAUL",
-    "dept": "Economics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SAIFUL ISLAM SUMON",
-    "dept": "Economics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD HASAN REZA ALIF",
-    "dept": "Economics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABDULLAH AL ARAF",
-    "dept": "Economics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RUBAI HOSSAN",
-    "dept": "Geography and Environment",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAHUL SHEKH",
-    "dept": "Geography and Environment",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SHARIAR KABIR SHOYN",
-    "dept": "Geography and Environment",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SAJEEB MIA",
-    "dept": "Geography and Environment",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "TAREK MONOWAR",
-    "dept": "Government and Politics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SADDAM ALI",
-    "dept": "Government and Politics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.FAZLE AZUAD",
-    "dept": "Government and Politics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAFAT KARIM",
-    "dept": "Government and Politics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SHAHADAT ISLAM",
-    "dept": "Urban and Regional Planning",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. MEHARAB HASAN SIDDIQUEI",
-    "dept": "Urban and Regional Planning",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "DIGONTO SAHA",
-    "dept": "Public Administration",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SALMAN NAJAFI",
-    "dept": "Public Administration",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "REDUAN HASAN HRID",
-    "dept": "Public Administration",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "TANZIL HAIDER",
-    "dept": "Public Administration",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. IFTEKHER TALUKDER YASH",
-    "dept": "Bangla",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABDUR RATIM",
-    "dept": "Bangla",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "F. M PROTTOY",
-    "dept": "Bangla",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SIAM AL NAFIS MAHIN",
-    "dept": "English",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SOURAV DAS",
-    "dept": "English",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. DELOWAR HOSSEN",
-    "dept": "English",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MAFOJUL ISLAM HERA",
-    "dept": "History",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SAYED MOHAMMAD ABRAR",
-    "dept": "Philosophy",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "EMAMUL HASAN",
-    "dept": "International Relations",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.   FAIZULLAH    RABBI",
-    "dept": "International Relations",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABDULLAH AL NOMAN",
-    "dept": "Journalism and Media Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "GOLAM MASHRAFI SHIFAT",
-    "dept": "Journalism and Media Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. ABU RAYHAN",
-    "dept": "Journalism and Media Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "AMBROWS CHIRAN",
-    "dept": "Journalism and Media Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. TALHA JOBAYER",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. FOYSAL AHMED",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RASHEL HOSSAIN",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SHAHARIAR HASAN SHOHAN",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAHUL BISWAS",
-    "dept": "Zoology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. ASHRAF UDDIN",
-    "dept": "Zoology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "TITAS BARUA",
-    "dept": "Zoology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ISHWAR CHANDRA SARKAR",
-    "dept": "Zoology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "RUMEL UDDIN RAHIM",
-    "dept": "Zoology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. TORIKUL ISLAM SADHIN",
-    "dept": "Pharmacy",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "EMON   HOSSEN",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SHAKIB HASSAN",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABU BAKAR SIDDIQ",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.SAJEDUL ISLAM UTSHO",
-    "dept": "Biotechnology and Genetic Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD RAISUL ISLAM RAHUL",
-    "dept": "Marketing",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABDULLAH BIN JAHID",
-    "dept": "Marketing",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SHOHAG MIA",
-    "dept": "Accounting and Information Systems",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SHAH MURTAJA IKRAM",
-    "dept": "Accounting and Information Systems",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "BIKASH CHANDRA DAS",
-    "dept": "Accounting and Information Systems",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAQIBUL ISLAM",
-    "dept": "Accounting and Information Systems",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SABBIR HOSSEN RAJIB",
-    "dept": "Management Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAKIBUL ISLAM",
-    "dept": "Management Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MAHFUZ AHMMED",
-    "dept": "Management Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "EMON MIA",
-    "dept": "Management Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "SIMANTA MONDAL",
-    "dept": "Management Studies",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "NAHID MD.YEASIR SUJAN",
-    "dept": "Law and Justice",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.RATUL ISLAM FARDIN",
-    "dept": "Law and Justice",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.  SHARIFUL  ISLAM",
-    "dept": "Law and Justice",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. BOKHTIAR UDDIN",
-    "dept": "Law and Justice",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ZABIR AL ZEHAD",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "A. K. M. SHIHAM SHAHRIAR",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "ABU HURAIRA MD. SAYEM",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "TAHSHIN ISLAM TUHIN",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "NOBIN CHANDRA",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MOHAMMAD MOHTASIM MOBIN",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. EMON SHAH",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SHAMIUL HASAN SEAM",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. MEHEDI HASAN",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MUSHFIKUR RAHMAN RAFI",
-    "dept": "Accounting and Information Systems",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "S. M. Nafiz Hossen",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Ariful Islam",
-    "dept": "Biochemistry and Molecular Biology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Sayed Mahdi Hasan",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.MAHEDI ALL MUYEED",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RAFATUL ISLAM",
-    "dept": "Botany",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Risalat Hossain Rahid",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Rony Islam",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.SADEK NAYEM",
-    "dept": "Chemistry",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. SAKIL AHMED",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Mukhleshur Rahman",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Afzal Hossain Babor",
-    "dept": "Computer Science and Engineering",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. TAUSIF HOSSAIN KHAN",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "S.M. NASIM  MAHMUD SMARON",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Shahriar Iqbal Chowdhury Rafi",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. MEDHEDI HASAN TUSAR",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. RIFAT HASAN",
-    "dept": "IBA",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Rashedul Islam",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Samiun Islam",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Raufur Mukit Aman",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Maruful Islam Maruf",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Nahidul Islam",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Akmol Masud",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Maruf Ahmed",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Minhaz Hossain Asif",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Abdur Rouf",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Mozadded-Ul-Islam",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Tanjid Hasan",
-    "dept": "IIT",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Zahid Binhar",
-    "dept": "International Relations",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Khaled Jubayer Shabab",
-    "dept": "Geography and Environment",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Sujon Chandro",
-    "dept": "Mathematics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD ASHIK IQBAL",
-    "dept": "Microbiology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Subir Sarker",
-    "dept": "Microbiology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Mahir Fysal Islam",
-    "dept": "Microbiology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md Zahid Hasan",
-    "dept": "Microbiology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Ayon Kumar Saha",
-    "dept": "Microbiology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "JONAITUL ISLAM",
-    "dept": "Microbiology",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Rifat Bin Jahur",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD.SIAM UDDIN",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Anamul Haque",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "AKRAM HOSSAIN",
-    "dept": "Physics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Rasel Akand",
-    "dept": "Philosophy",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Rakibul Islam",
-    "dept": "Public Administration",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Siddikur Rahman Shanto",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Md. Fajla Rabby",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Mohammod Al-Mahey",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "Soham Sarker",
-    "dept": "Statistics",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
-    "name": "MD. Abdul Mannan",
-    "dept": "Urban and Regional Planning",
-    "hall": "Mir Mosharraf Hossain Hall"
-  },
-  {
     "name": "TOYOBA ISLAM",
     "dept": "Statistics",
     "hall": "Nawab Faizunnesa Hall"
@@ -10278,5 +9538,505 @@
     "name": "RAUNAQ JAHAN",
     "dept": "IIT",
     "hall": "15 No. Students (Female) Hall"
+  },
+  {
+    "name": "MD. KHADEMUL ISLAM",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MASNUN AL MASANI",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. NAKIBUL HASANAT TAMIM",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "RAFID HASAN",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RIAZUL ISLAM",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MUHAIMINUL ISLAM",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "GAZI FARHAN SADIK",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "AMRAN SIDDIK APU",
+    "dept": "Mathematics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SHAYAN CHANDRA BORMON",
+    "dept": "Statistics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SYED MAJHARUL ISLAM",
+    "dept": "Statistics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MAHATHIR MOHAMMAD",
+    "dept": "Statistics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SABBIR AHAMED",
+    "dept": "Statistics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABID HOSSAIN",
+    "dept": "Statistics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. NAHIDUR RAHAMAN SAGOR",
+    "dept": "Statistics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SHAHREAR NAZIM SHIFAT",
+    "dept": "Chemistry",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RAKIBUL HASAN",
+    "dept": "Chemistry",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. ARIFUL ISLAM",
+    "dept": "Chemistry",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. ABDULLAH",
+    "dept": "Chemistry",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. MAKSUDUL ISLAM MASUM",
+    "dept": "Chemistry",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "NURUZZAMAN HOSSAIN",
+    "dept": "Chemistry",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RABIUL ISLAM BABU",
+    "dept": "Physics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SOWKOT ALI CHAN",
+    "dept": "Physics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "JEFFRI OVISHEK SIKDER",
+    "dept": "Physics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "NAFIZ FUAD ALVEE",
+    "dept": "Physics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SAIMON HOSSAIN RATUL",
+    "dept": "Physics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "DIPTA KUMAR DAS",
+    "dept": "Computer Science and Engineering",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. MUKTADIRUL HAQUE MARUF",
+    "dept": "Computer Science and Engineering",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "JUBAIR MUNSHI",
+    "dept": "Computer Science and Engineering",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SOUMITRA SAHA",
+    "dept": "Computer Science and Engineering",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ADNAN SHAHRIAR OYON",
+    "dept": "Economics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "RAJU AHMMED REZAUL",
+    "dept": "Economics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SAIFUL ISLAM SUMON",
+    "dept": "Economics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD HASAN REZA ALIF",
+    "dept": "Economics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABDULLAH AL ARAF",
+    "dept": "Economics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RUBAI HOSSAN",
+    "dept": "Geography and Environment",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RAHUL SHEKH",
+    "dept": "Geography and Environment",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SHARIAR KABIR SHOYN",
+    "dept": "Geography and Environment",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SAJEEB MIA",
+    "dept": "Geography and Environment",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "TAREK MONOWAR",
+    "dept": "Government and Politics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SADDAM ALI",
+    "dept": "Government and Politics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD.FAZLE AZUAD",
+    "dept": "Government and Politics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RAFAT KARIM",
+    "dept": "Government and Politics",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SHAHADAT ISLAM",
+    "dept": "Urban and Regional Planning",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. MEHARAB HASAN SIDDIQUEI",
+    "dept": "Urban and Regional Planning",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "DIGONTO SAHA",
+    "dept": "Public Administration",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SALMAN NAJAFI",
+    "dept": "Public Administration",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "REDUAN HASAN HRID",
+    "dept": "Public Administration",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "TANZIL HAIDER",
+    "dept": "Public Administration",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. IFTEKHER TALUKDER YASH",
+    "dept": "Bangla",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABDUR RATIM",
+    "dept": "Bangla",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "F. M PROTTOY",
+    "dept": "Bangla",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SIAM AL NAFIS MAHIN",
+    "dept": "English",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SOURAV DAS",
+    "dept": "English",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. DELOWAR HOSSEN",
+    "dept": "English",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MAFOJUL ISLAM HERA",
+    "dept": "History",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SAYED MOHAMMAD ABRAR",
+    "dept": "Philosophy",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "EMAMUL HASAN",
+    "dept": "International Relations",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD.   FAIZULLAH    RABBI",
+    "dept": "International Relations",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABDULLAH AL NOMAN",
+    "dept": "Journalism and Media Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "GOLAM MASHRAFI SHIFAT",
+    "dept": "Journalism and Media Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. ABU RAYHAN",
+    "dept": "Journalism and Media Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "AMBROWS CHIRAN",
+    "dept": "Journalism and Media Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. TALHA JOBAYER",
+    "dept": "Botany",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. FOYSAL AHMED",
+    "dept": "Botany",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RASHEL HOSSAIN",
+    "dept": "Botany",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SHAHARIAR HASAN SHOHAN",
+    "dept": "Botany",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RAHUL BISWAS",
+    "dept": "Zoology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. ASHRAF UDDIN",
+    "dept": "Zoology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "TITAS BARUA",
+    "dept": "Zoology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ISHWAR CHANDRA SARKAR",
+    "dept": "Zoology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "RUMEL UDDIN RAHIM",
+    "dept": "Zoology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. TORIKUL ISLAM SADHIN",
+    "dept": "Pharmacy",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "EMON   HOSSEN",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SHAKIB HASSAN",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABU BAKAR SIDDIQ",
+    "dept": "Biochemistry and Molecular Biology",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD.SAJEDUL ISLAM UTSHO",
+    "dept": "Biotechnology and Genetic Engineering",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD RAISUL ISLAM RAHUL",
+    "dept": "Marketing",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABDULLAH BIN JAHID",
+    "dept": "Marketing",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SHOHAG MIA",
+    "dept": "Accounting and Information Systems",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SHAH MURTAJA IKRAM",
+    "dept": "Accounting and Information Systems",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "BIKASH CHANDRA DAS",
+    "dept": "Accounting and Information Systems",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RAQIBUL ISLAM",
+    "dept": "Accounting and Information Systems",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SABBIR HOSSEN RAJIB",
+    "dept": "Management Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. RAKIBUL ISLAM",
+    "dept": "Management Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MAHFUZ AHMMED",
+    "dept": "Management Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "EMON MIA",
+    "dept": "Management Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "SIMANTA MONDAL",
+    "dept": "Management Studies",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "NAHID MD.YEASIR SUJAN",
+    "dept": "Law and Justice",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD.RATUL ISLAM FARDIN",
+    "dept": "Law and Justice",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD.  SHARIFUL  ISLAM",
+    "dept": "Law and Justice",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. BOKHTIAR UDDIN",
+    "dept": "Law and Justice",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ZABIR AL ZEHAD",
+    "dept": "IBA",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "A. K. M. SHIHAM SHAHRIAR",
+    "dept": "IBA",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "ABU HURAIRA MD. SAYEM",
+    "dept": "IBA",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "TAHSHIN ISLAM TUHIN",
+    "dept": "IIT",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "NOBIN CHANDRA",
+    "dept": "IIT",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MOHAMMAD MOHTASIM MOBIN",
+    "dept": "IIT",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. EMON SHAH",
+    "dept": "IIT",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. SHAMIUL HASAN SEAM",
+    "dept": "IIT",
+    "hall": "Mir Mosharraf Hossain Hall"
+  },
+  {
+    "name": "MD. MEHEDI HASAN",
+    "dept": "IIT",
+    "hall": "Mir Mosharraf Hossain Hall"
   }
 ]
