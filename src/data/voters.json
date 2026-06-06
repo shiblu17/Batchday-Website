@@ -10873,5 +10873,235 @@
     "name": "MAISHA BINTE MAHMUD",
     "dept": "Zoology",
     "hall": "Bir Protik Taramon Bibi Hall"
+  },
+  {
+    "name": "JOSHIM AHMED JOY",
+    "dept": "Mathematics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ZILLUR RAHMAN SIMANTA",
+    "dept": "Statistics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. ASADUZZAMAN PIYAL",
+    "dept": "Statistics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. JAHID HASAN",
+    "dept": "Chemistry",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "SHIHABUR RAHMAN",
+    "dept": "Chemistry",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "BOKHTIER KHOLGI SIAM",
+    "dept": "Physics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. MAHBUB ALOM DIP",
+    "dept": "Physics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. MUSTAHID HASAN LAZIM",
+    "dept": "Environmental Sciences",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. IMRAN HOSSEN",
+    "dept": "Environmental Sciences",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ZOBAER RAHMAN",
+    "dept": "Environmental Sciences",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MIR RIDUL FARHAN",
+    "dept": "Economics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ALI EMROSE SALEHIN",
+    "dept": "Economics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "TAHSAN KHAN ZENAN",
+    "dept": "Economics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. RAZU AHMED",
+    "dept": "Government and Politics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "S.M. FAHIM SHAHRIAR",
+    "dept": "Government and Politics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "TAHMID ISLAM SOWKHIN",
+    "dept": "Urban and Regional Planning",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ABDUL HALIM",
+    "dept": "Urban and Regional Planning",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ASIFUL ISLAM EFAT",
+    "dept": "Urban and Regional Planning",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. FARHANOOR IMTIAZ",
+    "dept": "Public Administration",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "SUDIPTA TALUKDER TURJA",
+    "dept": "Public Administration",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "HAMEE HASNAEEN HASAN",
+    "dept": "Public Administration",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD ASIB HOSSEN",
+    "dept": "English",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. SHAHRIAN NAZIM SHIHAB",
+    "dept": "History",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "RAKIBUL ISLAM",
+    "dept": "Botany",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "SARKER M SALSABIL KAWSER",
+    "dept": "Botany",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. SAMSUDDOHA",
+    "dept": "Botany",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. SHAHRIAR RAFI",
+    "dept": "Microbiology",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "SADMAN SADIK",
+    "dept": "Microbiology",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MAHFUJUR RAHMAN SIAM",
+    "dept": "Public Health and Informatics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "A.N.M. AKIB IMTIAZ",
+    "dept": "Public Health and Informatics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. SAMIUL HAQUE",
+    "dept": "Public Health and Informatics",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. SAIMON HOSSAIN",
+    "dept": "Finance and Banking",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. OBAIDULLAH",
+    "dept": "Finance and Banking",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ARPON KUNDU",
+    "dept": "Finance and Banking",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "SAGOR HOSSAIN",
+    "dept": "Marketing",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "ALI HEZAZ ARPI",
+    "dept": "Marketing",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. IMRAN HOSSEN",
+    "dept": "Accounting and Information Systems",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. ADNAN SABBIR LIFAT",
+    "dept": "Law and Justice",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MAHADI HOSSAIN",
+    "dept": "Law and Justice",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. MUSHFIQUR ALOM TOMAL",
+    "dept": "Law and Justice",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. RAWAN IQBAL NAFI",
+    "dept": "IBA",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "FARHAN JAFI",
+    "dept": "IBA",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "NAIMUR MOSTAFIZ NUDER",
+    "dept": "IBA",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. NAFIS ABID",
+    "dept": "IBA",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "MD. ARIF HOSSEN",
+    "dept": "ICLC",
+    "hall": "21 No. Students (Male) Hall"
+  },
+  {
+    "name": "AKASH KUNDU",
+    "dept": "ICLC",
+    "hall": "21 No. Students (Male) Hall"
   }
 ]
