@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Lock, Mail } from "lucide-react";
+import { isSuperAdminEmail } from "@/lib/constants";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -17,8 +18,6 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
@@ -34,14 +33,31 @@ export default function AdminLogin() {
       return;
     }
 
-    const { data: roleData } = await supabase
+    const isSuperAdmin = isSuperAdminEmail(user.email);
+
+    const { data: roleData, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
       .maybeSingle();
 
-    if (!roleData) {
+    if (roleError) {
+      console.warn("User role query notice:", roleError.message);
+    }
+
+    // If verified super admin but role row not yet reflected in user_roles, try inserting it
+    if (isSuperAdmin && !roleData) {
+      try {
+        await supabase
+          .from("user_roles")
+          .upsert({ user_id: user.id, role: "admin" as any });
+      } catch (err) {
+        console.warn("Could not upsert role:", err);
+      }
+    }
+
+    if (!roleData && !isSuperAdmin) {
       await supabase.auth.signOut();
       toast({
         title: "অ্যাক্সেস নিষিদ্ধ",
