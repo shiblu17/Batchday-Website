@@ -35,10 +35,15 @@ const CatchTheGrades = lazy(() => import("./pages/CatchTheGrades"));
 const JUMaze = lazy(() => import("./pages/JUMaze"));
 const TypingMaster = lazy(() => import("./pages/TypingMaster"));
 const Confessions = lazy(() => import("./pages/Confessions"));
+const SlamBook = lazy(() => import("./pages/SlamBook"));
+const TimeCapsule = lazy(() => import("./pages/TimeCapsule"));
+const StagePulse = lazy(() => import("./pages/StagePulse"));
+const CampusMap = lazy(() => import("./pages/CampusMap"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TwentyNineGame = lazy(() => import("./pages/TwentyNineGame"));
+import JuAmbientPlayer from "@/components/JuAmbientPlayer";
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-full flex-col items-center justify-center bg-background relative overflow-hidden">
@@ -86,6 +91,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <JuAmbientPlayer />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 {/* Public routes with Navbar */}
@@ -223,6 +229,38 @@ const App = () => (
                       <Confessions />
                     </>
                   }
+                />
+
+                <Route
+                  path="/campus-map"
+                  element={
+                    <>
+                      <Navbar />
+                      <CampusMap />
+                    </>
+                  }
+                />
+                <Route
+                  path="/slambook"
+                  element={
+                    <>
+                      <Navbar />
+                      <SlamBook />
+                    </>
+                  }
+                />
+                <Route
+                  path="/time-capsule"
+                  element={
+                    <>
+                      <Navbar />
+                      <TimeCapsule />
+                    </>
+                  }
+                />
+                <Route
+                  path="/stage-pulse"
+                  element={<StagePulse />}
                 />
 
                 {/* Admin login (public) */}
