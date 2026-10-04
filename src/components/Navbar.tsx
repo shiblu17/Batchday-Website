@@ -48,18 +48,37 @@ export default function Navbar() {
   const location = useLocation();
   const [isHubOpen, setIsHubOpen] = useState(false);
 
+  const isHome = location.pathname === "/";
   const isFeatureActive = featureItems.some((f) => location.pathname === f.to);
 
   return (
     <>
       {/* Top bar (Desktop + Mobile Header) */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <header
+        className={`sticky top-0 z-50 transition-colors duration-300 ${
+          isHome
+            ? "border-b border-white/10 bg-[#400514]/75 backdrop-blur-xl text-white shadow-lg shadow-black/10"
+            : "border-b border-border bg-background/80 backdrop-blur-md text-foreground"
+        }`}
+      >
         <div className="container flex h-14 md:h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <span className="font-display text-xl sm:text-2xl font-black text-primary tracking-tight group-hover:scale-105 transition-transform">
+            <span
+              className={`font-display text-xl sm:text-2xl font-black tracking-tight group-hover:scale-105 transition-transform ${
+                isHome
+                  ? "bg-gradient-to-r from-white via-amber-200 to-amber-400 bg-clip-text text-transparent drop-shadow-sm"
+                  : "text-primary"
+              }`}
+            >
               JU-52
             </span>
-            <span className="hidden sm:inline text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span
+              className={`hidden sm:inline text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors ${
+                isHome
+                  ? "bg-white/10 text-amber-300 border-white/20"
+                  : "bg-primary/10 text-primary border border-primary/20"
+              }`}
+            >
               ব্যাচ ডে ২০২৬
             </span>
           </Link>
@@ -70,7 +89,11 @@ export default function Navbar() {
               to="/"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/"
-                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                  ? isHome
+                    ? "bg-white/20 text-white font-bold border border-white/20 shadow-sm"
+                    : "bg-primary text-primary-foreground font-bold shadow-sm"
+                  : isHome
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -83,11 +106,15 @@ export default function Navbar() {
               <DropdownMenuTrigger
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors outline-none cursor-pointer ${
                   isFeatureActive
-                    ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                    ? isHome
+                      ? "bg-white/20 text-white font-bold border border-white/20 shadow-sm"
+                      : "bg-primary text-primary-foreground font-bold shadow-sm"
+                    : isHome
+                    ? "text-white/80 hover:text-white hover:bg-white/10"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <Sparkles className="h-4 w-4 text-amber-500" />
+                <Sparkles className="h-4 w-4 text-amber-400" />
                 স্মৃতি ও ফিচার
                 <ChevronDown className="h-3.5 w-3.5 opacity-70" />
               </DropdownMenuTrigger>
@@ -116,7 +143,11 @@ export default function Navbar() {
               to="/leaderboard"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/leaderboard"
-                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                  ? isHome
+                    ? "bg-white/20 text-white font-bold border border-white/20 shadow-sm"
+                    : "bg-primary text-primary-foreground font-bold shadow-sm"
+                  : isHome
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -128,7 +159,11 @@ export default function Navbar() {
               to="/status"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/status"
-                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                  ? isHome
+                    ? "bg-white/20 text-white font-bold border border-white/20 shadow-sm"
+                    : "bg-primary text-primary-foreground font-bold shadow-sm"
+                  : isHome
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -140,7 +175,11 @@ export default function Navbar() {
               to="/gallery"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/gallery"
-                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                  ? isHome
+                    ? "bg-white/20 text-white font-bold border border-white/20 shadow-sm"
+                    : "bg-primary text-primary-foreground font-bold shadow-sm"
+                  : isHome
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -152,7 +191,11 @@ export default function Navbar() {
               to="/game"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname.startsWith("/game")
-                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                  ? isHome
+                    ? "bg-white/20 text-white font-bold border border-white/20 shadow-sm"
+                    : "bg-primary text-primary-foreground font-bold shadow-sm"
+                  : isHome
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -162,7 +205,7 @@ export default function Navbar() {
 
             <Link
               to="/register"
-              className="ml-2 px-5 py-2 rounded-xl bg-accent text-accent-foreground font-display font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-accent/30"
+              className="ml-2 px-5 py-2 rounded-xl bg-gradient-to-r from-accent to-amber-500 text-white font-display font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-accent/25"
             >
               Register Now
             </Link>
@@ -172,7 +215,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2 md:hidden">
             <Link
               to="/register"
-              className="px-3.5 py-1.5 rounded-lg bg-accent text-accent-foreground font-display font-black text-xs shadow-sm hover:scale-105 transition-transform"
+              className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-accent to-amber-500 text-white font-display font-black text-xs shadow-md hover:scale-105 transition-transform"
             >
               Register
             </Link>
