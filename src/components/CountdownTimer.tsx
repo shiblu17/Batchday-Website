@@ -10,7 +10,7 @@ interface CountdownProps {
 const AnimatedNumber = ({ value, label }: { value: number, label: string }) => {
   return (
     <div className="flex flex-col items-center gap-2 sm:gap-3">
-      <div className="relative overflow-hidden w-16 h-20 sm:w-20 sm:h-24 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-xl border border-white/20">
+      <div className="relative overflow-hidden w-16 h-20 sm:w-20 sm:h-24 bg-white/15 backdrop-blur-2xl rounded-2xl flex items-center justify-center shadow-2xl border border-white/30 ring-1 ring-white/20">
         <AnimatePresence mode="popLayout">
           <motion.span
             key={value}
@@ -18,16 +18,16 @@ const AnimatedNumber = ({ value, label }: { value: number, label: string }) => {
             animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
             exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute inset-0 flex items-center justify-center font-display text-4xl sm:text-5xl font-black text-white tabular-nums tracking-tighter"
+            className="absolute inset-0 flex items-center justify-center font-number text-4xl sm:text-5xl font-black text-white tabular-nums tracking-tighter drop-shadow-lg"
           >
             {String(value).padStart(2, "0")}
           </motion.span>
         </AnimatePresence>
         
         {/* Glossy overlay effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/10 pointer-events-none rounded-2xl" />
       </div>
-      <span className="text-xs sm:text-sm font-bold text-primary-foreground/70 uppercase tracking-widest">{label}</span>
+      <span className="text-xs sm:text-sm font-display font-bold text-white/90 uppercase tracking-widest drop-shadow-sm">{label}</span>
     </div>
   );
 };

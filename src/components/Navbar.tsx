@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
@@ -12,6 +13,9 @@ import {
   BookOpen,
   Hourglass,
   Zap,
+  Grid,
+  X,
+  ArrowRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -21,28 +25,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const featureItems = [
-  { to: "/campus-map", label: "মেমোরি ম্যাপ", desc: "৭০০ একরের স্মৃতিচিহ্ন", icon: Compass },
-  { to: "/slambook", label: "স্ল্যাম বুক", desc: "বন্ধুদের চিরকুট ডায়েরি", icon: BookOpen },
-  { to: "/time-capsule", label: "টাইম ক্যাপসুল", desc: "২০৩৬ সালের জন্য চিঠি", icon: Hourglass },
-  { to: "/stage-pulse", label: "লাইভ পালস", desc: "মুক্তমঞ্চ ক্রাউড রিঅ্যাকশন", icon: Zap },
-  { to: "/confessions", label: "কনফেশন", desc: "মনের না-বলা কথা", icon: MessageCircleHeart },
+  { to: "/campus-map", label: "মেমোরি ম্যাপ", desc: "৭০০ একরের স্মৃতিচিহ্ন", icon: Compass, color: "text-emerald-500 bg-emerald-500/10" },
+  { to: "/slambook", label: "স্ল্যাম বুক", desc: "বন্ধুদের চিরকুট ডায়েরি", icon: BookOpen, color: "text-rose-500 bg-rose-500/10" },
+  { to: "/time-capsule", label: "টাইম ক্যাপসুল", desc: "২০৩৬ সালের জন্য চিঠি", icon: Hourglass, color: "text-amber-500 bg-amber-500/10" },
+  { to: "/stage-pulse", label: "লাইভ পালস", desc: "মুক্তমঞ্চ ক্রাউড রিঅ্যাকশন", icon: Zap, color: "text-primary bg-primary/10" },
+  { to: "/confessions", label: "কনফেশন", desc: "মনের না-বলা কথা", icon: MessageCircleHeart, color: "text-purple-500 bg-purple-500/10" },
 ];
 
-const mobileNavItems = [
-  { to: "/", label: "হোম", icon: Home },
-  { to: "/campus-map", label: "ম্যাপ", icon: Compass },
-  { to: "/slambook", label: "স্ল্যাম বুক", icon: BookOpen },
-  { to: "/time-capsule", label: "ক্যাপসুল", icon: Hourglass },
-  { to: "/stage-pulse", label: "পালস", icon: Zap },
-  { to: "/confessions", label: "কনফেশন", icon: MessageCircleHeart },
-  { to: "/leaderboard", label: "লিডারবোর্ড", icon: Trophy },
-  { to: "/status", label: "স্ট্যাটাস", icon: UserCheck },
-  { to: "/gallery", label: "গ্যালারি", icon: Image },
-  { to: "/game", label: "গেম", icon: Gamepad2 },
+const allHubItems = [
+  { to: "/campus-map", label: "ক্যাম্পাস ম্যাপ", desc: "৭০০ একরের স্মৃতি", icon: Compass, color: "text-emerald-500 bg-emerald-500/10" },
+  { to: "/slambook", label: "স্ল্যাম বুক", desc: "বন্ধুর চিরকুট", icon: BookOpen, color: "text-rose-500 bg-rose-500/10" },
+  { to: "/time-capsule", label: "টাইম ক্যাপসুল", desc: "২০৩৬ ভল্ট", icon: Hourglass, color: "text-amber-500 bg-amber-500/10" },
+  { to: "/stage-pulse", label: "স্টেজ পালস", desc: "লাইভ রিঅ্যাকশন", icon: Zap, color: "text-primary bg-primary/10" },
+  { to: "/confessions", label: "কনফেশন", desc: "স্মৃতি ও বার্তা", icon: MessageCircleHeart, color: "text-purple-500 bg-purple-500/10" },
+  { to: "/game", label: "গেম জোন", desc: "৯টি মজাদার গেম", icon: Gamepad2, color: "text-indigo-500 bg-indigo-500/10" },
+  { to: "/leaderboard", label: "লিডারবোর্ড", desc: "হল ও ডিপার্টমেন্ট", icon: Trophy, color: "text-yellow-500 bg-yellow-500/10" },
+  { to: "/gallery", label: "গ্যালারি", desc: "স্মৃতিময় ছবি", icon: Image, color: "text-cyan-500 bg-cyan-500/10" },
+  { to: "/status", label: "স্ট্যাটাস ও কার্ড", desc: "আইডি কার্ড ডাউনলোড", icon: UserCheck, color: "text-emerald-500 bg-emerald-500/10" },
 ];
 
 export default function Navbar() {
   const location = useLocation();
+  const [isHubOpen, setIsHubOpen] = useState(false);
 
   const isFeatureActive = featureItems.some((f) => location.pathname === f.to);
 
@@ -51,9 +55,13 @@ export default function Navbar() {
       {/* Top bar (Desktop + Mobile Header) */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container flex h-14 md:h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-display text-xl font-extrabold text-primary">JU-52</span>
-            <span className="hidden sm:inline text-xs font-medium text-muted-foreground">ব্যাচ ডে</span>
+          <Link to="/" className="flex items-center gap-2 group">
+            <span className="font-display text-xl sm:text-2xl font-black text-primary tracking-tight group-hover:scale-105 transition-transform">
+              JU-52
+            </span>
+            <span className="hidden sm:inline text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              ব্যাচ ডে ২০২৬
+            </span>
           </Link>
 
           {/* Desktop Nav */}
@@ -62,7 +70,7 @@ export default function Navbar() {
               to="/"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -73,9 +81,9 @@ export default function Navbar() {
             {/* Features Dropdown Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors outline-none ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors outline-none cursor-pointer ${
                   isFeatureActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground font-bold shadow-sm"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
@@ -83,18 +91,18 @@ export default function Navbar() {
                 স্মৃতি ও ফিচার
                 <ChevronDown className="h-3.5 w-3.5 opacity-70" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-60 p-2 shadow-2xl rounded-xl">
+              <DropdownMenuContent align="start" className="w-64 p-2 shadow-2xl rounded-2xl bg-card/95 backdrop-blur-xl border border-border">
                 {featureItems.map((item) => {
                   const Icon = item.icon;
                   const active = location.pathname === item.to;
                   return (
-                    <DropdownMenuItem key={item.to} asChild className="cursor-pointer rounded-lg p-2">
+                    <DropdownMenuItem key={item.to} asChild className="cursor-pointer rounded-xl p-2 focus:bg-muted">
                       <Link to={item.to} className={`flex items-center gap-3 w-full ${active ? "bg-primary/10 text-primary font-bold" : ""}`}>
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="text-xs font-bold leading-none">{item.label}</div>
+                          <div className="text-xs font-bold leading-none text-foreground">{item.label}</div>
                           <div className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</div>
                         </div>
                       </Link>
@@ -108,7 +116,7 @@ export default function Navbar() {
               to="/leaderboard"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/leaderboard"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -120,7 +128,7 @@ export default function Navbar() {
               to="/status"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/status"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -132,7 +140,7 @@ export default function Navbar() {
               to="/gallery"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === "/gallery"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -144,7 +152,7 @@ export default function Navbar() {
               to="/game"
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname.startsWith("/game")
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -154,17 +162,17 @@ export default function Navbar() {
 
             <Link
               to="/register"
-              className="ml-2 px-5 py-2 rounded-lg bg-accent text-accent-foreground font-display font-bold text-sm transition-all hover:scale-105 active:scale-95 shadow-sm"
+              className="ml-2 px-5 py-2 rounded-xl bg-accent text-accent-foreground font-display font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-accent/30"
             >
               Register Now
             </Link>
           </nav>
 
-          {/* Mobile Register button */}
+          {/* Mobile Right Quick Register Button */}
           <div className="flex items-center gap-2 md:hidden">
             <Link
               to="/register"
-              className="px-4 py-1.5 rounded-lg bg-accent text-accent-foreground font-display font-bold text-xs"
+              className="px-3.5 py-1.5 rounded-lg bg-accent text-accent-foreground font-display font-black text-xs shadow-sm hover:scale-105 transition-transform"
             >
               Register
             </Link>
@@ -172,27 +180,130 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Bottom Bar (Horizontal Scrollable) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md safe-area-bottom">
-        <div className="flex overflow-x-auto no-scrollbar gap-1 px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] relative z-50 bg-background/95 items-center">
-          {mobileNavItems.map((item) => {
-            const active = location.pathname === item.to;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex-shrink-0 flex-1 min-w-[3.4rem] flex flex-col items-center gap-1 px-1 py-1.5 rounded-lg text-[9px] font-bold transition-colors ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Icon className={`h-4 w-4 ${active ? "text-primary" : ""}`} />
-                <span className="truncate w-full text-center">{item.label}</span>
-              </Link>
-            );
-          })}
+      {/* Modern Mobile Bottom Navigation Bar (App-Style Dock) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl safe-area-bottom">
+        <div className="flex items-center justify-around px-2 py-2 relative">
+          {/* Tab 1: Home */}
+          <Link
+            to="/"
+            className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold transition-colors ${
+              location.pathname === "/" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Home className="h-5 w-5" />
+            <span>হোম</span>
+          </Link>
+
+          {/* Tab 2: Map */}
+          <Link
+            to="/campus-map"
+            className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold transition-colors ${
+              location.pathname === "/campus-map" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Compass className="h-5 w-5" />
+            <span>ম্যাপ</span>
+          </Link>
+
+          {/* Center Floating Hub Action Button */}
+          <div className="relative -top-4 flex items-center justify-center">
+            <button
+              onClick={() => setIsHubOpen(true)}
+              aria-label="সব ফিচার দেখুন"
+              className="relative flex items-center justify-center w-13 h-13 rounded-full bg-gradient-to-tr from-primary via-rose-600 to-amber-500 text-white shadow-xl shadow-primary/40 ring-4 ring-background transition-transform active:scale-95 hover:scale-105"
+            >
+              <Grid className="w-6 h-6" />
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
+              </span>
+            </button>
+          </div>
+
+          {/* Tab 3: Stage Pulse */}
+          <Link
+            to="/stage-pulse"
+            className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold transition-colors ${
+              location.pathname === "/stage-pulse" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Zap className="h-5 w-5" />
+            <span>পালস</span>
+          </Link>
+
+          {/* Tab 4: Games */}
+          <Link
+            to="/game"
+            className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold transition-colors ${
+              location.pathname.startsWith("/game") ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Gamepad2 className="h-5 w-5" />
+            <span>গেম</span>
+          </Link>
         </div>
       </nav>
+
+      {/* Mobile Quick Hub Modal / Bottom Sheet */}
+      {isHubOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col justify-end animate-in fade-in duration-200">
+          <div className="bg-card border-t border-border rounded-t-3xl p-5 space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom duration-300">
+            {/* Sheet Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
+                  52
+                </div>
+                <div>
+                  <h3 className="font-display font-black text-sm text-foreground">JU-52 কুইক হাব</h3>
+                  <p className="text-[10px] text-muted-foreground">সব ফিচার এক নজরে</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsHubOpen(false)}
+                className="p-1.5 rounded-full bg-muted/60 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Hub Grid */}
+            <div className="grid grid-cols-3 gap-2.5 pt-1">
+              {allHubItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setIsHubOpen(false)}
+                    className="flex flex-col items-center text-center p-3 rounded-2xl bg-muted/40 hover:bg-primary/10 transition-colors border border-border/40"
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${item.color}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="font-display font-bold text-xs text-foreground line-clamp-1">
+                      {item.label}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground line-clamp-1 mt-0.5">
+                      {item.desc}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Quick Register Banner inside Sheet */}
+            <Link
+              to="/register"
+              onClick={() => setIsHubOpen(false)}
+              className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-accent to-amber-600 text-white font-display font-black text-xs shadow-md"
+            >
+              <span>এখনই ব্যাচ ডে রেজিস্ট্রেশন করুন</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      )}
     </>
   );
 }
