@@ -13,9 +13,8 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        display: ["'Anek Bangla'", "'Hind Siliguri'", "sans-serif"],
+        display: ["'Hind Siliguri'", "sans-serif"],
         body: ["'Hind Siliguri'", "sans-serif"],
-        number: ["'Outfit'", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

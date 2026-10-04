@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, CalendarDays, MapPin, ShieldCheck,
   Settings, Clock, ChevronRight, Music, Laptop, ArrowRight, Sparkles, Share2, Loader2,
-  Compass, BookOpen, Hourglass, Zap, Headphones
+  Compass, BookOpen, Hourglass, Zap
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
@@ -12,7 +12,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useQuery } from "@tanstack/react-query";
 import { CountdownTimer } from "@/components/CountdownTimer";
-import { juAmbientEngine } from "@/utils/juAmbientAudio";
 
 function useCountdown(target: Date) {
   const calc = () => {
@@ -111,118 +110,32 @@ export default function Index() {
   return (
     <div className="pb-28 md:pb-0">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#3a0412] via-[#52071a] to-[#2c030d]">
-        {/* Dramatic Top Spotlight Beam */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(245,158,11,0.22),rgba(255,255,255,0))] pointer-events-none" />
+      <section className="relative overflow-hidden bg-primary">
+        <div className="absolute inset-0 opacity-[0.07]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }} />
+        <div className="absolute inset-0" style={{
+          backgroundImage: "radial-gradient(circle at 20% 80%, hsl(37 90% 43% / 0.15) 0%, transparent 50%), radial-gradient(circle at 85% 20%, hsl(160 84% 30% / 0.12) 0%, transparent 50%)"
+        }} />
 
-        {/* Ambient Glowing Orbs */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-gradient-to-tr from-amber-500/25 via-rose-500/20 to-primary/20 blur-[130px] pointer-events-none rounded-full" />
-        <div className="absolute top-24 left-10 w-72 h-72 bg-emerald-500/15 blur-[100px] pointer-events-none rounded-full" />
-        <div className="absolute top-24 right-10 w-72 h-72 bg-amber-400/20 blur-[100px] pointer-events-none rounded-full" />
+        <div className="container relative py-14 md:py-24 text-center">
+          <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
+            <motion.p variants={fadeUp} className="font-body text-xs sm:text-sm font-medium tracking-[0.2em] uppercase text-primary-foreground/60">জাহাঙ্গীরনগর বিশ্ববিদ্যালয় · ৫২তম ব্যাচ
 
-        {/* Floating Campus Badge 1 (Left Top) */}
-        <div className="hidden lg:flex absolute left-8 xl:left-14 top-28 items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl animate-float">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-lg shadow-inner">
-            📍
-          </div>
-          <div className="text-left">
-            <div className="text-xs font-bold leading-tight font-display">৭০০ একর</div>
-            <div className="text-[10px] text-white/75">সবুজ ক্যাম্পাসের আবেগ</div>
-          </div>
-        </div>
-
-        {/* Floating Campus Badge 2 (Left Bottom) */}
-        <div className="hidden lg:flex absolute left-10 xl:left-16 bottom-44 items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl animate-float [animation-delay:1.6s]">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-lg shadow-inner">
-            ☕
-          </div>
-          <div className="text-left">
-            <div className="text-xs font-bold leading-tight font-display">বটতলার আড্ডা</div>
-            <div className="text-[10px] text-white/75">৫০ রকমের স্পেশাল ভর্তা</div>
-          </div>
-        </div>
-
-        {/* Floating Campus Badge 3 (Right Top) */}
-        <div className="hidden lg:flex absolute right-8 xl:left-auto xl:right-14 top-28 items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl animate-float [animation-delay:0.9s]">
-          <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center text-lg shadow-inner">
-            🎓
-          </div>
-          <div className="text-left">
-            <div className="text-xs font-bold leading-tight font-display">৫২তম ব্যাচ</div>
-            <div className="text-[10px] text-white/75">সাতশ একরে পদচিহ্ন</div>
-          </div>
-        </div>
-
-        {/* Floating Campus Badge 4 (Right Bottom) */}
-        <div className="hidden lg:flex absolute right-10 xl:left-auto xl:right-16 bottom-44 items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl animate-float [animation-delay:2.3s]">
-          <div className="w-9 h-9 rounded-xl bg-purple-500/20 flex items-center justify-center text-lg shadow-inner">
-            🎶
-          </div>
-          <div className="text-left">
-            <div className="text-xs font-bold leading-tight font-display">মুক্তমঞ্চের সুর</div>
-            <div className="text-[10px] text-white/75">রাতজাগা কনসার্ট ও গান</div>
-          </div>
-        </div>
-
-        {/* Campus Silhouette in Background */}
-        <div className="absolute bottom-8 left-0 right-0 h-48 pointer-events-none opacity-20 overflow-hidden flex items-end justify-center">
-          <svg viewBox="0 0 1200 200" className="w-full h-full preserve-3d" fill="currentColor">
-            {/* Birds */}
-            <path d="M200,40 Q215,30 225,40 Q235,30 250,40 Q235,45 225,37 Q215,45 200,40 Z" fill="white" />
-            <path d="M280,60 Q292,52 300,60 Q308,52 320,60 Q308,64 300,58 Q292,64 280,60 Z" fill="white" />
-            <path d="M850,30 Q862,22 870,30 Q878,22 890,30 Q878,34 870,28 Q862,34 850,30 Z" fill="white" />
-            {/* Trees & Campus Outline */}
-            <path d="M0,200 L0,170 Q40,150 80,175 Q120,140 160,170 Q200,130 240,175 Q300,145 360,180 L420,180 L440,120 L450,200 L460,80 L470,200 L480,140 L500,180 Q560,140 620,175 Q680,135 740,170 Q800,140 860,175 Q920,130 980,180 Q1040,145 1100,170 Q1150,155 1200,175 L1200,200 Z" fill="white" />
-          </svg>
-        </div>
-
-        <div className="container relative pt-12 pb-20 md:pt-20 md:pb-28 text-center max-w-4xl mx-auto">
-          <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
-            {/* Festival Top Pill */}
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-lg">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="font-display text-xs sm:text-sm font-semibold tracking-wide">
-                জাহাঙ্গীরনগর বিশ্ববিদ্যালয় · ৫২তম ব্যাচ পুনর্মিলনী উৎসব
-              </span>
-            </motion.div>
-
-            {/* Giant JU-52 Metallic Title */}
-            <div className="relative py-2">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-96 sm:h-96 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
-              <motion.h1 variants={fadeUp} className="relative font-display text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black leading-none tracking-tight flex items-center justify-center">
-                <span className="bg-gradient-to-b from-white via-amber-100 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
-                  JU
-                </span>
-                <span className="inline-flex items-center justify-center mx-2 sm:mx-4 px-3 sm:px-6 py-1 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-2xl shadow-orange-500/50 text-4xl sm:text-6xl md:text-7xl font-black align-middle border border-white/20">
-                  -
-                </span>
-                <span className="bg-gradient-to-b from-white via-amber-100 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
-                  52
-                </span>
-              </motion.h1>
-            </div>
-
-            {/* Radiant Sunset Gold Subtitle */}
-            <motion.p variants={fadeUp} className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-amber-200 via-yellow-300 to-orange-400 bg-clip-text text-transparent whitespace-pre-line leading-relaxed sm:leading-relaxed drop-shadow-md">
+            </motion.p>
+            <motion.h1 variants={fadeUp} className="font-display text-6xl sm:text-7xl md:text-8xl font-extrabold text-primary-foreground leading-none">
+              {s.hero_title.includes("-") ?
+              <>{s.hero_title.split("-")[0]}<span className="text-accent">-</span>{s.hero_title.split("-")[1]}</> :
+              s.hero_title}
+            </motion.h1>
+            <motion.p variants={fadeUp} className="font-display text-lg sm:text-xl md:text-2xl font-bold text-accent whitespace-pre-line leading-relaxed sm:leading-relaxed">
               {s.hero_subtitle.includes("এই নগরীর ভিড়ে") 
                 ? s.hero_subtitle.replace("বায়ান্নর", "\nবায়ান্নর") 
                 : s.hero_subtitle}
             </motion.p>
-
-            <motion.p variants={fadeUp} className="text-white/80 max-w-xl mx-auto text-sm md:text-base leading-relaxed font-body">
+            <motion.p variants={fadeUp} className="text-primary-foreground/70 max-w-md mx-auto text-sm md:text-base leading-relaxed">
               {s.hero_description}
             </motion.p>
-
-            {/* Ambient Sound Audio Quick Pill */}
-            <motion.div variants={fadeUp} className="flex items-center justify-center pt-1 pb-1">
-              <button
-                onClick={() => juAmbientEngine.play("tea")}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold backdrop-blur-md transition-all hover:scale-105 active:scale-95 shadow-lg group cursor-pointer"
-              >
-                <Headphones className="w-3.5 h-3.5 text-amber-300 group-hover:rotate-12 transition-transform" />
-                <span>বটতলার আড্ডার সুর শুনুন ☕</span>
-              </button>
-            </motion.div>
 
             {/* Timeline Section */}
             <EventTimeline />
@@ -232,12 +145,13 @@ export default function Index() {
                <CountdownTimer days={countdown.days} hours={countdown.hours} minutes={countdown.minutes} seconds={countdown.seconds} />
             </motion.div>
 
-            {/* CTA Buttons */}
+            {/* CTA */}
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
               {s.registration_open ?
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-accent via-orange-500 to-amber-500 text-white font-display font-black text-base transition-all hover:scale-105 hover:shadow-2xl hover:shadow-accent/40 active:scale-[0.98] shadow-xl border border-white/20">
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md">
+                
                   Register Now
                   <ArrowRight className="h-5 w-5" />
                 </Link> :
@@ -248,18 +162,12 @@ export default function Index() {
               }
               <Link
                 to="/status"
-                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/30 text-white font-display font-bold text-base hover:bg-white/20 active:scale-[0.98] transition-all shadow-lg hover:border-white/50">
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl border-2 border-primary-foreground/20 text-primary-foreground font-display font-semibold text-base hover:bg-primary-foreground/10 active:scale-[0.98] transition-all">
+                
                 Check Status
               </Link>
             </motion.div>
           </motion.div>
-        </div>
-
-        {/* Organic Wave Transition into next section */}
-        <div className="absolute bottom-0 left-0 right-0 leading-none pointer-events-none">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-8 sm:h-14 text-surface fill-current">
-            <path d="M0,0 C150,90 350,-40 500,45 C650,130 900,10 1200,50 L1200,120 L0,120 Z" />
-          </svg>
         </div>
       </section>
 
@@ -271,25 +179,25 @@ export default function Index() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5">
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             
             {[
-            { icon: CalendarDays, label: "তারিখ", value: dateStr, sub: timeStr, color: "text-amber-500 bg-amber-500/10" },
-            { icon: MapPin, label: "স্থান", value: s.event_location.name, sub: s.event_location.detail, color: "text-rose-500 bg-rose-500/10" },
-            { icon: Users, label: "রেজিস্টার্ড", value: `${verifiedCount}+`, sub: "শিক্ষার্থী", color: "text-emerald-500 bg-emerald-500/10" }].
+            { icon: CalendarDays, label: "তারিখ", value: dateStr, sub: timeStr },
+            { icon: MapPin, label: "স্থান", value: s.event_location.name, sub: s.event_location.detail },
+            { icon: Users, label: "রেজিস্টার্ড", value: `${verifiedCount}+`, sub: "শিক্ষার্থী" }].
             map((item) =>
             <motion.div
               key={item.label}
               variants={fadeUp}
-              className="flex items-center gap-4 rounded-2xl bg-card border border-border/80 p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+              className="flex items-center gap-4 rounded-2xl bg-card p-4 md:p-5 shadow-card hover:shadow-card-hover transition-shadow">
               
-                <div className={`flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-2xl ${item.color} shadow-sm`}>
-                  <item.icon className="h-6 w-6 md:h-7 md:w-7" />
+                <div className="flex h-11 w-11 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <item.icon className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{item.label}</p>
-                  <p className="font-display font-black text-base md:text-lg truncate text-foreground">{item.value}</p>
-                  <p className="text-[11px] text-muted-foreground font-medium">{item.sub}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{item.label}</p>
+                  <p className="font-display font-bold text-sm md:text-base truncate">{item.value}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.sub}</p>
                 </div>
               </motion.div>
             )}
@@ -308,10 +216,10 @@ export default function Index() {
           </motion.div>
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-3 md:gap-4">
             {s.features.map((item, idx) =>
-              <motion.div key={idx} variants={fadeUp} whileHover={{ y: -6 }} className="rounded-2xl bg-card border border-border/80 p-5 shadow-sm hover:shadow-xl hover:border-primary/40 transition-all text-center group">
-                <span className="text-4xl block mb-2.5 group-hover:scale-110 transition-transform duration-200">{item.emoji}</span>
-                <p className="font-display font-black text-sm md:text-base text-foreground">{item.title}</p>
-                <p className="text-[11px] md:text-xs text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
+              <motion.div key={idx} variants={fadeUp} whileHover={{ y: -4 }} className="rounded-2xl bg-card border border-border/50 p-4 md:p-5 shadow-card text-center hover:shadow-card-hover transition-all">
+                <span className="text-3xl md:text-4xl block mb-2">{item.emoji}</span>
+                <p className="font-display font-bold text-sm md:text-base">{item.title}</p>
+                <p className="text-[11px] md:text-xs text-muted-foreground mt-1">{item.desc}</p>
               </motion.div>
             )}
           </motion.div>

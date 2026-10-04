@@ -13,41 +13,14 @@
     font-weight: 400;
   }
   .font-display-hand {
-    font-family: 'Anek Bangla', 'Hind Siliguri', sans-serif;
+    font-family: 'Hind Siliguri', sans-serif;
     font-weight: 700;
-  }
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-  }
-  .dark .glass-panel {
-    background: rgba(30, 12, 18, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  .glow-primary {
-    box-shadow: 0 0 35px -5px hsl(var(--primary) / 0.4);
-  }
-  .glow-accent {
-    box-shadow: 0 0 35px -5px hsl(var(--accent) / 0.5);
   }
 }
 
 @keyframes music-bar {
   0%, 100% { height: 4px; }
   50% { height: 12px; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
 }
 
 @layer base {
