@@ -377,25 +377,18 @@ export default function LiveBatchStream() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#130721] via-[#1a0a19] to-[#0b0412] text-white pb-20 select-none overflow-x-hidden relative">
-      {/* Instagram Ambient Glow Orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-10 -left-20 w-96 h-96 bg-[#c13584]/25 rounded-full blur-[110px]" />
-        <div className="absolute top-1/2 -right-20 w-96 h-96 bg-[#f77737]/20 rounded-full blur-[110px]" />
-        <div className="absolute -bottom-20 left-1/3 w-[450px] h-96 bg-[#833ab4]/25 rounded-full blur-[130px]" />
-      </div>
-
-      {/* Top Floating App Bar (Instagram Style) */}
-      <header className="sticky top-0 z-40 bg-[#130721]/85 backdrop-blur-xl border-b border-pink-500/20 px-4 py-3 flex items-center justify-between relative shadow-lg shadow-black/40">
+    <div className="min-h-screen bg-[#0d0f12] text-white pb-20 select-none overflow-x-hidden relative">
+      {/* Top Floating App Bar */}
+      <header className="sticky top-0 z-40 bg-[#0d0f12]/90 backdrop-blur-md border-b border-white/[0.08] px-4 py-3 flex items-center justify-between relative shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#fa7e1e] to-[#d62976] animate-pulse" />
-          <h1 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-1.5 font-display">
+          <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+          <h1 className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-1.5 font-display">
             <span className="text-white">JU-52</span>
-            <span className="bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] bg-clip-text text-transparent font-black">
+            <span className="text-rose-500 font-extrabold">
               রিলস
             </span>
           </h1>
-          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#fa7e1e]/20 to-[#d62976]/20 text-rose-300 font-bold border border-rose-500/30">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.07] text-zinc-300 font-medium border border-white/10">
             ৪৫ সে.
           </span>
         </div>
@@ -406,20 +399,20 @@ export default function LiveBatchStream() {
             onClick={() =>
               setViewMode(viewMode === "reels" ? "grid" : "reels")
             }
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 transition-colors border border-white/10"
+            className="p-2 rounded-full bg-white/[0.07] hover:bg-white/[0.12] text-zinc-200 transition-colors border border-white/[0.08]"
             title={viewMode === "reels" ? "গ্রিড ভিউ" : "রিলস সোয়াইপ ভিউ"}
           >
             {viewMode === "reels" ? (
               <LayoutGrid className="w-4 h-4" />
             ) : (
-              <Smartphone className="w-4 h-4 text-rose-400" />
+              <Smartphone className="w-4 h-4 text-zinc-300" />
             )}
           </button>
 
           {/* Sound Toggle */}
           <button
             onClick={() => setIsGlobalMuted(!isGlobalMuted)}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 transition-colors border border-white/10"
+            className="p-2 rounded-full bg-white/[0.07] hover:bg-white/[0.12] text-zinc-200 transition-colors border border-white/[0.08]"
             title={isGlobalMuted ? "সাউন্ড অন করো" : "সাউন্ড মিউট করো"}
           >
             {isGlobalMuted ? (
@@ -429,11 +422,11 @@ export default function LiveBatchStream() {
             )}
           </button>
 
-          {/* Upload Button (Instagram Gradient) */}
+          {/* Upload Button */}
           <Button
             onClick={() => setUploadOpen(true)}
             size="sm"
-            className="bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white font-bold rounded-full px-4 py-1.5 text-xs shadow-lg shadow-[#dc2743]/30 flex items-center gap-1.5 transition-transform active:scale-95 border border-white/20"
+            className="bg-rose-600 hover:bg-rose-500 text-white font-medium rounded-full px-4 py-1.5 text-xs shadow-sm flex items-center gap-1.5 transition-transform active:scale-95"
           >
             <Video className="w-3.5 h-3.5" />
             <span>ড্রপ রিলস</span>
@@ -551,17 +544,17 @@ export default function LiveBatchStream() {
         </div>
       )}
 
-      {/* Upload Modal (Dedicated to 45s Reels - Instagram Theme) */}
+      {/* Upload Modal (Dedicated to 45s Reels) */}
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
-        <DialogContent className="bg-[#170a24]/95 border border-pink-500/30 text-slate-100 max-w-md p-6 rounded-3xl max-h-[92vh] overflow-y-auto backdrop-blur-2xl shadow-[0_0_50px_rgba(225,48,108,0.25)]">
+        <DialogContent className="bg-[#14161d] border border-white/10 text-zinc-100 max-w-md p-6 rounded-2xl max-h-[92vh] overflow-y-auto backdrop-blur-xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold flex items-center gap-2 text-white font-display">
-              <span className="p-1.5 rounded-lg bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] via-[#d62976] to-[#962fbf] text-white">
+              <span className="p-1.5 rounded-lg bg-rose-500/15 border border-rose-500/25 text-rose-400">
                 <Film className="w-4 h-4" />
               </span>
               ৪৫ সেকেন্ডের রিলস ড্রপ করো
             </DialogTitle>
-            <DialogDescription className="text-xs text-rose-200/70">
+            <DialogDescription className="text-xs text-zinc-400">
               ভিডিওটি স্বয়ংক্রিয়ভাবে টেলিগ্রাম ক্লাউড ভল্টে সংরক্ষিত হবে এবং
               সবার ফিডে অটো-প্লে হবে।
             </DialogDescription>
@@ -569,7 +562,7 @@ export default function LiveBatchStream() {
 
           <form onSubmit={handleUploadSubmit} className="space-y-4 pt-2">
             {/* Video File Picker */}
-            <div className="border-2 border-dashed border-pink-500/40 hover:border-pink-500 rounded-2xl p-4 text-center bg-[#230f36]/60 transition-colors">
+            <div className="border-2 border-dashed border-white/15 hover:border-white/30 rounded-2xl p-4 text-center bg-white/[0.02] transition-colors">
               {filePreview ? (
                 <div className="relative rounded-xl overflow-hidden max-h-60 bg-black flex items-center justify-center">
                   <video
@@ -578,7 +571,7 @@ export default function LiveBatchStream() {
                     className="max-h-60 w-full object-contain"
                   />
                   {videoDuration && (
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/80 text-[11px] font-mono text-emerald-400 border border-emerald-500/40">
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/80 text-[11px] font-mono text-emerald-400 border border-emerald-500/30">
                       ⏱️ {videoDuration} সেকেন্ড
                     </div>
                   )}
@@ -588,7 +581,7 @@ export default function LiveBatchStream() {
                       setSelectedFile(null);
                       setFilePreview(null);
                     }}
-                    className="absolute top-2 left-2 bg-[#dc2743] hover:bg-rose-700 text-white p-1 rounded-full text-xs shadow-lg"
+                    className="absolute top-2 left-2 bg-zinc-800 hover:bg-zinc-700 text-white p-1 rounded-full text-xs shadow-lg"
                     title="বাতিল করুন"
                   >
                     <X className="w-4 h-4" />
@@ -596,13 +589,13 @@ export default function LiveBatchStream() {
                 </div>
               ) : (
                 <label className="cursor-pointer flex flex-col items-center justify-center py-6">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#fa7e1e]/20 via-[#d62976]/20 to-[#962fbf]/20 border border-pink-500/30 flex items-center justify-center text-pink-400 mb-2">
-                    <Video className="w-7 h-7" />
+                  <div className="w-14 h-14 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-300 mb-2">
+                    <Video className="w-7 h-7 text-rose-400" />
                   </div>
-                  <span className="text-xs font-bold text-white mb-1">
+                  <span className="text-xs font-semibold text-white mb-1">
                     ক্যামেরা দিয়ে রেকর্ড করো বা ভিডিও সিলেক্ট করো
                   </span>
-                  <span className="text-[11px] text-rose-200/70">
+                  <span className="text-[11px] text-zinc-400">
                     সর্বোচ্চ ৪৫ সেকেন্ড • সাইজ বড় হলে ব্রাউজার অটো-কম্প্রেস করবে
                   </span>
                   <input
@@ -618,26 +611,26 @@ export default function LiveBatchStream() {
             {/* Name & Dept */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-semibold text-rose-100 mb-1 block">
+                <label className="text-xs font-medium text-zinc-300 mb-1 block">
                   তোমার নাম *
                 </label>
                 <Input
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="যেমন: সাকিব"
-                  className="bg-[#230f36] border-white/10 focus:border-[#e1306c] text-slate-100 text-xs rounded-xl"
+                  className="bg-white/[0.05] border-white/10 focus:border-rose-500 text-zinc-100 text-xs rounded-xl"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-rose-100 mb-1 block">
+                <label className="text-xs font-medium text-zinc-300 mb-1 block">
                   ডিপার্টমেন্ট *
                 </label>
                 <select
                   value={formDept}
                   onChange={(e) => setFormDept(e.target.value)}
-                  className="w-full bg-[#230f36] border border-white/10 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none focus:border-[#e1306c]"
+                  className="w-full bg-[#1c1e26] border border-white/10 text-zinc-100 text-xs rounded-xl px-3 py-2 outline-none focus:border-rose-500"
                   required
                 >
                   <option value="">সিলেক্ট করো...</option>
@@ -652,13 +645,13 @@ export default function LiveBatchStream() {
 
             {/* Campus Spot */}
             <div>
-              <label className="text-xs font-semibold text-rose-100 mb-1 block">
+              <label className="text-xs font-medium text-zinc-300 mb-1 block">
                 ক্যাম্পাস স্পট (কোথায় ভিডিও?)
               </label>
               <select
                 value={formSpot}
                 onChange={(e) => setFormSpot(e.target.value)}
-                className="w-full bg-[#230f36] border border-white/10 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none focus:border-[#e1306c]"
+                className="w-full bg-[#1c1e26] border border-white/10 text-zinc-100 text-xs rounded-xl px-3 py-2 outline-none focus:border-rose-500"
               >
                 {SPOTS.map((s) => (
                   <option key={s} value={s}>
@@ -670,7 +663,7 @@ export default function LiveBatchStream() {
 
             {/* Caption */}
             <div>
-              <label className="text-xs font-semibold text-rose-100 mb-1 block">
+              <label className="text-xs font-medium text-zinc-300 mb-1 block">
                 ক্যাপশন বা মজার স্মৃতি
               </label>
               <Textarea
@@ -678,24 +671,24 @@ export default function LiveBatchStream() {
                 onChange={(e) => setFormCaption(e.target.value)}
                 placeholder="যেমন: মুক্তমঞ্চে বন্ধুদের তুমুল নাচ... 🔥"
                 rows={2}
-                className="bg-[#230f36] border-white/10 focus:border-[#e1306c] text-slate-100 text-xs rounded-xl"
+                className="bg-white/[0.05] border-white/10 focus:border-rose-500 text-zinc-100 text-xs rounded-xl"
               />
             </div>
 
             {/* Progress Status */}
             {uploadProgress && (
-              <div className="p-3 rounded-xl bg-[#230f36] border border-pink-500/30 space-y-1.5">
+              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-slate-300">
+                  <span className="text-zinc-300">
                     {uploadProgress.message}
                   </span>
                   <span className="text-rose-400 font-mono">
                     {uploadProgress.percent}%
                   </span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] transition-all duration-300"
+                    className="h-full bg-rose-500 transition-all duration-300"
                     style={{ width: `${uploadProgress.percent}%` }}
                   />
                 </div>
@@ -705,7 +698,7 @@ export default function LiveBatchStream() {
             <Button
               type="submit"
               disabled={uploading}
-              className="w-full bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-95 text-white font-bold rounded-xl py-2.5 text-xs shadow-lg shadow-[#dc2743]/30 flex items-center justify-center gap-2 transition-transform active:scale-95"
+              className="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl py-2.5 text-xs shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95"
             >
               {uploading ? (
                 <>
@@ -844,7 +837,7 @@ function ReelPlayerCard({
     <div
       ref={cardRef}
       id={`reel-item-${reel.id}`}
-      className="relative w-full h-full snap-start snap-always rounded-none sm:rounded-[32px] overflow-hidden bg-black flex items-center justify-center border-y sm:border border-pink-500/30 shadow-[0_8px_35px_rgba(214,41,118,0.2)]"
+      className="relative w-full h-full snap-start snap-always rounded-none sm:rounded-[24px] overflow-hidden bg-black flex items-center justify-center border-y sm:border border-white/10 sm:shadow-2xl"
       onClick={handleCardClick}
       onTouchEnd={handleTouchEnd}
     >
@@ -865,7 +858,7 @@ function ReelPlayerCard({
       {/* Heart Burst on Double Tap */}
       {showHeartBurst && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 animate-ping">
-          <Heart className="w-24 h-24 text-[#ff3040] fill-[#ff3040] drop-shadow-[0_0_20px_rgba(255,48,64,0.8)]" />
+          <Heart className="w-24 h-24 text-rose-500 fill-rose-500 drop-shadow-xl" />
         </div>
       )}
 
@@ -878,53 +871,53 @@ function ReelPlayerCard({
         </div>
       )}
 
-      {/* Right Floating Action Stack (Instagram Style) */}
+      {/* Right Floating Action Stack */}
       <div
-        className="absolute right-3 bottom-16 sm:bottom-20 z-20 flex flex-col items-center gap-4"
+        className="absolute right-3 bottom-16 sm:bottom-20 z-20 flex flex-col items-center gap-3.5"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Profile Avatar with Instagram Story Ring */}
-        <div className="w-11 h-11 rounded-full p-[2.5px] bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] via-[#d62976] via-[#962fbf] to-[#4f5bd5] shadow-lg">
-          <div className="w-full h-full rounded-full bg-[#180a21] flex items-center justify-center text-xs font-bold text-white border border-black/40">
+        {/* Profile Avatar with Subtle Story Ring */}
+        <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-md">
+          <div className="w-full h-full rounded-full bg-zinc-900 flex items-center justify-center text-xs font-bold text-white border border-black/40">
             {reel.uploaderName.charAt(0)}
           </div>
         </div>
 
-        {/* Love Button (Instagram Vibrant Heart) */}
+        {/* Love Button */}
         <button
           onClick={() => onReact(reel.id, "likes")}
           className="flex flex-col items-center gap-1 group transition-transform active:scale-125"
         >
-          <div className="w-11 h-11 rounded-full bg-black/45 backdrop-blur-md border border-white/15 flex items-center justify-center text-white group-hover:bg-[#e1306c]/30 shadow-lg">
-            <Heart className="w-6 h-6 text-[#ff3040] fill-[#ff3040] drop-shadow-[0_0_8px_rgba(255,48,64,0.6)]" />
+          <div className="w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 flex items-center justify-center text-white shadow-lg">
+            <Heart className="w-5 h-5 text-rose-500 fill-rose-500 drop-shadow" />
           </div>
           <span className="text-[11px] font-bold text-white drop-shadow">
             {reel.likes}
           </span>
         </button>
 
-        {/* Fire Button (Instagram Sunset Orange) */}
+        {/* Fire Button */}
         <button
           onClick={() => onReact(reel.id, "fire")}
           className="flex flex-col items-center gap-1 group transition-transform active:scale-125"
         >
-          <div className="w-11 h-11 rounded-full bg-black/45 backdrop-blur-md border border-white/15 flex items-center justify-center text-white group-hover:bg-[#fa7e1e]/30 shadow-lg">
-            <Flame className="w-6 h-6 text-[#fa7e1e] fill-[#fa7e1e] drop-shadow-[0_0_8px_rgba(250,126,30,0.5)]" />
+          <div className="w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 flex items-center justify-center text-white shadow-lg">
+            <Flame className="w-5 h-5 text-amber-500 fill-amber-500 drop-shadow" />
           </div>
           <span className="text-[11px] font-bold text-white drop-shadow">
             {reel.fire}
           </span>
         </button>
 
-        {/* Share Button (Instagram Purple) */}
+        {/* Share Button */}
         <button
           onClick={handleShare}
           className="flex flex-col items-center gap-1 group transition-transform active:scale-110"
         >
-          <div className="w-11 h-11 rounded-full bg-black/45 backdrop-blur-md border border-white/15 flex items-center justify-center text-white group-hover:bg-[#962fbf]/30 shadow-lg">
-            <Share2 className="w-5 h-5 text-purple-300" />
+          <div className="w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 flex items-center justify-center text-white shadow-lg">
+            <Share2 className="w-5 h-5 text-zinc-200" />
           </div>
-          <span className="text-[10px] font-semibold text-slate-300">শেয়ার</span>
+          <span className="text-[10px] font-semibold text-zinc-300">শেয়ার</span>
         </button>
 
         {/* Sound Toggle Button */}
@@ -932,14 +925,14 @@ function ReelPlayerCard({
           onClick={onToggleMute}
           className="flex flex-col items-center gap-1 group transition-transform active:scale-110"
         >
-          <div className="w-11 h-11 rounded-full bg-black/45 backdrop-blur-md border border-white/15 flex items-center justify-center text-white shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 flex items-center justify-center text-white shadow-lg">
             {isMuted ? (
               <VolumeX className="w-5 h-5 text-rose-400" />
             ) : (
               <Volume2 className="w-5 h-5 text-emerald-400" />
             )}
           </div>
-          <span className="text-[9px] text-slate-400 font-mono">
+          <span className="text-[9px] text-zinc-400 font-mono">
             {isMuted ? "MUTE" : "ON"}
           </span>
         </button>
@@ -949,29 +942,29 @@ function ReelPlayerCard({
           href="https://t.me/JU52ReelsVault"
           target="_blank"
           rel="noreferrer"
-          className="w-8 h-8 rounded-full bg-gradient-to-r from-sky-500/20 to-purple-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400 shadow hover:scale-105 transition-transform"
+          className="w-8 h-8 rounded-full bg-black/50 hover:bg-sky-500/20 border border-white/15 flex items-center justify-center text-sky-400 shadow hover:scale-105 transition-transform"
           title="টেলিগ্রাম ভল্ট চ্যানেলে দেখো"
         >
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
 
-      {/* Bottom Info Overlay (Instagram Reels Style) */}
+      {/* Bottom Info Overlay */}
       <div className="absolute left-3 right-16 bottom-3 z-10 text-left pointer-events-none">
         {/* Creator Name & Department */}
         <div className="flex items-center gap-2 mb-1 pointer-events-auto">
           <span className="text-sm font-extrabold text-white tracking-wide drop-shadow">
             @{reel.uploaderName}
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-slate-200 font-medium border border-white/10">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-zinc-200 font-medium border border-white/10">
             {reel.department}
           </span>
         </div>
 
-        {/* Spot Tag with Instagram Gradient */}
+        {/* Spot Tag */}
         {reel.spot && (
           <div className="mb-1.5 pointer-events-auto">
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-gradient-to-r from-[#d62976] to-[#fa7e1e] text-white shadow">
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-rose-600/90 text-white shadow">
               <MapPin className="w-3 h-3" />
               {reel.spot}
             </span>
@@ -980,7 +973,7 @@ function ReelPlayerCard({
 
         {/* Caption */}
         {reel.caption && (
-          <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed drop-shadow mb-2 font-normal">
+          <p className="text-xs text-zinc-200 line-clamp-2 leading-relaxed drop-shadow mb-2 font-normal">
             {reel.caption}
           </p>
         )}

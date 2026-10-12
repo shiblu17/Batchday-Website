@@ -34,75 +34,75 @@ const RADIAL_ITEMS: RadialItem[] = [
     to: "/stream",
     label: "লাইভ স্ট্রিম",
     icon: Video,
-    lightBg: "bg-[#FFD1DC]",
-    lightText: "text-[#be123c]",
-    darkBg: "dark:bg-rose-950/90",
-    darkText: "dark:text-rose-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-rose-600 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-rose-400",
     isLive: true,
   },
   {
     to: "/slambook",
     label: "স্ল্যাম বুক",
     icon: BookOpen,
-    lightBg: "bg-[#E1FFB5]",
-    lightText: "text-[#365314]",
-    darkBg: "dark:bg-emerald-950/90",
-    darkText: "dark:text-emerald-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-emerald-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-emerald-400",
   },
   {
     to: "/time-capsule",
     label: "টাইম ক্যাপসুল",
     icon: Hourglass,
-    lightBg: "bg-[#FFD66B]",
-    lightText: "text-[#92400e]",
-    darkBg: "dark:bg-amber-950/90",
-    darkText: "dark:text-amber-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-amber-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-amber-400",
   },
   {
     to: "/stage-pulse",
     label: "লাইভ পালস",
     icon: Zap,
-    lightBg: "bg-[#FFC2C2]",
-    lightText: "text-[#9f1239]",
-    darkBg: "dark:bg-rose-950/90",
-    darkText: "dark:text-rose-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-rose-600 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-rose-400",
     isLive: true,
   },
   {
     to: "/confessions",
     label: "কনফেশন",
     icon: MessageCircleHeart,
-    lightBg: "bg-[#E6E3FF]",
-    lightText: "text-[#581c87]",
-    darkBg: "dark:bg-purple-950/90",
-    darkText: "dark:text-purple-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-purple-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-purple-400",
   },
   {
     to: "/status",
     label: "স্ট্যাটাস ও পাস",
     icon: UserCheck,
-    lightBg: "bg-[#EEF0FF]",
-    lightText: "text-[#3730a3]",
-    darkBg: "dark:bg-indigo-950/90",
-    darkText: "dark:text-indigo-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-indigo-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-indigo-400",
   },
   {
     to: "/gallery",
     label: "গ্যালারি",
     icon: ImageIcon,
-    lightBg: "bg-[#FFE4E6]",
-    lightText: "text-[#881337]",
-    darkBg: "dark:bg-pink-950/90",
-    darkText: "dark:text-pink-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-pink-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-pink-400",
   },
   {
     to: "/register",
     label: "রেজিস্ট্রেশন",
     icon: Sparkles,
-    lightBg: "bg-[#FEF3C7]",
-    lightText: "text-[#78350f]",
-    darkBg: "dark:bg-yellow-950/90",
-    darkText: "dark:text-yellow-300",
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-primary font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-primary",
   },
 ];
 
@@ -161,7 +161,7 @@ export default function MobileBottomNav() {
         }}
       >
         <div
-          className="relative grid grid-cols-[1fr_1fr_88px_1fr_1fr] items-center bg-card/95 dark:bg-[#181824]/95 backdrop-blur-xl border-t border-border/40 transition-colors"
+          className="relative grid grid-cols-[1fr_1fr_88px_1fr_1fr] items-center bg-card/95 dark:bg-card/95 backdrop-blur-xl border-t border-border/40 transition-colors"
           style={{
             height: "calc(72px + env(safe-area-inset-bottom, 0px))",
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -245,7 +245,7 @@ export default function MobileBottomNav() {
             whileTap={{ scale: 0.92 }}
             className={`relative flex items-center justify-center w-16 h-16 rounded-full border-[5px] border-background dark:border-[#0f0f17] shadow-xl text-white transition-all cursor-pointer ${
               isOpen
-                ? "bg-gradient-to-tr from-rose-600 to-red-500 shadow-rose-600/40"
+                ? "bg-primary shadow-primary/40"
                 : "bg-gradient-to-tr from-primary via-[#8A1538] to-[#500000] shadow-primary/40"
             }`}
           >
@@ -282,7 +282,7 @@ export default function MobileBottomNav() {
             initial={{ scale: 0.3, opacity: 0, y: 60 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 340, damping: 26 }}
-            className="relative rounded-full aspect-square bg-card dark:bg-[#181826] border border-border/80 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.4)] flex items-center justify-center pointer-events-auto"
+            className="relative rounded-full aspect-square bg-card dark:bg-card border border-border/80 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.4)] flex items-center justify-center pointer-events-auto"
             style={{
               width: "min(360px, 92vw)",
               height: "min(360px, 92vw)",
