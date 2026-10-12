@@ -39,6 +39,7 @@ const SlamBook = lazy(() => import("./pages/SlamBook"));
 const TimeCapsule = lazy(() => import("./pages/TimeCapsule"));
 const StagePulse = lazy(() => import("./pages/StagePulse"));
 const CampusMap = lazy(() => import("./pages/CampusMap"));
+const LiveBatchStream = lazy(() => import("./pages/LiveBatchStream"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -232,11 +233,20 @@ const App = () => (
                 />
 
                 <Route
+                  path="/stream"
+                  element={
+                    <>
+                      <Navbar />
+                      <LiveBatchStream />
+                    </>
+                  }
+                />
+                <Route
                   path="/campus-map"
                   element={
                     <>
                       <Navbar />
-                      <CampusMap />
+                      <LiveBatchStream />
                     </>
                   }
                 />

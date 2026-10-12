@@ -12,6 +12,7 @@ import {
   BookOpen,
   Hourglass,
   Zap,
+  Video,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -21,25 +22,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const featureItems = [
-  { to: "/campus-map", label: "মেমোরি ম্যাপ", desc: "৭০০ একরের স্মৃতিচিহ্ন", icon: Compass },
+  { to: "/stream", label: "লাইভ রিলস ও স্ট্রিম", desc: "ছবি ও ৪৫ সেকেন্ডের ভিডিও", icon: Video },
   { to: "/slambook", label: "স্ল্যাম বুক", desc: "বন্ধুদের চিরকুট ডায়েরি", icon: BookOpen },
   { to: "/time-capsule", label: "টাইম ক্যাপসুল", desc: "২০৩৬ সালের জন্য চিঠি", icon: Hourglass },
   { to: "/stage-pulse", label: "লাইভ পালস", desc: "মুক্তমঞ্চ ক্রাউড রিঅ্যাকশন", icon: Zap },
   { to: "/confessions", label: "কনফেশন", desc: "মনের না-বলা কথা", icon: MessageCircleHeart },
 ];
 
-const mobileNavItems = [
-  { to: "/", label: "হোম", icon: Home },
-  { to: "/campus-map", label: "ম্যাপ", icon: Compass },
-  { to: "/slambook", label: "স্ল্যাম বুক", icon: BookOpen },
-  { to: "/time-capsule", label: "ক্যাপসুল", icon: Hourglass },
-  { to: "/stage-pulse", label: "পালস", icon: Zap },
-  { to: "/confessions", label: "কনফেশন", icon: MessageCircleHeart },
-  { to: "/leaderboard", label: "লিডারবোর্ড", icon: Trophy },
-  { to: "/status", label: "স্ট্যাটাস", icon: UserCheck },
-  { to: "/gallery", label: "গ্যালারি", icon: Image },
-  { to: "/game", label: "গেম", icon: Gamepad2 },
-];
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function Navbar() {
   const location = useLocation();
@@ -172,27 +162,8 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Bottom Bar (Horizontal Scrollable) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md safe-area-bottom">
-        <div className="flex overflow-x-auto no-scrollbar gap-1 px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] relative z-50 bg-background/95 items-center">
-          {mobileNavItems.map((item) => {
-            const active = location.pathname === item.to;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex-shrink-0 flex-1 min-w-[3.4rem] flex flex-col items-center gap-1 px-1 py-1.5 rounded-lg text-[9px] font-bold transition-colors ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Icon className={`h-4 w-4 ${active ? "text-primary" : ""}`} />
-                <span className="truncate w-full text-center">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      {/* Modern Curved Mobile Bottom Bar & Radial Menu */}
+      <MobileBottomNav />
     </>
   );
 }

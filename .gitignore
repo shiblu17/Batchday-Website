@@ -32,5 +32,9 @@ pnpm-debug.log*
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
+
+# Scratch & Logs
+scratch/
+build_log*.txt
+*.log

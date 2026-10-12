@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, CalendarDays, MapPin, ShieldCheck,
   Settings, Clock, ChevronRight, Music, Laptop, ArrowRight, Sparkles, Share2, Loader2,
-  Compass, BookOpen, Hourglass, Zap
+  Compass, BookOpen, Hourglass, Zap, Video
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
@@ -245,12 +245,12 @@ export default function Index() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                title: "ক্যাম্পাস মেমোরি ম্যাপ",
-                desc: "৭০০ একরের প্রিয় স্থানগুলোতে বন্ধুদের সঙ্গে কাটানো সেরা স্মৃতি পিন করো।",
-                to: "/campus-map",
-                icon: Compass,
-                badge: "ইন্টারেক্টিভ ম্যাপ",
-                color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+                title: "লাইভ ফটো ও রিলস ফিড",
+                desc: "ব্যাচ ডে-র প্রতিটি মুহূর্ত, হাসি আর ৪৫ সেকেন্ডের রিলস ভিডিও সরাসরি সবার সাথে শেয়ার করো।",
+                to: "/stream",
+                icon: Video,
+                badge: "লাইভ স্ট্রিম 🔴",
+                color: "text-red-500 bg-red-500/10 border-red-500/20",
               },
               {
                 title: "ফ্রেন্ডশিপ স্ল্যাম বুক",

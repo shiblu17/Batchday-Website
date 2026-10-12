@@ -57,8 +57,8 @@ export default function JuAmbientPlayer() {
 
   return (
     <>
-      {/* Floating launcher button in bottom right corner */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+      {/* Floating launcher button in bottom right corner (lifted on mobile to avoid bottom nav) */}
+      <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-40 flex items-center gap-2">
         {isPlaying && (
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-primary/20 shadow-lg animate-pulse">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
