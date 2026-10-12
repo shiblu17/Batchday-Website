@@ -110,30 +110,28 @@ export default function Index() {
   return (
     <div className="pb-28 md:pb-0">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-primary">
-        <div className="absolute inset-0 opacity-[0.07]" style={{
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#8B1538] via-[#75112F] to-[#590C22]">
+        <div className="absolute inset-0 opacity-[0.06]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }} />
-        <div className="absolute inset-0" style={{
-          backgroundImage: "radial-gradient(circle at 20% 80%, hsl(37 90% 43% / 0.15) 0%, transparent 50%), radial-gradient(circle at 85% 20%, hsl(160 84% 30% / 0.12) 0%, transparent 50%)"
-        }} />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_70%)]" />
 
         <div className="container relative py-14 md:py-24 text-center">
           <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
-            <motion.p variants={fadeUp} className="font-body text-xs sm:text-sm font-medium tracking-[0.2em] uppercase text-primary-foreground/60">জাহাঙ্গীরনগর বিশ্ববিদ্যালয় · ৫২তম ব্যাচ
-
+            <motion.p variants={fadeUp} className="font-body text-xs sm:text-sm font-medium tracking-[0.2em] uppercase text-primary-foreground/75">
+              জাহাঙ্গীরনগর বিশ্ববিদ্যালয় · ৫২তম ব্যাচ
             </motion.p>
-            <motion.h1 variants={fadeUp} className="font-display text-6xl sm:text-7xl md:text-8xl font-extrabold text-primary-foreground leading-none">
+            <motion.h1 variants={fadeUp} className="font-display text-6xl sm:text-7xl md:text-8xl font-extrabold text-white leading-none">
               {s.hero_title.includes("-") ?
-              <>{s.hero_title.split("-")[0]}<span className="text-accent">-</span>{s.hero_title.split("-")[1]}</> :
+              <>{s.hero_title.split("-")[0]}<span className="text-amber-300">-</span>{s.hero_title.split("-")[1]}</> :
               s.hero_title}
             </motion.h1>
-            <motion.p variants={fadeUp} className="font-display text-lg sm:text-xl md:text-2xl font-bold text-accent whitespace-pre-line leading-relaxed sm:leading-relaxed">
+            <motion.p variants={fadeUp} className="font-display text-lg sm:text-xl md:text-2xl font-bold text-amber-300 whitespace-pre-line leading-relaxed sm:leading-relaxed">
               {s.hero_subtitle.includes("এই নগরীর ভিড়ে") 
                 ? s.hero_subtitle.replace("বায়ান্নর", "\nবায়ান্নর") 
                 : s.hero_subtitle}
             </motion.p>
-            <motion.p variants={fadeUp} className="text-primary-foreground/70 max-w-md mx-auto text-sm md:text-base leading-relaxed">
+            <motion.p variants={fadeUp} className="text-white/80 max-w-md mx-auto text-sm md:text-base leading-relaxed">
               {s.hero_description}
             </motion.p>
 
@@ -150,13 +148,12 @@ export default function Index() {
               {s.registration_open ?
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md">
-                
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md">
                   Register Now
                   <ArrowRight className="h-5 w-5" />
                 </Link> :
 
-              <span className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-muted text-muted-foreground font-display font-bold text-base cursor-not-allowed">
+              <span className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-white/20 text-white/80 font-display font-bold text-base cursor-not-allowed">
                   রেজিস্ট্রেশন বন্ধ
                 </span>
               }
