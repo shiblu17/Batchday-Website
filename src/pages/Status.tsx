@@ -27,6 +27,7 @@ interface UserData {
 export default function StatusPage() {
   const { toast } = useToast();
   const [roll, setRoll] = useState("");
+  const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [userData, setUserData] = useState<UserData | null>(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
@@ -35,22 +36,59 @@ export default function StatusPage() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roll.trim()) return;
+    const cleanRoll = roll.trim();
+    const cleanPhone = phone.trim();
+
+    if (!cleanRoll) {
+      toast({ title: "রোল নম্বর লিখুন", variant: "destructive" });
+      return;
+    }
+    if (!cleanPhone) {
+      toast({ title: "নিরাপত্তার স্বার্থে ফোন নম্বর দিন", variant: "destructive" });
+      return;
+    }
+
     setStatus("loading");
 
-    const { data, error } = await supabase
-      .from("registrations")
-      .select("name, department, hall, status, tshirt_size")
-      .eq("roll", roll.trim())
-      .maybeSingle();
+    try {
+      let query = supabase
+        .from("registrations")
+        .select("id, name, department, hall, status, tshirt_size")
+        .eq("roll", cleanRoll);
 
-    if (error || !data) {
-      setUserData(null);
-      setStatus("not_found");
-      setPreviewUrl('');
-    } else {
+      if (cleanPhone.length === 11) {
+        query = query.eq("phone", cleanPhone);
+      } else if (cleanPhone.length >= 4) {
+        query = query.ilike("phone", `%${cleanPhone}`);
+      } else {
+        toast({
+          title: "ফোন নম্বর লিখুন",
+          description: "নিরাপত্তার স্বার্থে রেজিস্ট্রেশনের সময় দেওয়া সঠিক ফোন নম্বর লিখুন (কমপক্ষে শেষ ৪ ডিজিট)।",
+          variant: "destructive",
+        });
+        setStatus("idle");
+        return;
+      }
+
+      const { data, error } = await query.maybeSingle();
+
+      if (error || !data) {
+        setUserData(null);
+        setStatus("not_found");
+        setPreviewUrl('');
+        toast({
+          title: "তথ্য পাওয়া যায়নি",
+          description: "দেওয়া রোল ও ফোন নম্বরের সাথে কোনো রেজিস্ট্রেশন মেলেনি। অনুগ্রহ করে সঠিক তথ্য দিন।",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setUserData(data);
       setStatus(data.status as Status);
+    } catch (err: any) {
+      console.error("Status search error:", err);
+      setStatus("not_found");
     }
   };
 
@@ -118,7 +156,7 @@ export default function StatusPage() {
       ctx.fillStyle = '#ffffff';
       ctx.font = 'italic 20px sans-serif';
       ctx.letterSpacing = "2px";
-      ctx.fillText('BATCH DAY 2024 • OFFICIAL ID', 300, 150);
+      ctx.fillText('BATCH DAY 2026 • OFFICIAL ID', 300, 150);
       ctx.letterSpacing = "0px";
 
       // 5. User Details (Premium Typography)
@@ -168,6 +206,20 @@ export default function StatusPage() {
         // Update Preview
         setPreviewUrl(canvas.toDataURL('image/png', 0.8));
       };
+
+      qrImage.onerror = () => {
+        // Offline / Error fallback: draw clean badge on card so preview & download are never blocked
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(200, 260, 200, 200);
+        ctx.fillStyle = '#600000';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('JU 52ND BATCH', 300, 350);
+        ctx.font = 'bold 16px monospace';
+        ctx.fillStyle = '#111827';
+        ctx.fillText(`JU52-${roll}`, 300, 380);
+        setPreviewUrl(canvas.toDataURL('image/png', 0.8));
+      };
     }
   }, [status, userData, roll]);
 
@@ -211,25 +263,41 @@ export default function StatusPage() {
             <ShieldCheck className="text-white w-8 h-8" />
           </motion.div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">স্ট্যাটাস চেক</h1>
-          <p className="text-slate-500 font-medium">আপনার রোল নম্বর দিয়ে রেজিস্ট্রেশন যাচাই করুন</p>
+          <p className="text-slate-500 font-medium">নিরাপত্তার স্বার্থে রোল ও নিবন্ধিত ফোন নম্বর দিয়ে যাচাই করুন</p>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-1 p-1.5 bg-white border border-slate-200 rounded-full shadow-xl focus-within:ring-4 focus-within:ring-primary/10 transition-all max-w-full overflow-hidden">
-          <input
-            className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 outline-none px-4 md:px-6 py-2.5 md:py-3 font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-base"
-            placeholder="রোল নম্বর (যেমন: 89)"
-            value={roll}
-            onChange={(e) => setRoll(e.target.value)}
-            required
-          />
+        {/* Secure Search Bar */}
+        <form onSubmit={handleSearch} className="bg-white p-3 sm:p-4 rounded-3xl border border-slate-200/90 shadow-xl space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="relative">
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 block px-1">রোল নম্বর *</label>
+              <input
+                className="w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 rounded-2xl outline-none px-4 py-2.5 sm:py-3 font-bold text-slate-800 placeholder:text-slate-400 text-sm transition-all"
+                placeholder="যেমন: 89"
+                value={roll}
+                onChange={(e) => setRoll(e.target.value)}
+                required
+              />
+            </div>
+            <div className="relative">
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 block px-1">নিবন্ধিত ফোন নম্বর *</label>
+              <input
+                type="tel"
+                className="w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 rounded-2xl outline-none px-4 py-2.5 sm:py-3 font-bold text-slate-800 placeholder:text-slate-400 text-sm transition-all"
+                placeholder="যেমন: 017XXXXXXXX"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+          </div>
           <button
             type="submit"
             disabled={status === "loading"}
-            className="shrink-0 bg-primary hover:bg-[#600000] text-white px-5 md:px-8 py-2.5 md:py-3 rounded-full font-bold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 text-sm md:text-base"
+            className="w-full bg-primary hover:bg-[#600000] text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 text-sm sm:text-base shadow-lg shadow-primary/20 cursor-pointer"
           >
-            {status === "loading" ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Search className="h-4 w-4 md:h-5 md:w-5" />}
-            খুঁজুন
+            {status === "loading" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+            টিকিট ও স্ট্যাটাস যাচাই করুন
           </button>
         </form>
 

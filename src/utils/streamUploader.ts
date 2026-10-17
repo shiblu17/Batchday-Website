@@ -5,14 +5,30 @@
  */
 
 export const TELEGRAM_BOT_TOKEN =
-  import.meta.env.VITE_TELEGRAM_BOT_TOKEN ||
-  "8851131748:AAFNALYNcT8nneTE9nhjpveJa8wDvukKXtg";
+  import.meta.env.VITE_TELEGRAM_BOT_TOKEN || "";
 
 export const TELEGRAM_CHAT_ID =
   import.meta.env.VITE_TELEGRAM_CHAT_ID || "-1003827033172";
 
 export const IMGBB_API_KEY =
   import.meta.env.VITE_IMGBB_API_KEY || "85164bf284c589b1ac8c2f2408fdc3f5";
+
+export const CLOUDFLARE_REELS_PROXY =
+  import.meta.env.VITE_CLOUDFLARE_REELS_PROXY || "";
+
+/**
+ * Routes Telegram direct video URLs through high-speed Cloudflare Edge Cache if configured
+ */
+export function formatVideoStreamingUrl(rawUrl: string): string {
+  if (!rawUrl) return "";
+  if (CLOUDFLARE_REELS_PROXY && rawUrl.includes("api.telegram.org/file/")) {
+    return rawUrl.replace(
+      "https://api.telegram.org",
+      CLOUDFLARE_REELS_PROXY.replace(/\/+$/, "")
+    );
+  }
+  return rawUrl;
+}
 
 export interface UploadProgress {
   percent: number;
@@ -38,6 +54,54 @@ export async function getVideoDuration(file: File): Promise<number> {
     video.onerror = () => {
       URL.revokeObjectURL(objectUrl);
       reject(new Error("ভিডিও ফাইলটি পড়া সম্ভব হয়নি। সঠিক MP4 বা WebM ফাইল দিন।"));
+    };
+  });
+}
+
+/**
+ * Generates an instant lightweight first-frame JPEG thumbnail from video File
+ */
+export async function generateVideoThumbnail(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const video = document.createElement("video");
+    video.preload = "auto";
+    video.muted = true;
+    video.playsInline = true;
+    const objectUrl = URL.createObjectURL(file);
+    video.src = objectUrl;
+
+    video.onloadeddata = () => {
+      video.currentTime = 0.05;
+    };
+
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const maxW = 400;
+        let w = video.videoWidth || 360;
+        let h = video.videoHeight || 640;
+        if (w > maxW) {
+          h = Math.round((h * maxW) / w);
+          w = maxW;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+          URL.revokeObjectURL(objectUrl);
+          resolve(dataUrl);
+          return;
+        }
+      } catch {}
+      URL.revokeObjectURL(objectUrl);
+      resolve("");
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve("");
     };
   });
 }
@@ -293,17 +357,21 @@ export async function uploadVideoToTelegram(
     onProgress({
       percent: 22,
       stage: "uploading",
-      message: "টেলিগ্রাম ক্লাউডে ভিডিও আপলোড হচ্ছে...",
+      message: "ভিডিও ক্লাউডে আপলোড হচ্ছে...",
     });
   }
 
   const formData = new FormData();
-  formData.append("chat_id", TELEGRAM_CHAT_ID);
+  if (TELEGRAM_CHAT_ID) {
+    formData.append("chat_id", TELEGRAM_CHAT_ID);
+  }
   formData.append("video", fileToUpload);
   formData.append("caption", captionText || "JU 52nd Batch Day Reel");
   formData.append("supports_streaming", "true");
 
-  const sendVideoUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`;
+  const sendVideoUrl = CLOUDFLARE_REELS_PROXY
+    ? `${CLOUDFLARE_REELS_PROXY.replace(/\/+$/, "")}/api/upload-reel`
+    : `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`;
 
   const uploadResult = await new Promise<any>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -328,7 +396,7 @@ export async function uploadVideoToTelegram(
           if (res.ok) {
             resolve(res.result);
           } else {
-            reject(new Error(res.description || "টেলিগ্রাম সার্ভার এরর দিয়েছে।"));
+            reject(new Error(res.description || "ভিডিও সার্ভার এরর দিয়েছে।"));
           }
         } catch (err) {
           reject(new Error("রেসপন্স প্রসেস করা যায়নি।"));
@@ -350,11 +418,17 @@ export async function uploadVideoToTelegram(
     xhr.send(formData);
   });
 
-  const fileId = uploadResult.video?.file_id;
+  // Extract file_id from video, document, animation, or video_note
+  const fileId =
+    uploadResult.video?.file_id ||
+    uploadResult.document?.file_id ||
+    uploadResult.animation?.file_id ||
+    uploadResult.video_note?.file_id;
   const messageId = uploadResult.message_id;
 
   if (!fileId) {
-    throw new Error("টেলিগ্রাম থেকে ভিডিও ফাইল আইডি পাওয়া যায়নি।");
+    console.error("Upload response missing file_id:", uploadResult);
+    throw new Error("ভিডিও ফাইল প্রসেস করা সম্ভব হয়নি।");
   }
 
   // 3. Get direct file path
@@ -375,7 +449,9 @@ export async function uploadVideoToTelegram(
   }
 
   const filePath = fileJson.result.file_path;
-  const directStreamUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${filePath}`;
+  const directStreamUrl = formatVideoStreamingUrl(
+    `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${filePath}`
+  );
 
   if (onProgress) {
     onProgress({
@@ -388,7 +464,11 @@ export async function uploadVideoToTelegram(
   return {
     url: directStreamUrl,
     fileId,
-    duration: uploadResult.video?.duration || duration,
+    duration:
+      uploadResult.video?.duration ||
+      uploadResult.animation?.duration ||
+      uploadResult.document?.duration ||
+      duration,
     telegramMessageId: messageId,
   };
 }
@@ -401,7 +481,9 @@ export async function refreshTelegramFileUrl(fileId: string): Promise<string> {
   const res = await fetch(getFileUrl);
   const json = await res.json();
   if (json.ok && json.result?.file_path) {
-    return `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${json.result.file_path}`;
+    return formatVideoStreamingUrl(
+      `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${json.result.file_path}`
+    );
   }
   throw new Error("ফাইল রিফ্রেশ করা যায়নি");
 }

@@ -81,6 +81,13 @@ export default function RegisterPage() {
 
   const [dbDepartments, setDbDepartments] = useState<string[]>([]);
   const [dbHalls, setDbHalls] = useState<string[]>([]);
+  const [isInstantlyVerified, setIsInstantlyVerified] = useState(false);
+  const [txVerification, setTxVerification] = useState<{
+    checking: boolean;
+    found: boolean;
+    amount?: number;
+    alreadyMatched?: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const fetchLists = async () => {
@@ -91,6 +98,41 @@ export default function RegisterPage() {
     };
     fetchLists();
   }, []);
+
+  // Debounced auto-check for TrxID against bKash transactions
+  useEffect(() => {
+    const cleanTx = form.txId.trim().toUpperCase();
+    if (cleanTx.length < 8) {
+      setTxVerification(null);
+      return;
+    }
+
+    setTxVerification({ checking: true, found: false });
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await supabase
+          .from("bkash_transactions")
+          .select("amount, status")
+          .eq("trx_id", cleanTx)
+          .maybeSingle();
+
+        if (data) {
+          setTxVerification({
+            checking: false,
+            found: true,
+            amount: data.amount,
+            alreadyMatched: data.status === "matched",
+          });
+        } else {
+          setTxVerification({ checking: false, found: false });
+        }
+      } catch (err) {
+        setTxVerification(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [form.txId]);
 
   const set = (key: string, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -155,42 +197,58 @@ export default function RegisterPage() {
     try {
       let photoUrl: string | null = null;
 
-      // Upload photo if provided
+      // Upload photo if provided (ImgBB with Supabase Storage fallback)
       if (photo) {
         const formData = new FormData();
         formData.append("image", photo);
-
         const apiKey = "85164bf284c589b1ac8c2f2408fdc3f5";
-        if (!apiKey) throw new Error("ImgBB API Key is missing");
 
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-          method: "POST",
-          body: formData,
-        });
-        const imgbbData = await res.json();
-
-        if (!imgbbData.success) {
-          toast({ title: "ছবি আপলোড ব্যর্থ হয়েছে", description: imgbbData.error?.message, variant: "destructive" });
-          setSubmitting(false);
-          return;
+        try {
+          const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+            method: "POST",
+            body: formData,
+          });
+          const imgbbData = await res.json();
+          if (imgbbData?.success && imgbbData.data?.url) {
+            photoUrl = imgbbData.data.url;
+          }
+        } catch (imgbbErr) {
+          console.warn("ImgBB upload failed, trying Supabase storage fallback...", imgbbErr);
         }
 
-        photoUrl = imgbbData.data.url;
+        // Resilient Fallback: If ImgBB was rate-limited or unavailable, save directly to Supabase storage
+        if (!photoUrl) {
+          try {
+            const fileName = `student_${Date.now()}_${form.roll.replace(/[^a-zA-Z0-9]/g, "")}.jpg`;
+            const { data: storageData, error: storageErr } = await supabase.storage
+              .from("photos")
+              .upload(fileName, photo, { contentType: "image/jpeg", upsert: true });
+
+            if (!storageErr && storageData) {
+              const { data: pubData } = supabase.storage.from("photos").getPublicUrl(fileName);
+              photoUrl = pubData.publicUrl;
+            }
+          } catch (storageErr) {
+            console.warn("Supabase Storage fallback failed:", storageErr);
+          }
+        }
       }
 
-      // Insert registration
-      const { error } = await supabase.from("registrations").insert({
-        name: form.name,
-        roll: form.roll,
-        phone: form.phone,
+      const cleanTx = form.txId.trim().toUpperCase();
+
+      // Insert registration with normalized TrxID
+      const { data: insertedReg, error } = await supabase.from("registrations").insert({
+        name: form.name.trim(),
+        roll: form.roll.trim(),
+        phone: form.phone.trim(),
         department: form.department,
         hall: form.hall,
         tshirt_size: form.tshirtSize,
         payment_method: form.paymentMethod,
-        tx_id: form.txId,
-        sender_number: form.senderNumber,
+        tx_id: cleanTx,
+        sender_number: form.senderNumber.trim(),
         photo_url: photoUrl,
-      });
+      }).select("id, status").maybeSingle();
 
       // Automatically add the uploaded photo to the public gallery
       if (photoUrl && !error) {
@@ -208,6 +266,10 @@ export default function RegisterPage() {
         }
         setSubmitting(false);
         return;
+      }
+
+      if (insertedReg?.status === "verified") {
+        setIsInstantlyVerified(true);
       }
 
       setSubmitted(true);
@@ -254,10 +316,28 @@ export default function RegisterPage() {
             <CheckCircle className="h-10 w-10 text-secondary" />
           </motion.div>
           <h2 className="font-display text-2xl font-bold mb-2">রেজিস্ট্রেশন সম্পন্ন! 🎉</h2>
-          <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-            তোমার পেমেন্ট ভেরিফাই হলে আইডি কার্ড ডাউনলোড করতে পারবে।<br />
-            <strong>রোল: {form.roll}</strong> দিয়ে স্ট্যাটাস চেক করো।
-          </p>
+          {isInstantlyVerified ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="my-4 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center max-w-sm mx-auto"
+            >
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-white font-bold text-xs mb-2 shadow-sm">
+                <CheckCircle className="h-3.5 w-3.5" /> তাৎক্ষণিক ভেরিফাইড!
+              </span>
+              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                বিকাশ মার্চেন্ট ট্রানজ্যাকশন স্বয়ংক্রিয়ভাবে মিলে গেছে।
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                স্ট্যাটাস পেজে তোমার আইডি কার্ড প্রস্তুত আছে।
+              </p>
+            </motion.div>
+          ) : (
+            <p className="text-muted-foreground text-sm max-w-sm mx-auto my-3">
+              এসএমএস সার্ভারে পৌঁছালে পেমেন্ট স্বয়ংক্রিয়ভাবে ভেরিফাই হবে।<br />
+              <strong>রোল: {form.roll}</strong> দিয়ে স্ট্যাটাস চেক করো।
+            </p>
+          )}
         </motion.div>
       </div>
     );
@@ -451,8 +531,47 @@ export default function RegisterPage() {
                 </motion.div>
                 <div>
                   <label className={labelClass}>ট্রানজেকশন আইডি (TxID) *</label>
-                  <input className={`${inputClass} ${errors.txId ? "border-destructive ring-destructive/20" : "border-input"}`} placeholder="যেমন: 9A3F2K1L0P" value={form.txId} onChange={(e) => set("txId", e.target.value)} />
+                  <input
+                    className={`${inputClass} font-mono uppercase ${errors.txId ? "border-destructive ring-destructive/20" : "border-input"}`}
+                    placeholder="যেমন: 9A3F2K1L0P"
+                    value={form.txId}
+                    onChange={(e) => set("txId", e.target.value.toUpperCase())}
+                  />
                   {errors.txId && <p className={errorClass}>{errors.txId}</p>}
+
+                  {txVerification?.checking && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1.5 font-medium">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> বিকাশ সার্ভারে TrxID মিলানো হচ্ছে...
+                    </p>
+                  )}
+
+                  {txVerification && !txVerification.checking && txVerification.found && !txVerification.alreadyMatched && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 mt-2"
+                    >
+                      <CheckCircle className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <span>৳{txVerification.amount} পেমেন্ট নিশ্চিত পাওয়া গেছে! সাবমিট করলে তাৎক্ষণিক ভেরিফাইড হবে।</span>
+                    </motion.div>
+                  )}
+
+                  {txVerification && !txVerification.checking && txVerification.found && txVerification.alreadyMatched && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-semibold flex items-center gap-2 mt-2"
+                    >
+                      <XCircle className="h-4 w-4 shrink-0" />
+                      <span>সতর্কতা: এই TrxID দিয়ে অন্য একটি রেজিস্ট্রেশন ইতিমধ্যেই সম্পন্ন হয়েছে!</span>
+                    </motion.div>
+                  )}
+
+                  {txVerification && !txVerification.checking && !txVerification.found && (
+                    <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                      <span>ℹ️ এসএমএস ব্যাকএন্ডে পৌঁছালে স্বয়ংক্রিয়ভাবে মিলানো হবে।</span>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className={labelClass}>যে নম্বর থেকে পাঠিয়েছো *</label>

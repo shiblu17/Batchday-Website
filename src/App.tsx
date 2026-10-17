@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,6 +34,17 @@ const LudoGame = lazy(() => import("./pages/LudoGame"));
 const CatchTheGrades = lazy(() => import("./pages/CatchTheGrades"));
 const JUMaze = lazy(() => import("./pages/JUMaze"));
 const TypingMaster = lazy(() => import("./pages/TypingMaster"));
+const StackTower = lazy(() => import("./pages/StackTower"));
+const NeonSnake = lazy(() => import("./pages/NeonSnake"));
+const ColorSwitch = lazy(() => import("./pages/ColorSwitch"));
+const BrickBreaker = lazy(() => import("./pages/BrickBreaker"));
+const PianoTiles = lazy(() => import("./pages/PianoTiles"));
+const KnifeHit = lazy(() => import("./pages/KnifeHit"));
+const FruitNinja = lazy(() => import("./pages/FruitNinja"));
+const HelixJump = lazy(() => import("./pages/HelixJump"));
+const BlockBlast = lazy(() => import("./pages/BlockBlast"));
+const ZigZag = lazy(() => import("./pages/ZigZag"));
+const TrafficDash = lazy(() => import("./pages/TrafficDash"));
 const Confessions = lazy(() => import("./pages/Confessions"));
 const SlamBook = lazy(() => import("./pages/SlamBook"));
 const TimeCapsule = lazy(() => import("./pages/TimeCapsule"));
@@ -42,6 +53,7 @@ const CampusMap = lazy(() => import("./pages/CampusMap"));
 const LiveBatchStream = lazy(() => import("./pages/LiveBatchStream"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
+const AdminReels = lazy(() => import("./pages/admin/AdminReels"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TwentyNineGame = lazy(() => import("./pages/TwentyNineGame"));
 import JuAmbientPlayer from "@/components/JuAmbientPlayer";
@@ -159,24 +171,58 @@ const App = () => (
                     </>
                   }
                 />
+                {/* 5 New Competitive Global Games */}
                 <Route
-                  path="/game/memory"
-                  element={
-                    <>
-                      <Navbar />
-                      <MemoryMatch />
-                    </>
-                  }
+                  path="/game/stack"
+                  element={<StackTower />}
                 />
                 <Route
-                  path="/game/tictactoe"
-                  element={
-                    <>
-                      <Navbar />
-                      <TicTacToe />
-                    </>
-                  }
+                  path="/game/snake"
+                  element={<NeonSnake />}
                 />
+                <Route
+                  path="/game/color-switch"
+                  element={<ColorSwitch />}
+                />
+                <Route
+                  path="/game/brick-breaker"
+                  element={<BrickBreaker />}
+                />
+                <Route
+                  path="/game/piano-tiles"
+                  element={<PianoTiles />}
+                />
+                <Route
+                  path="/game/knife-hit"
+                  element={<KnifeHit />}
+                />
+                <Route
+                  path="/game/fruit-ninja"
+                  element={<FruitNinja />}
+                />
+                <Route
+                  path="/game/helix-jump"
+                  element={<HelixJump />}
+                />
+                <Route
+                  path="/game/block-blast"
+                  element={<BlockBlast />}
+                />
+                <Route
+                  path="/game/zigzag"
+                  element={<ZigZag />}
+                />
+                <Route
+                  path="/game/traffic-dash"
+                  element={<TrafficDash />}
+                />
+
+                {/* Legacy Game Redirects */}
+                <Route path="/game/memory" element={<Navigate to="/game" replace />} />
+                <Route path="/game/tictactoe" element={<Navigate to="/game" replace />} />
+                <Route path="/game/ju-maze" element={<Navigate to="/game" replace />} />
+                <Route path="/game/typing-master" element={<Navigate to="/game" replace />} />
+
                 <Route
                   path="/game/dinorun"
                   element={
@@ -192,24 +238,6 @@ const App = () => (
                     <>
                       <Navbar />
                       <CatchTheGrades />
-                    </>
-                  }
-                />
-                <Route
-                  path="/game/ju-maze"
-                  element={
-                    <>
-                      <Navbar />
-                      <JUMaze />
-                    </>
-                  }
-                />
-                <Route
-                  path="/game/typing-master"
-                  element={
-                    <>
-                      <Navbar />
-                      <TypingMaster />
                     </>
                   }
                 />
@@ -234,21 +262,11 @@ const App = () => (
 
                 <Route
                   path="/stream"
-                  element={
-                    <>
-                      <Navbar />
-                      <LiveBatchStream />
-                    </>
-                  }
+                  element={<LiveBatchStream />}
                 />
                 <Route
                   path="/campus-map"
-                  element={
-                    <>
-                      <Navbar />
-                      <LiveBatchStream />
-                    </>
-                  }
+                  element={<LiveBatchStream />}
                 />
                 <Route
                   path="/slambook"
@@ -291,6 +309,7 @@ const App = () => (
                   <Route path="scanner" element={<AdminScanner />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="gallery" element={<AdminGallery />} />
+                  <Route path="reels" element={<AdminReels />} />
                   <Route path="leaderboard" element={<AdminLeaderboard />} />
                   <Route path="confessions" element={<AdminConfessions />} />
                   <Route path="timeline" element={<AdminTimeline />} />

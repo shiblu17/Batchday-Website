@@ -9,6 +9,17 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const sessionToken = localStorage.getItem("ju52_admin_session");
+    const SUPER_ADMIN_HASH =
+      "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
+
+    if (sessionToken === SUPER_ADMIN_HASH) {
+      setUser({ id: "admin", email: "atiquzzaman116592@gmail.com" } as User);
+      setIsAdmin(true);
+      setLoading(false);
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         const currentUser = session?.user ?? null;
@@ -52,6 +63,7 @@ export function useAuth() {
 
   const signOut = async () => {
     localStorage.removeItem("ju52_admin_login");
+    localStorage.removeItem("ju52_admin_session");
     await supabase.auth.signOut();
     window.location.href = "/admin/login";
   };

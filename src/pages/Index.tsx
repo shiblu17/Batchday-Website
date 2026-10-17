@@ -135,9 +135,6 @@ export default function Index() {
               {s.hero_description}
             </motion.p>
 
-            {/* Timeline Section */}
-            <EventTimeline />
-
             {/* Countdown */}
             <motion.div variants={fadeUp}>
                <CountdownTimer days={countdown.days} hours={countdown.hours} minutes={countdown.minutes} seconds={countdown.seconds} />
@@ -222,6 +219,9 @@ export default function Index() {
           </motion.div>
         </div>
       </section>
+
+      {/* Event Timeline Section */}
+      <EventTimeline />
 
       {/* Special Memory & Interactive Features */}
       <section className="py-12 md:py-16 bg-muted/20 border-y border-border/60">

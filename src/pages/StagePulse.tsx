@@ -32,6 +32,33 @@ export default function StagePulse() {
   const [userCombo, setUserCombo] = useState(0);
   const comboTimerRef = useRef<number | null>(null);
 
+  // Load persistent cheering stats from Supabase on mount
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const { data, error } = await supabase
+          .from("stage_pulse_stats")
+          .select("*")
+          .eq("id", "current")
+          .maybeSingle();
+
+        if (!error && data) {
+          setCounts({
+            heart: data.heart_count || 1420,
+            fire: data.fire_count || 1850,
+            clap: data.clap_count || 960,
+            rock: data.rock_count || 2130,
+            energy: data.energy_count || 1680,
+          });
+          setTotalCheers(data.total_cheers || 8040);
+        }
+      } catch (e) {
+        console.warn("stage_pulse_stats load fallback:", e);
+      }
+    }
+    loadStats();
+  }, []);
+
   // Set up Supabase Realtime Channel
   useEffect(() => {
     const channel = supabase.channel("ju52_stage_pulse", {
@@ -51,12 +78,38 @@ export default function StagePulse() {
     };
   }, []);
 
+  // Periodic persistence of counts to stage_pulse_stats
+  const syncTimeoutRef = useRef<number | null>(null);
+  const queueSync = () => {
+    if (syncTimeoutRef.current) return;
+    syncTimeoutRef.current = window.setTimeout(async () => {
+      syncTimeoutRef.current = null;
+      try {
+        await supabase
+          .from("stage_pulse_stats")
+          .upsert({
+            id: "current",
+            heart_count: counts.heart,
+            fire_count: counts.fire,
+            clap_count: counts.clap,
+            rock_count: counts.rock,
+            energy_count: counts.energy,
+            total_cheers: totalCheers,
+            updated_at: new Date().toISOString(),
+          });
+      } catch (err) {
+        // fail-soft
+      }
+    }, 5000);
+  };
+
   const triggerReactionDisplay = (type: string, emoji: string, isSelf: boolean) => {
     setCounts((prev) => ({
       ...prev,
       [type]: (prev[type] || 0) + 1,
     }));
     setTotalCheers((prev) => prev + 1);
+    if (isSelf) queueSync();
 
     // Spawn 1-2 floating flying particles
     const newParticles: FlyingParticle[] = [];

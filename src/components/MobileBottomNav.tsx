@@ -69,13 +69,13 @@ const RADIAL_ITEMS: RadialItem[] = [
     isLive: true,
   },
   {
-    to: "/confessions",
-    label: "কনফেশন",
-    icon: MessageCircleHeart,
+    to: "/leaderboard",
+    label: "লিডারবোর্ড",
+    icon: Trophy,
     lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
-    lightText: "text-purple-700 font-semibold",
+    lightText: "text-amber-600 font-semibold",
     darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
-    darkText: "dark:text-purple-400",
+    darkText: "dark:text-amber-400",
   },
   {
     to: "/status",
@@ -147,7 +147,7 @@ export default function MobileBottomNav() {
 
   const isHome = location.pathname === "/";
   const isStream = location.pathname === "/stream" || location.pathname === "/campus-map";
-  const isLeaderboard = location.pathname === "/leaderboard";
+  const isConfession = location.pathname === "/confessions";
   const isGame = location.pathname.startsWith("/game");
 
   return (
@@ -203,18 +203,18 @@ export default function MobileBottomNav() {
           {/* 3. Center Slot (Reserved for Notch) */}
           <div aria-hidden="true" className="w-[88px]" />
 
-          {/* 4. লিডারবোর্ড */}
+          {/* 4. কনফেশন */}
           <Link
-            to="/leaderboard"
-            aria-current={isLeaderboard ? "page" : undefined}
+            to="/confessions"
+            aria-current={isConfession ? "page" : undefined}
             className={`flex flex-col items-center justify-center gap-1 min-h-[56px] text-xs font-semibold transition-colors ${
-              isLeaderboard
+              isConfession
                 ? "text-primary dark:text-rose-400 font-bold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Trophy className="w-5 h-5 transition-transform active:scale-90" />
-            <span className="text-[11px] leading-tight font-display">লিডারবোর্ড</span>
+            <MessageCircleHeart className="w-5 h-5 transition-transform active:scale-90" />
+            <span className="text-[11px] leading-tight font-display">কনফেশন</span>
           </Link>
 
           {/* 5. গেম জোন */}

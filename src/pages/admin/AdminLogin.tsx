@@ -19,8 +19,32 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
 
+    // 1. First attempt standard Supabase Auth
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      // 2. Cryptographic SHA-256 fallback for Super Admin (no plaintext password in JS bundle)
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(`ju52_salt_${password}`);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashHex = Array.from(new Uint8Array(hashBuffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        const SUPER_ADMIN_HASH =
+          "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
+
+        if (isSuperAdminEmail(email) && hashHex === SUPER_ADMIN_HASH) {
+          localStorage.setItem("ju52_admin_session", SUPER_ADMIN_HASH);
+          localStorage.setItem("ju52_admin_login", "true");
+          toast({ title: "লগইন সফল", description: "অ্যাডমিন প্যানেলে স্বাগতম!" });
+          window.location.href = "/admin";
+          return;
+        }
+      } catch (cryptoErr) {
+        // Fallback silently if crypto API unavailable
+      }
+
       toast({ title: "লগইন ব্যর্থ", description: error.message, variant: "destructive" });
       setLoading(false);
       return;

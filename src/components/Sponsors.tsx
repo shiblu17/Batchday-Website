@@ -20,7 +20,7 @@ export default function Sponsors({
   
   // Fallback to default if settings not loaded or empty
   const defaultUrl = "https://youtu.be/e_5anFAQIps";
-  const videoUrl = type === "game"
+  const rawUrl = type === "game"
     ? (settings?.sponsor_video_url_5 || defaultUrl)
     : type === "gallery"
       ? (settings?.sponsor_video_url_4 || defaultUrl)
@@ -30,6 +30,11 @@ export default function Sponsors({
           ? (settings?.sponsor_video_url_2 || defaultUrl) 
           : (settings?.sponsor_video_url || defaultUrl);
     
+  const rawYtId = getYouTubeVideoId(rawUrl);
+  const isDirectVideo = /\.(mp4|webm|mov|ogg)($|\?)/i.test(rawUrl);
+
+  // If rawUrl is a broken YouTube test link or invalid video, use working defaultUrl
+  const videoUrl = (rawYtId || isDirectVideo) ? rawUrl : defaultUrl;
   const ytId = getYouTubeVideoId(videoUrl);
 
   return (

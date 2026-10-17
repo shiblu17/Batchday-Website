@@ -1,0 +1,7 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ju52-reels-cdn",
+  "account_id": "7c1020aa8d8a68ca0b03afbcb6d71829",
+  "main": "cloudflare-reels-worker.js",
+  "compatibility_date": "2026-10-15"
+}

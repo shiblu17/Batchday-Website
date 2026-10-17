@@ -36,5 +36,7 @@ pnpm-debug.log*
 
 # Scratch & Logs
 scratch/
+find_*.cjs
+public/test-video.html
 build_log*.txt
 *.log

@@ -52,6 +52,28 @@ export default function SlamBook() {
 
   const postcardRef = useRef<HTMLDivElement>(null);
 
+  // Auto-detect ?name= parameter from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nameParam = params.get("name");
+    if (nameParam) {
+      const decodedName = decodeURIComponent(nameParam);
+      setSearchRoll(decodedName);
+      const found = votersData.find(
+        (v) => v.name.toLowerCase() === decodedName.toLowerCase()
+      );
+      if (found) {
+        setSelectedStudent(found);
+      } else {
+        setSelectedStudent({
+          name: decodedName.toUpperCase(),
+          dept: "জাহাঙ্গীরনগর বিশ্ববিদ্যালয়",
+          hall: "JU-52",
+        });
+      }
+    }
+  }, []);
+
   // Load entries when a student is selected
   useEffect(() => {
     if (!selectedStudent) return;
@@ -61,31 +83,92 @@ export default function SlamBook() {
   const loadEntries = async (targetName: string) => {
     setIsLoading(true);
     try {
-      // 1. Try Supabase
-      const { data, error } = await supabase
-        .from("slam_book_entries" as any)
+      let dedicatedEntries: SlamEntry[] = [];
+      // 1. Fetch from dedicated slambook_entries table
+      try {
+        const { data: directData, error: directErr } = await supabase
+          .from("slambook_entries")
+          .select("*")
+          .ilike("target_name", targetName)
+          .order("created_at", { ascending: false });
+
+        if (!directErr && directData && directData.length > 0) {
+          dedicatedEntries = directData.map((row: any) => ({
+            id: row.id,
+            target_name: row.target_name,
+            target_roll: row.target_roll,
+            author_name: row.author_name,
+            author_dept: row.author_dept,
+            nickname: row.nickname || "",
+            badge: row.badge || "চিরদিনের দোস্ত",
+            memory: row.memory || "",
+            wish: row.wish || "",
+            created_at: row.created_at,
+          }));
+        }
+      } catch (e) {
+        console.warn("slambook_entries table query fallback:", e);
+      }
+
+      // 2. Fetch legacy entries from gallery_photos
+      const { data: legacyData } = await supabase
+        .from("gallery_photos")
         .select("*")
-        .eq("target_name", targetName)
+        .ilike("caption", "[SLAM]:%")
         .order("created_at", { ascending: false });
 
-      if (!error && data && data.length > 0) {
-        setEntries(data as unknown as SlamEntry[]);
-      } else {
-        // Fallback to localStorage
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (stored) {
-          const parsed: SlamEntry[] = JSON.parse(stored);
-          const studentEntries = parsed.filter((e) => e.target_name.toLowerCase() === targetName.toLowerCase());
-          setEntries(studentEntries);
-        } else {
-          setEntries([]);
-        }
+      let cloudEntries: SlamEntry[] = [];
+      if (legacyData) {
+        cloudEntries = legacyData
+          .map((row) => {
+            try {
+              const rawJson = (row.caption || "").replace("[SLAM]:", "").trim();
+              const parsed = JSON.parse(rawJson);
+              return {
+                ...parsed,
+                id: parsed.id || row.id,
+                created_at: parsed.created_at || row.created_at,
+              };
+            } catch {
+              return null;
+            }
+          })
+          .filter(
+            (e): e is SlamEntry =>
+              e !== null &&
+              e.target_name.toLowerCase() === targetName.toLowerCase()
+          );
       }
-    } catch {
+
+      // 3. Fetch from LocalStorage fallback
+      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const localEntries: SlamEntry[] = stored
+        ? JSON.parse(stored).filter(
+            (e: SlamEntry) =>
+              e.target_name.toLowerCase() === targetName.toLowerCase()
+          )
+        : [];
+
+      // Combine avoiding duplicates by ID or identical author+memory
+      const combinedMap = new Map<string, SlamEntry>();
+      [...dedicatedEntries, ...cloudEntries, ...localEntries].forEach((e) => {
+        const key = e.id || `${e.author_name}_${e.memory}`;
+        if (!combinedMap.has(key)) {
+          combinedMap.set(key, e);
+        }
+      });
+
+      setEntries(Array.from(combinedMap.values()));
+    } catch (err) {
+      console.warn("SlamBook load fallback:", err);
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
         const parsed: SlamEntry[] = JSON.parse(stored);
-        setEntries(parsed.filter((e) => e.target_name.toLowerCase() === targetName.toLowerCase()));
+        setEntries(
+          parsed.filter(
+            (e) => e.target_name.toLowerCase() === targetName.toLowerCase()
+          )
+        );
       }
     } finally {
       setIsLoading(false);
@@ -135,14 +218,36 @@ export default function SlamBook() {
       created_at: new Date().toISOString(),
     };
 
-    // 1. Try Supabase
+    // 1. Optimistic UI update
+    setEntries((prev) => [newEntry, ...prev]);
+
+    // 2. Save to dedicated slambook_entries Supabase table
     try {
-      await supabase.from("slam_book_entries" as any).insert([newEntry]);
-    } catch {
-      // Ignored for offline fallback
+      await supabase.from("slambook_entries").insert({
+        target_name: newEntry.target_name,
+        target_roll: newEntry.target_roll,
+        author_name: newEntry.author_name,
+        author_dept: newEntry.author_dept,
+        nickname: newEntry.nickname,
+        badge: newEntry.badge,
+        memory: newEntry.memory,
+        wish: newEntry.wish,
+      });
+    } catch (err) {
+      console.warn("slambook_entries cloud insert:", err);
     }
 
-    // 2. Local storage persistence
+    // 3. Dual-save to gallery_photos for backwards-compatibility
+    try {
+      await supabase.from("gallery_photos").insert({
+        url: "https://batchday52ju.xyz/slambook",
+        caption: `[SLAM]:${JSON.stringify(newEntry)}`,
+      });
+    } catch (err) {
+      console.warn("Legacy cloud save notice:", err);
+    }
+
+    // 4. Local storage persistence
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       const all: SlamEntry[] = stored ? JSON.parse(stored) : [];
@@ -152,8 +257,12 @@ export default function SlamBook() {
       console.warn("Storage err:", err);
     }
 
-    setEntries((prev) => [newEntry, ...prev]);
     setIsSubmitting(false);
+
+    toast({
+      title: "🎉 চিরকুট ডায়েরিতে যুক্ত হয়েছে!",
+      description: "তোমার বার্তাটি সফলভাবে সংরক্ষিত হয়েছে।",
+    });
 
     // Reset form
     setAuthorName("");
@@ -346,12 +455,33 @@ export default function SlamBook() {
                     মোট {entries.length} টি চিরকুট জমা পড়েছে
                   </p>
                 </div>
-                {entries.length > 0 && (
-                  <Button variant="outline" size="sm" onClick={handleDownloadPostcard} className="gap-2">
-                    <Download className="w-3.5 h-3.5" />
-                    মেমোরি কার্ড সেভ
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (!selectedStudent) return;
+                      const shareUrl = `${window.location.origin}/slambook?name=${encodeURIComponent(
+                        selectedStudent.name
+                      )}`;
+                      navigator.clipboard.writeText(shareUrl);
+                      toast({
+                        title: "ডায়েরি লিংক কপি হয়েছে! 🔗",
+                        description: "বন্ধুদের পাঠিয়ে চিরকুট লিখতে বলুন।",
+                      });
+                    }}
+                    className="gap-1.5"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    লিংক শেয়ার
                   </Button>
-                )}
+                  {entries.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={handleDownloadPostcard} className="gap-2">
+                      <Download className="w-3.5 h-3.5" />
+                      মেমোরি কার্ড সেভ
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Printable / Renderable Postcard Container */}

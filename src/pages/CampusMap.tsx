@@ -114,43 +114,100 @@ export default function CampusMap() {
   const [authorDept, setAuthorDept] = useState("");
   const [memoryText, setMemoryText] = useState("");
 
+  // Realtime subscription for campus spot memories
   useEffect(() => {
     loadSpotMemories(selectedSpot.id);
-  }, [selectedSpot]);
 
-  const loadSpotMemories = (spotId: string) => {
+    const channel = supabase
+      .channel("realtime:campus_spot_memories")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "campus_spot_memories",
+          filter: `spot_id=eq.${selectedSpot.id}`,
+        },
+        (payload) => {
+          const row = payload.new as any;
+          if (row) {
+            const incoming: SpotMemory = {
+              id: row.id,
+              spotId: row.spot_id,
+              authorName: row.author_name,
+              dept: row.dept,
+              text: row.text,
+              created_at: row.created_at,
+            };
+            setMemories((prev) => {
+              if (prev.some((m) => m.id === incoming.id)) return prev;
+              return [incoming, ...prev];
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedSpot.id]);
+
+  const loadSpotMemories = async (spotId: string) => {
     try {
+      // 1. Fetch from Supabase Cloud
+      const { data, error } = await supabase
+        .from("campus_spot_memories")
+        .select("*")
+        .eq("spot_id", spotId)
+        .order("created_at", { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        const cloudMemories: SpotMemory[] = data.map((row: any) => ({
+          id: row.id,
+          spotId: row.spot_id,
+          authorName: row.author_name,
+          dept: row.dept,
+          text: row.text,
+          created_at: row.created_at,
+        }));
+        setMemories(cloudMemories);
+        return;
+      }
+
+      // 2. Fallback to LocalStorage + seed memories
       const stored = localStorage.getItem(LOCAL_STORAGE_MEMORIES);
       if (stored) {
         const all: SpotMemory[] = JSON.parse(stored);
         setMemories(all.filter((m) => m.spotId === spotId));
       } else {
-        // Default seed memories for nostalgia
-        setMemories([
-          {
-            id: "seed-1",
-            spotId: "bottola",
-            authorName: "রাকিব ও বন্ধুরা",
-            dept: "অর্থনীতি",
-            text: "বৃষ্টির দিনে ক্লাস শেষে বটতলায় ডিমভর্তা আর গরম খিচুড়ির সেই স্বাদ কোনোদিন ভুলব না!",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "seed-2",
-            spotId: "muktamancha",
-            authorName: "তানভীর",
-            dept: "সিএসই",
-            text: "কনসার্টের রাতে সবার সাথে হাত তুলে একসঙ্গে গান গাওয়ার সেই উন্মাদনা আজও হৃদয়ে বাজে।",
-            created_at: new Date().toISOString(),
-          },
-        ].filter((m) => m.spotId === spotId));
+        setMemories(
+          [
+            {
+              id: "seed-1",
+              spotId: "bottola",
+              authorName: "রাকিব ও বন্ধুরা",
+              dept: "অর্থনীতি",
+              text: "বৃষ্টির দিনে ক্লাস শেষে বটতলায় ডিমভর্তা আর গরম খিচুড়ির সেই স্বাদ কোনোদিন ভুলব না!",
+              created_at: new Date().toISOString(),
+            },
+            {
+              id: "seed-2",
+              spotId: "muktamancha",
+              authorName: "তানভীর",
+              dept: "সিএসই",
+              text: "কনসার্টের রাতে সবার সাথে হাত তুলে একসঙ্গে গান গাওয়ার সেই উন্মাদনা আজও হৃদয়ে বাজে।",
+              created_at: new Date().toISOString(),
+            },
+          ].filter((m) => m.spotId === spotId)
+        );
       }
     } catch {
       setMemories([]);
     }
   };
 
-  const handleAddMemory = (e: React.FormEvent) => {
+  const handleAddMemory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!authorName.trim() || !memoryText.trim()) {
       toast({ title: "নাম এবং স্মৃতি লিখুন", variant: "destructive" });
@@ -166,6 +223,19 @@ export default function CampusMap() {
       created_at: new Date().toISOString(),
     };
 
+    // 1. Optimistic UI update
+    setMemories((prev) => [newMem, ...prev]);
+    setIsAddingMemory(false);
+    setAuthorName("");
+    setAuthorDept("");
+    setMemoryText("");
+
+    toast({
+      title: "স্মৃতি পিন করা হয়েছে! 📍",
+      description: `${selectedSpot.name}-এ আপনার স্মৃতি সফলভাবে যুক্ত হলো।`,
+    });
+
+    // 2. Backup to localStorage
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_MEMORIES);
       const all: SpotMemory[] = stored ? JSON.parse(stored) : [];
@@ -175,16 +245,17 @@ export default function CampusMap() {
       console.warn("Storage err:", err);
     }
 
-    setMemories((prev) => [newMem, ...prev]);
-    setIsAddingMemory(false);
-    setAuthorName("");
-    setAuthorDept("");
-    setMemoryText("");
-
-    toast({
-      title: "স্মৃতি পিন করা হয়েছে! 📍",
-      description: `${selectedSpot.name}-এ আপনার স্মৃতি স্থায়ীভাবে যুক্ত হলো।`,
-    });
+    // 3. Persist to Supabase Cloud
+    try {
+      await supabase.from("campus_spot_memories").insert({
+        spot_id: selectedSpot.id,
+        author_name: newMem.authorName,
+        dept: newMem.dept,
+        text: newMem.text,
+      });
+    } catch (err) {
+      console.warn("Supabase spot memory insert error:", err);
+    }
   };
 
   const filteredSpots = activeCategory === "all"

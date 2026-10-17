@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Headphones, Volume2, VolumeX, X, Play, Square, Sparkles } from "lucide-react";
 import { juAmbientEngine, type AmbientTrack } from "@/utils/juAmbientAudio";
 import { Slider } from "@/components/ui/slider";
@@ -19,10 +20,31 @@ const TRACKS: TrackOption[] = [
 ];
 
 export default function JuAmbientPlayer() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<AmbientTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(60);
+
+  const isExcludedRoute =
+    location.pathname.startsWith("/stream") ||
+    location.pathname.startsWith("/game") ||
+    location.pathname.startsWith("/campus-map");
+
+  useEffect(() => {
+    if (isExcludedRoute && isPlaying) {
+      juAmbientEngine.stop();
+      setIsPlaying(false);
+      setCurrentTrack(null);
+    }
+  }, [isExcludedRoute, isPlaying]);
+
+  // Cleanup on unmount - MUST be called unconditionally before any early return
+  useEffect(() => {
+    return () => {
+      juAmbientEngine.stop();
+    };
+  }, []);
 
   const handleToggleTrack = (track: AmbientTrack) => {
     if (isPlaying && currentTrack === track) {
@@ -48,12 +70,8 @@ export default function JuAmbientPlayer() {
     juAmbientEngine.setVolume(val / 100);
   };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      juAmbientEngine.stop();
-    };
-  }, []);
+  // Do not render UI on excluded routes (Games, Stream, Map)
+  if (isExcludedRoute) return null;
 
   return (
     <>

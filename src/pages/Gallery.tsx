@@ -15,10 +15,39 @@ function useGalleryPhotos(page: number) {
         const { data, error, count } = await supabase
           .from("gallery_photos")
           .select("*", { count: "exact" })
+          .or("caption.is.null,caption.not.ilike.%[REEL]%")
+          .not("caption", "ilike", "%[SLAM]%")
+          .not("caption", "ilike", "%[CAPSULE]%")
+          .not("url", "ilike", "%api.telegram.org%")
+          .not("url", "ilike", "%.mp4%")
+          .not("url", "ilike", "%.webm%")
           .order("created_at", { ascending: false })
           .range(0, page * LIMIT - 1);
         if (error) throw error;
-        return { data: data || [], count: count || 0 };
+
+        // Client-side guard: strictly ensure no reel, video, or data payload shows in photo gallery
+        const cleanPhotos = (data || []).filter((item: any) => {
+          const caption = item.caption || "";
+          const urlLower = (item.url || "").toLowerCase();
+          if (
+            caption.startsWith("[REEL]") ||
+            caption.startsWith("[SLAM]") ||
+            caption.startsWith("[CAPSULE]")
+          ) {
+            return false;
+          }
+          if (
+            urlLower.includes(".mp4") ||
+            urlLower.includes(".webm") ||
+            urlLower.includes("api.telegram.org") ||
+            urlLower.includes("t.me")
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        return { data: cleanPhotos, count: count || cleanPhotos.length };
       } catch (err) {
         console.error("Supabase fetch error:", err);
         return { data: [], count: 0 };

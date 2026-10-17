@@ -1,4 +1,4 @@
-import { LayoutDashboard, CreditCard, Download, QrCode, ArrowLeft, Settings, ImageIcon, Trophy, MessageCircleHeart, CalendarDays } from "lucide-react";
+import { LayoutDashboard, CreditCard, Download, QrCode, ArrowLeft, Settings, ImageIcon, Trophy, MessageCircleHeart, CalendarDays, Film } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import {
@@ -19,6 +19,7 @@ const items = [
   { title: "ডেটা এক্সপোর্ট", url: "/admin/export", icon: Download },
   { title: "QR স্ক্যানার", url: "/admin/scanner", icon: QrCode },
   { title: "গ্যালারি", url: "/admin/gallery", icon: ImageIcon },
+  { title: "রিলস ও স্ট্রিম", url: "/admin/reels", icon: Film },
   { title: "সাইট সেটিংস", url: "/admin/settings", icon: Settings },
   { title: "লিডারবোর্ড", url: "/admin/leaderboard", icon: Trophy },
   { title: "টাইমলাইন", url: "/admin/timeline", icon: CalendarDays },

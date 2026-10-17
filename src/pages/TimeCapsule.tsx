@@ -50,11 +50,29 @@ export default function TimeCapsule() {
       created_at: new Date().toISOString(),
     };
 
-    // 1. Try Supabase
+    // 1. Save to dedicated time_capsules Supabase table
     try {
-      await supabase.from("time_capsules" as any).insert([payload]);
-    } catch {
-      // Ignored for graceful fallback
+      await supabase.from("time_capsules").insert({
+        capsule_code: capsuleId,
+        name: payload.name,
+        email: payload.email,
+        dept: payload.dept,
+        message: payload.message,
+        vision: payload.vision,
+        unlock_year: 2036,
+      });
+    } catch (err) {
+      console.warn("time_capsules cloud insert notice:", err);
+    }
+
+    // 2. Dual-save to gallery_photos for backwards-compatibility
+    try {
+      await supabase.from("gallery_photos").insert({
+        url: "https://batchday52ju.xyz/time-capsule",
+        caption: `[CAPSULE]:${JSON.stringify(payload)}`,
+      });
+    } catch (err) {
+      console.warn("Time capsule cloud notice:", err);
     }
 
     // 2. Local storage

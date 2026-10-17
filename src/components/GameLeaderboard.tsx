@@ -14,7 +14,15 @@ interface Score {
   score: number;
 }
 
-export default function GameLeaderboard({ gameName, ascending = false }: { gameName: string, ascending?: boolean }) {
+export default function GameLeaderboard({ 
+  gameName, 
+  ascending = false,
+  children
+}: { 
+  gameName: string; 
+  ascending?: boolean;
+  children?: React.ReactNode;
+}) {
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -59,10 +67,14 @@ export default function GameLeaderboard({ gameName, ascending = false }: { gameN
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 text-amber-700 font-bold hover:bg-amber-200 transition-colors text-sm shadow-sm">
-          <Trophy className="w-4 h-4" />
-          লিডারবোর্ড
-        </button>
+        {children ? (
+          children
+        ) : (
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 text-amber-700 font-bold hover:bg-amber-200 transition-colors text-sm shadow-sm">
+            <Trophy className="w-4 h-4" />
+            লিডারবোর্ড
+          </button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-card rounded-2xl w-[90vw]">
         <DialogHeader>

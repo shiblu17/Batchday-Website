@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star, Loader2, Activity } from "lucide-react";
+import { Gamepad2, BrainCircuit, XSquare, Play, Footprints, Dices, Flame, Sparkles, ShoppingBag, Trophy, Medal, Star, Loader2, Activity, Layers, Zap, Orbit, Music, Target, Apple, LayoutGrid, Navigation, Car } from "lucide-react";
 import Sponsors from "@/components/Sponsors";
 import GameStore from '@/components/GameStore';
 
@@ -123,15 +123,147 @@ const FloatingParticles = () => {
 
 const games = [
   {
+    path: "/game/knife-hit",
+    title: "নাইফ হিট (Knife Hit)",
+    description: "ঘূর্ণায়মান কাঠে নিখুঁত লক্ষ্যভেদ করো আর আপেল কাটো!",
+    icon: Target,
+    color: "bg-rose-100 text-rose-600",
+    gradient: "from-rose-500 to-red-600",
+    badge: "NEW",
+    badgeIcon: Sparkles,
+    badgeColor: "bg-rose-500 text-white",
+  },
+  {
+    path: "/game/fruit-ninja",
+    title: "ফ্রুট নিনজা (Fruit Ninja)",
+    description: "আঙুলের ছোঁয়ায় ফল স্লাইস করো, বোমা এড়িয়ে চলো!",
+    icon: Apple,
+    color: "bg-emerald-100 text-emerald-600",
+    gradient: "from-lime-500 to-green-600",
+    badge: "HOT",
+    badgeIcon: Flame,
+    badgeColor: "bg-orange-500 text-white",
+  },
+  {
+    path: "/game/helix-jump",
+    title: "হেলিক্স জাম্প (Helix Jump)",
+    description: "ঘূর্ণায়মান টাওয়ারের ফাঁক গলে নিচে নেমে যাও!",
+    icon: Orbit,
+    color: "bg-purple-100 text-purple-600",
+    gradient: "from-purple-600 to-indigo-700",
+    badge: "NEW",
+    badgeIcon: Sparkles,
+    badgeColor: "bg-purple-500 text-white",
+  },
+  {
+    path: "/game/block-blast",
+    title: "ব্লক ব্লাস্ট (Block Blast)",
+    description: "৮x৮ নিওন গ্রিডে ব্লক সাজিয়ে কম্বো ব্লাস্ট করো!",
+    icon: LayoutGrid,
+    color: "bg-amber-100 text-amber-600",
+    gradient: "from-amber-500 to-yellow-600",
+    badge: "HOT",
+    badgeIcon: Flame,
+    badgeColor: "bg-amber-500 text-white",
+  },
+  {
+    path: "/game/zigzag",
+    title: "জিগজ্যাগ (ZigZag 3D)",
+    description: "দেয়াল ঘেষে ব্যালান্স রাখো, ক্রিস্টাল সংগ্রহ করো!",
+    icon: Navigation,
+    color: "bg-teal-100 text-teal-600",
+    gradient: "from-teal-500 to-emerald-700",
+    badge: "NEW",
+    badgeIcon: Sparkles,
+    badgeColor: "bg-teal-500 text-white",
+  },
+  {
+    path: "/game/traffic-dash",
+    title: "রেসিং লিমিটস (Racing Limits 3D)",
+    description: "আসল ৩ডি হাইওয়ে ট্রাফিক রেসিং! ৩৫টি আনলকড স্পোর্টস কার, বিদ্যুৎ গতিতে ড্রাইভ করো!",
+    icon: Car,
+    coverImage: "/racing-limits/cover.png",
+    color: "bg-red-100 text-red-600",
+    gradient: "from-red-600 to-amber-600",
+    badge: "3D HOT",
+    badgeIcon: Flame,
+    badgeColor: "bg-red-500 text-white",
+  },
+  {
+    path: "/game/stack",
+    title: "স্ট্যাক টাওয়ার (Stack)",
+    description: "নিখুঁত টাইমিংয়ে ড্রপ করে আকাশছোঁয়া টাওয়ার বানাও!",
+    icon: Layers,
+    color: "bg-blue-100 text-blue-600",
+    gradient: "from-blue-600 to-indigo-700",
+    badge: "TOP",
+    badgeIcon: Flame,
+    badgeColor: "bg-red-500 text-white",
+  },
+  {
+    path: "/game/snake",
+    title: "নিওন স্নেক (Neon Snake)",
+    description: "সাইবারপাঙ্ক নিওন গ্রিডে গতি আর খাদ্যের লড়াই!",
+    icon: Zap,
+    color: "bg-cyan-100 text-cyan-600",
+    gradient: "from-cyan-500 to-teal-600",
+    badge: "HOT",
+    badgeIcon: Flame,
+    badgeColor: "bg-cyan-500 text-white",
+  },
+  {
+    path: "/game/color-switch",
+    title: "কালার সুইচ (Color Switch)",
+    description: "একই রঙের অংশ দিয়ে বল পার করে স্টার জেতো!",
+    icon: Orbit,
+    color: "bg-fuchsia-100 text-fuchsia-600",
+    gradient: "from-fuchsia-500 to-pink-600",
+  },
+  {
+    path: "/game/brick-breaker",
+    title: "ব্রিক ব্রেকার (Brick Breaker)",
+    description: "পাওয়ার-আপ আর বল দিয়ে সব ইট চূর্ণ করো!",
+    icon: Sparkles,
+    color: "bg-amber-100 text-amber-600",
+    gradient: "from-amber-500 to-orange-600",
+  },
+  {
+    path: "/game/piano-tiles",
+    title: "পিয়ানো টাইলস (Piano Tiles)",
+    description: "সঙ্গীতের সুরে সুরে কালো টাইলসে দ্রুত ট্যাপ করো!",
+    icon: Music,
+    color: "bg-sky-100 text-sky-600",
+    gradient: "from-sky-500 to-indigo-600",
+    badge: "HOT",
+    badgeIcon: Flame,
+    badgeColor: "bg-red-500 text-white",
+  },
+  {
+    path: "/game/flappy",
+    title: "Flappy Student",
+    description: "বাস বাঁচিয়ে বাধা পার হও!",
+    icon: Gamepad2,
+    color: "bg-sky-100 text-sky-600",
+    gradient: "from-sky-500 to-blue-600",
+    badge: "CLASSIC",
+    badgeIcon: Flame,
+    badgeColor: "bg-rose-500 text-white",
+  },
+  {
     path: "/game/catch-grades",
     title: "Catch the Grades",
     description: "A+ এবং সিঙ্গারাগুলো ব্যাগে ভরো!",
     icon: ShoppingBag,
     color: "bg-emerald-100 text-emerald-600",
     gradient: "from-emerald-500 to-teal-600",
-    badge: "NEW",
-    badgeIcon: Sparkles,
-    badgeColor: "bg-yellow-500 text-white",
+  },
+  {
+    path: "/game/dinorun",
+    title: "জাবি রানার",
+    description: "ডাইনোসরের মতো ছুটে চলো ক্যাম্পাসে!",
+    icon: Footprints,
+    color: "bg-amber-100 text-amber-600",
+    gradient: "from-amber-500 to-orange-600",
   },
   {
     path: "/game/29",
@@ -145,72 +277,12 @@ const games = [
     badgeColor: "bg-black text-white",
   },
   {
-    path: "/game/flappy",
-    title: "Flappy Student",
-    description: "বাস বাঁচিয়ে বাধা পার হও!",
-    icon: Gamepad2,
-    color: "bg-sky-100 text-sky-600",
-    gradient: "from-sky-500 to-blue-600",
-    badge: "HOT",
-    badgeIcon: Flame,
-    badgeColor: "bg-red-500 text-white",
-  },
-  {
     path: "/game/ludo",
     title: "জাবি লুডু কিং",
     description: "সবাই মিলে লুডু খেলো!",
     icon: Dices,
     color: "bg-violet-100 text-violet-600",
     gradient: "from-violet-500 to-purple-600",
-  },
-  {
-    path: "/game/memory",
-    title: "JU মেমোরি ম্যাচ",
-    description: "কার্ড উল্টিয়ে ছবি মেলাও",
-    icon: BrainCircuit,
-    color: "bg-fuchsia-100 text-fuchsia-600",
-    gradient: "from-fuchsia-500 to-purple-600",
-  },
-  {
-    path: "/game/tictactoe",
-    title: "টিক-ট্যাক-টো",
-    description: "বন্ধুর সাথে বা এআই-এর সাথে খেলো",
-    icon: XSquare,
-    color: "bg-rose-100 text-rose-600",
-    gradient: "from-rose-500 to-pink-600",
-  },
-  {
-    path: "/game/dinorun",
-    title: "জাবি রানার",
-    description: "ডাইনোসরের মতো ছুটে চলো ক্যাম্পাসে!",
-    icon: Footprints,
-    color: "bg-amber-100 text-amber-600",
-    gradient: "from-amber-500 to-orange-600",
-    badge: "HOT",
-    badgeIcon: Flame,
-    badgeColor: "bg-amber-500 text-white"
-  },
-  {
-    path: "/game/ju-maze",
-    title: "জাবি মেজ",
-    description: "ভুলভুলাইয়া পার হয়ে বটতলায় পৌঁছাও দ্রুততম সময়ে!",
-    icon: BrainCircuit,
-    color: "bg-green-100 text-green-600",
-    gradient: "from-green-500 to-emerald-600",
-    badge: "NEW",
-    badgeIcon: Sparkles,
-    badgeColor: "bg-yellow-500 text-white"
-  },
-  {
-    path: "/game/typing-master",
-    title: "এক্সাম নাইট টাইপিং",
-    description: "শব্দ পড়ার আগেই টাইপ করে ফেলো!",
-    icon: Gamepad2,
-    color: "bg-indigo-100 text-indigo-600",
-    gradient: "from-indigo-500 to-purple-600",
-    badge: "NEW",
-    badgeIcon: Sparkles,
-    badgeColor: "bg-yellow-500 text-white"
   }
 ];
 
@@ -272,21 +344,34 @@ const GameCard = ({ game, index }: { game: any; index: number }) => {
           </motion.div>
         )}
 
-        <div className={`h-40 bg-gradient-to-br ${game.gradient} p-6 relative overflow-hidden flex items-center justify-center`}>
-          <motion.div 
-            className="opacity-10 absolute"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          >
-            <game.icon className="w-56 h-56 text-white" />
-          </motion.div>
-          <motion.div
-             whileHover={{ scale: 1.15, rotate: [0, -10, 10, 0] }}
-             transition={{ type: "spring", stiffness: 300 }}
-             className="z-10"
-          >
-             <game.icon className="w-16 h-16 text-white drop-shadow-lg" />
-          </motion.div>
+        <div className={`h-40 bg-gradient-to-br ${game.gradient} relative overflow-hidden flex items-center justify-center`}>
+          {game.coverImage ? (
+            <>
+              <img
+                src={game.coverImage}
+                alt={game.title}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+            </>
+          ) : (
+            <>
+              <motion.div 
+                className="opacity-10 absolute"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              >
+                <game.icon className="w-56 h-56 text-white" />
+              </motion.div>
+              <motion.div
+                 whileHover={{ scale: 1.15, rotate: [0, -10, 10, 0] }}
+                 transition={{ type: "spring", stiffness: 300 }}
+                 className="z-10"
+              >
+                 <game.icon className="w-16 h-16 text-white drop-shadow-lg" />
+              </motion.div>
+            </>
+          )}
         </div>
         
         <div className="p-6 relative pt-10">
@@ -332,56 +417,73 @@ export default function GameHub() {
     const fetchGlobalLeaderboard = async () => {
       setLoadingLeaderboard(true);
       const gamesMap: Record<string, string> = {
-        "catch-grades_v3": "Catch the Grades",
+        "knife_hit_v1": "নাইফ হিট",
+        "fruit_ninja_v1": "ফ্রুট নিনজা",
+        "helix_jump_v1": "হেলিক্স জাম্প",
+        "block_blast_v1": "ব্লক ব্লাস্ট",
+        "zigzag_v1": "জিগজ্যাগ 3D",
+        "traffic_dash_v1": "ট্রাফিক ড্যাশ",
+        "stack_v1": "স্ট্যাক টাওয়ার",
+        "snake_v1": "নিওন স্নেক",
+        "color_switch_v1": "কালার সুইচ",
+        "brick_breaker_v1": "ব্রিক ব্রেকার",
+        "piano_tiles_v1": "পিয়ানো টাইলস",
         "flappy_v3": "Flappy Student",
-        "ludo": "জাবি লুডু কিং",
-        "memory_v3": "JU মেমোরি ম্যাচ",
-        "tictactoe": "টিক-ট্যাক-টো",
+        "catch-grades_v3": "Catch the Grades",
         "dinorun_v3": "জাবি রানার",
-        "jumaze_v3": "জাবি মেজ",
-        "typing_v3": "এক্সাম নাইট টাইপিং"
+        "ludo": "জাবি লুডু কিং"
       };
       
-      const results = [];
-      for (const [gameId, gameTitle] of Object.entries(gamesMap)) {
-        const ascending = gameId === "memory_v3" || gameId === "jumaze_v3";
-        const { data } = await supabase
-          .from("game_scores")
-          .select("nickname, score")
-          .eq("game_name", gameId)
-          .order("score", { ascending })
-          .limit(1);
-          
-        if (data && data.length > 0) {
-          results.push({
-            name: data[0].nickname,
-            game: gameTitle,
-            score: gameId === "memory_v3" ? `${data[0].score} চাল` : gameId === "jumaze_v3" ? `${data[0].score} সে.` : data[0].score.toString(),
-            gameId
-          });
-        }
-      }
-      
-      setGlobalScores(results);
+      // Run all game leaderboard queries concurrently to prevent N+1 lag
+      const scorePromises = Object.entries(gamesMap).map(async ([gameId, gameTitle]) => {
+        try {
+          const { data } = await supabase
+            .from("game_scores")
+            .select("nickname, score")
+            .eq("game_name", gameId)
+            .order("score", { ascending: false })
+            .limit(1);
 
-      const { data: recentData } = await supabase
-        .from("game_scores")
-        .select("nickname, game_name, score")
-        .order("created_at", { ascending: false })
-        .limit(5);
-        
-      if (recentData) {
-        setRecentActivity(recentData.map(d => ({
-           ...d, 
-           gameTitle: gamesMap[d.game_name] || d.game_name 
-        })));
+          if (data && data.length > 0) {
+            return {
+              name: data[0].nickname,
+              game: gameTitle,
+              score: data[0].score.toString(),
+              gameId,
+            };
+          }
+        } catch (e) {
+          // Silent ignore individual game errors
+        }
+        return null;
+      });
+
+      const [scoresResults, recentRes] = await Promise.all([
+        Promise.all(scorePromises),
+        supabase
+          .from("game_scores")
+          .select("nickname, game_name, score")
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
+
+      const validScores = scoresResults.filter((s): s is NonNullable<typeof s> => s !== null);
+      setGlobalScores(validScores);
+
+      if (recentRes.data) {
+        setRecentActivity(
+          recentRes.data.map((d) => ({
+            ...d,
+            gameTitle: gamesMap[d.game_name] || d.game_name,
+          }))
+        );
       }
-      
+
       setLoadingLeaderboard(false);
     };
-    
+
     fetchGlobalLeaderboard();
-    const interval = setInterval(fetchGlobalLeaderboard, 30000);
+    const interval = setInterval(fetchGlobalLeaderboard, 45000);
     return () => clearInterval(interval);
   }, []);
 
@@ -425,7 +527,7 @@ export default function GameHub() {
     <div 
       ref={containerRef}
       className={`relative min-h-screen pt-12 pb-24 md:pb-12 px-4 overflow-hidden bg-background ${retroMode ? 'retro-scanlines' : ''}`}
-      style={{ cursor: retroMode ? 'crosshair' : 'crosshair' }} 
+      style={{ cursor: retroMode ? 'crosshair' : 'default' }} 
     >
       {/* Retro CSS injected dynamically for the easter egg */}
       {retroMode && (

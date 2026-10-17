@@ -60,10 +60,28 @@ function useGalleryPhotos(page: number) {
       const { data, error, count } = await supabase
         .from("gallery_photos")
         .select("*", { count: "exact" })
+        .or("caption.is.null,caption.not.ilike.%[REEL]%")
+        .not("caption", "ilike", "%[SLAM]%")
+        .not("caption", "ilike", "%[CAPSULE]%")
+        .not("url", "ilike", "%api.telegram.org%")
+        .not("url", "ilike", "%.mp4%")
+        .not("url", "ilike", "%.webm%")
         .order("created_at", { ascending: false })
         .range(0, page * LIMIT - 1);
       if (error) throw error;
-      return { data, count };
+      const cleanPhotos = (data || []).filter((item: any) => {
+        const caption = item.caption || "";
+        const urlLower = (item.url || "").toLowerCase();
+        return (
+          !caption.startsWith("[REEL]") &&
+          !caption.startsWith("[SLAM]") &&
+          !caption.startsWith("[CAPSULE]") &&
+          !urlLower.includes(".mp4") &&
+          !urlLower.includes(".webm") &&
+          !urlLower.includes("api.telegram.org")
+        );
+      });
+      return { data: cleanPhotos, count };
     },
   });
 }

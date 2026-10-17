@@ -167,3 +167,31 @@
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(1.05); }
 }
+
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(-90px) scale(1.25) rotate(12deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-180px) scale(1.4) rotate(-12deg);
+  }
+}
+
+.animate-float-up {
+  animation: float-up 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes vinyl-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-vinyl-spin {
+  animation: vinyl-spin 3.5s linear infinite;
+}
