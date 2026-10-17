@@ -209,6 +209,22 @@ export default function ReelsStudioModal({
     }
   };
 
+  const handleSelectTrack = async (track: MusicTrackItem) => {
+    setSelectedAppleTrack(track);
+    if (!track.previewUrl) {
+      try {
+        const res = await searchAppleMusic(`${track.title} ${track.artist}`, 1);
+        if (res && res[0]?.previewUrl) {
+          setSelectedAppleTrack((prev) =>
+            prev?.id === track.id ? { ...prev, previewUrl: res[0].previewUrl } : prev
+          );
+        }
+      } catch (err) {
+        console.warn("Failed to fetch previewUrl for selected track:", err);
+      }
+    }
+  };
+
   // Submit and upload reel
   const handlePublish = async () => {
     if (!selectedFile) return;
@@ -241,11 +257,22 @@ export default function ReelsStudioModal({
       // Build metadata tags
       let meta = `flt:${selectedFilter}|ov:${origVolume}|bv:${bgVolume}`;
       if (selectedAppleTrack) {
-        const safeTitle = encodeURIComponent(selectedAppleTrack.title.slice(0, 40));
-        const safeArtist = encodeURIComponent(selectedAppleTrack.artist.slice(0, 30));
-        const safeArt = encodeURIComponent(selectedAppleTrack.artwork);
-        const safePurl = encodeURIComponent(selectedAppleTrack.previewUrl);
-        meta += `|aud:itunes|tt:${safeTitle}|ta:${safeArtist}|tar:${safeArt}|tp:${safePurl}`;
+        let pUrl = selectedAppleTrack.previewUrl;
+        if (!pUrl) {
+          try {
+            const res = await searchAppleMusic(`${selectedAppleTrack.title} ${selectedAppleTrack.artist}`, 1);
+            if (res && res[0]?.previewUrl) pUrl = res[0].previewUrl;
+          } catch {}
+        }
+        if (pUrl) {
+          const safeTitle = encodeURIComponent(selectedAppleTrack.title.slice(0, 40));
+          const safeArtist = encodeURIComponent(selectedAppleTrack.artist.slice(0, 30));
+          const safeArt = encodeURIComponent(selectedAppleTrack.artwork);
+          const safePurl = encodeURIComponent(pUrl);
+          meta += `|aud:itunes|tt:${safeTitle}|ta:${safeArtist}|tar:${safeArt}|tp:${safePurl}`;
+        } else {
+          meta += `|aud:original`;
+        }
       } else {
         meta += `|aud:original`;
       }
@@ -668,7 +695,7 @@ export default function ReelsStudioModal({
                         return (
                           <div
                             key={track.id}
-                            onClick={() => setSelectedAppleTrack(track)}
+                            onClick={() => handleSelectTrack(track)}
                             className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                               isSelected
                                 ? "bg-gradient-to-r from-amber-500/25 to-rose-500/25 border border-amber-500/40 text-white"

@@ -31,6 +31,7 @@ import {
   formatVideoStreamingUrl,
 } from "@/utils/streamUploader";
 import { getFilterCss } from "@/utils/reelsCustomization";
+import { searchAppleMusic } from "@/utils/itunesMusicService";
 import ReelsStudioModal from "@/components/stream/ReelsStudioModal";
 
 export interface ReelItem {
@@ -573,7 +574,7 @@ export default function LiveBatchStream() {
                     <ReelPlayerCard
                       key={reel.id}
                       reel={reel}
-                      isActive={isCurrent}
+                      isActive={isCurrent && !uploadOpen}
                       isAdjacent={isAdjacent}
                       shouldLoad={shouldLoad}
                       isMuted={isGlobalMuted}
@@ -689,6 +690,26 @@ function ReelPlayerCard({
   const [posterUrl, setPosterUrl] = useState<string>(
     () => globalPosterCache.get(reel.id) || ""
   );
+
+  // Dynamic audio resolution with lazy fallback
+  const [resolvedAudioUrl, setResolvedAudioUrl] = useState<string | undefined>(
+    reel.audioPreviewUrl || undefined
+  );
+
+  useEffect(() => {
+    if (reel.audioPreviewUrl) {
+      setResolvedAudioUrl(reel.audioPreviewUrl);
+      return;
+    }
+    if (reel.audioType === "itunes" && reel.audioTitle) {
+      const term = `${reel.audioTitle} ${reel.audioArtist || ""}`.trim();
+      searchAppleMusic(term, 1).then((tracks) => {
+        if (tracks && tracks[0]?.previewUrl) {
+          setResolvedAudioUrl(tracks[0].previewUrl);
+        }
+      });
+    }
+  }, [reel.audioPreviewUrl, reel.audioType, reel.audioTitle, reel.audioArtist]);
 
   // Scrubber preview tooltip states
   const [isScrubbing, setIsScrubbing] = useState(false);
@@ -816,7 +837,7 @@ function ReelPlayerCard({
           setIsBuffering(false);
           setHasError(false);
           capturePoster();
-          if (audio && reel.audioPreviewUrl && !isHolding.current) {
+          if (audio && resolvedAudioUrl && !isHolding.current) {
             audio.muted = isMuted;
             audio.volume = (reel.bgVolume ?? 80) / 100;
             audio.play().catch(() => {});
@@ -847,7 +868,7 @@ function ReelPlayerCard({
         audio.pause();
       }
     }
-  }, [isActive, isMuted, shouldLoad, videoSrc, reel.origVolume, reel.bgVolume, reel.audioPreviewUrl]);
+  }, [isActive, isMuted, shouldLoad, videoSrc, reel.origVolume, reel.bgVolume, resolvedAudioUrl]);
 
   // Tap handling & Long-press hold-to-pause (Clean screen mode)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -894,7 +915,7 @@ function ReelPlayerCard({
       if (videoRef.current && videoRef.current.paused && isActive) {
         videoRef.current.play().then(() => setIsPlaying(true));
       }
-      if (audioRef.current && isActive && !isMuted && reel.audioPreviewUrl) {
+      if (audioRef.current && isActive && !isMuted && resolvedAudioUrl) {
         audioRef.current.play().catch(() => {});
       }
       return;
@@ -925,7 +946,7 @@ function ReelPlayerCard({
       if (video.paused) {
         video.play().then(() => setIsPlaying(true));
       }
-      if (audioRef.current && reel.audioPreviewUrl) {
+      if (audioRef.current && resolvedAudioUrl) {
         audioRef.current.muted = false;
         audioRef.current.play().catch(() => {});
       }
@@ -935,7 +956,7 @@ function ReelPlayerCard({
     if (video.paused) {
       video.play().then(() => setIsPlaying(true));
       setShowPlayIcon(false);
-      if (audioRef.current && reel.audioPreviewUrl) {
+      if (audioRef.current && resolvedAudioUrl) {
         audioRef.current.play().catch(() => {});
       }
     } else {
@@ -1057,10 +1078,10 @@ function ReelPlayerCard({
       }}
     >
       {/* Synchronized Apple Music Soundtrack Streamer */}
-      {shouldLoad && reel.audioPreviewUrl && (
+      {shouldLoad && resolvedAudioUrl && (
         <audio
           ref={audioRef}
-          src={reel.audioPreviewUrl}
+          src={resolvedAudioUrl}
           loop
           preload="auto"
         />
@@ -1091,7 +1112,7 @@ function ReelPlayerCard({
           onPlaying={() => {
             setIsBuffering(false);
             capturePoster();
-            if (audioRef.current && isActive && reel.audioPreviewUrl && !isHolding.current) {
+            if (audioRef.current && isActive && resolvedAudioUrl && !isHolding.current) {
               audioRef.current.play().catch(() => {});
             }
           }}
