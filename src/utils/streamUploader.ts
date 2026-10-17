@@ -14,7 +14,8 @@ export const IMGBB_API_KEY =
   import.meta.env.VITE_IMGBB_API_KEY || "85164bf284c589b1ac8c2f2408fdc3f5";
 
 export const CLOUDFLARE_REELS_PROXY =
-  import.meta.env.VITE_CLOUDFLARE_REELS_PROXY || "";
+  import.meta.env.VITE_CLOUDFLARE_REELS_PROXY ||
+  "https://ju52-reels-cdn.atiquzzaman116592.workers.dev";
 
 /**
  * Routes Telegram direct video URLs through high-speed Cloudflare Edge Cache if configured
@@ -115,8 +116,8 @@ export async function compressVideoInBrowser(
   file: File,
   onProgress?: (percent: number) => void
 ): Promise<File> {
-  // If already under 19MB, no compression needed
-  if (file.size <= 19 * 1024 * 1024) {
+  // If already lightweight (under 4.5MB), no compression needed
+  if (file.size <= 4.5 * 1024 * 1024) {
     return file;
   }
 
@@ -135,15 +136,15 @@ export async function compressVideoInBrowser(
     video.onloadedmetadata = () => {
       let width = video.videoWidth || 720;
       let height = video.videoHeight || 1280;
-      const maxDim = 720;
+      const maxDim = 1280;
 
-      // Scale down large 1080p/4K dimensions to 720p
-      if (width > height && width > maxDim) {
-        height = Math.round((height * maxDim) / width);
-        width = maxDim;
-      } else if (height > maxDim) {
+      // Scale down large 1080p/4K dimensions to 720p (1280px height for portrait)
+      if (height > width && height > maxDim) {
         width = Math.round((width * maxDim) / height);
         height = maxDim;
+      } else if (width > maxDim) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
       }
 
       width = width % 2 === 0 ? width : width - 1;
@@ -190,7 +191,7 @@ export async function compressVideoInBrowser(
 
       const recorder = new MediaRecorder(stream, {
         mimeType,
-        videoBitsPerSecond: 2_200_000, // 2.2 Mbps target bitrate (~12MB for 45s)
+        videoBitsPerSecond: 1_600_000, // 1.6 Mbps target bitrate (~3.5MB for 20s, ~6MB for 30s)
       });
 
       const chunks: Blob[] = [];
@@ -257,7 +258,7 @@ export async function validateVideoFile(file: File): Promise<{ duration: number;
       `ভিডিওর দৈর্ঘ্য সর্বোচ্চ ৪৫ সেকেন্ড হতে পারবে! (বর্তমান: ${Math.round(duration)} সেকেন্ড)`
     );
   }
-  const needsCompression = file.size > 20 * 1024 * 1024;
+  const needsCompression = file.size > 4.5 * 1024 * 1024;
   return { duration, needsCompression };
 }
 
@@ -332,30 +333,41 @@ export async function uploadVideoToTelegram(
   const { duration } = await validateVideoFile(file);
 
   let fileToUpload = file;
-  if (file.size > 20 * 1024 * 1024) {
+  if (file.size > 4.5 * 1024 * 1024) {
     if (onProgress) {
       const initialMb = (file.size / (1024 * 1024)).toFixed(1);
       onProgress({
         percent: 12,
         stage: "compressing",
-        message: `ভিডিও সাইজ ${initialMb} MB, এটি স্বয়ংক্রিয়ভাবে কম্প্রেস করা হচ্ছে...`,
+        message: `ভিডিও সাইজ ${initialMb} MB, এটি দ্রুত স্ট্রিমিংয়ের জন্য অপ্টিমাইজ করা হচ্ছে...`,
       });
     }
-    fileToUpload = await compressVideoInBrowser(file, (p) => {
-      if (onProgress) {
-        onProgress({
-          percent: Math.min(20, Math.round((p / 100) * 20)),
-          stage: "compressing",
-          message: `কম্প্রেশন চলছে (${p}%)...`,
-        });
+    try {
+      fileToUpload = await compressVideoInBrowser(file, (p) => {
+        if (onProgress) {
+          onProgress({
+            percent: Math.min(22, Math.round(12 + (p / 100) * 10)),
+            stage: "compressing",
+            message: `ভিডিও অপ্টিমাইজেশন চলছে (${p}%)...`,
+          });
+        }
+      });
+    } catch (compressErr) {
+      console.warn("Client compression failed, using original:", compressErr);
+      if (file.size <= 20 * 1024 * 1024) {
+        fileToUpload = file;
+      } else {
+        throw new Error(
+          "ভিডিও ফাইলটি ২০ MB-র বেশি এবং কম্প্রেশন সম্ভব হয়নি। দয়া করে একটু ছোট ভিডিও দিন।"
+        );
       }
-    });
+    }
   }
 
   // 2. Upload with XMLHttpRequest for real progress
   if (onProgress) {
     onProgress({
-      percent: 22,
+      percent: 25,
       stage: "uploading",
       message: "ভিডিও ক্লাউডে আপলোড হচ্ছে...",
     });
@@ -369,9 +381,7 @@ export async function uploadVideoToTelegram(
   formData.append("caption", captionText || "JU 52nd Batch Day Reel");
   formData.append("supports_streaming", "true");
 
-  const sendVideoUrl = CLOUDFLARE_REELS_PROXY
-    ? `${CLOUDFLARE_REELS_PROXY.replace(/\/+$/, "")}/api/upload-reel`
-    : `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`;
+  const sendVideoUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`;
 
   const uploadResult = await new Promise<any>((resolve, reject) => {
     const xhr = new XMLHttpRequest();

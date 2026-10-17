@@ -94,9 +94,6 @@ const DEPARTMENTS = [
   "পরিবেশ বিজ্ঞান",
 ];
 
-// In-memory poster cache to guarantee 0ms transitions across re-renders
-const globalPosterCache = new Map<string, string>();
-
 export default function LiveBatchStream() {
   const { isAdmin } = useAuth();
   const isLocalAdmin = localStorage.getItem("ju52_admin_login") === "true";
@@ -376,15 +373,21 @@ export default function LiveBatchStream() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeReelId, reels, uploadOpen]);
 
-  // Real-time snap detection for instantaneous video playback on swipe
+  // Real-time snap detection throttled to display refresh rate
+  const scrollRafRef = useRef<number | null>(null);
   const handleContainerScroll = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    const itemHeight = el.clientHeight || window.innerHeight;
-    const newIndex = Math.round(el.scrollTop / itemHeight);
-    if (reels[newIndex] && reels[newIndex].id !== activeReelId) {
-      setActiveReelId(reels[newIndex].id);
+    if (scrollRafRef.current) {
+      window.cancelAnimationFrame(scrollRafRef.current);
     }
+    scrollRafRef.current = window.requestAnimationFrame(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      const itemHeight = el.clientHeight || window.innerHeight;
+      const newIndex = Math.round(el.scrollTop / itemHeight);
+      if (reels[newIndex] && reels[newIndex].id !== activeReelId) {
+        setActiveReelId(reels[newIndex].id);
+      }
+    });
   };
 
   return (
@@ -550,7 +553,7 @@ export default function LiveBatchStream() {
             <div
               ref={containerRef}
               onScroll={handleContainerScroll}
-              className="w-full h-[100dvh] overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar relative"
+              className="w-full h-[100dvh] overflow-y-scroll snap-y snap-mandatory no-scrollbar relative touch-pan-y"
               style={{
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
@@ -564,19 +567,22 @@ export default function LiveBatchStream() {
                 );
                 return reels.map((reel, index) => {
                   const isCurrent = activeReelId === reel.id;
-                  const isAdjacent =
+                  const isNext =
                     activeIndex === -1
                       ? index === 1
-                      : Math.abs(index - activeIndex) === 1;
-                  const shouldLoad = isCurrent || isAdjacent;
+                      : index === activeIndex + 1;
+                  const isPrev =
+                    activeIndex !== -1 && index === activeIndex - 1;
+                  const shouldMount = isCurrent || isNext || isPrev;
 
                   return (
                     <ReelPlayerCard
                       key={reel.id}
                       reel={reel}
                       isActive={isCurrent && !uploadOpen}
-                      isAdjacent={isAdjacent}
-                      shouldLoad={shouldLoad}
+                      isNext={isNext}
+                      isPrev={isPrev}
+                      shouldMount={shouldMount}
                       isMuted={isGlobalMuted}
                       isCleanMode={isCleanMode}
                       hasAdminAccess={hasAdminAccess}
@@ -641,8 +647,9 @@ export default function LiveBatchStream() {
 function ReelPlayerCard({
   reel,
   isActive,
-  isAdjacent,
-  shouldLoad,
+  isNext,
+  isPrev,
+  shouldMount,
   isMuted,
   isCleanMode,
   hasAdminAccess,
@@ -659,8 +666,9 @@ function ReelPlayerCard({
 }: {
   reel: ReelItem;
   isActive: boolean;
-  isAdjacent: boolean;
-  shouldLoad: boolean;
+  isNext: boolean;
+  isPrev: boolean;
+  shouldMount: boolean;
   isMuted: boolean;
   isCleanMode: boolean;
   hasAdminAccess?: boolean;
@@ -687,9 +695,6 @@ function ReelPlayerCard({
   const [videoSrc, setVideoSrc] = useState(reel.url);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [posterUrl, setPosterUrl] = useState<string>(
-    () => globalPosterCache.get(reel.id) || ""
-  );
 
   // Dynamic audio resolution with lazy fallback
   const [resolvedAudioUrl, setResolvedAudioUrl] = useState<string | undefined>(
@@ -727,37 +732,6 @@ function ReelPlayerCard({
     setHasError(false);
   }, [reel.url]);
 
-  // Capture frame 0 dynamically for instant poster
-  const capturePoster = () => {
-    const video = videoRef.current;
-    if (!video || posterUrl || globalPosterCache.has(reel.id)) return;
-    try {
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        const canvas = document.createElement("canvas");
-        const maxW = 360;
-        let w = video.videoWidth;
-        let h = video.videoHeight;
-        if (w > maxW) {
-          h = Math.round((h * maxW) / w);
-          w = maxW;
-        }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, w, h);
-          const data = canvas.toDataURL("image/jpeg", 0.65);
-          if (globalPosterCache.size > 80) {
-            const firstKey = globalPosterCache.keys().next().value;
-            if (firstKey) globalPosterCache.delete(firstKey);
-          }
-          globalPosterCache.set(reel.id, data);
-          setPosterUrl(data);
-        }
-      }
-    } catch {}
-  };
-
   const handleVideoError = async () => {
     if (reel.fileId && !isRefreshing) {
       setIsRefreshing(true);
@@ -775,7 +749,7 @@ function ReelPlayerCard({
     }
   };
 
-  // IntersectionObserver for snap autoplay
+  // IntersectionObserver for clean, un-jittered snap activation
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
@@ -783,47 +757,39 @@ function ReelPlayerCard({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
             onInView();
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.65 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
   }, [onInView]);
 
-  // Pre-warm adjacent video on GPU
+  // Smart background warm-up for the IMMEDIATE NEXT reel only
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !shouldLoad) return;
+    if (!video || !isNext) return;
 
-    if (isAdjacent && !isActive) {
-      video.muted = true;
-      video.preload = "auto";
-      const handleLoadedMeta = () => {
-        try {
-          video.currentTime = 0.001;
-          capturePoster();
-        } catch {}
-      };
-      if (video.readyState >= 1) {
-        handleLoadedMeta();
-      } else {
-        video.addEventListener("loadedmetadata", handleLoadedMeta, {
-          once: true,
-        });
-      }
-    }
-  }, [isAdjacent, isActive, shouldLoad]);
+    video.muted = true;
+    video.preload = "metadata";
 
-  // Handle play/pause and synchronize background Apple Tune track
+    // Switch to auto pre-buffering after 1.2s idle so active video gets 100% initial bandwidth
+    const timer = window.setTimeout(() => {
+      if (video) video.preload = "auto";
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, [isNext]);
+
+  // Dedicated Playback & Sound Controller
   useEffect(() => {
     const video = videoRef.current;
     const audio = audioRef.current;
-    if (!video || !shouldLoad) return;
+    if (!video || !shouldMount) return;
 
     if (isActive) {
       video.muted = isMuted;
@@ -836,7 +802,6 @@ function ReelPlayerCard({
           setIsPlaying(true);
           setIsBuffering(false);
           setHasError(false);
-          capturePoster();
           if (audio && resolvedAudioUrl && !isHolding.current) {
             audio.muted = isMuted;
             audio.volume = (reel.bgVolume ?? 80) / 100;
@@ -850,7 +815,6 @@ function ReelPlayerCard({
               await video.play();
               setIsPlaying(true);
               setIsBuffering(false);
-              capturePoster();
             } catch {
               setIsPlaying(false);
             }
@@ -868,7 +832,7 @@ function ReelPlayerCard({
         audio.pause();
       }
     }
-  }, [isActive, isMuted, shouldLoad, videoSrc, reel.origVolume, reel.bgVolume, resolvedAudioUrl]);
+  }, [isActive, isMuted, shouldMount, videoSrc, reel.origVolume, reel.bgVolume, resolvedAudioUrl]);
 
   // Tap handling & Long-press hold-to-pause (Clean screen mode)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1062,6 +1026,20 @@ function ReelPlayerCard({
     }
   };
 
+  if (!shouldMount) {
+    return (
+      <div
+        ref={cardRef}
+        id={`reel-item-${reel.id}`}
+        className="relative w-full h-[100dvh] snap-start snap-always overflow-hidden bg-black flex items-center justify-center select-none"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-zinc-950/80 border border-white/5 flex items-center justify-center opacity-30">
+          <Film className="w-6 h-6 text-zinc-600" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={cardRef}
@@ -1073,84 +1051,60 @@ function ReelPlayerCard({
       onPointerCancel={handlePointerUp}
       onTouchEnd={handleTouchEnd}
       style={{
-        transform: "translateZ(0)",
+        transform: "translate3d(0, 0, 0)",
         willChange: "transform",
       }}
     >
       {/* Synchronized Apple Music Soundtrack Streamer */}
-      {shouldLoad && resolvedAudioUrl && (
+      {resolvedAudioUrl && (
         <audio
           ref={audioRef}
           src={resolvedAudioUrl}
           loop
-          preload="auto"
+          preload={isActive ? "auto" : "none"}
         />
       )}
 
-      {/* HTML5 Video Player with Real-time CSS Filter */}
-      {shouldLoad ? (
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          loop
-          playsInline
-          muted={isMuted}
-          preload="auto"
-          style={{
-            filter: getFilterCss(reel.filterId),
-            transform: "translateZ(0)",
-            willChange: "filter, transform",
-          }}
-          onLoadedData={() => {
-            capturePoster();
-            setIsBuffering(false);
-          }}
-          onWaiting={() => {
-            setIsBuffering(true);
-            if (audioRef.current) audioRef.current.pause();
-          }}
-          onPlaying={() => {
-            setIsBuffering(false);
-            capturePoster();
-            if (audioRef.current && isActive && resolvedAudioUrl && !isHolding.current) {
-              audioRef.current.play().catch(() => {});
-            }
-          }}
-          onCanPlay={() => {
-            setIsBuffering(false);
-          }}
-          onPause={() => {
-            setIsPlaying(false);
-            if (audioRef.current) audioRef.current.pause();
-          }}
-          onSeeked={() => {
-            if (audioRef.current && videoRef.current && audioRef.current.duration) {
-              audioRef.current.currentTime =
-                videoRef.current.currentTime % audioRef.current.duration;
-            }
-          }}
-          onError={handleVideoError}
-          onTimeUpdate={handleTimeUpdate}
-          className="w-full h-full object-cover select-none transition-[filter] duration-300"
-        />
-      ) : (
-        <div className="w-full h-full bg-zinc-950 flex flex-col items-center justify-center text-zinc-700">
-          <Film className="w-12 h-12 mb-2 animate-pulse" />
-          <span className="text-[11px] font-mono">JU-52 Reel</span>
-        </div>
-      )}
-
-      {/* Instant 0ms First-Frame Poster Layer */}
-      {posterUrl && (
-        <img
-          src={posterUrl}
-          alt=""
-          style={{ filter: getFilterCss(reel.filterId) }}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none z-10 ${
-            isPlaying && !isBuffering ? "opacity-0" : "opacity-100"
-          }`}
-        />
-      )}
+      {/* HTML5 Video Player with Hardware Acceleration & Real-time CSS Filter */}
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        loop
+        playsInline
+        muted={isMuted}
+        preload={isActive ? "auto" : isNext ? "metadata" : "none"}
+        style={{
+          filter: getFilterCss(reel.filterId),
+          transform: "translate3d(0, 0, 0)",
+          backfaceVisibility: "hidden",
+          contain: "paint",
+        }}
+        onLoadedData={() => setIsBuffering(false)}
+        onWaiting={() => {
+          setIsBuffering(true);
+          if (audioRef.current) audioRef.current.pause();
+        }}
+        onPlaying={() => {
+          setIsBuffering(false);
+          if (audioRef.current && isActive && resolvedAudioUrl && !isHolding.current) {
+            audioRef.current.play().catch(() => {});
+          }
+        }}
+        onCanPlay={() => setIsBuffering(false)}
+        onPause={() => {
+          setIsPlaying(false);
+          if (audioRef.current) audioRef.current.pause();
+        }}
+        onSeeked={() => {
+          if (audioRef.current && videoRef.current && audioRef.current.duration) {
+            audioRef.current.currentTime =
+              videoRef.current.currentTime % audioRef.current.duration;
+          }
+        }}
+        onError={handleVideoError}
+        onTimeUpdate={handleTimeUpdate}
+        className="w-full h-full object-cover select-none transition-[filter] duration-200"
+      />
 
       {/* Sleek Buffering Indicator */}
       {isBuffering && isActive && (
@@ -1248,7 +1202,7 @@ function ReelPlayerCard({
           title="রিলস ড্রপ করুন"
         >
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-pink-500 p-[1.5px] shadow-[0_0_15px_rgba(244,63,94,0.45)] group-hover:shadow-[0_0_22px_rgba(244,63,94,0.65)] transition-all">
-            <div className="w-full h-full rounded-full bg-black/60 backdrop-blur-xl flex items-center justify-center text-white">
+            <div className="w-full h-full rounded-full bg-black/80 flex items-center justify-center text-white">
               <Sparkles className="w-4 h-4 text-amber-300 group-hover:scale-110 transition-transform" />
             </div>
           </div>
@@ -1264,7 +1218,7 @@ function ReelPlayerCard({
           className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
           title="সব রিলস গ্রিড ভিউতে দেখুন"
         >
-          <div className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-105">
+          <div className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-105">
             <LayoutGrid className="w-4 h-4 text-zinc-200" />
           </div>
           <span className="text-[9px] font-medium text-zinc-300">গ্রিড</span>
@@ -1280,10 +1234,10 @@ function ReelPlayerCard({
           title={isFullscreen ? "ফুলস্ক্রিন বন্ধ" : "গেমের মত ফুলস্ক্রিন করুন"}
         >
           <div
-            className={`w-9 h-9 rounded-full backdrop-blur-2xl border flex items-center justify-center shadow-lg transition-all group-hover:scale-105 ${
+            className={`w-9 h-9 rounded-full border flex items-center justify-center shadow-lg transition-all group-hover:scale-105 ${
               isFullscreen
-                ? "bg-amber-500/25 border-amber-400 text-amber-300 shadow-amber-500/30"
-                : "bg-white/10 hover:bg-white/20 border-white/20 text-white"
+                ? "bg-amber-500/30 border-amber-400 text-amber-300 shadow-amber-500/30"
+                : "bg-black/60 hover:bg-black/80 border-white/20 text-white"
             }`}
           >
             {isFullscreen ? (
@@ -1303,7 +1257,7 @@ function ReelPlayerCard({
           className="flex flex-col items-center gap-0.5 group transition-transform active:scale-125"
           title="Fire React"
         >
-          <div className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-amber-500/40 flex items-center justify-center text-white shadow-xl shadow-amber-500/20 group-hover:border-amber-400 group-hover:shadow-[0_0_20px_rgba(251,191,36,0.5)] transition-all">
+          <div className="w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 border border-amber-500/50 flex items-center justify-center text-white shadow-xl shadow-amber-500/20 group-hover:border-amber-400 group-hover:shadow-[0_0_20px_rgba(251,191,36,0.5)] transition-all">
             <Flame className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.7)] group-hover:scale-110 transition-transform" />
           </div>
           <span className="text-[11px] font-bold text-amber-400 drop-shadow font-mono">
@@ -1317,7 +1271,7 @@ function ReelPlayerCard({
           className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
           title="শেয়ার"
         >
-          <div className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white shadow-lg transition-all">
+          <div className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white shadow-lg transition-all">
             <Share2 className="w-4 h-4 text-zinc-200" />
           </div>
           <span className="text-[9px] font-medium text-zinc-300">শেয়ার</span>
@@ -1329,7 +1283,7 @@ function ReelPlayerCard({
           className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
           title={isMuted ? "সাউন্ড চালু করুন" : "মিউট করুন"}
         >
-          <div className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white shadow-lg transition-all">
+          <div className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white shadow-lg transition-all">
             {isMuted ? (
               <VolumeX className="w-4 h-4 text-rose-400" />
             ) : (
@@ -1349,7 +1303,7 @@ function ReelPlayerCard({
             className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
             title="রিলস এডমিন কন্ট্রোল"
           >
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-2xl border border-amber-500/40 flex items-center justify-center text-amber-300 shadow-md transition-all">
+            <div className="w-8 h-8 rounded-full bg-amber-500/30 hover:bg-amber-500/40 border border-amber-500/50 flex items-center justify-center text-amber-300 shadow-md transition-all">
               <Shield className="w-3.5 h-3.5" />
             </div>
             <span className="text-[8px] text-amber-300 font-medium">এডমিন</span>
@@ -1366,7 +1320,7 @@ function ReelPlayerCard({
             className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
             title="রিলস ডিলিট করুন (এডমিন)"
           >
-            <div className="w-8 h-8 rounded-full bg-rose-500/20 hover:bg-rose-500/30 backdrop-blur-2xl border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-lg transition-all group-hover:scale-105">
+            <div className="w-8 h-8 rounded-full bg-rose-500/30 hover:bg-rose-500/40 border border-rose-500/50 flex items-center justify-center text-rose-400 shadow-lg transition-all group-hover:scale-105">
               <Trash2 className="w-3.5 h-3.5" />
             </div>
             <span className="text-[8px] text-rose-400 font-medium">মুছুন</span>
