@@ -59,6 +59,15 @@ const RADIAL_ITEMS: RadialItem[] = [
     darkText: "dark:text-amber-400",
   },
   {
+    to: "/campus-map",
+    label: "ক্যাম্পাস ম্যাপ",
+    icon: Compass,
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-teal-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-teal-400",
+  },
+  {
     to: "/stage-pulse",
     label: "লাইভ পালস",
     icon: Zap,
@@ -146,7 +155,7 @@ export default function MobileBottomNav() {
   };
 
   const isHome = location.pathname === "/";
-  const isStream = location.pathname === "/stream" || location.pathname === "/campus-map";
+  const isStream = location.pathname === "/stream";
   const isConfession = location.pathname === "/confessions";
   const isGame = location.pathname.startsWith("/game");
 

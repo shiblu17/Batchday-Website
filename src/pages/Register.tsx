@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TSHIRT_SIZES } from "@/lib/constants";
-import { CheckCircle, Upload, Phone, CreditCard, ChevronLeft, ChevronRight, User, Camera, Loader2, XCircle } from "lucide-react";
+import { CheckCircle, Upload, Phone, CreditCard, ChevronLeft, ChevronRight, User, Camera, Loader2, XCircle, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -88,6 +88,17 @@ export default function RegisterPage() {
     amount?: number;
     alreadyMatched?: boolean;
   } | null>(null);
+  const [copiedNumber, setCopiedNumber] = useState(false);
+
+  const handleCopyNumber = () => {
+    const num = form.paymentMethod === "bkash" ? settings?.bkash_number : settings?.nagad_number;
+    if (num) {
+      navigator.clipboard.writeText(num);
+      setCopiedNumber(true);
+      toast({ title: "নম্বর কপি হয়েছে! 📋", description: `${num} ক্লিপবোর্ডে কপি করা হয়েছে।` });
+      setTimeout(() => setCopiedNumber(false), 2000);
+    }
+  };
 
   useEffect(() => {
     const fetchLists = async () => {
@@ -522,11 +533,29 @@ export default function RegisterPage() {
                 </div>
                 <motion.div
                   layout
-                  className="rounded-xl bg-card p-4 border border-border text-center"
+                  className="rounded-xl bg-card p-4 border border-border flex flex-col items-center justify-center gap-2"
                 >
-                  <p className="text-xs text-muted-foreground mb-1">টাকা পাঠাও এই নম্বরে</p>
-                  <p className="font-display font-bold text-lg text-primary">
-                    {form.paymentMethod === "bkash" ? settings?.bkash_number : settings?.nagad_number}
+                  <div className="flex items-center justify-between w-full px-1">
+                    <span className="text-xs text-muted-foreground font-medium">টাকা পাঠাও এই নম্বরে</span>
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      ফি: ৳{settings?.registration_fee || 252}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between w-full bg-muted/40 p-2.5 rounded-xl border border-border">
+                    <span className="font-display font-extrabold text-xl text-primary tracking-wide">
+                      {form.paymentMethod === "bkash" ? settings?.bkash_number : settings?.nagad_number}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyNumber}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all active:scale-95"
+                    >
+                      {copiedNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedNumber ? "কপি হয়েছে!" : "কপি নম্বর"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground text-center">
+                    বিকাশ বা নগদ অ্যাপ থেকে <strong>Send Money</strong> করে প্রাপ্ত TrxID নিচে লিখুন।
                   </p>
                 </motion.div>
                 <div>

@@ -76,6 +76,8 @@ function useGalleryPhotos(page: number) {
           !caption.startsWith("[REEL]") &&
           !caption.startsWith("[SLAM]") &&
           !caption.startsWith("[CAPSULE]") &&
+          !urlLower.startsWith("system://") &&
+          urlLower.startsWith("http") &&
           !urlLower.includes(".mp4") &&
           !urlLower.includes(".webm") &&
           !urlLower.includes("api.telegram.org")

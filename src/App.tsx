@@ -267,7 +267,12 @@ const App = () => (
                 />
                 <Route
                   path="/campus-map"
-                  element={<LiveBatchStream />}
+                  element={
+                    <>
+                      <Navbar />
+                      <CampusMap />
+                    </>
+                  }
                 />
                 <Route
                   path="/slambook"

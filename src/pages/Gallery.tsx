@@ -32,7 +32,9 @@ function useGalleryPhotos(page: number) {
           if (
             caption.startsWith("[REEL]") ||
             caption.startsWith("[SLAM]") ||
-            caption.startsWith("[CAPSULE]")
+            caption.startsWith("[CAPSULE]") ||
+            urlLower.startsWith("system://") ||
+            !urlLower.startsWith("http")
           ) {
             return false;
           }

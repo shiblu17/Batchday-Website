@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, CalendarDays, MapPin, ShieldCheck,
   Settings, Clock, ChevronRight, Music, Laptop, ArrowRight, Sparkles, Share2, Loader2,
-  Compass, BookOpen, Hourglass, Zap, Video
+  Compass, BookOpen, Hourglass, Zap, Video, MessageCircleHeart, Heart, Phone
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
@@ -239,7 +239,7 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
                 title: "লাইভ ফটো ও রিলস ফিড",
@@ -266,12 +266,28 @@ export default function Index() {
                 color: "text-amber-500 bg-amber-500/10 border-amber-500/20",
               },
               {
+                title: "ক্যাম্পাস মেমোরি ম্যাপ",
+                desc: "শহীদ মিনার, মুক্তমঞ্চ, বটতলা ও প্রিয় স্পটগুলোতে বন্ধুদের স্মৃতি ও গল্প জমা রাখো।",
+                to: "/campus-map",
+                icon: Compass,
+                badge: "ইন্টারেক্টিভ স্পট",
+                color: "text-teal-600 bg-teal-500/10 border-teal-500/20",
+              },
+              {
                 title: "মুক্তমঞ্চ লাইভ পালস",
                 desc: "কনসার্ট ও ইভেন্টে ফোন থেকে ট্যাপ করে মঞ্চের প্রজেক্টরে রিয়েল-টাইম শক্তি পাঠাও!",
                 to: "/stage-pulse",
                 icon: Zap,
                 badge: "লাইভ স্টেজ",
                 color: "text-primary bg-primary/10 border-primary/20",
+              },
+              {
+                title: "বেনামী কনফেশন বক্স",
+                desc: "মনের গহীনে লুকানো কথা কিংবা ভালোলাগার অনুভূতি শেয়ার করো সম্পূর্ণ গোপন রেখে।",
+                to: "/confessions",
+                icon: MessageCircleHeart,
+                badge: "না-বলা অনুভূতি",
+                color: "text-pink-600 bg-pink-500/10 border-pink-500/20",
               },
             ].map((f) => {
               const Icon = f.icon;
@@ -352,6 +368,40 @@ export default function Index() {
           </motion.div>
         </div>
       </section>
-    </div>);
 
+      {/* Footer */}
+      <footer className="border-t border-border bg-card/60 backdrop-blur-md py-12 px-4">
+        <div className="container max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <span className="font-display font-black text-xl text-primary">JU-52</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                ব্যাচ ডে ২০২৬
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground max-w-sm">
+              জাহাঙ্গীরনগর বিশ্ববিদ্যালয় ৫২তম ব্যাচ পুনর্মিলনী উৎসব। স্মৃতি, বন্ধুত্ব ও উদযাপনের চিরন্তন মিলনমেলা।
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-colors">হোম</Link>
+            <Link to="/register" className="hover:text-foreground transition-colors">রেজিস্ট্রেশন</Link>
+            <Link to="/status" className="hover:text-foreground transition-colors">স্ট্যাটাস ও পাস</Link>
+            <Link to="/gallery" className="hover:text-foreground transition-colors">গ্যালারি</Link>
+            <Link to="/stream" className="hover:text-foreground transition-colors">রিলস</Link>
+            <Link to="/game" className="hover:text-foreground transition-colors">গেম জোন</Link>
+            <Link to="/campus-map" className="hover:text-foreground transition-colors">ক্যাম্পাস ম্যাপ</Link>
+            <Link to="/admin/login" className="hover:text-primary transition-colors font-semibold">অ্যাডমিন লগইন</Link>
+          </div>
+        </div>
+        <div className="container max-w-6xl mx-auto mt-8 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-muted-foreground">
+          <p>© ২০২৬ জাহাঙ্গীরনগর বিশ্ববিদ্যালয় ৫২তম ব্যাচ। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p className="flex items-center justify-center gap-1">
+            Made with <Heart className="w-3 h-3 text-red-500 fill-red-500 inline" /> for JU 52nd Batch
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
 }
