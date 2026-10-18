@@ -1,21 +1,18 @@
 import React, { useState, useRef, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   Lock,
-  Send,
   Download,
   Calendar,
-  Clock,
-  Heart,
   Sparkles,
   User,
   Mail,
-  Shield,
-  CheckCircle,
+  PenTool,
   HelpCircle,
   Share2,
+  ArrowLeft,
+  CheckCircle2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import html2canvas from "html2canvas";
@@ -42,7 +39,7 @@ export default function TimeCapsule() {
   // Delivery date: 02 October 2036 (10 years from 2026)
   const deliveryDateStr = "02 Oct 2036";
   const targetDate = useMemo(() => new Date("2036-10-02T00:00:00"), []);
-  
+
   const daysLeft = useMemo(() => {
     const diff = targetDate.getTime() - Date.now();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
@@ -145,7 +142,7 @@ export default function TimeCapsule() {
 
     toast({
       title: "Letter Sealed! 🔒 ✈",
-      description: "Your time capsule letter has been securely stored for 2036.",
+      description: "Your time capsule letter has been securely sealed for 2036.",
     });
   };
 
@@ -181,224 +178,322 @@ export default function TimeCapsule() {
   };
 
   return (
-    <div className="relative min-h-screen text-stone-100 overflow-x-hidden selection:bg-rose-900 selection:text-white">
-      {/* Background with custom artwork and rich burgundy wine atmospheric gradient */}
+    <div className="relative min-h-screen bg-[#F6EDE0] text-[#2c1d1a] overflow-x-hidden selection:bg-[#7c2237] selection:text-white">
+      {/* Background artwork layer */}
       <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-40 lg:opacity-75 transition-opacity duration-1000"
         style={{
           backgroundImage: `url(/time-capsule-bg.jpg)`,
         }}
       />
-      {/* Deep Burgundy & Starlight Overlay for authentic vintage mood */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-[#2a0610]/80 via-[#3d0916]/75 to-[#1c0309]/90 backdrop-blur-[1px] pointer-events-none" />
 
-      {/* Main Content Container */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pt-24 pb-20">
-        
-        {/* Top Header Section */}
-        <div className="text-center space-y-4 mb-8 sm:mb-12">
-          {/* Eyebrow Label */}
-          <div className="inline-flex items-center justify-center gap-2 tracking-[0.35em] text-xs font-semibold text-amber-200/90 uppercase select-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-ping inline-block" />
-            T I M E &nbsp; C A P S U L E
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-ping inline-block" />
-          </div>
+      {/* Atmospheric ambient blend */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-r from-[#F6EDE0]/90 via-[#F6EDE0]/60 to-[#4a0f1d]/70 pointer-events-none" />
 
-          {/* Main Headline with Serif Typography */}
-          <h1 className="font-serif-vintage text-3xl sm:text-5xl md:text-6xl text-white font-normal leading-tight tracking-tight drop-shadow-lg max-w-3xl mx-auto">
-            To the person I'll become,
-            <span className="block italic font-light text-rose-200/90 mt-1 sm:mt-2">
-              from the person I am today.
-            </span>
-          </h1>
-
-          {/* Subtitle Description */}
-          <p className="text-xs sm:text-sm md:text-base text-rose-100/80 max-w-xl mx-auto leading-relaxed font-light">
-            Write a letter to your future self — 10 years from now. Your dreams,
-            your fears, your hopes, or just a random thought. We'll keep it safe,
-            and you'll get to read it back in 10 years.
-          </p>
-
-          {/* Metadata Badge */}
-          <div className="pt-1">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs text-rose-100 font-medium shadow-sm">
-              <span className="text-emerald-400 font-bold">☑</span>
-              <span>Written in 2026 • Intended for 2036</span>
+      {/* Top Vintage Navigation Bar matching the Mockup */}
+      <header className="relative z-20 w-full border-b border-[#e5d6c2]/70 bg-[#F6EDE0]/85 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          {/* Logo & Brand */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 group text-[#3a1c22] hover:opacity-90 transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-full bg-[#7c2237] text-white flex items-center justify-center font-serif-vintage font-bold text-xs shadow-sm">
+              JU
             </div>
-          </div>
-        </div>
+            <div className="flex flex-col">
+              <span className="font-serif-vintage font-bold text-sm sm:text-base tracking-wider uppercase text-[#3a1c22]">
+                JU 52nd BATCH DAY
+              </span>
+            </div>
+          </Link>
 
-        {!isSealed ? (
-          /* Stationery Letter Card Form */
-          <div className="relative max-w-2xl mx-auto">
-            {/* Realistic Paperclip Graphic Top Left */}
-            <div
-              className="absolute -top-4 left-6 sm:left-10 z-20 w-8 h-12 pointer-events-none drop-shadow-md select-none transform -rotate-6"
-              title="Paperclip"
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium text-[#5c3e3a]">
+            <Link to="/" className="hover:text-[#7c2237] transition-colors">
+              Home
+            </Link>
+            <Link to="/#about" className="hover:text-[#7c2237] transition-colors">
+              About
+            </Link>
+            <Link to="/#schedule" className="hover:text-[#7c2237] transition-colors">
+              Schedule
+            </Link>
+            <Link
+              to="/time-capsule"
+              className="text-[#7c2237] font-semibold border-b-2 border-[#7c2237] pb-0.5"
             >
-              <svg viewBox="0 0 32 48" fill="none" className="w-full h-full">
-                <path
-                  d="M12 8 C12 4, 20 4, 20 8 L20 34 C20 42, 6 42, 6 34 L6 14 C6 8, 16 8, 16 14 L16 32"
-                  stroke="#8b8273"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 8 C12 4, 20 4, 20 8 L20 34 C20 42, 6 42, 6 34 L6 14 C6 8, 16 8, 16 14 L16 32"
-                  stroke="#e6decb"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+              Time Capsule
+            </Link>
+            <Link to="/gallery" className="hover:text-[#7c2237] transition-colors">
+              Gallery
+            </Link>
+            <Link to="/#sponsors" className="hover:text-[#7c2237] transition-colors">
+              Sponsors
+            </Link>
+          </nav>
 
-            {/* Vintage Stationery Paper Card */}
-            <div className="bg-[#FAF5EB] text-[#2c221e] rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.2)] border border-[#e8dfcf] p-6 sm:p-10 relative overflow-hidden transition-all duration-300">
+          {/* Right Cursive Tagline */}
+          <div className="hidden lg:block font-cursive text-xl text-[#7c2237]/90 italic tracking-wide select-none">
+            Same roots, bigger dreams. ♡
+          </div>
+
+          {/* Mobile Back to Home */}
+          <Link
+            to="/"
+            className="md:hidden flex items-center gap-1.5 text-xs font-semibold text-[#7c2237] bg-white/70 px-3 py-1.5 rounded-full border border-[#e2d3be]"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Home
+          </Link>
+        </div>
+      </header>
+
+      {/* Main Page Container */}
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        {!isSealed ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            
+            {/* LEFT COLUMN: Hero Title, Description & Prompts Sticky Note */}
+            <div className="lg:col-span-5 space-y-6 pt-2 lg:pt-6">
               
-              {/* Subtle Paper Grain / Lines */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-[0.035]"
-                style={{
-                  backgroundImage: `repeating-linear-gradient(0deg, #000, #000 1px, transparent 1px, transparent 28px)`,
-                }}
-              />
+              {/* Eyebrow Label */}
+              <div className="tracking-[0.35em] text-xs font-bold text-[#8a3e47] uppercase select-none">
+                T I M E &nbsp; C A P S U L E
+              </div>
 
-              {/* Form Header */}
-              <div className="flex items-center justify-between border-b border-[#e4d8c6] pb-4 mb-6">
-                <div className="flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-[#786656] uppercase">
-                  <span>✉</span>
-                  <span>WRITE YOUR LETTER</span>
-                </div>
-                <div className="text-[11px] font-mono text-[#968372]">
-                  JU 52 • 2026-2036
+              {/* Main Headline */}
+              <h1 className="font-serif-vintage text-3xl sm:text-4xl xl:text-5xl text-[#2e181c] font-normal leading-[1.18] drop-shadow-sm">
+                To the person
+                <span className="block font-medium">I'll become,</span>
+                <span className="block italic font-light text-[#7c2237] mt-1 sm:mt-2">
+                  from the person I am today.
+                </span>
+              </h1>
+
+              {/* Paragraph Subtitle */}
+              <p className="text-xs sm:text-sm text-[#543b37] leading-relaxed max-w-md font-serif-vintage">
+                Write a letter to your future self — 10 years from now. Your
+                dreams, your fears, your hopes, or just a random thought. We'll
+                keep it safe, and you'll get to read it back in 10 years.
+              </p>
+
+              {/* Meta Checkbox Pill */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#e4d6c4] text-xs text-[#523c37] font-medium shadow-xs">
+                <span className="text-emerald-600 font-bold">☑</span>
+                <span>Written in 2026 • Intended for 2036</span>
+              </div>
+
+              {/* Pinned Yellow Memo Note (Desktop view) */}
+              <div className="hidden lg:block pt-6">
+                <div className="relative bg-[#FFF9E5] text-[#3d2e24] p-5 rounded-2xl shadow-xl border border-[#ebdcb9] max-w-sm transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+                  {/* Pushpin */}
+                  <div className="absolute -top-3.5 left-8 select-none pointer-events-none drop-shadow">
+                    <span className="text-2xl">📌</span>
+                  </div>
+
+                  <div className="text-xs font-bold text-[#69543f] mb-3 flex items-center gap-1.5 pt-1">
+                    <HelpCircle className="w-4 h-4 text-[#7c2237]" />
+                    <span>A few prompts, if you need them:</span>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-[#4a392d]">
+                    {prompts.map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleInsertPrompt(prompt)}
+                        className="block text-left w-full hover:text-[#7c2237] hover:translate-x-1 transition-all cursor-pointer font-serif-vintage italic"
+                      >
+                        • {prompt}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-[10px] text-[#968372] mt-3 italic text-right font-serif-vintage">
+                    click any prompt to write ♡
+                  </div>
                 </div>
               </div>
 
-              <form onSubmit={handleSealCapsule} className="space-y-5">
-                {/* Inputs Grid: Name & Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Name (Optional) */}
-                  <div className="space-y-1.5 text-left">
-                    <label className="text-xs font-semibold text-[#4a3d34] flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-[#786656]" />
-                      Your name (optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Al-Amin, or leave blank"
-                      className="w-full bg-[#fdfaf5] border border-[#dcd0bf] rounded-xl px-3.5 py-2.5 text-sm text-[#2c221e] placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#701626]/20 focus:border-[#701626] transition-all"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1.5 text-left">
-                    <div className="flex items-baseline justify-between">
-                      <label className="text-xs font-semibold text-[#4a3d34] flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-[#786656]" />
-                        Your email address
-                      </label>
-                    </div>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full bg-[#fdfaf5] border border-[#dcd0bf] rounded-xl px-3.5 py-2.5 text-sm text-[#2c221e] placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#701626]/20 focus:border-[#701626] transition-all"
-                    />
-                    <p className="text-[10px] text-[#8c7a6b] italic">
-                      We'll send your letter to you in 10 years.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Delivery Date Field */}
-                <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-semibold text-[#4a3d34] flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#786656]" />
-                    When should we deliver it?
-                  </label>
-                  <div className="w-full bg-[#f4ece0] border border-[#d9ccba] rounded-xl px-3.5 py-2.5 text-sm text-[#4a3d34] flex items-center justify-between select-none">
-                    <span className="font-medium">
-                      02 Oct 2036 (10 years from now)
-                    </span>
-                    <span className="text-[11px] font-semibold text-[#701626] bg-[#701626]/10 px-2 py-0.5 rounded-md flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> Locked
-                    </span>
-                  </div>
-                </div>
-
-                {/* Letter Body Textarea */}
-                <div className="space-y-1.5 text-left relative">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-[#4a3d34] font-serif-vintage italic">
-                      Dear future me...
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <textarea
-                      ref={textareaRef}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      maxLength={2000}
-                      rows={7}
-                      placeholder="Dear future me,&#10;&#10;I hope life has been kind to you. As I write this on Batch Day 52 at Jahangirnagar University, here is what is in my heart right now..."
-                      className="w-full bg-[#fdfaf5] border border-[#dcd0bf] rounded-xl p-4 pb-8 text-sm sm:text-base text-[#2c221e] leading-relaxed placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#701626]/20 focus:border-[#701626] transition-all resize-none font-serif-vintage"
-                      required
-                    />
-
-                    {/* Character Counter */}
-                    <div className="absolute bottom-2.5 right-3 text-[11px] font-mono text-[#8c7a6b] select-none bg-[#fdfaf5]/90 px-1.5 py-0.5 rounded">
-                      {message.length} / 2000
-                    </div>
-                  </div>
-                </div>
-
-                {/* CTA Button: Seal My Letter ✈ */}
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full group bg-[#701626] hover:bg-[#861a2e] active:scale-[0.99] text-[#fbf7ee] text-sm sm:text-base font-semibold py-3.5 px-6 rounded-full shadow-lg shadow-[#701626]/30 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
-                  >
-                    <span>
-                      {isSubmitting ? "Sealing your capsule..." : "Seal My Letter"}
-                    </span>
-                    <span className="text-base group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform">
-                      ✈
-                    </span>
-                  </button>
-                </div>
-
-                {/* Security Footnote */}
-                <div className="text-center text-xs text-[#8c7a6b] flex items-center justify-center gap-1.5 pt-1">
-                  <Lock className="w-3.5 h-3.5 text-[#701626]" />
-                  <span>Your letter will be kept safe and private.</span>
-                </div>
-              </form>
             </div>
+
+            {/* RIGHT COLUMN: The Stationery Letter Card */}
+            <div className="lg:col-span-7">
+              <div className="relative max-w-xl mx-auto lg:ml-auto">
+                
+                {/* Paperclip Graphic at Top-Left */}
+                <div
+                  className="absolute -top-4 left-6 sm:left-10 z-20 w-8 h-12 pointer-events-none drop-shadow-md select-none transform -rotate-6"
+                  title="Paperclip"
+                >
+                  <svg viewBox="0 0 32 48" fill="none" className="w-full h-full">
+                    <path
+                      d="M12 8 C12 4, 20 4, 20 8 L20 34 C20 42, 6 42, 6 34 L6 14 C6 8, 16 8, 16 14 L16 32"
+                      stroke="#786c5e"
+                      strokeWidth="3.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 8 C12 4, 20 4, 20 8 L20 34 C20 42, 6 42, 6 34 L6 14 C6 8, 16 8, 16 14 L16 32"
+                      stroke="#dcd0bf"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+
+                {/* Stationery Sheet Paper */}
+                <div className="bg-[#FAF5E8] text-[#2c1d1a] rounded-2xl shadow-[0_20px_50px_-15px_rgba(70,15,30,0.35),0_0_0_1px_rgba(226,213,195,0.8)] border border-[#e2d5c3] p-6 sm:p-9 relative overflow-hidden transition-all duration-300">
+                  
+                  {/* Subtle Paper Lines */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                    style={{
+                      backgroundImage: `repeating-linear-gradient(0deg, #000, #000 1px, transparent 1px, transparent 28px)`,
+                    }}
+                  />
+
+                  {/* Inner decorative framing border */}
+                  <div className="border border-[#e4d8c7] rounded-xl p-5 sm:p-7 relative z-10 bg-[#FAF5E8]/80">
+                    
+                    {/* Header: WRITE YOUR LETTER */}
+                    <div className="flex items-center justify-between border-b border-[#e4d8c7] pb-3 mb-5">
+                      <div className="flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-[#7c2237] uppercase">
+                        <span>✉</span>
+                        <span>WRITE YOUR LETTER</span>
+                      </div>
+                      <div className="text-[11px] font-mono text-[#8c7768]">
+                        JU 52 • 2026-2036
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleSealCapsule} className="space-y-4">
+                      {/* Name Field */}
+                      <div className="space-y-1 text-left">
+                        <label className="text-xs font-medium text-[#4a3a34] flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-[#7c2237]" />
+                          Your name (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="e.g. Al-Amin (or leave blank)"
+                          className="w-full bg-[#fdfbf6] border border-[#d9cdbc] rounded-xl px-3.5 py-2.5 text-sm text-[#2c1d1a] placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7c2237]/20 focus:border-[#7c2237] transition-all"
+                        />
+                      </div>
+
+                      {/* Email Field */}
+                      <div className="space-y-1 text-left">
+                        <label className="text-xs font-medium text-[#4a3a34] flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-[#7c2237]" />
+                          Your email address
+                        </label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          className="w-full bg-[#fdfbf6] border border-[#d9cdbc] rounded-xl px-3.5 py-2.5 text-sm text-[#2c1d1a] placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7c2237]/20 focus:border-[#7c2237] transition-all"
+                        />
+                        <p className="text-[10px] text-[#8c7768] italic">
+                          We'll send your letter to you in 10 years.
+                        </p>
+                      </div>
+
+                      {/* Delivery Date Field */}
+                      <div className="space-y-1 text-left">
+                        <label className="text-xs font-medium text-[#4a3a34] flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#7c2237]" />
+                          When should we deliver it?
+                        </label>
+                        <div className="w-full bg-[#f4ebe0] border border-[#d6c7b3] rounded-xl px-3.5 py-2.5 text-sm text-[#4a3a34] flex items-center justify-between select-none">
+                          <span className="font-medium text-xs sm:text-sm">
+                            02 Oct 2036 (10 years from now)
+                          </span>
+                          <span className="text-[11px] font-semibold text-[#7c2237] bg-[#7c2237]/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Lock className="w-3 h-3" /> Locked
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Textarea Field */}
+                      <div className="space-y-1 text-left">
+                        <label className="text-xs font-serif-vintage italic text-[#4a3a34] flex items-center gap-1.5">
+                          <PenTool className="w-3.5 h-3.5 text-[#7c2237]" />
+                          Dear future me...
+                        </label>
+                        <div className="relative">
+                          <textarea
+                            ref={textareaRef}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            maxLength={2000}
+                            rows={6}
+                            placeholder="Dear future me,&#10;&#10;I hope life has been kind to you. Today in 2026 at Jahangirnagar University, here is what is in my heart..."
+                            className="w-full bg-[#fdfbf6] border border-[#d9cdbc] rounded-xl p-3.5 pb-8 text-sm sm:text-base text-[#2c1d1a] leading-relaxed placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7c2237]/20 focus:border-[#7c2237] transition-all resize-none font-serif-vintage"
+                            required
+                          />
+                          {/* Character Counter */}
+                          <div className="absolute bottom-2.5 right-3 text-[11px] font-mono text-[#8c7768] select-none bg-[#fdfbf6]/90 px-1.5 py-0.5 rounded">
+                            {message.length} / 2000
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CTA Button: Seal My Letter ✈ */}
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full group bg-[#7c2237] hover:bg-[#922841] active:scale-[0.99] text-white text-sm sm:text-base font-semibold py-3.5 px-6 rounded-full shadow-lg shadow-[#7c2237]/25 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                        >
+                          <span>
+                            {isSubmitting
+                              ? "Sealing your capsule..."
+                              : "Seal My Letter"}
+                          </span>
+                          <span className="text-base group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform">
+                            ✈
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* Privacy Footnote */}
+                      <div className="text-center text-xs text-[#8c7768] flex items-center justify-center gap-1.5 pt-1">
+                        <Lock className="w-3.5 h-3.5 text-[#7c2237]" />
+                        <span>Your letter will be kept safe and private.</span>
+                      </div>
+                    </form>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
         ) : (
-          /* Sealed State / Certificate View */
-          <div className="max-w-xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500">
-            {/* Visual Sealed Certificate */}
+          /* Sealed State: Authentic Parchment Certificate */
+          <div className="max-w-xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500 pt-4">
+            
+            {/* Visual Certificate Card for Download */}
             <div
               ref={certRef}
-              className="relative bg-[#FAF5EB] text-[#2c221e] rounded-3xl p-8 sm:p-12 shadow-2xl border-4 border-[#701626]/30 text-center space-y-6 overflow-hidden"
+              className="relative bg-[#FAF5E8] text-[#2c1d1a] rounded-3xl p-8 sm:p-12 shadow-2xl border-4 border-[#7c2237]/30 text-center space-y-6 overflow-hidden"
             >
-              {/* Watermark */}
+              {/* Subtle watermark */}
               <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none select-none">
                 <span className="font-serif-vintage text-8xl font-black">
                   JU 52
                 </span>
               </div>
 
-              {/* Red Wax Seal Stamp Badge */}
-              <div className="relative mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-[#570e1d] via-[#701626] to-[#921e34] flex flex-col items-center justify-center text-amber-100 shadow-xl shadow-[#701626]/40 ring-8 ring-[#701626]/20 select-none">
+              {/* Digital Wax Seal Stamp */}
+              <div className="relative mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-[#521323] via-[#7c2237] to-[#992944] flex flex-col items-center justify-center text-amber-100 shadow-xl shadow-[#7c2237]/40 ring-8 ring-[#7c2237]/20 select-none">
                 <Lock className="w-8 h-8 text-amber-200" />
                 <span className="text-[9px] font-black uppercase tracking-widest mt-1 text-amber-100">
                   SEALED
@@ -408,28 +503,28 @@ export default function TimeCapsule() {
                 </span>
               </div>
 
-              {/* Certificate Titles */}
+              {/* Titles */}
               <div className="space-y-1 relative z-10">
-                <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#701626]">
+                <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#7c2237]">
                   Official Time Capsule Vault
                 </span>
-                <h2 className="font-serif-vintage text-2xl sm:text-3xl font-bold text-[#2c221e]">
+                <h2 className="font-serif-vintage text-2xl sm:text-3xl font-bold text-[#2c1d1a]">
                   Jahangirnagar University
                 </h2>
                 <p className="text-xs text-[#786656]">
                   Certificate ID:{" "}
-                  <span className="font-mono font-bold text-[#701626]">
+                  <span className="font-mono font-bold text-[#7c2237]">
                     {sealedData?.id}
                   </span>
                 </p>
               </div>
 
-              {/* Certificate Body */}
+              {/* Certificate Body Text */}
               <div className="py-5 border-y border-[#dcd0bf] max-w-sm mx-auto space-y-2 relative z-10">
                 <p className="text-xs text-[#786656] italic">
                   This certifies that a future letter written by
                 </p>
-                <h3 className="font-serif-vintage text-xl sm:text-2xl font-bold text-[#2c221e]">
+                <h3 className="font-serif-vintage text-xl sm:text-2xl font-bold text-[#2c1d1a]">
                   {sealedData?.name}
                 </h3>
                 {sealedData?.email && (
@@ -449,106 +544,94 @@ export default function TimeCapsule() {
                 <div>
                   Sealed on: <strong>{sealedData?.date}</strong>
                 </div>
-                <div className="text-[#701626] font-bold">
+                <div className="text-[#7c2237] font-bold">
                   Unlock Date: Oct 2036
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button
+              <button
                 onClick={handleDownloadCertificate}
-                size="lg"
-                className="bg-[#701626] hover:bg-[#861a2e] text-[#fbf7ee] gap-2 w-full sm:w-auto shadow-md rounded-full font-medium"
+                className="bg-[#7c2237] hover:bg-[#922841] text-white py-3 px-6 rounded-full font-medium text-sm flex items-center justify-center gap-2 shadow-md w-full sm:w-auto cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 Download Certificate
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={handleShare}
-                variant="outline"
-                size="lg"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 gap-2 w-full sm:w-auto rounded-full font-medium"
+                className="bg-white hover:bg-stone-50 text-[#7c2237] border border-[#e2d5c3] py-3 px-6 rounded-full font-medium text-sm flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto cursor-pointer"
               >
                 <Share2 className="w-4 h-4" />
                 Share
-              </Button>
-              <Button
-                variant="ghost"
-                size="lg"
+              </button>
+              <button
                 onClick={() => {
                   setIsSealed(false);
                   setMessage("");
                   setName("");
                   setEmail("");
                 }}
-                className="text-rose-200 hover:text-white hover:bg-white/10 w-full sm:w-auto rounded-full"
+                className="text-[#7c2237] hover:underline text-xs py-2 px-4 cursor-pointer"
               >
                 Write Another Letter
-              </Button>
+              </button>
             </div>
+
           </div>
         )}
 
-        {/* Bottom Elements: Prompts Sticky Note, Countdown Pill, Cursive Note */}
-        <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          
-          {/* Bottom-Left Pinned Sticky Note */}
-          <div className="flex justify-center md:justify-start">
-            <div className="relative bg-[#FFF9E6] text-[#3d3228] p-4 sm:p-5 rounded-2xl shadow-xl border border-[#ebdcb9] max-w-xs transform -rotate-1 hover:rotate-0 transition-transform duration-300">
-              {/* Pushpin at top center */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 select-none pointer-events-none drop-shadow">
-                <span className="text-xl">📌</span>
+        {/* Mobile-Only Prompts Sticky Note */}
+        {!isSealed && (
+          <div className="lg:hidden mt-8 flex justify-center">
+            <div className="relative bg-[#FFF9E5] text-[#3d2e24] p-5 rounded-2xl shadow-xl border border-[#ebdcb9] max-w-sm w-full transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+              <div className="absolute -top-3.5 left-8 select-none pointer-events-none drop-shadow">
+                <span className="text-2xl">📌</span>
               </div>
-
-              <div className="text-xs font-bold text-[#69543f] mb-2.5 flex items-center gap-1.5 pt-1">
-                <HelpCircle className="w-3.5 h-3.5 text-[#701626]" />
-                A few prompts, if you need them:
+              <div className="text-xs font-bold text-[#69543f] mb-3 flex items-center gap-1.5 pt-1">
+                <HelpCircle className="w-4 h-4 text-[#7c2237]" />
+                <span>A few prompts, if you need them:</span>
               </div>
-
-              <div className="space-y-1.5 text-xs text-[#52443a] leading-relaxed">
+              <div className="space-y-2 text-xs text-[#4a392d]">
                 {prompts.map((prompt, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleInsertPrompt(prompt)}
-                    className="block text-left w-full hover:text-[#701626] hover:translate-x-0.5 transition-all cursor-pointer font-serif-vintage italic"
+                    className="block text-left w-full hover:text-[#7c2237] transition-all cursor-pointer font-serif-vintage italic"
                   >
                     • {prompt}
                   </button>
                 ))}
               </div>
-
-              <div className="text-[10px] text-[#968372] mt-3 italic text-right">
-                click prompt to add ♡
+              <div className="text-[10px] text-[#968372] mt-3 italic text-right font-serif-vintage">
+                click any prompt to write ♡
               </div>
             </div>
           </div>
+        )}
 
-          {/* Bottom-Center Countdown Pill */}
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-xs sm:text-sm text-rose-100 font-medium shadow-xl">
-              <span className="text-amber-300 text-base">⌛</span>
-              <span>
-                <strong className="text-white font-mono font-bold">
-                  {daysLeft.toLocaleString()}
-                </strong>{" "}
-                days until your future self opens this.
-              </span>
-            </div>
+        {/* Bottom Elements: Countdown & Cursive Tagline */}
+        <div className="mt-12 sm:mt-16 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-[#e2d5c3]/60 pt-6">
+          {/* Countdown Pill */}
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-[#e2d5c3] text-xs sm:text-sm text-[#4a322e] font-medium shadow-sm">
+            <span className="text-[#7c2237] text-base">⌛</span>
+            <span>
+              <strong className="text-[#7c2237] font-mono font-bold">
+                {daysLeft.toLocaleString()}
+              </strong>{" "}
+              days until your future self opens this.
+            </span>
           </div>
 
-          {/* Bottom-Right Handwritten Script */}
-          <div className="flex justify-center md:justify-end text-center md:text-right">
-            <div className="font-cursive text-2xl sm:text-3xl text-amber-200/90 italic tracking-wide select-none drop-shadow-md">
-              Small words. Big tomorrows. ♡
-            </div>
+          {/* Right Cursive Note */}
+          <div className="font-cursive text-2xl sm:text-3xl text-[#7c2237] italic tracking-wide select-none drop-shadow-xs">
+            Small words. Big tomorrows. ♡
           </div>
-
         </div>
 
-      </div>
+      </main>
     </div>
   );
 }

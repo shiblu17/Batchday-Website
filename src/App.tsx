@@ -285,12 +285,7 @@ const App = () => (
                 />
                 <Route
                   path="/time-capsule"
-                  element={
-                    <>
-                      <Navbar />
-                      <TimeCapsule />
-                    </>
-                  }
+                  element={<TimeCapsule />}
                 />
                 <Route
                   path="/stage-pulse"
