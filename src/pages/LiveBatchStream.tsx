@@ -199,16 +199,20 @@ export default function LiveBatchStream() {
       if (error) throw error;
 
       if (data) {
-        // Filter ONLY videos & reels (no static photos)
+        // Filter ONLY active reels (excluding legacy pre-Cloudinary test reels)
+        const LEGACY_CUTOFF = "2026-10-18T10:45:00.000Z";
         const videoRows = data.filter((row: any) => {
+          if (row.created_at && row.created_at < LEGACY_CUTOFF) {
+            return false;
+          }
           const urlLower = (row.url || "").toLowerCase();
           const caption = row.caption || "";
           return (
             caption.startsWith("[REEL") ||
             urlLower.includes(".mp4") ||
             urlLower.includes(".webm") ||
-            urlLower.includes("api.telegram.org") ||
-            urlLower.includes("t.me")
+            urlLower.includes("cloudinary.com") ||
+            urlLower.includes("res.cloudinary.com")
           );
         });
 
@@ -561,45 +565,66 @@ export default function LiveBatchStream() {
                 WebkitOverflowScrolling: "touch",
               }}
             >
-              {(() => {
-                const activeIndex = reels.findIndex(
-                  (r) => r.id === activeReelId
-                );
-                return reels.map((reel, index) => {
-                  const isCurrent = activeReelId === reel.id;
-                  const isNext =
-                    activeIndex === -1
-                      ? index === 1
-                      : index === activeIndex + 1;
-                  const isPrev =
-                    activeIndex !== -1 && index === activeIndex - 1;
-                  const shouldMount = isCurrent || isNext || isPrev;
-
-                  return (
-                    <ReelPlayerCard
-                      key={reel.id}
-                      reel={reel}
-                      isActive={isCurrent && !uploadOpen}
-                      isNext={isNext}
-                      isPrev={isPrev}
-                      shouldMount={shouldMount}
-                      isMuted={isGlobalMuted}
-                      isCleanMode={isCleanMode}
-                      hasAdminAccess={hasAdminAccess}
-                      isFullscreen={isFullscreen}
-                      onToggleMute={handleToggleMute}
-                      onUnmute={handleUnmute}
-                      onFireReact={() => handleFireReact(reel.id)}
-                      onCleanModeChange={setIsCleanMode}
-                      onInView={() => setActiveReelId(reel.id)}
-                      onDeleteReel={() => handleDeleteReel(reel.id)}
-                      onOpenUpload={() => setUploadOpen(true)}
-                      onToggleViewMode={() => setViewMode("grid")}
-                      onToggleFullscreen={toggleFullscreen}
-                    />
+              {reels.length === 0 ? (
+                <div className="w-full h-[100dvh] flex flex-col items-center justify-center text-center p-6 bg-gradient-to-b from-black via-zinc-950 to-black select-none">
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center mb-6 shadow-2xl backdrop-blur-xl">
+                    <Film className="w-10 h-10 text-amber-400" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white tracking-wide mb-2">
+                    রিলস ফিড প্রস্তুত! ✨
+                  </h3>
+                  <p className="text-sm text-zinc-400 max-w-xs mb-8 leading-relaxed">
+                    আগের পরীক্ষামূলক রিলসগুলো পরিষ্কার করা হয়েছে। হাই-স্পিড ১৫০ GB ক্লাউডিনারি সিডিএন-এ প্রথম রিলসটি তুমিই ড্রপ করো!
+                  </p>
+                  <Button
+                    onClick={() => setUploadOpen(true)}
+                    className="h-12 px-7 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white font-bold text-base shadow-xl shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    প্রথম রিলস ড্রপ করো
+                  </Button>
+                </div>
+              ) : (
+                (() => {
+                  const activeIndex = reels.findIndex(
+                    (r) => r.id === activeReelId
                   );
-                });
-              })()}
+                  return reels.map((reel, index) => {
+                    const isCurrent = activeReelId === reel.id;
+                    const isNext =
+                      activeIndex === -1
+                        ? index === 1
+                        : index === activeIndex + 1;
+                    const isPrev =
+                      activeIndex !== -1 && index === activeIndex - 1;
+                    const shouldMount = isCurrent || isNext || isPrev;
+
+                    return (
+                      <ReelPlayerCard
+                        key={reel.id}
+                        reel={reel}
+                        isActive={isCurrent && !uploadOpen}
+                        isNext={isNext}
+                        isPrev={isPrev}
+                        shouldMount={shouldMount}
+                        isMuted={isGlobalMuted}
+                        isCleanMode={isCleanMode}
+                        hasAdminAccess={hasAdminAccess}
+                        isFullscreen={isFullscreen}
+                        onToggleMute={handleToggleMute}
+                        onUnmute={handleUnmute}
+                        onFireReact={() => handleFireReact(reel.id)}
+                        onCleanModeChange={setIsCleanMode}
+                        onInView={() => setActiveReelId(reel.id)}
+                        onDeleteReel={() => handleDeleteReel(reel.id)}
+                        onOpenUpload={() => setUploadOpen(true)}
+                        onToggleViewMode={() => setViewMode("grid")}
+                        onToggleFullscreen={toggleFullscreen}
+                      />
+                    );
+                  });
+                })()
+              )}
             </div>
           </div>
         )}

@@ -59,16 +59,20 @@ export default function AdminReels() {
       if (error) throw error;
 
       if (data) {
-        // Filter strictly reels and videos
+        // Filter strictly reels and videos (excluding legacy test reels)
+        const LEGACY_CUTOFF = "2026-10-18T10:45:00.000Z";
         const videoRows = data.filter((row: any) => {
+          if (row.created_at && row.created_at < LEGACY_CUTOFF) {
+            return false;
+          }
           const urlLower = (row.url || "").toLowerCase();
           const cap = row.caption || "";
           return (
             cap.startsWith("[REEL") ||
             urlLower.includes(".mp4") ||
             urlLower.includes(".webm") ||
-            urlLower.includes("api.telegram.org") ||
-            urlLower.includes("ju52-reels-cdn")
+            urlLower.includes("cloudinary.com") ||
+            urlLower.includes("res.cloudinary.com")
           );
         });
 
