@@ -36,14 +36,28 @@ export default function TimeCapsule() {
   const certRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Delivery date: 02 October 2036 (10 years from 2026)
-  const deliveryDateStr = "02 Oct 2036";
-  const targetDate = useMemo(() => new Date("2036-10-02T00:00:00"), []);
+  // Dynamic dates: exactly 10 years from the day the letter is written
+  const today = useMemo(() => new Date(), []);
+  const deliveryDate = useMemo(() => {
+    const d = new Date(today);
+    d.setFullYear(d.getFullYear() + 10);
+    return d;
+  }, [today]);
+
+  const deliveryDateStr = useMemo(() => {
+    return deliveryDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }, [deliveryDate]);
+
+  const unlockYear = useMemo(() => deliveryDate.getFullYear(), [deliveryDate]);
 
   const daysLeft = useMemo(() => {
-    const diff = targetDate.getTime() - Date.now();
+    const diff = deliveryDate.getTime() - Date.now();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  }, [targetDate]);
+  }, [deliveryDate]);
 
   const prompts = [
     "What are you scared of right now?",
@@ -85,8 +99,8 @@ export default function TimeCapsule() {
       email: email.trim(),
       dept: dept.trim() || "JU-52",
       message: message.trim(),
-      unlock_year: 2036,
-      delivery_date: "2036-10-02",
+      unlock_year: unlockYear,
+      delivery_date: deliveryDate.toISOString().split("T")[0],
       created_at: new Date().toISOString(),
     };
 
@@ -98,7 +112,7 @@ export default function TimeCapsule() {
         email: payload.email,
         dept: payload.dept,
         message: payload.message,
-        unlock_year: 2036,
+        unlock_year: unlockYear,
       });
     } catch (err) {
       console.warn("time_capsules insert warning:", err);
@@ -129,8 +143,8 @@ export default function TimeCapsule() {
       name: payload.name,
       email: payload.email,
       dept: payload.dept,
-      date: new Date().toLocaleDateString("en-US", {
-        day: "numeric",
+      date: new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
         month: "short",
         year: "numeric",
       }),
@@ -213,67 +227,19 @@ export default function TimeCapsule() {
       {/* Desktop subtle atmospheric vignette */}
       <div className="hidden lg:block fixed inset-0 z-0 bg-gradient-to-r from-[#F6EDE0]/85 via-[#F6EDE0]/50 to-[#4a0f1d]/75 pointer-events-none" />
 
-      {/* Top Vintage Navigation Bar matching the Mockup */}
-      <header className="relative z-20 w-full border-b border-[#e5d6c2]/70 bg-[#F6EDE0]/85 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          {/* Logo & Brand */}
-          <Link
-            to="/"
-            className="flex items-center gap-3 group text-[#3a1c22] hover:opacity-90 transition-opacity"
-          >
-            <div className="w-8 h-8 rounded-full bg-[#7c2237] text-white flex items-center justify-center font-serif-vintage font-bold text-xs shadow-sm">
-              JU
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif-vintage font-bold text-sm sm:text-base tracking-wider uppercase text-[#3a1c22]">
-                JU 52nd BATCH DAY
-              </span>
-            </div>
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium text-[#5c3e3a]">
-            <Link to="/" className="hover:text-[#7c2237] transition-colors">
-              Home
-            </Link>
-            <Link to="/#about" className="hover:text-[#7c2237] transition-colors">
-              About
-            </Link>
-            <Link to="/#schedule" className="hover:text-[#7c2237] transition-colors">
-              Schedule
-            </Link>
-            <Link
-              to="/time-capsule"
-              className="text-[#7c2237] font-semibold border-b-2 border-[#7c2237] pb-0.5"
-            >
-              Time Capsule
-            </Link>
-            <Link to="/gallery" className="hover:text-[#7c2237] transition-colors">
-              Gallery
-            </Link>
-            <Link to="/#sponsors" className="hover:text-[#7c2237] transition-colors">
-              Sponsors
-            </Link>
-          </nav>
-
-          {/* Right Cursive Tagline */}
-          <div className="hidden lg:block font-cursive text-xl text-[#7c2237]/90 italic tracking-wide select-none">
-            Same roots, bigger dreams. ♡
-          </div>
-
-          {/* Mobile Back to Home */}
-          <Link
-            to="/"
-            className="md:hidden flex items-center gap-1.5 text-xs font-semibold text-[#7c2237] bg-white/70 px-3 py-1.5 rounded-full border border-[#e2d3be]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Home
-          </Link>
-        </div>
-      </header>
+      {/* Floating Back to Home button (no top bar banner) */}
+      <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/75 hover:bg-white text-[#7c2237] text-xs font-semibold border border-[#e2d5c3] shadow-xs backdrop-blur-sm transition-all"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Home</span>
+        </Link>
+      </div>
 
       {/* Main Page Container */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-16">
         {!isSealed ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
@@ -304,7 +270,7 @@ export default function TimeCapsule() {
               {/* Meta Checkbox Pill */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#e4d6c4] text-xs text-[#523c37] font-medium shadow-xs">
                 <span className="text-emerald-600 font-bold">☑</span>
-                <span>Written in 2026 • Intended for 2036</span>
+                <span>Written in {today.getFullYear()} • Intended for {unlockYear}</span>
               </div>
 
               {/* Pinned Yellow Memo Note (Desktop view) */}
@@ -389,7 +355,7 @@ export default function TimeCapsule() {
                         <span>WRITE YOUR LETTER</span>
                       </div>
                       <div className="text-[11px] font-mono text-[#8c7768]">
-                        JU 52 • 2026-2036
+                        JU 52 • {today.getFullYear()}-{unlockYear}
                       </div>
                     </div>
 
@@ -435,7 +401,7 @@ export default function TimeCapsule() {
                         </label>
                         <div className="w-full bg-[#f4ebe0] border border-[#d6c7b3] rounded-xl px-3.5 py-2.5 text-sm text-[#4a3a34] flex items-center justify-between select-none">
                           <span className="font-medium text-xs sm:text-sm">
-                            02 Oct 2036 (10 years from now)
+                            {deliveryDateStr} (10 years from today)
                           </span>
                           <span className="text-[11px] font-semibold text-[#7c2237] bg-[#7c2237]/10 px-2 py-0.5 rounded-md flex items-center gap-1">
                             <Lock className="w-3 h-3" /> Locked
@@ -522,7 +488,7 @@ export default function TimeCapsule() {
                   SEALED
                 </span>
                 <span className="text-[7px] text-amber-200/80 tracking-tighter">
-                  2026 - 2036
+                  {today.getFullYear()} - {unlockYear}
                 </span>
               </div>
 
@@ -568,7 +534,7 @@ export default function TimeCapsule() {
                   Sealed on: <strong>{sealedData?.date}</strong>
                 </div>
                 <div className="text-[#7c2237] font-bold">
-                  Unlock Date: Oct 2036
+                  Unlock Date: {sealedData?.deliveryDate}
                 </div>
               </div>
             </div>
