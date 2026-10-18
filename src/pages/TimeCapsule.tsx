@@ -179,16 +179,39 @@ export default function TimeCapsule() {
 
   return (
     <div className="relative min-h-screen bg-[#F6EDE0] text-[#2c1d1a] overflow-x-hidden selection:bg-[#7c2237] selection:text-white">
-      {/* Background artwork layer */}
+      {/* MOBILE BACKGROUND: Top Sky, JU Monument, Paper Airplane, Moon & Celestial Clock (100% width, NO side cropping!) */}
       <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-40 lg:opacity-75 transition-opacity duration-1000"
+        className="absolute top-0 left-0 right-0 h-[480px] sm:h-[580px] lg:hidden z-0 bg-no-repeat pointer-events-none opacity-95"
+        style={{
+          backgroundImage: `url(/time-capsule-bg.jpg)`,
+          backgroundSize: "100% auto",
+          backgroundPosition: "top center",
+        }}
+      />
+      {/* Mobile top-to-body smooth gradient fade */}
+      <div className="absolute top-[320px] sm:top-[440px] left-0 right-0 h-[180px] lg:hidden z-0 bg-gradient-to-b from-transparent via-[#F6EDE0]/75 to-[#F6EDE0] pointer-events-none" />
+
+      {/* MOBILE BACKGROUND: Bottom Desk Artwork (Mahogany Desk, Red Envelope with Wax Seal, Pens, Fallen Leaves) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[420px] sm:h-[500px] lg:hidden z-0 bg-no-repeat pointer-events-none opacity-95"
+        style={{
+          backgroundImage: `url(/time-capsule-bg.jpg)`,
+          backgroundSize: "100% auto",
+          backgroundPosition: "bottom center",
+        }}
+      />
+      {/* Mobile bottom fade blend */}
+      <div className="absolute bottom-[320px] sm:bottom-[420px] left-0 right-0 h-[120px] lg:hidden z-0 bg-gradient-to-b from-[#F6EDE0] to-transparent pointer-events-none" />
+
+      {/* DESKTOP BACKGROUND: Full High-Res Immersion */}
+      <div
+        className="hidden lg:block fixed inset-0 z-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-85 transition-opacity duration-700"
         style={{
           backgroundImage: `url(/time-capsule-bg.jpg)`,
         }}
       />
-
-      {/* Atmospheric ambient blend */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-r from-[#F6EDE0]/90 via-[#F6EDE0]/60 to-[#4a0f1d]/70 pointer-events-none" />
+      {/* Desktop subtle atmospheric vignette */}
+      <div className="hidden lg:block fixed inset-0 z-0 bg-gradient-to-r from-[#F6EDE0]/85 via-[#F6EDE0]/50 to-[#4a0f1d]/75 pointer-events-none" />
 
       {/* Top Vintage Navigation Bar matching the Mockup */}
       <header className="relative z-20 w-full border-b border-[#e5d6c2]/70 bg-[#F6EDE0]/85 backdrop-blur-md">
@@ -255,7 +278,7 @@ export default function TimeCapsule() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
             {/* LEFT COLUMN: Hero Title, Description & Prompts Sticky Note */}
-            <div className="lg:col-span-5 space-y-6 pt-2 lg:pt-6">
+            <div className="lg:col-span-5 space-y-6 pt-2 lg:pt-6 bg-white/40 lg:bg-transparent backdrop-blur-[2px] lg:backdrop-blur-none p-4 sm:p-5 lg:p-0 rounded-2xl border border-white/40 lg:border-none shadow-sm lg:shadow-none">
               
               {/* Eyebrow Label */}
               <div className="tracking-[0.35em] text-xs font-bold text-[#8a3e47] uppercase select-none">
