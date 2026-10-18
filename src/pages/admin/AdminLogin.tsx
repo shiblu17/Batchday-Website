@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "@/hooks/use-toast";
 import { Lock, Mail } from "lucide-react";
 import { isSuperAdminEmail } from "@/lib/constants";
+import { authenticateModerator, ADMIN_SECTIONS } from "@/utils/adminPermissionsService";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -19,33 +20,49 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
 
-    // 1. First attempt standard Supabase Auth
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      // 2. Cryptographic SHA-256 fallback for Super Admin (no plaintext password in JS bundle)
-      try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(`ju52_salt_${password}`);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-        const hashHex = Array.from(new Uint8Array(hashBuffer))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
+    const cleanEmail = email.trim();
 
-        const SUPER_ADMIN_HASH =
-          "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
+    // 1. Super Admin Password Hash Check
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(`ju52_salt_${password}`);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashHex = Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
-        if (isSuperAdminEmail(email) && hashHex === SUPER_ADMIN_HASH) {
-          localStorage.setItem("ju52_admin_session", SUPER_ADMIN_HASH);
-          localStorage.setItem("ju52_admin_login", "true");
-          toast({ title: "লগইন সফল", description: "অ্যাডমিন প্যানেলে স্বাগতম!" });
-          window.location.href = "/admin";
-          return;
-        }
-      } catch (cryptoErr) {
-        // Fallback silently if crypto API unavailable
+      const SUPER_ADMIN_HASH =
+        "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
+
+      if (isSuperAdminEmail(cleanEmail) && hashHex === SUPER_ADMIN_HASH) {
+        localStorage.setItem("ju52_admin_session", SUPER_ADMIN_HASH);
+        localStorage.setItem("ju52_admin_login", "true");
+        toast({ title: "সুপার অ্যাডমিন লগইন সফল", description: "অ্যাডমিন প্যানেলে স্বাগতম!" });
+        window.location.href = "/admin";
+        return;
       }
+    } catch {}
 
-      toast({ title: "লগইন ব্যর্থ", description: error.message, variant: "destructive" });
+    // 2. Team Moderator Check
+    try {
+      const mod = await authenticateModerator(cleanEmail, password);
+      if (mod) {
+        toast({
+          title: "মডারেটর লগইন সফল! 🎉",
+          description: `স্বাগতম ${mod.name}! (${mod.roleTitle})`,
+        });
+        const firstSection = ADMIN_SECTIONS.find((s) => mod.allowedSections?.includes(s.key));
+        window.location.href = firstSection ? firstSection.url : "/admin";
+        return;
+      }
+    } catch (err) {
+      console.warn("Moderator auth check warning:", err);
+    }
+
+    // 3. Standard Supabase Auth Fallback
+    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+    if (error) {
+      toast({ title: "লগইন ব্যর্থ", description: "ভুল ইমেইল বা পাসওয়ার্ড। দয়া করে আবার চেষ্টা করুন।", variant: "destructive" });
       setLoading(false);
       return;
     }

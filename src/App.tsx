@@ -25,6 +25,7 @@ const AdminScanner = lazy(() => import("./pages/admin/AdminScanner"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminGallery = lazy(() => import("./pages/admin/AdminGallery"));
 const AdminLeaderboard = lazy(() => import("./pages/admin/AdminLeaderboard"));
+const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
 const GameHub = lazy(() => import("./pages/GameHub"));
 const FlappyJU = lazy(() => import("./pages/FlappyJU"));
 const MemoryMatch = lazy(() => import("./pages/MemoryMatch"));
@@ -313,6 +314,7 @@ const App = () => (
                   <Route path="leaderboard" element={<AdminLeaderboard />} />
                   <Route path="confessions" element={<AdminConfessions />} />
                   <Route path="timeline" element={<AdminTimeline />} />
+                  <Route path="roles" element={<AdminRoles />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
