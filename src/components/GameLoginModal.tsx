@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, GraduationCap, UserCircle2, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import votersData from "@/data/voters.json";
 
 interface Voter {
@@ -23,6 +24,8 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
   const [selectedHall, setSelectedHall] = useState("");
   const [selectedName, setSelectedName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [dbDepartments, setDbDepartments] = useState<string[]>([]);
+  const [dbHalls, setDbHalls] = useState<string[]>([]);
   
   const voters = votersData as Voter[];
 
@@ -46,22 +49,46 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
     }
   }, [voters]);
 
+  // Fetch departments and halls from Supabase as fallback
+  useEffect(() => {
+    supabase
+      .from("departments")
+      .select("name")
+      .order("name")
+      .then(({ data }) => {
+        if (data) setDbDepartments(data.map((d) => d.name));
+      });
+    supabase
+      .from("halls")
+      .select("name")
+      .order("name")
+      .then(({ data }) => {
+        if (data) setDbHalls(data.map((h) => h.name));
+      });
+  }, []);
+
   // Unique Departments
   const departments = useMemo(() => {
-    const depts = new Set<string>();
-    voters.forEach(v => depts.add(v.dept));
-    return Array.from(depts).sort();
-  }, [voters]);
+    if (voters.length > 0) {
+      const depts = new Set<string>();
+      voters.forEach((v) => depts.add(v.dept));
+      return Array.from(depts).sort();
+    }
+    return dbDepartments;
+  }, [voters, dbDepartments]);
 
   // Unique Halls based on Selected Department
   const halls = useMemo(() => {
-    if (!selectedDept) return [];
-    const h = new Set<string>();
-    voters.forEach(v => {
-      if (v.dept === selectedDept) h.add(v.hall);
-    });
-    return Array.from(h).sort();
-  }, [selectedDept, voters]);
+    if (voters.length > 0) {
+      if (!selectedDept) return [];
+      const h = new Set<string>();
+      voters.forEach((v) => {
+        if (v.dept === selectedDept) h.add(v.hall);
+      });
+      return Array.from(h).sort();
+    }
+    return dbHalls;
+  }, [selectedDept, voters, dbHalls]);
 
   // Names based on Selected Department + Hall
   const availableNames = useMemo(() => {
@@ -203,36 +230,49 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
                 {selectedHall && (
                   <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
                     <label className="block text-xs font-bold text-muted-foreground uppercase mb-1 ml-1">তোমার নাম</label>
-                    <div className="relative">
+                    {availableNames.length > 0 ? (
+                      <div className="relative">
+                        <input 
+                          type="text"
+                          placeholder="নাম সার্চ বা সিলেক্ট করো..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full bg-background text-foreground border border-input rounded-t-xl px-3.5 py-2 text-sm outline-none border-b-0"
+                        />
+                        <div className="max-h-28 overflow-y-auto border border-input rounded-b-xl bg-background divide-y divide-border">
+                          {filteredNames.length === 0 ? (
+                            <div className="p-2.5 text-xs text-center text-muted-foreground">কোনো নাম পাওয়া যায়নি</div>
+                          ) : (
+                            filteredNames.map(name => (
+                              <button
+                                key={name}
+                                onClick={() => {
+                                  setSelectedName(name);
+                                  setSearchTerm(name);
+                                }}
+                                className={`w-full text-left px-3.5 py-2 text-sm hover:bg-primary/10 transition-colors flex items-center justify-between ${
+                                  selectedName === name ? 'bg-primary/20 font-bold text-primary' : 'text-foreground'
+                                }`}
+                              >
+                                <span>{name}</span>
+                                {selectedName === name && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    ) : (
                       <input 
                         type="text"
-                        placeholder="নাম সার্চ বা সিলেক্ট করো..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-background text-foreground border border-input rounded-t-xl px-3.5 py-2 text-sm outline-none border-b-0"
+                        placeholder="তোমার নাম লেখো..."
+                        value={selectedName}
+                        onChange={(e) => {
+                          setSelectedName(e.target.value);
+                          setSearchTerm(e.target.value);
+                        }}
+                        className="w-full bg-background text-foreground border border-input rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                       />
-                      <div className="max-h-28 overflow-y-auto border border-input rounded-b-xl bg-background divide-y divide-border">
-                        {filteredNames.length === 0 ? (
-                          <div className="p-2.5 text-xs text-center text-muted-foreground">কোনো নাম পাওয়া যায়নি</div>
-                        ) : (
-                          filteredNames.map(name => (
-                            <button
-                              key={name}
-                              onClick={() => {
-                                setSelectedName(name);
-                                setSearchTerm(name);
-                              }}
-                              className={`w-full text-left px-3.5 py-2 text-sm hover:bg-primary/10 transition-colors flex items-center justify-between ${
-                                selectedName === name ? 'bg-primary/20 font-bold text-primary' : 'text-foreground'
-                              }`}
-                            >
-                              <span>{name}</span>
-                              {selectedName === name && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </motion.div>
                 )}
 
