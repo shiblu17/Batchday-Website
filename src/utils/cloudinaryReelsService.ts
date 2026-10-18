@@ -22,6 +22,10 @@ export const CLOUDINARY_ACCOUNTS: CloudinaryAccount[] = [
     cloudName: "feegnsre",
     uploadPreset: "batchday2",
   },
+  {
+    cloudName: "s6dntiix",
+    uploadPreset: "batchday3",
+  },
 ];
 
 export interface CloudinaryUploadResult {
