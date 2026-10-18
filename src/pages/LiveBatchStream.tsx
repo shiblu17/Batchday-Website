@@ -926,7 +926,19 @@ function ReelPlayerCard({
   }, [isActive, isMuted, shouldMount, videoSrc, reel.origVolume, reel.bgVolume, resolvedAudioUrl]);
 
   // Tap handling & Long-press hold-to-pause (Clean screen mode)
+  const lastDropTriggerRef = useRef<number>(0);
+  const handleDropTrigger = (e: React.SyntheticEvent | React.PointerEvent) => {
+    e.stopPropagation();
+    const now = Date.now();
+    if (now - lastDropTriggerRef.current < 400) return;
+    lastDropTriggerRef.current = now;
+    onOpenUpload();
+  };
+
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement)?.closest("button, a, input, [role='button']")) {
+      return;
+    }
     pointerStartPos.current = { x: e.clientX, y: e.clientY };
     isDragOrSwipe.current = false;
     isHolding.current = false;
@@ -958,7 +970,15 @@ function ReelPlayerCard({
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e?: React.PointerEvent<HTMLDivElement>) => {
+    if (e && (e.target as HTMLElement)?.closest("button, a, input, [role='button']")) {
+      if (longPressTimer.current) {
+        window.clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+      return;
+    }
+
     if (longPressTimer.current) {
       window.clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -1026,7 +1046,10 @@ function ReelPlayerCard({
 
   // Double tap for massive Fire Burst with sparks
   const lastTapRef = useRef<number>(0);
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement)?.closest("button, a, input, [role='button']")) {
+      return;
+    }
     const now = Date.now();
     if (now - lastTapRef.current < 280) {
       onFireReact();
@@ -1286,18 +1309,25 @@ function ReelPlayerCard({
 
       {/* ================== RIGHT FROSTED GLASS ACTION STACK ================== */}
       <div
-        className={`absolute right-3 bottom-10 sm:bottom-12 z-20 flex flex-col items-center gap-2 sm:gap-2.5 transition-opacity duration-300 ${
-          isCleanMode ? "opacity-0 pointer-events-none" : "opacity-100"
+        className={`absolute right-3 bottom-10 sm:bottom-12 z-20 flex flex-col items-center gap-2 sm:gap-2.5 transition-opacity duration-300 pointer-events-auto ${
+          isCleanMode ? "opacity-0 !pointer-events-none" : "opacity-100"
         }`}
         onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerMove={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {/* 1. Reels Studio Drop Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenUpload();
-          }}
-          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+          type="button"
+          onClick={handleDropTrigger}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerUp={handleDropTrigger}
+          onTouchEnd={handleDropTrigger}
+          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
           title="রিলস ড্রপ করুন"
         >
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-pink-500 p-[1.5px] shadow-[0_0_15px_rgba(244,63,94,0.45)] group-hover:shadow-[0_0_22px_rgba(244,63,94,0.65)] transition-all">
@@ -1310,11 +1340,13 @@ function ReelPlayerCard({
 
         {/* 2. Grid Explorer Switcher */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleViewMode();
           }}
-          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+          onPointerDown={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
           title="সব রিলস গ্রিড ভিউতে দেখুন"
         >
           <div className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-105">
@@ -1325,11 +1357,13 @@ function ReelPlayerCard({
 
         {/* 3. Game-Style Fullscreen Toggle (Hides mobile browser top bar) */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleFullscreen();
           }}
-          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+          onPointerDown={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
           title={isFullscreen ? "ফুলস্ক্রিন বন্ধ" : "গেমের মত ফুলস্ক্রিন করুন"}
         >
           <div
@@ -1352,8 +1386,13 @@ function ReelPlayerCard({
 
         {/* 4. Fire React (🔥) with Floating Shockwave */}
         <button
-          onClick={onFireReact}
-          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-125"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onFireReact();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-125 cursor-pointer select-none touch-manipulation"
           title="Fire React"
         >
           <div className="w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 border border-amber-500/50 flex items-center justify-center text-white shadow-xl shadow-amber-500/20 group-hover:border-amber-400 group-hover:shadow-[0_0_20px_rgba(251,191,36,0.5)] transition-all">
@@ -1366,8 +1405,13 @@ function ReelPlayerCard({
 
         {/* 5. Share Button */}
         <button
-          onClick={handleShare}
-          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleShare();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
           title="শেয়ার"
         >
           <div className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white shadow-lg transition-all">
@@ -1378,8 +1422,13 @@ function ReelPlayerCard({
 
         {/* 6. Sound Toggle Button */}
         <button
-          onClick={onToggleMute}
-          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMute();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
           title={isMuted ? "সাউন্ড চালু করুন" : "মিউট করুন"}
         >
           <div className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white shadow-lg transition-all">
@@ -1399,7 +1448,8 @@ function ReelPlayerCard({
           <Link
             to="/admin/reels"
             onClick={(e) => e.stopPropagation()}
-            className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
             title="রিলস এডমিন কন্ট্রোল"
           >
             <div className="w-8 h-8 rounded-full bg-amber-500/30 hover:bg-amber-500/40 border border-amber-500/50 flex items-center justify-center text-amber-300 shadow-md transition-all">
@@ -1412,11 +1462,13 @@ function ReelPlayerCard({
         {/* 8. Admin Delete Action Button (Visible only to Admin) */}
         {hasAdminAccess && onDeleteReel && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDeleteReel();
             }}
-            className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110"
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex flex-col items-center gap-0.5 group transition-transform active:scale-110 cursor-pointer select-none touch-manipulation"
             title="রিলস ডিলিট করুন (এডমিন)"
           >
             <div className="w-8 h-8 rounded-full bg-rose-500/30 hover:bg-rose-500/40 border border-rose-500/50 flex items-center justify-center text-rose-400 shadow-lg transition-all group-hover:scale-105">
