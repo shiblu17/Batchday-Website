@@ -31,8 +31,8 @@ const DEFAULTS: SiteSettings = {
   nagad_number: "01XXXXXXXXX",
   features: [
     { emoji: "🎶", title: "লাইভ কনসার্ট", desc: "মিউজিক ও পারফরম্যান্স" },
-    { emoji: "🍽️", title: "ফুড ফেস্ট", desc: "ক্যাম্পাসের বিখ্যাত খাবার" },
-    { emoji: "📸", title: "ফটো জোন", "desc": "স্মৃতি ধরে রাখো" },
+    { emoji: "💃", title: "গ্র্যান্ড ফ্ল্যাশমব", desc: "নাচ, গান আর ক্যাম্পাস মাতানো উন্মাদনা" },
+    { emoji: "📸", title: "ফটো জোন", desc: "স্মৃতি ধরে রাখো" },
     { emoji: "🏆", title: "প্রতিযোগিতা", desc: "হল vs হল চ্যালেঞ্জ" }
   ],
   sponsor_video_url: "https://youtu.be/e_5anFAQIps",
@@ -65,9 +65,16 @@ async function fetchSettings(): Promise<SiteSettings> {
     registration_open: data.registration_open ?? DEFAULTS.registration_open,
     registration_fee: data.registration_fee ?? DEFAULTS.registration_fee,
     bkash_number: data.bkash_number ?? DEFAULTS.bkash_number,
-    nagad_number: data.nagad_number ?? DEFAULTS.nagad_number,
-    features: data.features ?? DEFAULTS.features,
-    sponsor_video_url: data.sponsor_video_url ?? DEFAULTS.sponsor_video_url,
+    features: (Array.isArray(data.features) ? data.features : DEFAULTS.features).map((f: any) => {
+      if (f.title === "ফুড ফেস্ট" || f.emoji === "🍽️") {
+        return {
+          emoji: "💃",
+          title: "গ্র্যান্ড ফ্ল্যাশমব",
+          desc: "নাচ, গান আর ক্যাম্পাস মাতানো উন্মাদনা",
+        };
+      }
+      return f;
+    }),
     sponsor_video_url_2: data.sponsor_video_url_2 ?? DEFAULTS.sponsor_video_url_2,
     sponsor_video_url_3: data.sponsor_video_url_3 ?? DEFAULTS.sponsor_video_url_3,
     sponsor_video_url_4: data.sponsor_video_url_4 ?? DEFAULTS.sponsor_video_url_4,
