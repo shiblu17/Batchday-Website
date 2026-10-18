@@ -753,11 +753,20 @@ function ReelPlayerCard({
   const isDragOrSwipe = useRef(false);
 
   useEffect(() => {
-    setVideoSrc(reel.url);
+    setVideoSrc(formatVideoStreamingUrl(reel.url));
     setHasError(false);
   }, [reel.url]);
 
   const handleVideoError = async () => {
+    // If it's a Cloudinary URL, sanitize away any transformations and retry with cache-bust
+    if (videoSrc && videoSrc.includes("cloudinary.com")) {
+      const sanitized = formatVideoStreamingUrl(videoSrc);
+      const cleanUrl = sanitized.replace(/\?.*$/, "");
+      setVideoSrc(`${cleanUrl}?retry=${Date.now()}`);
+      setHasError(false);
+      return;
+    }
+
     // Cloudinary URLs are permanent; only Telegram file URLs expire after time
     if (
       reel.fileId &&

@@ -65,16 +65,15 @@ export interface UploadProgress {
 let currentAccountPointer = Math.floor(Math.random() * CLOUDINARY_ACCOUNTS.length);
 
 /**
- * Returns an optimized Cloudinary video streaming URL with FastStart, 720p limit, and auto-quality
+ * Returns a clean direct Cloudinary video streaming URL with native byte-range support (Accept-Ranges: bytes)
  */
 export function formatCloudinaryVideoUrl(rawUrl: string): string {
   if (!rawUrl || !rawUrl.includes("res.cloudinary.com")) return rawUrl;
-  if (rawUrl.includes("q_auto") || rawUrl.includes("vc_h264")) return rawUrl;
-
-  // Transform into FastStart H.264 720p mobile optimized stream
+  // If the URL has on-the-fly transformations (e.g. q_auto, w_720), Cloudinary sends Accept-Ranges: none,
+  // which causes mobile browsers to fail. Strip transformations to deliver the fast native 206 byte-range stream.
   return rawUrl.replace(
-    /\/video\/upload\/(v\d+)/,
-    "/video/upload/q_auto:good,f_auto,w_720,c_limit,vc_h264/$1"
+    /\/video\/upload\/[^\/]+\/(v\d+)/,
+    (match, v) => `/video/upload/${v}`
   );
 }
 
