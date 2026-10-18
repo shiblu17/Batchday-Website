@@ -35,7 +35,7 @@ import {
   type MusicTrackItem,
 } from "@/utils/itunesMusicService";
 import {
-  uploadVideoToTelegram,
+  uploadReelVideo,
   validateVideoFile,
   type UploadProgress,
 } from "@/utils/streamUploader";
@@ -283,8 +283,8 @@ export default function ReelsStudioModal({
         : `${name} (${dept})`;
       const fullCaption = `${metaTag} ${baseCaption}`;
 
-      // Upload to Telegram Bot
-      const res = await uploadVideoToTelegram(
+      // Upload to Cloudinary Multi-Account Pool (with Telegram fallback)
+      const res = await uploadReelVideo(
         selectedFile,
         fullCaption,
         (progress) => setUploadProgress(progress)
@@ -309,7 +309,7 @@ export default function ReelsStudioModal({
       toast({
         title: "🎉 রিলস ড্রপ সফল হয়েছে!",
         description:
-          "ফিল্টার ও ব্যাকগ্রাউন্ড মিউজিকসহ তোমার রিলসটি এখন সরাসরি ফিডে বাজছে!",
+          "তোমার রিলসটি হাই-স্পিড ক্লাউড সিডিএন ও মিউজিকসহ সরাসরি ফিডে লাইভ হয়েছে!",
       });
 
       if (bgAudioRef.current) {

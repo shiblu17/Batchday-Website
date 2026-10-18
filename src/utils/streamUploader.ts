@@ -4,6 +4,13 @@
  * - Videos: Telegram Bot Storage (Fast, Free, 45s reels up to 20MB directly to @JU52ReelsVault)
  */
 
+import {
+  formatCloudinaryVideoUrl,
+  uploadReelToCloudinaryPool,
+} from "./cloudinaryReelsService";
+
+export { formatCloudinaryVideoUrl, uploadReelToCloudinaryPool };
+
 export const TELEGRAM_BOT_TOKEN =
   import.meta.env.VITE_TELEGRAM_BOT_TOKEN || "";
 
@@ -18,10 +25,13 @@ export const CLOUDFLARE_REELS_PROXY =
   "https://ju52-reels-cdn.atiquzzaman116592.workers.dev";
 
 /**
- * Routes Telegram direct video URLs through high-speed Cloudflare Edge Cache if configured
+ * Routes Video URLs through high-speed Cloudinary or Cloudflare Edge Cache
  */
 export function formatVideoStreamingUrl(rawUrl: string): string {
   if (!rawUrl) return "";
+  if (rawUrl.includes("res.cloudinary.com")) {
+    return formatCloudinaryVideoUrl(rawUrl);
+  }
   if (CLOUDFLARE_REELS_PROXY && rawUrl.includes("api.telegram.org/file/")) {
     return rawUrl.replace(
       "https://api.telegram.org",
@@ -497,3 +507,50 @@ export async function refreshTelegramFileUrl(fileId: string): Promise<string> {
   }
   throw new Error("ফাইল রিফ্রেশ করা যায়নি");
 }
+
+/**
+ * Smart Unified Reel Video Uploader:
+ * 1. Primary: Cloudinary Multi-Account Pool (50GB, FastStart 720p, ~1.5MB)
+ * 2. Automatic Failover: Telegram Bot Vault (if all Cloudinary accounts fail)
+ */
+export async function uploadReelVideo(
+  file: File,
+  captionText: string,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<{
+  url: string;
+  fileId: string;
+  duration: number;
+  provider: "cloudinary" | "telegram";
+}> {
+  // First, attempt Cloudinary high-speed streaming CDN pool
+  try {
+    const cld = await uploadReelToCloudinaryPool(file, onProgress);
+    return {
+      url: cld.url,
+      fileId: cld.publicId,
+      duration: cld.duration || 0,
+      provider: "cloudinary",
+    };
+  } catch (cldErr) {
+    console.warn(
+      "Cloudinary pool upload failed, falling back to Telegram Bot Vault:",
+      cldErr
+    );
+    if (onProgress) {
+      onProgress({
+        percent: 15,
+        stage: "uploading",
+        message: "ব্যাকআপ ক্লাউডে ভিডিও আপলোড হচ্ছে...",
+      });
+    }
+    const tg = await uploadVideoToTelegram(file, captionText, onProgress);
+    return {
+      url: tg.url,
+      fileId: tg.fileId,
+      duration: tg.duration,
+      provider: "telegram",
+    };
+  }
+}
+

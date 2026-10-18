@@ -733,7 +733,12 @@ function ReelPlayerCard({
   }, [reel.url]);
 
   const handleVideoError = async () => {
-    if (reel.fileId && !isRefreshing) {
+    // Cloudinary URLs are permanent; only Telegram file URLs expire after time
+    if (
+      reel.fileId &&
+      !reel.url.includes("cloudinary.com") &&
+      !isRefreshing
+    ) {
       setIsRefreshing(true);
       try {
         const freshUrl = await refreshTelegramFileUrl(reel.fileId);
