@@ -785,6 +785,58 @@ function ReelPlayerCard({
     return () => window.clearTimeout(timer);
   }, [isNext]);
 
+  // Continuous High-Precision Audio-Video Sync Guard (Zero Drift Engine)
+  useEffect(() => {
+    if (!isActive || !shouldMount) return;
+
+    let animId: number;
+    const syncLoop = () => {
+      const video = videoRef.current;
+      const audio = audioRef.current;
+
+      if (video && audio && resolvedAudioUrl) {
+        // 1. If video is paused, buffering, seeking or user is holding, audio MUST pause
+        if (video.paused || video.seeking || isBuffering || isHolding.current) {
+          if (!audio.paused) {
+            audio.pause();
+          }
+        } else {
+          // 2. Video is actively playing
+          if (audio.paused && !isMuted) {
+            audio.play().catch(() => {});
+          }
+
+          // 3. Keep audio mute and volume in mirror sync
+          if (audio.muted !== isMuted) {
+            audio.muted = isMuted;
+          }
+
+          // 4. Calculate expected audio position locked to video position
+          const audioDur = audio.duration;
+          if (audioDur && !isNaN(audioDur) && audioDur > 0) {
+            const expectedTime = video.currentTime % audioDur;
+            const drift = Math.abs(audio.currentTime - expectedTime);
+
+            // Snap if drift exceeds 120ms (imperceptible correction, eliminates lag build-up)
+            if (drift > 0.12) {
+              audio.currentTime = expectedTime;
+            }
+          }
+
+          // 5. Keep playbackRate in sync
+          if (audio.playbackRate !== video.playbackRate) {
+            audio.playbackRate = video.playbackRate;
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(syncLoop);
+    };
+
+    animId = requestAnimationFrame(syncLoop);
+    return () => cancelAnimationFrame(animId);
+  }, [isActive, shouldMount, resolvedAudioUrl, isBuffering, isMuted]);
+
   // Dedicated Playback & Sound Controller
   useEffect(() => {
     const video = videoRef.current;
@@ -1060,8 +1112,7 @@ function ReelPlayerCard({
         <audio
           ref={audioRef}
           src={resolvedAudioUrl}
-          loop
-          preload={isActive ? "auto" : "none"}
+          preload={isActive ? "auto" : isNext ? "auto" : "none"}
         />
       )}
 
@@ -1072,7 +1123,7 @@ function ReelPlayerCard({
         loop
         playsInline
         muted={isMuted}
-        preload={isActive ? "auto" : isNext ? "metadata" : "none"}
+        preload={isActive ? "auto" : isNext ? "auto" : "none"}
         style={{
           filter: getFilterCss(reel.filterId),
           transform: "translate3d(0, 0, 0)",
@@ -1081,6 +1132,10 @@ function ReelPlayerCard({
         }}
         onLoadedData={() => setIsBuffering(false)}
         onWaiting={() => {
+          setIsBuffering(true);
+          if (audioRef.current) audioRef.current.pause();
+        }}
+        onStalled={() => {
           setIsBuffering(true);
           if (audioRef.current) audioRef.current.pause();
         }}
@@ -1094,6 +1149,11 @@ function ReelPlayerCard({
         onPause={() => {
           setIsPlaying(false);
           if (audioRef.current) audioRef.current.pause();
+        }}
+        onEnded={() => {
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+          }
         }}
         onSeeked={() => {
           if (audioRef.current && videoRef.current && audioRef.current.duration) {
