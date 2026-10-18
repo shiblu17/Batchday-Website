@@ -16,11 +16,38 @@ import {
   X,
   Volume2,
   VolumeX,
+  Server,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Plus,
+  Activity,
+  Wifi,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getFilterCss } from "@/utils/reelsCustomization";
+import {
+  getActiveCloudinaryPool,
+  pingCloudinaryAccount,
+  addCustomCloudinaryAccount,
+  removeCustomCloudinaryAccount,
+  getCustomCloudinaryAccounts,
+  getAccountExhaustionInfo,
+  clearAccountExhausted,
+  type CloudinaryAccount,
+  type CloudinaryServerHealth,
+} from "@/utils/cloudinaryReelsService";
 
 interface AdminReelItem {
   id: string;
@@ -47,6 +74,16 @@ export default function AdminReels() {
   const [selectedDept, setSelectedDept] = useState("all");
   const [previewReel, setPreviewReel] = useState<AdminReelItem | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Cloudinary Servers Pool State
+  const [serverPool, setServerPool] = useState<CloudinaryAccount[]>(() => getActiveCloudinaryPool());
+  const [serverHealthMap, setServerHealthMap] = useState<Record<string, CloudinaryServerHealth>>({});
+  const [isPingingAll, setIsPingingAll] = useState(false);
+  const [showAddServerModal, setShowAddServerModal] = useState(false);
+  const [newCloudName, setNewCloudName] = useState("");
+  const [newUploadPreset, setNewUploadPreset] = useState("");
+  const [isTestingNewServer, setIsTestingNewServer] = useState(false);
+  const [newServerTestResult, setNewServerTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const fetchReels = async () => {
     setLoading(true);
@@ -149,9 +186,130 @@ export default function AdminReels() {
     }
   };
 
+  // Diagnostic ping for all Cloudinary servers
+  const runDiagnosticPing = async (silent = false) => {
+    setIsPingingAll(true);
+    const pool = getActiveCloudinaryPool();
+    setServerPool(pool);
+
+    const promises = pool.map(async (account) => {
+      setServerHealthMap((prev) => ({
+        ...prev,
+        [account.cloudName]: {
+          cloudName: account.cloudName,
+          uploadPreset: account.uploadPreset,
+          status: "checking",
+        },
+      }));
+
+      const res = await pingCloudinaryAccount(account);
+      setServerHealthMap((prev) => ({
+        ...prev,
+        [account.cloudName]: res,
+      }));
+      return res;
+    });
+
+    const results = await Promise.all(promises);
+    setIsPingingAll(false);
+
+    const exhaustedList = results.filter((r) => r.status === "exhausted");
+    const degradedList = results.filter((r) => r.status === "degraded");
+
+    if (!silent) {
+      if (exhaustedList.length > 0) {
+        toast.error(`⚠️ সতর্কতা: ${exhaustedList.length}টি সার্ভারের লিমিট/কোটা শেষ হয়েছে! অবিলম্বে নতুন সার্ভার যুক্ত করুন।`);
+      } else if (degradedList.length > 0) {
+        toast.warning(`⚠️ ${degradedList.length}টি সার্ভারে সংযোগ সমস্যা দেখা দিয়েছে।`);
+      } else {
+        toast.success("✅ সকল ক্লাউডিনারি সার্ভার ১০০% সুস্থ ও আপলোডের জন্য প্রস্তুত!");
+      }
+    }
+  };
+
   useEffect(() => {
     fetchReels();
+    runDiagnosticPing(true);
   }, []);
+
+  const handleTestNewServer = async () => {
+    if (!newCloudName.trim() || !newUploadPreset.trim()) {
+      toast.error("দয়া করে Cloud Name এবং Upload Preset উভয়ই লিখুন");
+      return;
+    }
+    setIsTestingNewServer(true);
+    setNewServerTestResult(null);
+    try {
+      const res = await pingCloudinaryAccount({
+        cloudName: newCloudName.trim(),
+        uploadPreset: newUploadPreset.trim(),
+      });
+      if (res.status === "healthy") {
+        setNewServerTestResult({
+          success: true,
+          message: `সংযোগ সফল! লেটেন্সি: ${res.latencyMs}ms। সার্ভারটি সম্পূর্ণ সচল।`,
+        });
+      } else {
+        setNewServerTestResult({
+          success: false,
+          message: res.errorMessage || "সংযোগ ব্যর্থ হয়েছে। দয়া করে ক্লাউড নাম ও আনসাইন্ড প্রিসেট যাচাই করুন।",
+        });
+      }
+    } catch (err: any) {
+      setNewServerTestResult({
+        success: false,
+        message: err.message || "সার্ভার রেসপন্স দেয়নি।",
+      });
+    } finally {
+      setIsTestingNewServer(false);
+    }
+  };
+
+  const handleSaveNewServer = () => {
+    if (!newCloudName.trim() || !newUploadPreset.trim()) {
+      toast.error("দয়া করে Cloud Name এবং Upload Preset উভয়ই লিখুন");
+      return;
+    }
+    addCustomCloudinaryAccount({
+      cloudName: newCloudName.trim(),
+      uploadPreset: newUploadPreset.trim(),
+    });
+    toast.success(`🎉 সার্ভার '${newCloudName.trim()}' সফলভাবে পুলে যুক্ত হয়েছে!`);
+    setNewCloudName("");
+    setNewUploadPreset("");
+    setNewServerTestResult(null);
+    setShowAddServerModal(false);
+    const updated = getActiveCloudinaryPool();
+    setServerPool(updated);
+    runDiagnosticPing(false);
+  };
+
+  const handleRemoveServer = (cloudName: string) => {
+    if (!window.confirm(`আপনি কি নিশ্চিত যে '${cloudName}' সার্ভারটি পুল থেকে মুছে ফেলতে চান?`)) return;
+    removeCustomCloudinaryAccount(cloudName);
+    toast.info(`সার্ভার '${cloudName}' পুল থেকে সরানো হয়েছে।`);
+    const updated = getActiveCloudinaryPool();
+    setServerPool(updated);
+  };
+
+  const handleResetExhaustion = (cloudName: string) => {
+    clearAccountExhausted(cloudName);
+    toast.success(`'${cloudName}' এর লিমিট ফ্ল্যাগ রিসেট করা হয়েছে।`);
+    setServerHealthMap((prev) => ({
+      ...prev,
+      [cloudName]: {
+        ...prev[cloudName],
+        status: "unknown",
+        errorMessage: undefined,
+      },
+    }));
+    const acc = serverPool.find((s) => s.cloudName === cloudName);
+    if (acc) {
+      pingCloudinaryAccount(acc).then((res) => {
+        setServerHealthMap((prev) => ({ ...prev, [cloudName]: res }));
+      });
+    }
+  };
 
   // Delete Reel
   const handleDeleteReel = async (id: string, name: string) => {
@@ -196,6 +354,20 @@ export default function AdminReels() {
   // Total stats
   const totalFireCount = reels.reduce((acc, r) => acc + (r.fire || 1), 0);
   const totalCreators = new Set(reels.map((r) => r.uploaderName)).size;
+
+  // Server pool metrics
+  const hasExhaustedServers = serverPool.some(
+    (s) => serverHealthMap[s.cloudName]?.status === "exhausted" || getAccountExhaustionInfo(s.cloudName).isExhausted
+  );
+  const exhaustedServerNames = serverPool
+    .filter((s) => serverHealthMap[s.cloudName]?.status === "exhausted" || getAccountExhaustionInfo(s.cloudName).isExhausted)
+    .map((s) => s.cloudName);
+
+  const healthyServersCount = serverPool.filter(
+    (s) => (serverHealthMap[s.cloudName]?.status || "healthy") === "healthy" && !getAccountExhaustionInfo(s.cloudName).isExhausted
+  ).length;
+
+  const isLowCapacity = healthyServersCount <= 2;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -283,15 +455,286 @@ export default function AdminReels() {
 
         <div className="p-4 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs text-muted-foreground font-medium block">ঢাকা এজ সিডিএন</span>
-            <span className="text-sm font-bold text-emerald-500 mt-1 block flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              সক্রিয় (Active)
+            <span className="text-xs text-muted-foreground font-medium block">সার্ভার পুল হেলথ</span>
+            <span className={`text-base sm:text-lg font-bold font-display mt-0.5 block flex items-center gap-1.5 ${
+              hasExhaustedServers ? "text-rose-500" : "text-emerald-500"
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${hasExhaustedServers ? "bg-rose-500 animate-ping" : "bg-emerald-500 animate-pulse"}`} />
+              {healthyServersCount}/{serverPool.length} সচল
+            </span>
+            <span className="text-[10px] text-muted-foreground block font-mono">
+              {serverPool.length * 25} GB মোট পুল
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <span className="text-xs font-mono font-bold">206</span>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+            hasExhaustedServers ? "bg-rose-500/10 text-rose-500" : "bg-emerald-500/10 text-emerald-500"
+          }`}>
+            <Server className="w-5 h-5" />
           </div>
+        </div>
+      </div>
+
+      {/* ================== ⚠️ REAL-TIME SERVER QUOTA & HEALTH ALERT BANNER ================== */}
+      {(hasExhaustedServers || isLowCapacity) && (
+        <div className="relative overflow-hidden rounded-3xl border-2 border-rose-500/70 bg-gradient-to-r from-rose-950/80 via-zinc-950 to-amber-950/70 p-5 shadow-[0_0_30px_rgba(244,63,94,0.3)] animate-in fade-in duration-300">
+          <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-rose-500/15 blur-3xl pointer-events-none" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0 shadow-lg animate-pulse">
+                <AlertTriangle className="w-6 h-6 text-rose-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-extrabold text-white tracking-wide">
+                    ⚠️ জরুরি নোটিফিকেশন: রিলস সার্ভারের লিমিট শেষ হয়ে আসছে!
+                  </h3>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500 text-white font-bold font-mono uppercase tracking-wider animate-pulse">
+                    Action Required
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-300 mt-1 max-w-2xl leading-relaxed">
+                  {hasExhaustedServers ? (
+                    <>
+                      সার্ভার <strong className="text-rose-400 font-mono">[{exhaustedServerNames.join(", ")}]</strong>-এর ক্লাউডিনারি ফ্রি কোটা/ক্রেডিট লিমিট শেষ হয়ে গেছে বা সংযোগ বিচ্ছিন্ন! সাধারণ ব্যবহারকারীদের নিরবচ্ছিন্ন রিলস আপলোড চালু রাখতে অবিলম্বে আরও সার্ভার কানেক্ট করুন।
+                    </>
+                  ) : (
+                    <>
+                      পুলে সক্রিয় সার্ভার কমে মাত্র <strong className="text-amber-400 font-mono">{healthyServersCount}</strong> টি রয়েছে! যেকোনো সময় আপলোড ব্যাহত হতে পারে। অবিলম্বে নতুন সার্ভার যুক্ত করুন।
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0 sm:self-center">
+              <Button
+                size="sm"
+                onClick={() => setShowAddServerModal(true)}
+                className="bg-gradient-to-r from-rose-600 via-pink-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs rounded-full px-5 h-9 shadow-lg shadow-rose-600/30 gap-1.5 active:scale-95 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ আরও সার্ভার কানেক্ট করো</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runDiagnosticPing(false)}
+                disabled={isPingingAll}
+                className="border-white/20 hover:bg-white/10 text-zinc-200 rounded-full text-xs h-9"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 mr-1 ${isPingingAll ? "animate-spin" : ""}`} />
+                রিচেক
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================== CLOUDINARY SERVER POOL & LIVE QUOTA MONITOR ================== */}
+      <div className="p-5 rounded-3xl bg-card border border-border shadow-sm space-y-4">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+              <Server className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-foreground">
+                  ক্লাউডিনারি রিলস সার্ভার পুল ও ব্যান্ডউইথ হেলথ
+                </h2>
+                <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${
+                  hasExhaustedServers
+                    ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                    : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                }`}>
+                  {healthyServersCount}/{serverPool.length} সচল ({Math.round((healthyServersCount / Math.max(1, serverPool.length)) * 100)}%)
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                লোড-ব্যালেন্সিং ক্লাউডিনারি সার্ভারগুলোর রিয়েল-টাইম কোটা, রেসপন্স টাইম ও ভিডিও লোড পর্যবেক্ষণ।
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => runDiagnosticPing(false)}
+              disabled={isPingingAll}
+              className="rounded-full gap-1.5 text-xs h-8"
+              title="সকল ক্লাউডিনারি সার্ভারের লাইভ হেলথ চেক করুন"
+            >
+              <Activity className={`w-3.5 h-3.5 text-cyan-500 ${isPingingAll ? "animate-spin" : ""}`} />
+              <span>{isPingingAll ? "যাচাই হচ্ছে..." : "ডায়াগনস্টিক টেস্ট (Ping All)"}</span>
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => {
+                setNewCloudName("");
+                setNewUploadPreset("");
+                setNewServerTestResult(null);
+                setShowAddServerModal(true);
+              }}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full gap-1.5 text-xs font-semibold h-8 shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ নতুন সার্ভার কানেক্ট করো</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Server Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {serverPool.map((account, index) => {
+            const health = serverHealthMap[account.cloudName];
+            const isEx = health?.status === "exhausted" || getAccountExhaustionInfo(account.cloudName).isExhausted;
+            const isChecking = health?.status === "checking";
+            const isDegraded = health?.status === "degraded";
+
+            // Calculate videos on this account
+            const accountReelsCount = reels.filter((r) =>
+              r.url.toLowerCase().includes(account.cloudName.toLowerCase())
+            ).length;
+            const estMbUsed = Math.round(accountReelsCount * 1.5);
+            const quotaPercent = Math.min(100, Math.max(1, Math.round((estMbUsed / 25000) * 100)));
+
+            const isCustom = getCustomCloudinaryAccounts().some(
+              (c) => c.cloudName.toLowerCase() === account.cloudName.toLowerCase()
+            );
+
+            return (
+              <div
+                key={account.cloudName}
+                className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
+                  isEx
+                    ? "bg-rose-500/10 border-rose-500/60 shadow-sm shadow-rose-500/15"
+                    : isDegraded
+                    ? "bg-amber-500/10 border-amber-500/40"
+                    : "bg-muted/20 border-border hover:border-primary/40"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-foreground font-mono">
+                        #{index + 1} {account.cloudName}
+                      </span>
+                      {isCustom && (
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-medium">
+                          Custom
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Status Badge */}
+                    {isChecking ? (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 flex items-center gap-1">
+                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                        চেক হচ্ছে
+                      </span>
+                    ) : isEx ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500 border border-rose-500/40 flex items-center gap-1 animate-pulse">
+                        <XCircle className="w-2.5 h-2.5" />
+                        লিমিট শেষ
+                      </span>
+                    ) : isDegraded ? (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center gap-1">
+                        <AlertTriangle className="w-2.5 h-2.5" />
+                        সংযোগ সমস্যা
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        সচল {health?.latencyMs ? `(${health.latencyMs}ms)` : ""}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-[11px] text-muted-foreground space-y-0.5">
+                    <p className="truncate font-mono">
+                      প্রিসেট: <span className="text-foreground">{account.uploadPreset}</span>
+                    </p>
+                    <p className="text-xs font-semibold text-foreground">
+                      {accountReelsCount}টি রিলস হোস্টেড (~{estMbUsed} MB)
+                    </p>
+                    {health?.errorMessage && (
+                      <p className="text-[10px] text-rose-500 font-medium truncate" title={health.errorMessage}>
+                        ⚠️ {health.errorMessage}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Quota Usage Bar */}
+                  <div className="mt-2.5 space-y-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>ব্যবহৃত কোটা</span>
+                      <span className="font-mono">{quotaPercent}% / ২৫ GB</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          isEx
+                            ? "bg-rose-500"
+                            : quotaPercent > 70
+                            ? "bg-amber-500"
+                            : "bg-gradient-to-r from-emerald-500 to-cyan-500"
+                        }`}
+                        style={{ width: `${quotaPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Action Buttons */}
+                <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-1 text-[11px]">
+                  <button
+                    onClick={async () => {
+                      setServerHealthMap((prev) => ({
+                        ...prev,
+                        [account.cloudName]: { ...prev[account.cloudName], status: "checking" },
+                      }));
+                      const res = await pingCloudinaryAccount(account);
+                      setServerHealthMap((prev) => ({ ...prev, [account.cloudName]: res }));
+                      if (res.status === "healthy") {
+                        toast.success(`${account.cloudName} সার্ভার সম্পূর্ণ সচল! (${res.latencyMs}ms)`);
+                      } else {
+                        toast.error(`${account.cloudName}: ${res.errorMessage || "ত্রুটি পাওয়া গেছে"}`);
+                      }
+                    }}
+                    disabled={isChecking}
+                    className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
+                  >
+                    <Wifi className="w-3 h-3" />
+                    পিং টেস্ট
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {isEx && (
+                      <button
+                        onClick={() => handleResetExhaustion(account.cloudName)}
+                        className="text-[10px] text-amber-500 hover:underline"
+                        title="কোটা লিমিট সতর্কবার্তা রিসেট করুন"
+                      >
+                        রিসেট
+                      </button>
+                    )}
+                    {isCustom && (
+                      <button
+                        onClick={() => handleRemoveServer(account.cloudName)}
+                        className="text-[10px] text-rose-500 hover:underline"
+                        title="এই সার্ভারটি পুল থেকে মুছুন"
+                      >
+                        মুছুন
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -464,6 +907,121 @@ export default function AdminReels() {
           onDelete={() => handleDeleteReel(previewReel.id, previewReel.uploaderName)}
         />
       )}
+
+      {/* ================== ADD NEW CLOUDINARY SERVER MODAL ================== */}
+      <Dialog open={showAddServerModal} onOpenChange={setShowAddServerModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Server className="w-5 h-5 text-primary" />
+              নতুন ক্লাউডিনারি সার্ভার কানেক্ট করুন
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              ফ্রি ২৫ GB স্টোরেজ যুক্ত করতে আপনার ক্লাউডিনারি অ্যাকাউন্টের Cloud Name এবং Unsigned Upload Preset লিখুন।
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3.5 py-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground">
+                Cloud Name (ক্লাউড নাম) *
+              </label>
+              <Input
+                placeholder="যেমন: batchday8"
+                value={newCloudName}
+                onChange={(e) => setNewCloudName(e.target.value.trim())}
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground">
+                Upload Preset (আনসাইন্ড প্রিসেট) *
+              </label>
+              <Input
+                placeholder="যেমন: batchday8"
+                value={newUploadPreset}
+                onChange={(e) => setNewUploadPreset(e.target.value.trim())}
+                className="text-xs"
+              />
+            </div>
+
+            {/* Test Connection Button & Result Box */}
+            <div className="pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleTestNewServer}
+                disabled={isTestingNewServer || !newCloudName || !newUploadPreset}
+                className="w-full text-xs h-8 gap-1.5"
+              >
+                {isTestingNewServer ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    সংযোগ পরীক্ষা হচ্ছে...
+                  </>
+                ) : (
+                  <>
+                    <Wifi className="w-3.5 h-3.5 text-cyan-500" />
+                    সংযোগ পরীক্ষা করুন (Test Connection)
+                  </>
+                )}
+              </Button>
+
+              {newServerTestResult && (
+                <div
+                  className={`mt-2.5 p-2.5 rounded-xl text-xs flex items-start gap-2 border ${
+                    newServerTestResult.success
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                  }`}
+                >
+                  {newServerTestResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+                  )}
+                  <span>{newServerTestResult.message}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Cloudinary Quick Tips */}
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/60 text-[11px] text-muted-foreground space-y-1">
+              <span className="font-semibold text-foreground flex items-center gap-1">
+                <Info className="w-3.5 h-3.5 text-primary" />
+                সহজ নির্দেশিকা:
+              </span>
+              <p>১. cloudinary.com-এ গিয়ে একটি নতুন ফ্রি অ্যাকাউন্ট খুলুন (২৫ GB ফ্রি ব্যান্ডউইথ)।</p>
+              <p>২. Settings ➔ Upload ➔ <strong>Add upload preset</strong>-এ ক্লিক করুন।</p>
+              <p>৩. Signing Mode অপশনটি <strong>Unsigned</strong> নির্বাচন করে সেভ করুন।</p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex items-center justify-between gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowAddServerModal(false);
+                setNewServerTestResult(null);
+              }}
+              className="text-xs"
+            >
+              বাতিল
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveNewServer}
+              disabled={!newCloudName || !newUploadPreset}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold px-4"
+            >
+              সেভ ও পুলে যুক্ত করো
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
