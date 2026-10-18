@@ -202,8 +202,10 @@ export default function TimeCapsule() {
           backgroundPosition: "top center",
         }}
       />
+      {/* Mobile soft parchment veil on left: conceals background duplicate text while keeping moon & clock crisp on right */}
+      <div className="absolute top-0 left-0 w-full sm:w-[65%] h-[380px] sm:h-[450px] lg:hidden z-0 bg-gradient-to-r from-[#F6EDE0] via-[#F6EDE0]/95 to-transparent pointer-events-none" />
       {/* Mobile top-to-body smooth gradient fade */}
-      <div className="absolute top-[320px] sm:top-[440px] left-0 right-0 h-[180px] lg:hidden z-0 bg-gradient-to-b from-transparent via-[#F6EDE0]/75 to-[#F6EDE0] pointer-events-none" />
+      <div className="absolute top-[320px] sm:top-[440px] left-0 right-0 h-[180px] lg:hidden z-0 bg-gradient-to-b from-transparent via-[#F6EDE0]/80 to-[#F6EDE0] pointer-events-none" />
 
       {/* MOBILE BACKGROUND: Bottom Desk Artwork (Mahogany Desk, Red Envelope with Wax Seal, Pens, Fallen Leaves) */}
       <div
@@ -231,7 +233,7 @@ export default function TimeCapsule() {
       <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/75 hover:bg-white text-[#7c2237] text-xs font-semibold border border-[#e2d5c3] shadow-xs backdrop-blur-sm transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#7c2237] text-xs font-semibold border border-[#e2d5c3] shadow-xs backdrop-blur-sm transition-all"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Home</span>
@@ -239,38 +241,43 @@ export default function TimeCapsule() {
       </div>
 
       {/* Main Page Container */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-16">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-16">
         {!isSealed ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
-            {/* LEFT COLUMN: Hero Title, Description & Prompts Sticky Note */}
-            <div className="lg:col-span-5 space-y-6 pt-2 lg:pt-6 bg-white/40 lg:bg-transparent backdrop-blur-[2px] lg:backdrop-blur-none p-4 sm:p-5 lg:p-0 rounded-2xl border border-white/40 lg:border-none shadow-sm lg:shadow-none">
+            {/* LEFT COLUMN: Clean Hero Typography without any clunky glass card */}
+            <div className="lg:col-span-5 space-y-5 pt-1 lg:pt-6">
               
-              {/* Eyebrow Label */}
-              <div className="tracking-[0.35em] text-xs font-bold text-[#8a3e47] uppercase select-none">
-                T I M E &nbsp; C A P S U L E
+              {/* Eyebrow Label with subtle dot */}
+              <div className="flex items-center gap-2 select-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7c2237]" />
+                <span className="tracking-[0.3em] text-xs font-bold text-[#7c2237] uppercase">
+                  T I M E &nbsp; C A P S U L E
+                </span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="font-serif-vintage text-3xl sm:text-4xl xl:text-5xl text-[#2e181c] font-normal leading-[1.18] drop-shadow-sm">
+              <h1 className="font-serif-vintage text-3xl sm:text-4xl xl:text-5xl text-[#2c181b] font-normal leading-[1.15]">
                 To the person
-                <span className="block font-medium">I'll become,</span>
+                <span className="block font-medium mt-0.5">I'll become,</span>
                 <span className="block italic font-light text-[#7c2237] mt-1 sm:mt-2">
                   from the person I am today.
                 </span>
               </h1>
 
               {/* Paragraph Subtitle */}
-              <p className="text-xs sm:text-sm text-[#543b37] leading-relaxed max-w-md font-serif-vintage">
+              <p className="text-xs sm:text-sm text-[#4d3632] leading-relaxed max-w-md font-serif-vintage">
                 Write a letter to your future self — 10 years from now. Your
                 dreams, your fears, your hopes, or just a random thought. We'll
                 keep it safe, and you'll get to read it back in 10 years.
               </p>
 
               {/* Meta Checkbox Pill */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#e4d6c4] text-xs text-[#523c37] font-medium shadow-xs">
-                <span className="text-emerald-600 font-bold">☑</span>
-                <span>Written in {today.getFullYear()} • Intended for {unlockYear}</span>
+              <div className="pt-1">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#e2d3be] text-xs text-[#4d3632] font-medium shadow-xs">
+                  <span className="text-emerald-600 font-bold text-sm">☑</span>
+                  <span>Written in {today.getFullYear()} • Intended for {unlockYear}</span>
+                </div>
               </div>
 
               {/* Pinned Yellow Memo Note (Desktop view) */}
