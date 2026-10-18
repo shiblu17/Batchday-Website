@@ -15,6 +15,8 @@ module.exports = {
       fontFamily: {
         display: ["'Hind Siliguri'", "sans-serif"],
         body: ["'Hind Siliguri'", "sans-serif"],
+        serif: ["'Playfair Display'", "'Cormorant Garamond'", "Georgia", "serif"],
+        cursive: ["'Caveat'", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
