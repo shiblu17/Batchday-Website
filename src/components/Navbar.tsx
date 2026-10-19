@@ -13,6 +13,7 @@ import {
   Hourglass,
   Zap,
   Video,
+  Shirt,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,9 +24,9 @@ import {
 
 const featureItems = [
   { to: "/stream", label: "লাইভ রিলস ও স্ট্রিম", desc: "ছবি ও ৪৫ সেকেন্ডের ভিডিও", icon: Video },
-  { to: "/slambook", label: "স্ল্যাম বুক", desc: "বন্ধুদের চিরকুট ডায়েরি", icon: BookOpen },
-  { to: "/time-capsule", label: "টাইম ক্যাপসুল", desc: "২০৩৬ সালের জন্য চিঠি", icon: Hourglass },
-  { to: "/campus-map", label: "ক্যাম্পাস মেমোরি ম্যাপ", desc: "স্পট স্মৃতি ও গল্প", icon: Compass },
+  { to: "/jersey", label: "ডিজিটাল জার্সি", desc: "ভার্চুয়াল অটোগ্রাফ ও সাইনিং", icon: Shirt },
+  { to: "/memories", label: "জাবি ভাইবস ও স্মৃতি", desc: "ফুড মিটার, অডিও ও ইয়ারবুক", icon: Compass },
+  { to: "/time-capsule", label: "টাইম ক্যাপসুল", desc: "১০ বছর পরের জন্য চিঠি", icon: Hourglass },
   { to: "/stage-pulse", label: "লাইভ পালস", desc: "মুক্তমঞ্চ ক্রাউড রিঅ্যাকশন", icon: Zap },
   { to: "/confessions", label: "কনফেশন", desc: "মনের না-বলা কথা", icon: MessageCircleHeart },
 ];

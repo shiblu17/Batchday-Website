@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   X,
   Video,
+  Shirt,
 } from "lucide-react";
 
 interface RadialItem {
@@ -41,13 +42,22 @@ const RADIAL_ITEMS: RadialItem[] = [
     isLive: true,
   },
   {
-    to: "/slambook",
-    label: "স্ল্যাম বুক",
-    icon: BookOpen,
+    to: "/jersey",
+    label: "ডিজিটাল জার্সি",
+    icon: Shirt,
     lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
     lightText: "text-emerald-700 font-semibold",
     darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
     darkText: "dark:text-emerald-400",
+  },
+  {
+    to: "/memories",
+    label: "ভাইবস ও স্মৃতি",
+    icon: Compass,
+    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
+    lightText: "text-teal-700 font-semibold",
+    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
+    darkText: "dark:text-teal-400",
   },
   {
     to: "/time-capsule",
@@ -57,15 +67,6 @@ const RADIAL_ITEMS: RadialItem[] = [
     lightText: "text-amber-700 font-semibold",
     darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
     darkText: "dark:text-amber-400",
-  },
-  {
-    to: "/campus-map",
-    label: "ক্যাম্পাস ম্যাপ",
-    icon: Compass,
-    lightBg: "bg-card hover:bg-muted/80 border border-border/80 shadow-sm",
-    lightText: "text-teal-700 font-semibold",
-    darkBg: "dark:bg-[#1a1c24] dark:border-white/10 dark:hover:bg-[#222530]",
-    darkText: "dark:text-teal-400",
   },
   {
     to: "/stage-pulse",

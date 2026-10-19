@@ -48,6 +48,8 @@ const ZigZag = lazy(() => import("./pages/ZigZag"));
 const TrafficDash = lazy(() => import("./pages/TrafficDash"));
 const Confessions = lazy(() => import("./pages/Confessions"));
 const SlamBook = lazy(() => import("./pages/SlamBook"));
+const DigitalJersey = lazy(() => import("./pages/DigitalJersey"));
+const MemoriesHub = lazy(() => import("./pages/MemoriesHub"));
 const TimeCapsule = lazy(() => import("./pages/TimeCapsule"));
 const StagePulse = lazy(() => import("./pages/StagePulse"));
 const CampusMap = lazy(() => import("./pages/CampusMap"));
@@ -266,23 +268,25 @@ const App = () => (
                   element={<LiveBatchStream />}
                 />
                 <Route
-                  path="/campus-map"
+                  path="/jersey"
                   element={
                     <>
                       <Navbar />
-                      <CampusMap />
+                      <DigitalJersey />
                     </>
                   }
                 />
+                <Route path="/slambook" element={<Navigate to="/jersey" replace />} />
                 <Route
-                  path="/slambook"
+                  path="/memories"
                   element={
                     <>
                       <Navbar />
-                      <SlamBook />
+                      <MemoriesHub />
                     </>
                   }
                 />
+                <Route path="/campus-map" element={<Navigate to="/memories" replace />} />
                 <Route
                   path="/time-capsule"
                   element={<TimeCapsule />}
