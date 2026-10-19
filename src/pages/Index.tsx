@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, CalendarDays, MapPin, ShieldCheck,
   Settings, Clock, ChevronRight, Music, Laptop, ArrowRight, Sparkles, Share2, Loader2,
-  Compass, BookOpen, Hourglass, Zap, Video, MessageCircleHeart, Heart, Phone
+  Heart, Phone
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
@@ -223,109 +223,6 @@ export default function Index() {
       {/* Event Timeline Section */}
       <EventTimeline />
 
-      {/* Special Memory & Interactive Features */}
-      <section className="py-12 md:py-16 bg-muted/20 border-y border-border/60">
-        <div className="container space-y-8">
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              স্মৃতি ও উৎসবের বিশেষ ফিচারসমূহ
-            </div>
-            <h2 className="font-display text-2xl md:text-3xl font-black text-foreground">
-              ক্যাম্পাস জীবনকে চিরস্থায়ী করো
-            </h2>
-            <p className="text-xs md:text-sm text-muted-foreground max-w-xl mx-auto">
-              বন্ধুদের চিরকুট, ক্যাম্পাসের প্রিয় স্পট আর ১০ বছর পরের নিজের জন্য স্মৃতি জমা রাখার দারুণ সব আয়োজন।
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              {
-                title: "লাইভ ফটো ও রিলস ফিড",
-                desc: "ব্যাচ ডে-র প্রতিটি মুহূর্ত, হাসি আর ৪৫ সেকেন্ডের রিলস ভিডিও সরাসরি সবার সাথে শেয়ার করো।",
-                to: "/stream",
-                icon: Video,
-                badge: "লাইভ স্ট্রিম 🔴",
-                color: "text-red-500 bg-red-500/10 border-red-500/20",
-              },
-              {
-                title: "ফ্রেন্ডশিপ স্ল্যাম বুক",
-                desc: "বন্ধুদের নিজস্ব ডায়েরির পাতায় ডাকনাম, মজার স্মৃতি আর চিরকুট লিখে এসো।",
-                to: "/slambook",
-                icon: BookOpen,
-                badge: "ডিজিটাল চিরকুট",
-                color: "text-rose-500 bg-rose-500/10 border-rose-500/20",
-              },
-              {
-                title: "টাইম ক্যাপসুল ২০৩৬",
-                desc: "১০ বছর পরের নিজের উদ্দেশ্যে চিঠি লেখো। ডিজিটাল সিলমোহরে লক থাকবে ২০৩৬ পর্যন্ত।",
-                to: "/time-capsule",
-                icon: Hourglass,
-                badge: "লকড ইন ২০৩৬",
-                color: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-              },
-              {
-                title: "ক্যাম্পাস মেমোরি ম্যাপ",
-                desc: "শহীদ মিনার, মুক্তমঞ্চ, বটতলা ও প্রিয় স্পটগুলোতে বন্ধুদের স্মৃতি ও গল্প জমা রাখো।",
-                to: "/campus-map",
-                icon: Compass,
-                badge: "ইন্টারেক্টিভ স্পট",
-                color: "text-teal-600 bg-teal-500/10 border-teal-500/20",
-              },
-              {
-                title: "মুক্তমঞ্চ লাইভ পালস",
-                desc: "কনসার্ট ও ইভেন্টে ফোন থেকে ট্যাপ করে মঞ্চের প্রজেক্টরে রিয়েল-টাইম শক্তি পাঠাও!",
-                to: "/stage-pulse",
-                icon: Zap,
-                badge: "লাইভ স্টেজ",
-                color: "text-primary bg-primary/10 border-primary/20",
-              },
-              {
-                title: "বেনামী কনফেশন বক্স",
-                desc: "মনের গহীনে লুকানো কথা কিংবা ভালোলাগার অনুভূতি শেয়ার করো সম্পূর্ণ গোপন রেখে।",
-                to: "/confessions",
-                icon: MessageCircleHeart,
-                badge: "না-বলা অনুভূতি",
-                color: "text-pink-600 bg-pink-500/10 border-pink-500/20",
-              },
-            ].map((f) => {
-              const Icon = f.icon;
-              return (
-                <Link
-                  key={f.to}
-                  to={f.to}
-                  className="group relative flex flex-col justify-between p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-xl hover:border-primary/40 transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${f.color}`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide">
-                        {f.badge}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-display font-bold text-base text-foreground group-hover:text-primary transition-colors">
-                        {f.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                        {f.desc}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="pt-4 flex items-center gap-1 text-xs font-semibold text-primary">
-                    <span>এক্সপ্লোর করুন</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* Leaderboard Preview */}
       <section className="py-10 md:py-14 bg-surface">
         <div className="container">
@@ -390,8 +287,9 @@ export default function Index() {
             <Link to="/status" className="hover:text-foreground transition-colors">স্ট্যাটাস ও পাস</Link>
             <Link to="/gallery" className="hover:text-foreground transition-colors">গ্যালারি</Link>
             <Link to="/stream" className="hover:text-foreground transition-colors">রিলস</Link>
+            <Link to="/jersey" className="hover:text-foreground transition-colors">ডিজিটাল জার্সি</Link>
+            <Link to="/memories" className="hover:text-foreground transition-colors">স্মৃতি চত্বর</Link>
             <Link to="/game" className="hover:text-foreground transition-colors">গেম জোন</Link>
-            <Link to="/campus-map" className="hover:text-foreground transition-colors">ক্যাম্পাস ম্যাপ</Link>
             <Link to="/admin/login" className="hover:text-primary transition-colors font-semibold">অ্যাডমিন লগইন</Link>
           </div>
         </div>
