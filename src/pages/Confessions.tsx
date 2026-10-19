@@ -257,13 +257,13 @@ export default function Confessions() {
         
         <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3 shrink-0">
           <div className="relative w-full sm:w-[220px] md:w-[280px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-500 pointer-events-none" />
             <input
               type="text"
-              placeholder="কার উদ্দেশ্যে? নাম খুঁজুন..."
+              placeholder="নিজের নাম খুঁজুন..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-white/80 backdrop-blur-sm border border-rose-100 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/50 shadow-sm transition-shadow"
+              className="w-full pl-11 pr-4 py-3 sm:py-2.5 bg-white/90 dark:bg-card border border-rose-200 dark:border-rose-900/40 rounded-full text-sm font-medium placeholder:text-slate-500 dark:placeholder:text-slate-400 text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/50 shadow-sm transition-all"
             />
           </div>
 
@@ -271,7 +271,7 @@ export default function Confessions() {
             <DialogTrigger asChild>
               <button className="flex items-center justify-center gap-2 px-6 py-3 sm:py-2.5 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-md shrink-0">
                 <MessageSquarePlus className="w-5 h-5" />
-                নতুন কনফেশন
+                নতুন কনফেশন যুক্ত করো
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md bg-card rounded-3xl p-6 w-[95vw]">
