@@ -19,9 +19,8 @@ export default function AdminLeaderboard() {
     const { data: depts } = await supabase.from("departments").select("*").order("name");
     const { data: hl } = await supabase.from("halls").select("*").order("name");
     
-    // For now, we use a static total of 60 if not in DB
-    if (depts) setDeptData(depts.map(d => ({ ...d, total: 60 })));
-    if (hl) setHallData(hl.map(h => ({ ...h, total: 200 })));
+    if (depts) setDeptData(depts.map(d => ({ ...d, total: d.capacity || 60 })));
+    if (hl) setHallData(hl.map(h => ({ ...h, total: h.capacity || 200 })));
     setLoading(false);
   };
 
