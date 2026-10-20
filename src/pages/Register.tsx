@@ -1,10 +1,52 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { TSHIRT_SIZES } from "@/lib/constants";
-import { CheckCircle, Upload, Phone, CreditCard, ChevronLeft, ChevronRight, User, Camera, Loader2, XCircle, Copy, Check } from "lucide-react";
+import {
+  CheckCircle,
+  Upload,
+  Phone,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Camera,
+  Loader2,
+  XCircle,
+  Copy,
+  Check,
+  GraduationCap,
+  Sparkles,
+  AlertTriangle,
+  Ruler,
+  Lock,
+  Unlock,
+  Search,
+  Building2,
+  Info,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import initialVoters from "@/data/voters.json";
+import { fetchAllBatch52Students } from "@/utils/studentDataService";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+const TSHIRT_SIZE_DETAILS = [
+  { size: "S", chest: "36\"", length: "26\"", bangla: "স্মল (S)" },
+  { size: "M", chest: "38\"", length: "27\"", bangla: "মিডিয়াম (M)" },
+  { size: "L", chest: "40\"", length: "28\"", bangla: "লার্জ (L - সাধারণ ফিট)" },
+  { size: "XL", chest: "42\"", length: "29\"", bangla: "এক্সট্রা লার্জ (XL)" },
+  { size: "XXL", chest: "44\"", length: "30\"", bangla: "ডাবল এক্সেল (XXL)" },
+  { size: "3XL", chest: "46\"", length: "31\"", bangla: "ট্রিপল এক্সেল (3XL)" },
+];
 
 const STEPS = [
   { id: 1, label: "ব্যক্তিগত", icon: User },
@@ -90,6 +132,39 @@ export default function RegisterPage() {
   } | null>(null);
   const [copiedNumber, setCopiedNumber] = useState(false);
 
+  // 52nd Batch Student Autofill & Verification States
+  const [studentsList, setStudentsList] = useState<{
+    name: string;
+    department: string;
+    hall: string;
+    roll: string;
+    reg: string;
+  }[]>(() =>
+    (initialVoters as any[]).map((v) => ({
+      name: v.name || "",
+      department: v.dept || "",
+      hall: v.hall || "",
+      roll: String(v.rollNo || "").trim(),
+      reg: String(v.regNo || "").trim(),
+    }))
+  );
+  const [matchedStudent, setMatchedStudent] = useState<{
+    name: string;
+    department: string;
+    hall: string;
+    roll: string;
+    reg: string;
+  } | null>(null);
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
+  const [manualOverride, setManualOverride] = useState(false);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const [alreadyRegistered, setAlreadyRegistered] = useState<{
+    checking: boolean;
+    registered: boolean;
+    existingName?: string;
+    status?: string;
+  } | null>(null);
+
   const handleCopyNumber = () => {
     const num = form.paymentMethod === "bkash" ? settings?.bkash_number : settings?.nagad_number;
     if (num) {
@@ -108,7 +183,122 @@ export default function RegisterPage() {
       if (hl) setDbHalls(hl.map(h => h.name));
     };
     fetchLists();
+
+    // Fetch fresh 52nd batch student list in background
+    fetchAllBatch52Students()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setStudentsList(
+            data.map((d) => ({
+              name: d.name || "",
+              department: d.department || "",
+              hall: d.hall || "",
+              roll: String(d.roll_no || "").trim(),
+              reg: String(d.reg_no || "").trim(),
+            }))
+          );
+        }
+      })
+      .catch((err) => console.warn("Failed to fetch fresh students from Supabase", err));
   }, []);
+
+  // Live Auto-fill and Duplicate Registration Check on Roll Change
+  useEffect(() => {
+    const cleanRoll = form.roll.trim();
+    if (!cleanRoll) {
+      setMatchedStudent(null);
+      setIsAutoFilled(false);
+      setAlreadyRegistered(null);
+      return;
+    }
+
+    // Match by class roll or registration number (if 6+ digits)
+    const match = studentsList.find(
+      (s) => s.roll === cleanRoll || (cleanRoll.length >= 6 && s.reg === cleanRoll)
+    );
+
+    if (match) {
+      setMatchedStudent(match);
+      setIsAutoFilled(true);
+
+      // Auto-populate form fields
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name && prev.name !== match.name ? prev.name : match.name,
+        department: match.department,
+        hall: match.hall,
+        roll: match.roll,
+      }));
+
+      // Clear any previous validation errors for auto-filled fields
+      setErrors((prev) => ({
+        ...prev,
+        roll: "",
+        department: "",
+        hall: "",
+      }));
+
+      // Check if this roll has already been registered in registrations table
+      setAlreadyRegistered({ checking: true, registered: false });
+      const timer = setTimeout(async () => {
+        try {
+          const { data } = await supabase
+            .from("registrations")
+            .select("id, name, roll, status")
+            .eq("roll", match.roll)
+            .maybeSingle();
+
+          if (data) {
+            setAlreadyRegistered({
+              checking: false,
+              registered: true,
+              existingName: data.name,
+              status: data.status,
+            });
+          } else {
+            setAlreadyRegistered({ checking: false, registered: false });
+          }
+        } catch (e) {
+          setAlreadyRegistered(null);
+        }
+      }, 350);
+
+      return () => clearTimeout(timer);
+    } else {
+      setMatchedStudent(null);
+      setIsAutoFilled(false);
+
+      if (cleanRoll.length >= 2) {
+        setAlreadyRegistered({ checking: true, registered: false });
+        const timer = setTimeout(async () => {
+          try {
+            const { data } = await supabase
+              .from("registrations")
+              .select("id, name, roll, status")
+              .eq("roll", cleanRoll)
+              .maybeSingle();
+
+            if (data) {
+              setAlreadyRegistered({
+                checking: false,
+                registered: true,
+                existingName: data.name,
+                status: data.status,
+              });
+            } else {
+              setAlreadyRegistered({ checking: false, registered: false });
+            }
+          } catch (e) {
+            setAlreadyRegistered(null);
+          }
+        }, 400);
+
+        return () => clearTimeout(timer);
+      } else {
+        setAlreadyRegistered(null);
+      }
+    }
+  }, [form.roll, studentsList]);
 
   // Debounced auto-check for TrxID against bKash transactions
   useEffect(() => {
@@ -174,8 +364,12 @@ export default function RegisterPage() {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = "নাম লিখো";
     const rollNum = parseInt(form.roll);
-    if (!form.roll || isNaN(rollNum) || rollNum < 1 || rollNum > 9999) errs.roll = "সঠিক রোল নম্বর দাও (১-৯৯৯৯)";
-    if (!form.phone || !/^01\d{9}$/.test(form.phone)) errs.phone = "সঠিক ফোন নম্বর দাও";
+    if (!form.roll || isNaN(rollNum) || rollNum < 1 || rollNum > 9999) {
+      errs.roll = "সঠিক রোল নম্বর দাও (১-৯৯৯৯)";
+    } else if (alreadyRegistered?.registered) {
+      errs.roll = "এই রোল দিয়ে ইতিমধ্যেই রেজিস্ট্রেশন করা হয়েছে";
+    }
+    if (!form.phone || !/^01\d{9}$/.test(form.phone)) errs.phone = "সঠিক ফোন নম্বর দাও (১১ ডিজিট)";
     if (!form.department) errs.department = "ডিপার্টমেন্ট সিলেক্ট করো";
     if (!form.hall) errs.hall = "হল সিলেক্ট করো";
     if (!form.tshirtSize) errs.tshirtSize = "টি-শার্ট সাইজ সিলেক্ট করো";
@@ -402,45 +596,250 @@ export default function RegisterPage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="rounded-2xl bg-surface p-5 space-y-4"
+                className="rounded-2xl bg-surface p-5 space-y-4 shadow-sm border border-border/50"
               >
-                <h3 className="font-display font-semibold text-sm text-muted-foreground uppercase tracking-wider">ব্যক্তিগত তথ্য</h3>
+                <div className="flex items-center justify-between pb-2 border-b border-border/40">
+                  <h3 className="font-display font-semibold text-sm text-foreground uppercase tracking-wider flex items-center gap-2">
+                    <User className="h-4 w-4 text-primary" /> ব্যক্তিগত তথ্য
+                  </h3>
+                  <span className="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+                    ৫২তম ব্যাচ
+                  </span>
+                </div>
+
+                {/* Helpful info callout */}
+                <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-2.5">
+                  <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    তোমার <strong className="text-foreground font-bold">ক্লাস রোল নম্বর</strong> লিখলেই নাম, বিভাগ ও আবাসিক হল স্বয়ংক্রিয়ভাবে পূরণ হয়ে যাবে!
+                  </p>
+                </div>
+
+                {/* Roll Number Input (Prominent & First) */}
                 <div>
-                  <label className={labelClass}>নাম *</label>
-                  <input className={`${inputClass} ${errors.name ? "border-destructive ring-destructive/20" : "border-input"}`} placeholder="তোমার পুরো নাম" value={form.name} onChange={(e) => set("name", e.target.value)} />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelClass + " mb-0"}>ক্লাস রোল নম্বর *</label>
+                    <span className="text-[11px] text-muted-foreground font-mono">যেমন: 1227</span>
+                  </div>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      className={`${inputClass} pl-10 font-mono text-base font-bold ${
+                        errors.roll || alreadyRegistered?.registered
+                          ? "border-destructive ring-destructive/20"
+                          : matchedStudent
+                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          : "border-input"
+                      }`}
+                      placeholder="তোমার রোল নম্বর লিখো"
+                      value={form.roll}
+                      onChange={(e) => set("roll", e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
+                    />
+                    {alreadyRegistered?.checking && (
+                      <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary" />
+                    )}
+                  </div>
+                  {errors.roll && <p className={errorClass}>{errors.roll}</p>}
+
+                  {/* Case 1: Verified Batch 52 Student Card */}
+                  {matchedStudent && !alreadyRegistered?.registered && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                          ✓
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
+                            {matchedStudent.name}
+                          </p>
+                          <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80">
+                            রেজি: {matchedStudent.reg} • ৫২তম ব্যাচ ভেরিফাইড
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                        ভেরিফাইড 🎓
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {/* Case 2: Already Registered Warning Card */}
+                  {alreadyRegistered?.registered && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2.5 p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 space-y-2.5"
+                    >
+                      <div className="flex items-start gap-2.5 text-destructive">
+                        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-bold">
+                            এই রোল ({form.roll}) দিয়ে ইতিমধ্যেই রেজিস্ট্রেশন সম্পন্ন হয়েছে!
+                          </p>
+                          {alreadyRegistered.existingName && (
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                              রেজিস্ট্রেশনকারী: <strong className="text-foreground">{alreadyRegistered.existingName}</strong>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs font-bold border-destructive/30 hover:bg-destructive/10 text-destructive gap-1.5 h-8.5 rounded-xl"
+                      >
+                        <Link to="/status">
+                          <Search className="w-3.5 h-3.5" /> তোমার রেজিস্ট্রেশন স্ট্যাটাস ও আইডি কার্ড দেখো
+                        </Link>
+                      </Button>
+                    </motion.div>
+                  )}
+
+                  {/* Case 3: Roll typed (3+ digits) but not in Batch 52 list */}
+                  {!matchedStudent && form.roll.length >= 3 && !alreadyRegistered?.checking && !alreadyRegistered?.registered && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2"
+                    >
+                      <Info className="w-4 h-4 shrink-0 text-amber-600" />
+                      <span>তালিকাভুক্ত রোলের সাথে মেলেনি। রোল সঠিক হলে নাম, বিভাগ ও হল নিজে নির্বাচন করো।</span>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Name Input */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelClass + " mb-0"}>পুরো নাম *</label>
+                    {isAutoFilled && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        <Check className="w-3 h-3" /> স্বয়ংক্রিয়ভাবে পূরণকৃত
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    className={`${inputClass} ${errors.name ? "border-destructive ring-destructive/20" : "border-input"}`}
+                    placeholder="যেমন: MD. RAHIM AHMED"
+                    value={form.name}
+                    onChange={(e) => set("name", e.target.value)}
+                  />
                   {errors.name && <p className={errorClass}>{errors.name}</p>}
                 </div>
+
+                {/* Phone Input */}
                 <div>
-                  <label className={labelClass}>রোল নম্বর *</label>
-                  <input className={`${inputClass} ${errors.roll ? "border-destructive ring-destructive/20" : "border-input"}`} placeholder="যেমন: 1234" type="number" value={form.roll} onChange={(e) => set("roll", e.target.value)} />
-                  {errors.roll && <p className={errorClass}>{errors.roll}</p>}
-                </div>
-                <div>
-                  <label className={labelClass}>ফোন নম্বর *</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelClass + " mb-0"}>ফোন নম্বর *</label>
+                    <span className="text-[11px] text-muted-foreground font-mono">১১ ডিজিট</span>
+                  </div>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input className={`${inputClass} pl-10 ${errors.phone ? "border-destructive ring-destructive/20" : "border-input"}`} placeholder="01XXXXXXXXX" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      className={`${inputClass} pl-10 font-mono ${errors.phone ? "border-destructive ring-destructive/20" : "border-input"}`}
+                      placeholder="01XXXXXXXXX"
+                      value={form.phone}
+                      onChange={(e) => set("phone", e.target.value.replace(/[^0-9]/g, "").slice(0, 11))}
+                    />
                   </div>
                   {errors.phone && <p className={errorClass}>{errors.phone}</p>}
                 </div>
+
+                {/* Department */}
                 <div>
-                  <label className={labelClass}>ডিপার্টমেন্ট *</label>
-                  <select className={`${inputClass} ${errors.department ? "border-destructive ring-destructive/20" : "border-input"}`} value={form.department} onChange={(e) => set("department", e.target.value)}>
-                    <option value="">সিলেক্ট করো</option>
-                    {dbDepartments.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelClass + " mb-0"}>ডিপার্টমেন্ট *</label>
+                    {isAutoFilled && !manualOverride && (
+                      <button
+                        type="button"
+                        onClick={() => setManualOverride(true)}
+                        className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                      >
+                        <Unlock className="w-3 h-3" /> পরিবর্তন করতে চাও?
+                      </button>
+                    )}
+                  </div>
+                  {isAutoFilled && !manualOverride ? (
+                    <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm font-semibold text-foreground flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-emerald-600" />
+                        <span>{form.department || "বিভাগ লোড হচ্ছে..."}</span>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                        লকড ✓
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      className={`${inputClass} ${errors.department ? "border-destructive ring-destructive/20" : "border-input"}`}
+                      value={form.department}
+                      onChange={(e) => set("department", e.target.value)}
+                    >
+                      <option value="">সিলেক্ট করো</option>
+                      {dbDepartments.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  )}
                   {errors.department && <p className={errorClass}>{errors.department}</p>}
                 </div>
+
+                {/* Hall */}
                 <div>
-                  <label className={labelClass}>হল *</label>
-                  <select className={`${inputClass} ${errors.hall ? "border-destructive ring-destructive/20" : "border-input"}`} value={form.hall} onChange={(e) => set("hall", e.target.value)}>
-                    <option value="">সিলেক্ট করো</option>
-                    {dbHalls.map((h) => <option key={h} value={h}>{h}</option>)}
-                  </select>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelClass + " mb-0"}>আবাসিক হল *</label>
+                    {isAutoFilled && !manualOverride && (
+                      <button
+                        type="button"
+                        onClick={() => setManualOverride(true)}
+                        className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                      >
+                        <Unlock className="w-3 h-3" /> পরিবর্তন করতে চাও?
+                      </button>
+                    )}
+                  </div>
+                  {isAutoFilled && !manualOverride ? (
+                    <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm font-semibold text-foreground flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-emerald-600" />
+                        <span>{form.hall || "হল লোড হচ্ছে..."}</span>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                        লকড ✓
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      className={`${inputClass} ${errors.hall ? "border-destructive ring-destructive/20" : "border-input"}`}
+                      value={form.hall}
+                      onChange={(e) => set("hall", e.target.value)}
+                    >
+                      <option value="">সিলেক্ট করো</option>
+                      {dbHalls.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  )}
                   {errors.hall && <p className={errorClass}>{errors.hall}</p>}
                 </div>
+
+                {/* T-Shirt Size with Size Guide Chart */}
                 <div>
-                  <label className={labelClass}>টি-শার্ট সাইজ *</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelClass + " mb-0"}>টি-শার্ট সাইজ *</label>
+                    <button
+                      type="button"
+                      onClick={() => setSizeGuideOpen(true)}
+                      className="text-xs font-bold text-primary hover:underline flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-lg transition-colors"
+                    >
+                      <Ruler className="w-3.5 h-3.5" /> সাইজ চার্ট (Chart)
+                    </button>
+                  </div>
                   <div className="flex gap-2 flex-wrap">
                     {TSHIRT_SIZES.map((s) => (
                       <button
@@ -449,7 +848,7 @@ export default function RegisterPage() {
                         onClick={() => set("tshirtSize", s)}
                         className={`px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                           form.tshirtSize === s
-                            ? "bg-primary text-primary-foreground border-primary scale-105"
+                            ? "bg-primary text-primary-foreground border-primary scale-105 shadow-sm"
                             : "border-input bg-card hover:bg-muted active:scale-95"
                         }`}
                       >
@@ -604,8 +1003,66 @@ export default function RegisterPage() {
                 </div>
                 <div>
                   <label className={labelClass}>যে নম্বর থেকে পাঠিয়েছো *</label>
-                  <input className={`${inputClass} ${errors.senderNumber ? "border-destructive ring-destructive/20" : "border-input"}`} placeholder="01XXXXXXXXX" value={form.senderNumber} onChange={(e) => set("senderNumber", e.target.value)} />
+                  <input
+                    className={`${inputClass} font-mono ${errors.senderNumber ? "border-destructive ring-destructive/20" : "border-input"}`}
+                    placeholder="01XXXXXXXXX"
+                    value={form.senderNumber}
+                    onChange={(e) => set("senderNumber", e.target.value.replace(/[^0-9]/g, "").slice(0, 11))}
+                  />
                   {errors.senderNumber && <p className={errorClass}>{errors.senderNumber}</p>}
+                </div>
+
+                {/* Review Info Card before Submitting */}
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-3 shadow-sm mt-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                        চূড়ান্ত তথ্য প্রিভিউ (Review)
+                      </span>
+                    </div>
+                    {photoPreview ? (
+                      <img
+                        src={photoPreview}
+                        alt="Photo Preview"
+                        className="w-8 h-8 rounded-full object-cover border border-primary/30"
+                      />
+                    ) : (
+                      <span className="text-[11px] font-semibold text-primary">৫২তম ব্যাচ</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 text-xs">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">শিক্ষার্থীর নাম</span>
+                      <span className="font-bold text-foreground truncate block">{form.name || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">রোল ও রেজি</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {form.roll} {matchedStudent?.reg ? `(${matchedStudent.reg})` : ""}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">বিভাগ</span>
+                      <span className="font-semibold text-foreground truncate block">{form.department || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">আবাসিক হল</span>
+                      <span className="font-semibold text-foreground truncate block">{form.hall || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">টি-শার্ট সাইজ</span>
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-primary/15 text-primary font-bold text-xs">
+                        {form.tshirtSize || "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">ফি ও মাধ্যম</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        ৳{settings?.registration_fee || 252} ({form.paymentMethod === "bkash" ? "বিকাশ" : "নগদ"})
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -636,14 +1093,16 @@ export default function RegisterPage() {
             ) : (
               <button
                 type="submit"
-                disabled={submitting}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:hover:scale-100"
+                disabled={submitting || !!alreadyRegistered?.registered}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-accent text-accent-foreground font-display font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:hover:scale-100 cursor-pointer disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
                     সাবমিট হচ্ছে...
                   </>
+                ) : alreadyRegistered?.registered ? (
+                  "ইতিমধ্যেই রেজিস্ট্রেশন সম্পন্ন হয়েছে ⚠️"
                 ) : (
                   "সাবমিট করো 🚀"
                 )}
@@ -652,6 +1111,73 @@ export default function RegisterPage() {
           </div>
         </form>
       </motion.div>
+
+      {/* T-Shirt Size Guide Dialog Modal */}
+      <Dialog open={sizeGuideOpen} onOpenChange={setSizeGuideOpen}>
+        <DialogContent className="rounded-3xl max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <Ruler className="w-5 h-5 text-primary" />
+              <span>টি-শার্ট সাইজ গাইড (JU 52nd Batch)</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              সঠিক সাইজ নিশ্চিত করতে নিচে ইঞ্চিতে পরিমাপ দেওয়া হলো। ক্লিক করে সরাসরি নির্বাচন করতে পারো।
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-3 overflow-hidden rounded-2xl border border-border">
+            <table className="w-full text-xs text-left">
+              <thead className="bg-muted font-bold text-muted-foreground border-b border-border">
+                <tr>
+                  <th className="py-2.5 px-3">সাইজ</th>
+                  <th className="py-2.5 px-3">বুক (Chest)</th>
+                  <th className="py-2.5 px-3">লম্বা (Length)</th>
+                  <th className="py-2.5 px-3 text-right">নির্বাচন</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {TSHIRT_SIZE_DETAILS.map((item) => (
+                  <tr
+                    key={item.size}
+                    onClick={() => {
+                      set("tshirtSize", item.size);
+                      setSizeGuideOpen(false);
+                      toast({ title: `টি-শার্ট সাইজ "${item.size}" সিলেক্ট হয়েছে! 👕` });
+                    }}
+                    className={`cursor-pointer transition-colors hover:bg-primary/5 ${
+                      form.tshirtSize === item.size ? "bg-primary/10 font-bold" : ""
+                    }`}
+                  >
+                    <td className="py-2.5 px-3 font-bold text-foreground">
+                      <span className="px-2 py-0.5 rounded bg-muted font-mono">{item.size}</span>
+                      <span className="text-[10px] text-muted-foreground ml-1.5 font-normal">({item.bangla})</span>
+                    </td>
+                    <td className="py-2.5 px-3 font-mono">{item.chest}</td>
+                    <td className="py-2.5 px-3 font-mono">{item.length}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        type="button"
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                          form.tshirtSize === item.size
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-primary hover:text-white"
+                        }`}
+                      >
+                        {form.tshirtSize === item.size ? "সিলেক্টেড ✓" : "বেছে নাও"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-3 p-3 rounded-xl bg-muted/60 text-[11px] text-muted-foreground flex items-center gap-2">
+            <Info className="w-4 h-4 text-primary shrink-0" />
+            <span>টিপস: একটু ঢিলেঢালা বা কম্ফোর্টেবল পছন্দ করলে রেগুলার সাইজের চেয়ে ১ সাইজ বড় নিতে পারো।</span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
