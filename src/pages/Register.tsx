@@ -274,6 +274,17 @@ export default function RegisterPage() {
               ...prev.filter((s) => s.roll !== newStudent.roll),
               newStudent,
             ]);
+          } else if (payload.eventType === "DELETE" && payload.old) {
+            const d: any = payload.old;
+            const deletedRoll = String(d.roll_no || "").trim();
+            setStudentsList((prev) => prev.filter((s) => s.roll !== deletedRoll));
+            setForm((prev) => {
+              if (prev.roll.trim() === deletedRoll) {
+                return { ...prev, department: "", hall: "" };
+              }
+              return prev;
+            });
+            setMatchedStudent((curr) => (curr && curr.roll === deletedRoll ? null : curr));
           }
         }
       )

@@ -92,6 +92,39 @@ export default function StatusPage() {
     }
   };
 
+  // Live Realtime sync if Admin updates student's name, hall, or status
+  useEffect(() => {
+    if (!userData?.id) return;
+
+    const channel = supabase
+      .channel(`status_realtime_${userData.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "registrations",
+          filter: `id=eq.${userData.id}`,
+        },
+        (payload) => {
+          if (payload.new) {
+            const updated = payload.new as any;
+            setUserData(updated);
+            setStatus(updated.status as Status);
+            toast({
+              title: "তথ্য আপডেট হয়েছে! ✨",
+              description: "অ্যাডমিন প্যানেল থেকে আপনার তথ্য রিয়েল-টাইমে আপডেট করা হয়েছে।",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userData?.id]);
+
   useEffect(() => {
     if (status === "verified" && userData && canvasRef.current) {
       const canvas = canvasRef.current;

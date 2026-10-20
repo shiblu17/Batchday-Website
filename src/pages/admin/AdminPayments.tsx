@@ -195,6 +195,22 @@ export default function AdminPayments() {
     if (error) {
       toast({ title: "সেভ ব্যর্থ হয়েছে", variant: "destructive" });
     } else {
+      // Sync back to batch52_students master table
+      try {
+        await supabase
+          .from("batch52_students")
+          .update({
+            name: editing.name.trim().toUpperCase(),
+            department: editing.department,
+            hall: editing.hall,
+            roll_no: editing.roll.trim(),
+            updated_at: new Date().toISOString(),
+          } as any)
+          .eq("roll_no", editing.roll.trim());
+      } catch (bErr) {
+        console.warn("Sync back to batch52_students failed:", bErr);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["registrations"] });
       setEditing(null);
       toast({ title: "তথ্য আপডেট করা হয়েছে ✅" });

@@ -232,6 +232,31 @@ export default function AdminStudents() {
       } else {
         // Immediate local state update
         setStudents((prev) => [newStudent, ...prev.filter((s) => s.id !== newId)]);
+
+        // Cascade update to registrations table if a registration exists for this roll
+        try {
+          const { data: matchedRegs } = await supabase
+            .from("registrations")
+            .select("id")
+            .eq("roll", cleanRoll);
+
+          if (matchedRegs && matchedRegs.length > 0) {
+            for (const r of matchedRegs) {
+              await supabase
+                .from("registrations")
+                .update({
+                  name: cleanName,
+                  department: formData.department,
+                  hall: formData.hall,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", r.id);
+            }
+          }
+        } catch (rErr) {
+          console.warn("Sync to registrations on add failed", rErr);
+        }
+
         toast.success(`✓ শিক্ষার্থী "${cleanName}" সফলভাবে যুক্ত হয়েছে!`);
         setAddModalOpen(false);
       }
@@ -294,7 +319,33 @@ export default function AdminStudents() {
             s.id === editingStudent.id ? { ...s, ...updatedPayload } : s
           )
         );
-        toast.success(`✓ "${cleanName}" এর তথ্য সফলভাবে আপডেট হয়েছে!`);
+
+        // Cascade update to registrations table so student's badge, status, and registration record are always in sync!
+        try {
+          const { data: matchedRegs } = await supabase
+            .from("registrations")
+            .select("id")
+            .or(`roll.eq.${editingStudent.roll_no},roll.eq.${cleanRoll}`);
+
+          if (matchedRegs && matchedRegs.length > 0) {
+            for (const r of matchedRegs) {
+              await supabase
+                .from("registrations")
+                .update({
+                  name: cleanName,
+                  department: formData.department,
+                  hall: formData.hall,
+                  roll: cleanRoll,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", r.id);
+            }
+          }
+        } catch (regErr) {
+          console.warn("Cascade to registrations error:", regErr);
+        }
+
+        toast.success(`✓ "${cleanName}" এর তথ্য এবং সংশ্লিষ্ট সকল রেকর্ড আপডেট হয়েছে!`);
         setEditModalOpen(false);
       }
     } catch (err: any) {
