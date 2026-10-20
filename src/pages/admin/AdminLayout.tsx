@@ -9,6 +9,7 @@ import { ADMIN_SECTIONS, type AdminSectionKey } from "@/utils/adminPermissionsSe
 const ROUTE_SECTION_MAP: Record<string, AdminSectionKey> = {
   payments: "payments",
   export: "export",
+  students: "students",
   scanner: "scanner",
   gallery: "gallery",
   reels: "reels",

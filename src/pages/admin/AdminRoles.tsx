@@ -28,6 +28,7 @@ import {
   Settings,
   ShieldAlert,
   Search,
+  GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ const SECTION_ICONS: Record<string, any> = {
   CalendarDays,
   Download,
   Settings,
+  GraduationCap,
 };
 
 // 1-Click Role Presets
@@ -110,6 +112,13 @@ const ROLE_PRESETS: RolePreset[] = [
     sections: ["gallery", "reels"],
     badgeColor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     icon: ImageIcon,
+  },
+  {
+    name: "শিক্ষার্থী ডেটাবেজ অ্যাডমিন",
+    roleTitle: "ডেটাবেজ মডারেটর",
+    sections: ["students"],
+    badgeColor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    icon: GraduationCap,
   },
   {
     name: "অল-রাউন্ডার (নন-ফাইন্যান্স)",

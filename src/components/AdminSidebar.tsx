@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Film,
   Users,
+  GraduationCap,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -38,6 +39,7 @@ interface MenuItem {
 const items: MenuItem[] = [
   { title: "ড্যাশবোর্ড", url: "/admin", icon: LayoutDashboard },
   { title: "পেমেন্ট ভেরিফিকেশন", url: "/admin/payments", icon: CreditCard, sectionKey: "payments" },
+  { title: "শিক্ষার্থী ডেটাবেজ", url: "/admin/students", icon: GraduationCap, sectionKey: "students" },
   { title: "ডেটা এক্সপোর্ট", url: "/admin/export", icon: Download, sectionKey: "export" },
   { title: "QR স্ক্যানার", url: "/admin/scanner", icon: QrCode, sectionKey: "scanner" },
   { title: "গ্যালারি", url: "/admin/gallery", icon: ImageIcon, sectionKey: "gallery" },

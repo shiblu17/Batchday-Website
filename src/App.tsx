@@ -57,6 +57,7 @@ const LiveBatchStream = lazy(() => import("./pages/LiveBatchStream"));
 const AdminConfessions = lazy(() => import("./pages/admin/AdminConfessions"));
 const AdminTimeline = lazy(() => import("./pages/admin/AdminTimeline"));
 const AdminReels = lazy(() => import("./pages/admin/AdminReels"));
+const AdminStudents = lazy(() => import("./pages/admin/AdminStudents"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TwentyNineGame = lazy(() => import("./pages/TwentyNineGame"));
 import JuAmbientPlayer from "@/components/JuAmbientPlayer";
@@ -310,6 +311,7 @@ const App = () => (
                 >
                   <Route index element={<AdminDashboard />} />
                   <Route path="payments" element={<AdminPayments />} />
+                  <Route path="students" element={<AdminStudents />} />
                   <Route path="export" element={<AdminExport />} />
                   <Route path="scanner" element={<AdminScanner />} />
                   <Route path="settings" element={<AdminSettings />} />

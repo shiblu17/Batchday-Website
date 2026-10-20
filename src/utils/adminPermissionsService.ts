@@ -11,7 +11,8 @@ export type AdminSectionKey =
   | "leaderboard"
   | "timeline"
   | "settings"
-  | "roles";
+  | "roles"
+  | "students";
 
 export interface AdminSectionMeta {
   key: AdminSectionKey;
@@ -80,6 +81,13 @@ export const ADMIN_SECTIONS: AdminSectionMeta[] = [
     description: "রেজিস্ট্রেশন ডেটা ও এক্সেল শিট ডাউনলোড",
     iconName: "Download",
     isSensitive: true,
+  },
+  {
+    key: "students",
+    title: "শিক্ষার্থী ডেটাবেজ",
+    url: "/admin/students",
+    description: "৫২তম ব্যাচের শিক্ষার্থী তথ্য সংযোজন, এডিট, বাদ ও লাইভ সিঙ্ক",
+    iconName: "GraduationCap",
   },
   {
     key: "settings",
