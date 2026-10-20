@@ -2,13 +2,9 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, GraduationCap, UserCircle2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import votersData from "@/data/voters.json";
+import { useBatchStudents, BatchStudent } from "@/services/batchStudentsService";
 
-interface Voter {
-  name: string;
-  dept: string;
-  hall: string;
-}
+type Voter = BatchStudent;
 
 interface GameLoginModalProps {
   gameTitle: string;
@@ -27,7 +23,8 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
   const [dbDepartments, setDbDepartments] = useState<string[]>([]);
   const [dbHalls, setDbHalls] = useState<string[]>([]);
   
-  const voters = votersData as Voter[];
+  // Real-time student list synced with ju-52-analytics
+  const voters = useBatchStudents();
 
   // Auto-load saved nickname if any
   useEffect(() => {
