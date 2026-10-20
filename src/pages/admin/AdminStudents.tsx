@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import initialVoters from "@/data/voters.json";
+import { fetchAllBatch52Students } from "@/utils/studentDataService";
 
 export const JU_52_DEPARTMENTS = [
   "Accounting and Information Systems",
@@ -157,24 +158,17 @@ export default function AdminStudents() {
 
   const [saving, setSaving] = useState(false);
 
-  // Fetch all students from Supabase & Setup Realtime Listener
+  // Fetch all students from Supabase (bypassing 1000 row limit) & Setup Realtime Listener
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("batch52_students")
-        .select("*")
-        .order("name", { ascending: true })
-        .limit(3000);
-
-      if (error) {
-        console.error("Supabase fetch error:", error);
-        toast.error("সুপাবেজ থেকে ডেটা লোড করা যায়নি: " + error.message);
-      } else if (data && data.length > 0) {
-        setStudents(data);
+      const allData = await fetchAllBatch52Students();
+      if (allData && allData.length > 0) {
+        setStudents(allData as Student[]);
       }
     } catch (err: any) {
-      console.error(err);
+      console.error("Supabase fetch error:", err);
+      toast.error("সুপাবেজ থেকে ডেটা লোড করা যায়নি: " + (err?.message || ""));
     } finally {
       setLoading(false);
     }

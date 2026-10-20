@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, GraduationCap, UserCircle2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import votersData from "@/data/voters.json";
+import { fetchAllBatch52Students } from "@/utils/studentDataService";
 
 interface Voter {
   name: string;
@@ -31,12 +32,8 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
 
   // Sync with Supabase batch52_students table & Realtime channel
   useEffect(() => {
-    supabase
-      .from("batch52_students")
-      .select("id, name, department, hall, reg_no, roll_no")
-      .order("name")
-      .limit(3000)
-      .then(({ data }) => {
+    fetchAllBatch52Students()
+      .then((data) => {
         if (data && data.length > 0) {
           setVoters(
             data.map((d) => ({
@@ -49,7 +46,8 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
             }))
           );
         }
-      });
+      })
+      .catch((err) => console.error("Error fetching full student list in modal:", err));
 
     const channel = supabase
       .channel("batch52_students_realtime_sync")
