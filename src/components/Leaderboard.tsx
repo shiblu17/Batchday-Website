@@ -46,7 +46,7 @@ export default function Leaderboard() {
       const hallCounts: Record<string, number> = {};
 
       regs?.forEach(r => {
-        if (r.status === 'verified' || r.status === 'pending') {
+        if (r.status === 'verified') {
           deptCounts[r.department] = (deptCounts[r.department] || 0) + 1;
           hallCounts[r.hall] = (hallCounts[r.hall] || 0) + 1;
         }

@@ -55,7 +55,7 @@ export default function Index() {
         const deptCounts: Record<string, number> = {};
         const hallCounts: Record<string, number> = {};
         regs?.forEach(r => {
-          if (r.status === 'verified' || r.status === 'pending') {
+          if (r.status === 'verified') {
             deptCounts[r.department] = (deptCounts[r.department] || 0) + 1;
             hallCounts[r.hall] = (hallCounts[r.hall] || 0) + 1;
           }
@@ -75,6 +75,18 @@ export default function Index() {
       }
     };
     fetchLeaderboard();
+
+    // Live sync when payment is verified or registrations updated
+    const channel = supabase
+      .channel("home-leaderboard-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "registrations" }, () => {
+        fetchLeaderboard();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
   const { data: verifiedCount = 0 } = useQuery({
     queryKey: ["verified-registrations-count"],
