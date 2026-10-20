@@ -24,6 +24,11 @@ import {
   Search,
   Building2,
   Info,
+  HelpCircle,
+  MessageCircle,
+  PhoneCall,
+  Edit3,
+  RotateCcw,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,6 +170,29 @@ export default function RegisterPage() {
     status?: string;
   } | null>(null);
 
+  // Helpline & Data Correction State
+  const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
+  const [correctionForm, setCorrectionForm] = useState({
+    issueType: "hall",
+    details: "",
+    contactPhone: "",
+  });
+
+  const helplineNumber = settings?.bkash_number || "01700000000";
+  const rawNum = helplineNumber.replace(/[^0-9]/g, "");
+  const waNum = rawNum.startsWith("88")
+    ? rawNum
+    : `88${rawNum.startsWith("0") ? rawNum : "0" + rawNum}`;
+
+  const currentRollText = form.roll || "উল্লেখ নেই";
+  const currentNameText = form.name || matchedStudent?.name || "উল্লেখ নেই";
+  const currentDeptText = form.department || matchedStudent?.department || "উল্লেখ নেই";
+  const currentHallText = form.hall || matchedStudent?.hall || "উল্লেখ নেই";
+
+  const waMessage = `আসসালামু আলাইকুম অ্যাডমিন,\nআমি জাহাঙ্গীরনগর বিশ্ববিদ্যালয় ৫২তম ব্যাচের শিক্ষার্থী।\n🎓 ক্লাস রোল: ${currentRollText}\n👤 নাম: ${currentNameText}\n🏛️ বিভাগ: ${currentDeptText}\n🏠 হল: ${currentHallText}\n\n⚠️ সমস্যা: আমার ডেটাবেজের তথ্য সংশোধন প্রয়োজন। দয়া করে অ্যাডমিন প্যানেল থেকে ঠিক করে দিন।`;
+
+  const whatsappHelplineUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(waMessage)}`;
+
   const handleCopyNumber = () => {
     const num = form.paymentMethod === "bkash" ? settings?.bkash_number : settings?.nagad_number;
     if (num) {
@@ -184,7 +212,7 @@ export default function RegisterPage() {
     };
     fetchLists();
 
-    // Fetch fresh 52nd batch student list in background
+    // Fetch fresh 52nd batch student list in background & subscribe to Realtime Admin changes
     fetchAllBatch52Students()
       .then((data) => {
         if (data && data.length > 0) {
@@ -200,6 +228,73 @@ export default function RegisterPage() {
         }
       })
       .catch((err) => console.warn("Failed to fetch fresh students from Supabase", err));
+
+    // Realtime WebSocket channel for instant auto-sync when Admin updates any student record
+    const channel = supabase
+      .channel("register_page_batch52_live_sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "batch52_students" },
+        (payload) => {
+          if (payload.eventType === "UPDATE" && payload.new) {
+            const u: any = payload.new;
+            const updatedRoll = String(u.roll_no || "").trim();
+            const updatedStudent = {
+              name: u.name || "",
+              department: u.department || "",
+              hall: u.hall || "",
+              roll: updatedRoll,
+              reg: String(u.reg_no || "").trim(),
+            };
+
+            setStudentsList((prev) =>
+              prev.map((s) => (s.roll === updatedRoll ? updatedStudent : s))
+            );
+
+            // If the user currently has this student's roll typed in the form!
+            setForm((prev) => {
+              if (prev.roll.trim() === updatedRoll) {
+                toast({
+                  title: "ডেটাবেজ আপডেট হয়েছে! ✨",
+                  description: `অ্যাডমিন প্যানেল থেকে তোমার তথ্য (${updatedStudent.name}) লাইভ সিঙ্ক করা হয়েছে।`,
+                });
+                return {
+                  ...prev,
+                  name: updatedStudent.name,
+                  department: updatedStudent.department,
+                  hall: updatedStudent.hall,
+                };
+              }
+              return prev;
+            });
+
+            setMatchedStudent((curr) => {
+              if (curr && curr.roll === updatedRoll) {
+                return updatedStudent;
+              }
+              return curr;
+            });
+          } else if (payload.eventType === "INSERT" && payload.new) {
+            const n: any = payload.new;
+            const newStudent = {
+              name: n.name || "",
+              department: n.department || "",
+              hall: n.hall || "",
+              roll: String(n.roll_no || "").trim(),
+              reg: String(n.reg_no || "").trim(),
+            };
+            setStudentsList((prev) => [
+              ...prev.filter((s) => s.roll !== newStudent.roll),
+              newStudent,
+            ]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Live Auto-fill and Duplicate Registration Check on Roll Change
@@ -221,12 +316,12 @@ export default function RegisterPage() {
       setMatchedStudent(match);
       setIsAutoFilled(true);
 
-      // Auto-populate form fields
+      // Auto-populate form fields (Always set name to matched student!)
       setForm((prev) => ({
         ...prev,
-        name: prev.name && prev.name !== match.name ? prev.name : match.name,
-        department: match.department,
-        hall: match.hall,
+        name: match.name,
+        department: manualOverride && prev.department ? prev.department : match.department,
+        hall: manualOverride && prev.hall ? prev.hall : match.hall,
         roll: match.roll,
       }));
 
@@ -234,6 +329,7 @@ export default function RegisterPage() {
       setErrors((prev) => ({
         ...prev,
         roll: "",
+        name: "",
         department: "",
         hall: "",
       }));
@@ -754,7 +850,7 @@ export default function RegisterPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className={labelClass + " mb-0"}>ডিপার্টমেন্ট *</label>
-                    {isAutoFilled && !manualOverride && (
+                    {isAutoFilled && !manualOverride ? (
                       <button
                         type="button"
                         onClick={() => setManualOverride(true)}
@@ -762,7 +858,22 @@ export default function RegisterPage() {
                       >
                         <Unlock className="w-3 h-3" /> পরিবর্তন করতে চাও?
                       </button>
-                    )}
+                    ) : manualOverride && matchedStudent ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setManualOverride(false);
+                          setForm((f) => ({
+                            ...f,
+                            department: matchedStudent.department,
+                            hall: matchedStudent.hall,
+                          }));
+                        }}
+                        className="text-[11px] font-semibold text-muted-foreground hover:underline flex items-center gap-1"
+                      >
+                        <RotateCcw className="w-3 h-3" /> ডেটাবেজ মান ফিরিয়ে নাও
+                      </button>
+                    ) : null}
                   </div>
                   {isAutoFilled && !manualOverride ? (
                     <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm font-semibold text-foreground flex items-center justify-between">
@@ -793,7 +904,7 @@ export default function RegisterPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className={labelClass + " mb-0"}>আবাসিক হল *</label>
-                    {isAutoFilled && !manualOverride && (
+                    {isAutoFilled && !manualOverride ? (
                       <button
                         type="button"
                         onClick={() => setManualOverride(true)}
@@ -801,7 +912,22 @@ export default function RegisterPage() {
                       >
                         <Unlock className="w-3 h-3" /> পরিবর্তন করতে চাও?
                       </button>
-                    )}
+                    ) : manualOverride && matchedStudent ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setManualOverride(false);
+                          setForm((f) => ({
+                            ...f,
+                            department: matchedStudent.department,
+                            hall: matchedStudent.hall,
+                          }));
+                        }}
+                        className="text-[11px] font-semibold text-muted-foreground hover:underline flex items-center gap-1"
+                      >
+                        <RotateCcw className="w-3 h-3" /> ডেটাবেজ মান ফিরিয়ে নাও
+                      </button>
+                    ) : null}
                   </div>
                   {isAutoFilled && !manualOverride ? (
                     <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm font-semibold text-foreground flex items-center justify-between">
@@ -857,6 +983,59 @@ export default function RegisterPage() {
                     ))}
                   </div>
                   {errors.tshirtSize && <p className={errorClass}>{errors.tshirtSize}</p>}
+                </div>
+
+                {/* 💬 ডেটাবেজ সংশোধন ও অ্যাডমিন হেল্পলাইন কার্ড */}
+                <div className="rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/5 via-card to-secondary/5 p-4 space-y-3 shadow-sm mt-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                        <HelpCircle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">
+                          নাম, বিভাগ বা হলে কোনো ভুল আছে?
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground">
+                          অ্যাডমিন প্যানেল থেকে সংশোধন করলেই লাইভ সিঙ্ক হয়ে যাবে!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    অফিসিয়াল ডেটাবেজে তোমার নামের বানান, হল বা বিভাগ ভুল থাকলে অথবা রোল খুঁজে না পেলে চিন্তার কোনো কারণ নেই। সরাসরি হেল্পলাইনে মেসেজ পাঠাও, অ্যাডমিন প্যানেল থেকে ঠিক করার সাথে সাথেই তোমার স্ক্রিনে তা <strong>অটো সিঙ্ক (Live Auto-Sync)</strong> হয়ে যাবে।
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                    {/* WhatsApp Button */}
+                    <a
+                      href={whatsappHelplineUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm active:scale-95 flex-1"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>হোয়াটসঅ্যাপে এডমিনকে জানান</span>
+                    </a>
+
+                    {/* Quick Correction Request Modal Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCorrectionForm({
+                          issueType: "hall",
+                          details: "",
+                          contactPhone: form.phone || "",
+                        });
+                        setCorrectionModalOpen(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all active:scale-95 flex-1"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>সংশোধন রিকোয়েস্ট পাঠান</span>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -1176,6 +1355,128 @@ export default function RegisterPage() {
             <Info className="w-4 h-4 text-primary shrink-0" />
             <span>টিপস: একটু ঢিলেঢালা বা কম্ফোর্টেবল পছন্দ করলে রেগুলার সাইজের চেয়ে ১ সাইজ বড় নিতে পারো।</span>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 📝 Quick Data Correction Request Modal */}
+      <Dialog open={correctionModalOpen} onOpenChange={setCorrectionModalOpen}>
+        <DialogContent className="rounded-3xl max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <Edit3 className="w-5 h-5 text-primary" />
+              <span>তথ্য সংশোধনের অনুরোধ (Helpline)</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              অফিসিয়াল ডেটাবেজে কোনো তথ্যে ভুল থাকলে নিচে বিস্তারিত লিখে সরাসরি অ্যাডমিনকে জানান। অ্যাডমিন প্যানেলে আপডেট করার সাথে সাথে তোমার ফর্ম স্বয়ংক্রিয়ভাবে লাইভ সিঙ্ক হয়ে যাবে।
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const fullMsg = `*JU ৫২তম ব্যাচ - তথ্য সংশোধন অনুরোধ* 🎓\n• ক্লাস রোল: ${form.roll || "উল্লেখ নেই"}\n• বর্তমান নাম: ${form.name || "উল্লেখ নেই"}\n• বিভাগ: ${form.department || "উল্লেখ নেই"}\n• বর্তমান হল: ${form.hall || "উল্লেখ নেই"}\n• সংশোধনের বিষয়: ${
+                correctionForm.issueType === "hall"
+                  ? "আবাসিক হল ভুল"
+                  : correctionForm.issueType === "department"
+                  ? "বিভাগ ভুল"
+                  : correctionForm.issueType === "name"
+                  ? "নামের বানান ভুল"
+                  : correctionForm.issueType === "missing_roll"
+                  ? "রোল তালিকায় পাওয়া যাচ্ছে না"
+                  : "অন্যান্য সমস্যা"
+              }\n• যা সংশোধন করতে হবে: ${correctionForm.details}\n• যোগাযোগ নম্বর: ${correctionForm.contactPhone || form.phone || "উল্লেখ নেই"}\n\nদয়া করে অ্যাডমিন প্যানেল থেকে তথ্যটি আপডেট করে দিন।`;
+
+              const targetUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(fullMsg)}`;
+              window.open(targetUrl, "_blank");
+              setCorrectionModalOpen(false);
+              toast({
+                title: "হোয়াটসঅ্যাপে পাঠানো হচ্ছে... 💬",
+                description: "অ্যাডমিন তথ্য আপডেট করলেই তোমার রেজিস্ট্রেশন ফর্মে লাইভ সিঙ্ক হয়ে যাবে।",
+              });
+            }}
+            className="space-y-3.5 mt-2"
+          >
+            <div>
+              <label className="text-xs font-bold text-foreground block mb-1">
+                ক্লাস রোল নম্বর
+              </label>
+              <input
+                readOnly
+                value={form.roll || "ফর্মের রোল খালি"}
+                className="w-full rounded-xl border bg-muted/50 px-3.5 py-2.5 text-xs font-mono font-bold text-foreground"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-foreground block mb-1">
+                কোন তথ্যে ভুল আছে?
+              </label>
+              <select
+                value={correctionForm.issueType}
+                onChange={(e) =>
+                  setCorrectionForm({ ...correctionForm, issueType: e.target.value })
+                }
+                className="w-full rounded-xl border bg-card px-3.5 py-2.5 text-xs font-medium"
+              >
+                <option value="hall">আবাসিক হল ভুল আছে</option>
+                <option value="department">বিভাগের নাম ভুল আছে</option>
+                <option value="name">নামের বানানে ভুল আছে</option>
+                <option value="missing_roll">তালিকায় আমার রোল পাওয়া যাচ্ছে না</option>
+                <option value="other">অন্যান্য সমস্যা</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-foreground block mb-1">
+                সঠিক তথ্য কী হবে? বিস্তারিত লিখুন *
+              </label>
+              <textarea
+                required
+                rows={3}
+                placeholder="যেমন: আমার সঠিক হল বীর প্রতীক তারামন বিবি হল (বর্তমানে জাহানারা ইমাম হল দেখাচ্ছে)"
+                value={correctionForm.details}
+                onChange={(e) =>
+                  setCorrectionForm({ ...correctionForm, details: e.target.value })
+                }
+                className="w-full rounded-xl border bg-card p-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-foreground block mb-1">
+                তোমার ফোন নম্বর
+              </label>
+              <input
+                placeholder="01XXXXXXXXX"
+                value={correctionForm.contactPhone || form.phone}
+                onChange={(e) =>
+                  setCorrectionForm({
+                    ...correctionForm,
+                    contactPhone: e.target.value.replace(/[^0-9]/g, "").slice(0, 11),
+                  })
+                }
+                className="w-full rounded-xl border bg-card px-3.5 py-2.5 text-xs font-mono"
+              />
+            </div>
+
+            <div className="pt-2 flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCorrectionModalOpen(false)}
+                className="flex-1 rounded-xl text-xs"
+              >
+                বাতিল
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                হোয়াটসঅ্যাপে পাঠান
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
