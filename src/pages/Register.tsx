@@ -20,7 +20,6 @@ import {
   AlertTriangle,
   Ruler,
   Lock,
-  Unlock,
   Search,
   Building2,
   Info,
@@ -28,7 +27,6 @@ import {
   MessageCircle,
   PhoneCall,
   Edit3,
-  RotateCcw,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,8 +124,6 @@ export default function RegisterPage() {
     senderNumber: "",
   });
 
-  const [dbDepartments, setDbDepartments] = useState<string[]>([]);
-  const [dbHalls, setDbHalls] = useState<string[]>([]);
   const [isInstantlyVerified, setIsInstantlyVerified] = useState(false);
   const [txVerification, setTxVerification] = useState<{
     checking: boolean;
@@ -161,7 +157,6 @@ export default function RegisterPage() {
     reg: string;
   } | null>(null);
   const [isAutoFilled, setIsAutoFilled] = useState(false);
-  const [manualOverride, setManualOverride] = useState(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState<{
     checking: boolean;
@@ -204,14 +199,6 @@ export default function RegisterPage() {
   };
 
   useEffect(() => {
-    const fetchLists = async () => {
-      const { data: depts } = await supabase.from("departments").select("name").order("name");
-      const { data: hl } = await supabase.from("halls").select("name").order("name");
-      if (depts) setDbDepartments(depts.map(d => d.name));
-      if (hl) setDbHalls(hl.map(h => h.name));
-    };
-    fetchLists();
-
     // Fetch fresh 52nd batch student list in background & subscribe to Realtime Admin changes
     fetchAllBatch52Students()
       .then((data) => {
@@ -304,6 +291,11 @@ export default function RegisterPage() {
       setMatchedStudent(null);
       setIsAutoFilled(false);
       setAlreadyRegistered(null);
+      setForm((prev) => ({
+        ...prev,
+        department: "",
+        hall: "",
+      }));
       return;
     }
 
@@ -316,12 +308,12 @@ export default function RegisterPage() {
       setMatchedStudent(match);
       setIsAutoFilled(true);
 
-      // Auto-populate form fields (Always set name to matched student!)
+      // Auto-populate form fields strictly from verified database record
       setForm((prev) => ({
         ...prev,
         name: match.name,
-        department: manualOverride && prev.department ? prev.department : match.department,
-        hall: manualOverride && prev.hall ? prev.hall : match.hall,
+        department: match.department,
+        hall: match.hall,
         roll: match.roll,
       }));
 
@@ -363,6 +355,11 @@ export default function RegisterPage() {
     } else {
       setMatchedStudent(null);
       setIsAutoFilled(false);
+      setForm((prev) => ({
+        ...prev,
+        department: "",
+        hall: "",
+      }));
 
       if (cleanRoll.length >= 2) {
         setAlreadyRegistered({ checking: true, registered: false });
@@ -462,12 +459,14 @@ export default function RegisterPage() {
     const rollNum = parseInt(form.roll);
     if (!form.roll || isNaN(rollNum) || rollNum < 1 || rollNum > 9999) {
       errs.roll = "সঠিক রোল নম্বর দাও (১-৯৯৯৯)";
+    } else if (!matchedStudent) {
+      errs.roll = "৫২তম ব্যাচের তালিকায় এই রোলটি পাওয়া যায়নি। নিচে হেল্পলাইনে জানান।";
     } else if (alreadyRegistered?.registered) {
       errs.roll = "এই রোল দিয়ে ইতিমধ্যেই রেজিস্ট্রেশন করা হয়েছে";
     }
     if (!form.phone || !/^01\d{9}$/.test(form.phone)) errs.phone = "সঠিক ফোন নম্বর দাও (১১ ডিজিট)";
-    if (!form.department) errs.department = "ডিপার্টমেন্ট সিলেক্ট করো";
-    if (!form.hall) errs.hall = "হল সিলেক্ট করো";
+    if (!form.department) errs.department = "সঠিক রোল দিয়ে বিভাগ লোড করো";
+    if (!form.hall) errs.hall = "সঠিক রোল দিয়ে হল লোড করো";
     if (!form.tshirtSize) errs.tshirtSize = "টি-শার্ট সাইজ সিলেক্ট করো";
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -846,111 +845,71 @@ export default function RegisterPage() {
                   {errors.phone && <p className={errorClass}>{errors.phone}</p>}
                 </div>
 
-                {/* Department */}
+                {/* Department (Strictly Locked / Read-only) */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className={labelClass + " mb-0"}>ডিপার্টমেন্ট *</label>
-                    {isAutoFilled && !manualOverride ? (
-                      <button
-                        type="button"
-                        onClick={() => setManualOverride(true)}
-                        className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
-                      >
-                        <Unlock className="w-3 h-3" /> পরিবর্তন করতে চাও?
-                      </button>
-                    ) : manualOverride && matchedStudent ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setManualOverride(false);
-                          setForm((f) => ({
-                            ...f,
-                            department: matchedStudent.department,
-                            hall: matchedStudent.hall,
-                          }));
-                        }}
-                        className="text-[11px] font-semibold text-muted-foreground hover:underline flex items-center gap-1"
-                      >
-                        <RotateCcw className="w-3 h-3" /> ডেটাবেজ মান ফিরিয়ে নাও
-                      </button>
-                    ) : null}
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+                      <Lock className="w-3 h-3 text-muted-foreground" /> অফিশিয়াল ডেটাবেজ
+                    </span>
                   </div>
-                  {isAutoFilled && !manualOverride ? (
-                    <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm font-semibold text-foreground flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-emerald-600" />
-                        <span>{form.department || "বিভাগ লোড হচ্ছে..."}</span>
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                        লকড ✓
+                  <div
+                    className={`w-full rounded-xl border px-4 py-3 text-sm font-semibold flex items-center justify-between transition-colors ${
+                      form.department
+                        ? "border-emerald-500/30 bg-emerald-500/5 text-foreground"
+                        : "border-input bg-muted/40 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <Building2
+                        className={`w-4 h-4 shrink-0 ${
+                          form.department ? "text-emerald-600" : "text-muted-foreground"
+                        }`}
+                      />
+                      <span className="truncate">
+                        {form.department || "রোল লিখলে স্বয়ংক্রিয়ভাবে লোড হবে"}
                       </span>
                     </div>
-                  ) : (
-                    <select
-                      className={`${inputClass} ${errors.department ? "border-destructive ring-destructive/20" : "border-input"}`}
-                      value={form.department}
-                      onChange={(e) => set("department", e.target.value)}
-                    >
-                      <option value="">সিলেক্ট করো</option>
-                      {dbDepartments.map((d) => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
-                  )}
+                    {form.department && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shrink-0">
+                        লকড ✓
+                      </span>
+                    )}
+                  </div>
                   {errors.department && <p className={errorClass}>{errors.department}</p>}
                 </div>
 
-                {/* Hall */}
+                {/* Hall (Strictly Locked / Read-only) */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className={labelClass + " mb-0"}>আবাসিক হল *</label>
-                    {isAutoFilled && !manualOverride ? (
-                      <button
-                        type="button"
-                        onClick={() => setManualOverride(true)}
-                        className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
-                      >
-                        <Unlock className="w-3 h-3" /> পরিবর্তন করতে চাও?
-                      </button>
-                    ) : manualOverride && matchedStudent ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setManualOverride(false);
-                          setForm((f) => ({
-                            ...f,
-                            department: matchedStudent.department,
-                            hall: matchedStudent.hall,
-                          }));
-                        }}
-                        className="text-[11px] font-semibold text-muted-foreground hover:underline flex items-center gap-1"
-                      >
-                        <RotateCcw className="w-3 h-3" /> ডেটাবেজ মান ফিরিয়ে নাও
-                      </button>
-                    ) : null}
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+                      <Lock className="w-3 h-3 text-muted-foreground" /> অফিশিয়াল ডেটাবেজ
+                    </span>
                   </div>
-                  {isAutoFilled && !manualOverride ? (
-                    <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm font-semibold text-foreground flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-emerald-600" />
-                        <span>{form.hall || "হল লোড হচ্ছে..."}</span>
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                        লকড ✓
+                  <div
+                    className={`w-full rounded-xl border px-4 py-3 text-sm font-semibold flex items-center justify-between transition-colors ${
+                      form.hall
+                        ? "border-emerald-500/30 bg-emerald-500/5 text-foreground"
+                        : "border-input bg-muted/40 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <Building2
+                        className={`w-4 h-4 shrink-0 ${
+                          form.hall ? "text-emerald-600" : "text-muted-foreground"
+                        }`}
+                      />
+                      <span className="truncate">
+                        {form.hall || "রোল লিখলে স্বয়ংক্রিয়ভাবে লোড হবে"}
                       </span>
                     </div>
-                  ) : (
-                    <select
-                      className={`${inputClass} ${errors.hall ? "border-destructive ring-destructive/20" : "border-input"}`}
-                      value={form.hall}
-                      onChange={(e) => set("hall", e.target.value)}
-                    >
-                      <option value="">সিলেক্ট করো</option>
-                      {dbHalls.map((h) => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
-                  )}
+                    {form.hall && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shrink-0">
+                        লকড ✓
+                      </span>
+                    )}
+                  </div>
                   {errors.hall && <p className={errorClass}>{errors.hall}</p>}
                 </div>
 
