@@ -27,7 +27,77 @@ export default function GameLoginModal({ gameTitle, onStart }: GameLoginModalPro
   const [dbDepartments, setDbDepartments] = useState<string[]>([]);
   const [dbHalls, setDbHalls] = useState<string[]>([]);
   
-  const voters = votersData as Voter[];
+  const [voters, setVoters] = useState<Voter[]>(votersData as Voter[]);
+
+  // Sync with Supabase batch52_students table & Realtime channel
+  useEffect(() => {
+    supabase
+      .from("batch52_students")
+      .select("id, name, department, hall, reg_no, roll_no")
+      .order("name")
+      .limit(3000)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setVoters(
+            data.map((d) => ({
+              id: d.id,
+              name: d.name,
+              dept: d.department,
+              hall: d.hall,
+              regNo: d.reg_no,
+              rollNo: d.roll_no,
+            }))
+          );
+        }
+      });
+
+    const channel = supabase
+      .channel("batch52_students_realtime_sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "batch52_students" },
+        (payload) => {
+          if (payload.eventType === "INSERT" && payload.new) {
+            const n: any = payload.new;
+            setVoters((prev) => [
+              ...prev.filter((v) => v.id !== n.id),
+              {
+                id: n.id,
+                name: n.name,
+                dept: n.department,
+                hall: n.hall,
+                regNo: n.reg_no,
+                rollNo: n.roll_no,
+              },
+            ]);
+          } else if (payload.eventType === "UPDATE" && payload.new) {
+            const u: any = payload.new;
+            setVoters((prev) =>
+              prev.map((v) =>
+                v.id === u.id
+                  ? {
+                      ...v,
+                      name: u.name,
+                      dept: u.department,
+                      hall: u.hall,
+                      regNo: u.reg_no,
+                      rollNo: u.roll_no,
+                    }
+                  : v
+              )
+            );
+          } else if (payload.eventType === "DELETE" && payload.old) {
+            const d: any = payload.old;
+            setVoters((prev) => prev.filter((v) => v.id !== d.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Auto-load saved nickname if any
   useEffect(() => {

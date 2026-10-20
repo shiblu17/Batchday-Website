@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      batch52_students: {
+        Row: {
+          created_at: string
+          department: string
+          hall: string
+          id: string
+          is_batch52: boolean
+          name: string
+          reg_no: string
+          roll_no: string
+          session: string
+          sl_no: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          hall: string
+          id: string
+          is_batch52?: boolean
+          name: string
+          reg_no: string
+          roll_no: string
+          session?: string
+          sl_no?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          hall?: string
+          id?: string
+          is_batch52?: boolean
+          name?: string
+          reg_no?: string
+          roll_no?: string
+          session?: string
+          sl_no?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_photos: {
         Row: {
           caption: string | null
