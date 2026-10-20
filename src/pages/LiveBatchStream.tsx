@@ -33,6 +33,7 @@ import {
 import { getFilterCss } from "@/utils/reelsCustomization";
 import { searchAppleMusic } from "@/utils/itunesMusicService";
 import ReelsStudioModal from "@/components/stream/ReelsStudioModal";
+import { JU_52_DEPARTMENTS } from "@/lib/constants";
 
 export interface ReelItem {
   id: string;
@@ -55,44 +56,7 @@ export interface ReelItem {
   fire: number;
 }
 
-const DEPARTMENTS = [
-  "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং",
-  "ইনস্টিটিউট অব ইনফরমেশন টেকনোলজি",
-  "নাটক ও নাট্যতত্ত্ব",
-  "গণিত",
-  "পদার্থবিজ্ঞান",
-  "রসায়ন",
-  "পরিসংখ্যান ও উপাত্ত বিজ্ঞান",
-  "অর্থনীতি",
-  "ভূগোল ও পরিবেশ",
-  "সরকার ও রাজনীতি",
-  "নৃবিজ্ঞান",
-  "নগর ও অঞ্চল পরিকল্পনা",
-  "লোক প্রশাসন",
-  "বাংলা",
-  "ইংরেজি",
-  "ইতিহাস",
-  "দর্শন",
-  "প্রত্নতত্ত্ব",
-  "আন্তর্জাতিক সম্পর্ক",
-  "সাংবাদিকতা ও গণমাধ্যম অধ্যয়ন",
-  "চারুকলা",
-  "উদ্ভিদবিজ্ঞান",
-  "প্রাণিবিদ্যা",
-  "ফার্মেসী",
-  "প্রাণরসায়ন ও অণুপ্রাণ বিজ্ঞান",
-  "অণুজীববিজ্ঞান",
-  "বায়োটেকনোলজি অ্যান্ড জেনেটিক ইঞ্জিনিয়ারিং",
-  "পাবলিক হেলথ অ্যান্ড ইনফরমেটিক্স",
-  "ফিন্যান্স ও ব্যাংকিং",
-  "মার্কেটিং",
-  "অ্যাকাউন্টিং অ্যান্ড ইনফরমেশন সিস্টেমস",
-  "ম্যানেজমেন্ট স্টাডিজ",
-  "আইবিএ",
-  "আইন ও বিচার",
-  "ভূতাত্ত্বিক বিজ্ঞান",
-  "পরিবেশ বিজ্ঞান",
-];
+const DEPARTMENTS = JU_52_DEPARTMENTS;
 
 export default function LiveBatchStream() {
   const { isAdmin } = useAuth();
