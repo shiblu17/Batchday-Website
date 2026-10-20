@@ -191,14 +191,14 @@ const games = [
   },
   {
     path: "/game/stack",
-    title: "স্ট্যাক টাওয়ার (Stack)",
-    description: "নিখুঁত টাইমিংয়ে ড্রপ করে আকাশছোঁয়া টাওয়ার বানাও!",
+    title: "স্ট্যাক ৩ডি (Stack 3D)",
+    description: "আসল কেচাপ (Ketchapp) অফিসিয়াল ৩ডি স্ট্যাক ক্লোন! নিখুঁত টাইমিংয়ে ব্লক স্লাইস করে আকাশছোঁয়া টাওয়ার বানাও!",
     icon: Layers,
     color: "bg-blue-100 text-blue-600",
     gradient: "from-blue-600 to-indigo-700",
-    badge: "TOP",
+    badge: "3D TOP",
     badgeIcon: Flame,
-    badgeColor: "bg-red-500 text-white",
+    badgeColor: "bg-amber-500 text-white",
   },
   {
     path: "/game/snake",
