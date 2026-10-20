@@ -9,6 +9,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "@/components/ErrorFallback";
 import Navbar from "@/components/Navbar";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
+import GlobalRealtimeSync from "@/components/GlobalRealtimeSync";
 
 // Lazy imports
 const Index = lazy(() => import("./pages/Index"));
@@ -108,6 +109,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <GlobalRealtimeSync />
             <JuAmbientPlayer />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
