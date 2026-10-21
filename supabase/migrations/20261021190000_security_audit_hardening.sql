@@ -1,47 +1,47 @@
 -- ====================================================================
--- JU 52nd BATCH DAY - SECURITY AUDIT & HARDENING MIGRATION
--- Generated from Security Audit (Cloudflare Edge & Supabase RLS)
+-- JU 52nd BATCH DAY - SECURITY AUDIT & HARDENING (FINAL REVISED)
 -- ====================================================================
 
--- 1. SECURE STUDENT VOTER DATABASE (batch52_students)
--- Prevent unauthenticated users from editing or deleting batch-52 students
+-- 1. DYNAMICALLY PURGE ALL OLD POLICIES & LOCK DOWN SENSITIVE TABLES
+DO $$
+DECLARE
+  pol RECORD;
+BEGIN
+  FOR pol IN
+    SELECT policyname, tablename
+    FROM pg_policies
+    WHERE schemaname = 'public' AND tablename IN ('batch52_students', 'departments', 'halls')
+  LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', pol.policyname, pol.tablename);
+  END LOOP;
+END $$;
+
+-- Enable RLS and set STRICT READ-ONLY for anonymous users
 ALTER TABLE IF EXISTS public.batch52_students ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public can view batch52_students" ON public.batch52_students;
-DROP POLICY IF EXISTS "Allow anon delete" ON public.batch52_students;
-DROP POLICY IF EXISTS "Allow anon update" ON public.batch52_students;
-
-CREATE POLICY "Public can view batch52_students"
+CREATE POLICY "Public read only batch52_students"
   ON public.batch52_students
   FOR SELECT
   TO anon, authenticated
   USING (true);
 
--- 2. SECURE DEPARTMENTS AND HALLS TABLES
 ALTER TABLE IF EXISTS public.departments ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public can read departments" ON public.departments;
-CREATE POLICY "Public can read departments"
+CREATE POLICY "Public read only departments"
   ON public.departments
   FOR SELECT
   TO anon, authenticated
   USING (true);
 
 ALTER TABLE IF EXISTS public.halls ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public can read halls" ON public.halls;
-CREATE POLICY "Public can read halls"
+CREATE POLICY "Public read only halls"
   ON public.halls
   FOR SELECT
   TO anon, authenticated
   USING (true);
 
--- 3. SECURE BKASH TRANSACTIONS
--- Clean up test probe row
-DELETE FROM public.bkash_transactions WHERE trx_id = 'AUDIT_TEST_PROBE';
+-- 2. ENSURE REGISTRATIONS TABLE HAS UPDATED_AT COLUMN
+ALTER TABLE IF EXISTS public.registrations ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
--- 4. SECURE ADMIN RPC FUNCTIONS
--- Enables admin panel updates to persist directly to Supabase cloud
--- and broadcast to all connected devices in real time.
-
+-- 3. SECURE ADMIN RPC FUNCTIONS (FOR 100% RELIABLE DB SYNC)
 CREATE OR REPLACE FUNCTION public.secure_admin_update_status(
   p_reg_id UUID,
   p_status TEXT,
@@ -53,7 +53,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Validate super admin session token
+  -- Verify super admin session token
   IF p_auth_token <> 'c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5' THEN
     RAISE EXCEPTION 'Unauthorized admin token';
   END IF;
@@ -81,14 +81,14 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Validate super admin session token
+  -- Verify super admin session token
   IF p_auth_token <> 'c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5' THEN
     RAISE EXCEPTION 'Unauthorized admin token';
   END IF;
 
   UPDATE public.site_settings
   SET
-    event_date = COALESCE((p_settings->>'event_date')::TIMESTAMPTZ, event_date),
+    event_date = COALESCE(p_settings->>'event_date', event_date),
     registration_open = COALESCE((p_settings->>'registration_open')::BOOLEAN, registration_open),
     registration_fee = COALESCE((p_settings->>'registration_fee')::NUMERIC, registration_fee),
     bkash_number = COALESCE(p_settings->>'bkash_number', bkash_number),
@@ -110,11 +110,10 @@ BEGIN
 END;
 $$;
 
--- Grant execution to anon and authenticated
 GRANT EXECUTE ON FUNCTION public.secure_admin_update_status TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.secure_admin_update_settings TO anon, authenticated;
 
--- Ensure Realtime publication is active on core tables
+-- 4. REALTIME BROADCAST CONFIRMATION
 DO $$
 BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE public.site_settings;
