@@ -36,23 +36,27 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function Navbar() {
   const location = useLocation();
-
+  const isHome = location.pathname === "/";
   const isFeatureActive = featureItems.some((f) => location.pathname === f.to);
 
   return (
     <>
-      {/* Floating Capsule Island Header (Matching Reference Design) */}
-      <header className="sticky top-2.5 sm:top-3.5 z-50 px-3 sm:px-6 pointer-events-none transition-all">
-        <div className="max-w-5xl mx-auto flex h-12 sm:h-13 items-center justify-between px-3.5 sm:px-5 rounded-full bg-white/95 dark:bg-slate-900/90 backdrop-blur-md shadow-md shadow-slate-900/[0.06] border border-slate-200/80 dark:border-white/10 pointer-events-auto">
+      {/* Floating Capsule Island Header */}
+      <header
+        className={`sticky top-2.5 sm:top-3.5 z-50 px-3 sm:px-6 pointer-events-none transition-all ${
+          isHome ? "-mb-14 sm:-mb-16" : ""
+        }`}
+      >
+        <div className="max-w-5xl mx-auto flex h-12 sm:h-13 items-center justify-between px-3.5 sm:px-5 rounded-full bg-[#580c18]/92 dark:bg-[#420813]/95 backdrop-blur-xl shadow-xl shadow-black/25 border border-white/20 text-white pointer-events-auto transition-all">
           {/* Logo (Left) */}
           <Link to="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
-            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0 transition-transform group-hover:scale-105">
-              <GraduationCap className="h-4 w-4 text-primary" />
+            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-white/15 text-amber-300 ring-1 ring-white/20 shrink-0 transition-transform group-hover:scale-105">
+              <GraduationCap className="h-4 w-4 text-amber-300" />
             </div>
             <div className="flex items-center tracking-tight leading-none font-display text-base sm:text-lg font-black">
-              <span className="text-slate-900 dark:text-white">JU</span>
-              <span className="text-primary ml-0.5">52</span>
-              <span className="hidden sm:inline-block text-[10px] font-bold text-muted-foreground ml-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
+              <span className="text-white">JU</span>
+              <span className="text-amber-400 ml-0.5">52</span>
+              <span className="hidden sm:inline-block text-[10px] font-bold text-amber-200/90 ml-1.5 px-2 py-0.5 rounded-full bg-white/10 border border-white/10">
                 ব্যাচ ডে
               </span>
             </div>
@@ -64,8 +68,8 @@ export default function Navbar() {
               to="/"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "bg-white/20 text-white font-bold shadow-xs"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <Home className="h-3.5 w-3.5" />
@@ -77,15 +81,15 @@ export default function Navbar() {
               <DropdownMenuTrigger
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors outline-none ${
                   isFeatureActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    ? "bg-white/20 text-white font-bold shadow-xs"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
               >
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                 স্মৃতি ও ফিচার
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-60 p-2 shadow-2xl rounded-2xl">
+              <DropdownMenuContent align="start" className="w-60 p-2 shadow-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100">
                 {featureItems.map((item) => {
                   const Icon = item.icon;
                   const active = location.pathname === item.to;
@@ -110,8 +114,8 @@ export default function Navbar() {
               to="/leaderboard"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/leaderboard"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "bg-white/20 text-white font-bold shadow-xs"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <Trophy className="h-3.5 w-3.5" />
@@ -122,8 +126,8 @@ export default function Navbar() {
               to="/status"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/status"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "bg-white/20 text-white font-bold shadow-xs"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <UserCheck className="h-3.5 w-3.5" />
@@ -134,8 +138,8 @@ export default function Navbar() {
               to="/gallery"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/gallery"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "bg-white/20 text-white font-bold shadow-xs"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <Image className="h-3.5 w-3.5" />
@@ -146,8 +150,8 @@ export default function Navbar() {
               to="/game"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname.startsWith("/game")
-                  ? "bg-primary text-primary-foreground"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "bg-white/20 text-white font-bold shadow-xs"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <Gamepad2 className="h-3.5 w-3.5" />
@@ -159,7 +163,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <Link
               to="/register"
-              className="px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-xs sm:text-sm shadow-md shadow-primary/20 transition-all active:scale-95 hover:scale-105 shrink-0 flex items-center gap-1.5"
+              className="px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-stone-950 font-display font-bold text-xs sm:text-sm shadow-md shadow-amber-400/25 transition-all active:scale-95 hover:scale-105 shrink-0 flex items-center gap-1.5"
             >
               <span>Register Now</span>
             </Link>
