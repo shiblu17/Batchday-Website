@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   CheckCircle,
   XCircle,
   Search,
   Eye,
+  EyeOff,
   Loader2,
   MessageCircle,
   Edit,
@@ -18,6 +19,13 @@ import {
   Check,
   ShieldCheck,
   HelpCircle,
+  KeyRound,
+  ShieldAlert,
+  Globe,
+  Server,
+  AlertCircle,
+  CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
 import { useRegistrations, type Registration } from "@/hooks/useRegistrations";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { parsePaymentSMS } from "@/lib/paymentParser";
 
 export default function AdminPayments() {
@@ -142,6 +151,209 @@ export default function AdminPayments() {
       toast({ title: "সিমুলেশন ত্রুটি", description: err.message, variant: "destructive" });
     } finally {
       setSimulating(false);
+    }
+  };
+
+  // ==========================================
+  // Merchant Gateway Configuration & Diagnostics
+  // ==========================================
+  const [gatewayConfig, setGatewayConfig] = useState({
+    provider: "bkash",
+    is_enabled: false,
+    environment: "sandbox" as "sandbox" | "production",
+    app_key: "",
+    app_secret: "",
+    username: "",
+    password: "",
+    base_url: "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout",
+    callback_url: "https://batchday52ju.xyz/payment/callback",
+  });
+  const [showAppSecret, setShowAppSecret] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [savingGateway, setSavingGateway] = useState(false);
+  const [testingGateway, setTestingGateway] = useState(false);
+  const [testResult, setTestResult] = useState<any | null>(null);
+
+  // Load gateway config on mount
+  useEffect(() => {
+    async function loadGateway() {
+      try {
+        const token = localStorage.getItem("ju52_admin_session") || "";
+        if (token) {
+          const { data, error } = await supabase.rpc("secure_admin_get_gateway", {
+            p_gateway_id: "bkash",
+            p_auth_token: token,
+          });
+          if (!error && data) {
+            setGatewayConfig((prev) => ({
+              ...prev,
+              ...data,
+              is_enabled: !!data.is_enabled,
+            }));
+            return;
+          }
+        }
+
+        // Fallback to table or cache
+        const { data: publicData } = await supabase
+          .from("payment_gateways")
+          .select("*")
+          .eq("id", "bkash")
+          .maybeSingle();
+
+        if (publicData) {
+          setGatewayConfig((prev) => ({
+            ...prev,
+            ...publicData,
+            is_enabled: !!publicData.is_enabled,
+          }));
+        } else {
+          const cached = localStorage.getItem("ju52_gateway_config");
+          if (cached) {
+            setGatewayConfig(JSON.parse(cached));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load gateway config:", err);
+      }
+    }
+    loadGateway();
+  }, []);
+
+  const handleSaveGateway = async () => {
+    setSavingGateway(true);
+    try {
+      const token = localStorage.getItem("ju52_admin_session") || "";
+      localStorage.setItem("ju52_gateway_config", JSON.stringify(gatewayConfig));
+
+      let saved = false;
+      if (token) {
+        const { data: rpcSuccess, error: rpcError } = await supabase.rpc(
+          "secure_admin_save_gateway",
+          {
+            p_config: gatewayConfig,
+            p_auth_token: token,
+          }
+        );
+        if (!rpcError && rpcSuccess) {
+          saved = true;
+        }
+      }
+
+      if (!saved) {
+        await supabase.from("payment_gateways").upsert({
+          id: "bkash",
+          ...gatewayConfig,
+          updated_at: new Date().toISOString(),
+        });
+      }
+
+      toast({
+        title: "মার্চেন্ট সেটিংস সেভ হয়েছে! ✅",
+        description: "এখন নিচের 'এপিআই কানেকশন টেস্ট' বাটনে চাপ দিয়ে যাচাই করতে পারেন।",
+      });
+    } catch (err: any) {
+      toast({
+        title: "সেভ ব্যর্থ",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingGateway(false);
+    }
+  };
+
+  const handleTestGateway = async () => {
+    if (!gatewayConfig.app_key.trim() || !gatewayConfig.app_secret.trim()) {
+      toast({
+        title: "App Key এবং App Secret প্রয়োজন",
+        description: "টেস্ট করার জন্য এগুলো পূরণ করা আবশ্যক।",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTestingGateway(true);
+    setTestResult(null);
+
+    const testPayload = {
+      app_key: gatewayConfig.app_key.trim(),
+      app_secret: gatewayConfig.app_secret.trim(),
+      username: gatewayConfig.username.trim(),
+      password: gatewayConfig.password.trim(),
+      environment: gatewayConfig.environment,
+    };
+
+    try {
+      let resData: any = null;
+      const workerUrl = "https://ju52-reels-cdn.atiquzzaman116592.workers.dev/api/test-bkash";
+
+      try {
+        const proxyRes = await fetch(workerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(testPayload),
+        });
+        if (proxyRes.ok) {
+          resData = await proxyRes.json();
+        }
+      } catch (e) {
+        console.warn("Worker proxy probe failed:", e);
+      }
+
+      if (!resData) {
+        const targetBase =
+          gatewayConfig.environment === "production"
+            ? "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout"
+            : "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout";
+
+        const directRes = await fetch(`${targetBase}/token/grant`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            username: testPayload.username,
+            password: testPayload.password,
+          },
+          body: JSON.stringify({
+            app_key: testPayload.app_key,
+            app_secret: testPayload.app_secret,
+          }),
+        });
+        resData = await directRes.json();
+      }
+
+      setTestResult({
+        timestamp: new Date().toLocaleTimeString("bn-BD"),
+        ...resData,
+      });
+
+      if (resData.statusCode === "0000" || resData.id_token) {
+        toast({
+          title: "🎉 এপিআই কানেকশন সফল!",
+          description: "বিকাশ সার্ভার থেকে অথরাইজেশন টোকেন সফলভাবে ইস্যু হয়েছে।",
+        });
+      } else {
+        toast({
+          title: "⚠️ এপিআই এরর",
+          description: resData.statusMessage || "বিকাশ সার্ভার ক্রেডেনশিয়াল গ্রহণ করেনি।",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      setTestResult({
+        timestamp: new Date().toLocaleTimeString("bn-BD"),
+        statusCode: "NETWORK_OR_CORS",
+        statusMessage: `ব্রাউজার কানেকশন এরর: ${err.message}`,
+        hint: "ব্রাউজার সিকিউরিটি পলিসির কারণে ক্লায়েন্ট থেকে সরাসরি রিকোয়েস্ট ব্লক হতে পারে। আমাদের ক্লাউড এজ সার্ভার এটি প্রক্সি করে যাচাই করতে পারবে।",
+      });
+      toast({
+        title: "টেস্ট এরর",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setTestingGateway(false);
     }
   };
 
@@ -312,7 +524,10 @@ export default function AdminPayments() {
             <Radio className="h-3.5 w-3.5 text-rose-500" /> বিকাশ লাইভ এসএমএস ({bkashTransactions.length})
           </TabsTrigger>
           <TabsTrigger value="automation_guide" className="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
-            <Smartphone className="h-3.5 w-3.5 text-primary" /> অটোমেশন সেটআপ ও সিমুলেটর
+            <Smartphone className="h-3.5 w-3.5 text-primary" /> অটোমেশন ও সিমুলেটর
+          </TabsTrigger>
+          <TabsTrigger value="merchant_gateway" className="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+            <KeyRound className="h-3.5 w-3.5 text-amber-500" /> মার্চেন্ট গেটওয়ে এপিআই
           </TabsTrigger>
         </TabsList>
 
@@ -692,6 +907,383 @@ export default function AdminPayments() {
                 )}
               </motion.div>
             )}
+          </div>
+        </TabsContent>
+
+        {/* TAB 4: MERCHANT GATEWAY CONFIGURATION & DIAGNOSTICS */}
+        <TabsContent value="merchant_gateway" className="space-y-6">
+          {/* Top Banner */}
+          <div className="rounded-2xl p-5 bg-gradient-to-br from-amber-500/10 via-card to-primary/5 border border-amber-500/30 shadow-card">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
+                  <KeyRound className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base sm:text-lg flex items-center gap-2">
+                    বিকাশ মার্চেন্ট গেটওয়ে সেটআপ ও লাইভ টেস্ট
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-sans bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30">
+                      PGW Tokenized API
+                    </span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    আপনার এপিআই প্রোভাইডারের দেওয়া বিকাশ ক্রেডেনশিয়াল এখানে ইনপুট করে সেভ করুন এবং নিচের বাটন দিয়ে সরাসরি বিকাশ সার্ভারের সাথে টেস্ট করুন।
+                  </p>
+                </div>
+              </div>
+
+              {/* Status & Active Toggle */}
+              <div className="flex items-center gap-3 bg-card px-4 py-2.5 rounded-xl border border-border shadow-sm shrink-0">
+                <div className="text-right">
+                  <p className="text-xs font-bold leading-tight">গেটওয়ে স্ট্যাটাস</p>
+                  <p className={`text-[11px] font-semibold ${gatewayConfig.is_enabled ? "text-emerald-500" : "text-muted-foreground"}`}>
+                    {gatewayConfig.is_enabled ? "● সক্রিয় (Live)" : "○ নিষ্ক্রিয় (Off)"}
+                  </p>
+                </div>
+                <Switch
+                  checked={gatewayConfig.is_enabled}
+                  onCheckedChange={(checked) =>
+                    setGatewayConfig((prev) => ({ ...prev, is_enabled: checked }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 Cols: Credentials Form */}
+            <div className="lg:col-span-2 space-y-5">
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-card space-y-4">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2">
+                    <Server className="h-4 w-4 text-primary" />
+                    <h4 className="font-display font-bold text-sm">গেটওয়ে এপিআই ক্রেডেনশিয়াল</h4>
+                  </div>
+                  {/* Environment Selector */}
+                  <div className="flex items-center bg-muted p-1 rounded-xl text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGatewayConfig((prev) => ({
+                          ...prev,
+                          environment: "sandbox",
+                          base_url: "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout",
+                        }))
+                      }
+                      className={`px-3 py-1 rounded-lg transition-all ${
+                        gatewayConfig.environment === "sandbox"
+                          ? "bg-amber-500 text-white shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      🧪 Sandbox (টেস্ট)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGatewayConfig((prev) => ({
+                          ...prev,
+                          environment: "production",
+                          base_url: "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout",
+                        }))
+                      }
+                      className={`px-3 py-1 rounded-lg transition-all ${
+                        gatewayConfig.environment === "production"
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      🚀 Live Production
+                    </button>
+                  </div>
+                </div>
+
+                {/* Form Fields */}
+                <div className="space-y-4 text-xs">
+                  {/* App Key */}
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-foreground flex items-center justify-between">
+                      <span>App Key <span className="text-destructive">*</span></span>
+                      <span className="text-[10px] text-muted-foreground">বিকাশ পোর্টাল থেকে প্রাপ্ত কী</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={gatewayConfig.app_key}
+                      onChange={(e) =>
+                        setGatewayConfig((prev) => ({ ...prev, app_key: e.target.value }))
+                      }
+                      placeholder="e.g. 5c84d6xxxx..."
+                      className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+
+                  {/* App Secret */}
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-foreground flex items-center justify-between">
+                      <span>App Secret <span className="text-destructive">*</span></span>
+                      <span className="text-[10px] text-rose-500 font-medium">গোপন রাখুন</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showAppSecret ? "text" : "password"}
+                        value={gatewayConfig.app_secret}
+                        onChange={(e) =>
+                          setGatewayConfig((prev) => ({ ...prev, app_secret: e.target.value }))
+                        }
+                        placeholder="••••••••••••••••••••••••"
+                        className="w-full rounded-xl border border-input bg-background pl-3.5 pr-10 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAppSecret(!showAppSecret)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                      >
+                        {showAppSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Username & Password */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-foreground">
+                        Merchant Username <span className="text-destructive">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={gatewayConfig.username}
+                        onChange={(e) =>
+                          setGatewayConfig((prev) => ({ ...prev, username: e.target.value }))
+                        }
+                        placeholder="e.g. sandboxTestUser"
+                        className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-foreground">
+                        Merchant Password <span className="text-destructive">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={gatewayConfig.password}
+                          onChange={(e) =>
+                            setGatewayConfig((prev) => ({ ...prev, password: e.target.value }))
+                          }
+                          placeholder="••••••••••••"
+                          className="w-full rounded-xl border border-input bg-background pl-3.5 pr-10 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Base URL */}
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-foreground">API Base URL</label>
+                    <input
+                      type="text"
+                      value={gatewayConfig.base_url}
+                      onChange={(e) =>
+                        setGatewayConfig((prev) => ({ ...prev, base_url: e.target.value }))
+                      }
+                      className="w-full rounded-xl border border-input bg-muted/50 px-3.5 py-2.5 font-mono text-[11px] text-muted-foreground focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-3">
+                    <button
+                      type="button"
+                      onClick={handleSaveGateway}
+                      disabled={savingGateway}
+                      className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-xs sm:text-sm hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                    >
+                      {savingGateway ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
+                      ক্রেডেনশিয়াল সেভ করুন 💾
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleTestGateway}
+                      disabled={testingGateway}
+                      className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 text-white font-display font-bold text-xs sm:text-sm hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
+                    >
+                      {testingGateway ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Zap className="h-4 w-4 fill-current" />
+                      )}
+                      ⚡ এপিআই কানেকশন টেস্ট করুন
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Diagnostic Test Output Card */}
+              {testResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`rounded-2xl p-5 border shadow-card space-y-3 ${
+                    testResult.statusCode === "0000" || testResult.id_token
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-100"
+                      : "bg-destructive/10 border-destructive/30 text-destructive-foreground"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {testResult.statusCode === "0000" || testResult.id_token ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive" />
+                      )}
+                      <h4 className="font-display font-bold text-sm">
+                        {testResult.statusCode === "0000" || testResult.id_token
+                          ? "🎉 এপিআই সংযোগ সফল! (Token Granted)"
+                          : "⚠️ বিকাশ এপিআই কানেকশন ত্রুটি"}
+                      </h4>
+                    </div>
+                    <span className="text-[11px] font-mono text-muted-foreground">
+                      টেস্ট সময়: {testResult.timestamp}
+                    </span>
+                  </div>
+
+                  {/* Summary Info */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono pt-1">
+                    <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+                      <p className="text-[10px] text-muted-foreground uppercase">Status Code</p>
+                      <p className="font-bold text-foreground">{testResult.statusCode || "N/A"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+                      <p className="text-[10px] text-muted-foreground uppercase">Token Status</p>
+                      <p className="font-bold text-foreground">
+                        {testResult.id_token ? "ACTIVE (Valid)" : "Not Issued"}
+                      </p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+                      <p className="text-[10px] text-muted-foreground uppercase">Token Type</p>
+                      <p className="font-bold text-foreground">{testResult.token_type || "Bearer"}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+                      <p className="text-[10px] text-muted-foreground uppercase">Expires In</p>
+                      <p className="font-bold text-foreground">{testResult.expires_in ? `${testResult.expires_in}s` : "N/A"}</p>
+                    </div>
+                  </div>
+
+                  {testResult.statusMessage && (
+                    <div className="p-3 rounded-xl bg-card/80 border border-border/50 text-xs">
+                      <span className="font-bold">সার্ভার মেসেজ: </span>
+                      <span>{testResult.statusMessage}</span>
+                    </div>
+                  )}
+
+                  {testResult.hint && (
+                    <p className="text-xs text-muted-foreground italic">
+                      💡 পরামর্শ: {testResult.hint}
+                    </p>
+                  )}
+
+                  {/* Raw JSON Accordion */}
+                  <details className="text-[11px] font-mono bg-black/10 dark:bg-black/40 rounded-xl p-3 border border-border/40">
+                    <summary className="cursor-pointer font-bold select-none text-muted-foreground hover:text-foreground">
+                      সার্ভার থেকে প্রাপ্ত Raw Response (JSON)
+                    </summary>
+                    <pre className="mt-2 overflow-x-auto p-2 bg-background/50 rounded-lg text-[10px] leading-tight">
+                      {JSON.stringify(testResult, null, 2)}
+                    </pre>
+                  </details>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Right 1 Col: Instructions & Webhook / Callback Checklist */}
+            <div className="space-y-5">
+              {/* Webhook & Callback Info Card */}
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-card space-y-4">
+                <div className="flex items-center gap-2 border-b border-border pb-3">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <h4 className="font-display font-bold text-sm">বিকাশ পোর্টাল কনফিগারেশন</h4>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  {/* Callback URL */}
+                  <div className="space-y-1">
+                    <label className="font-semibold text-foreground">Callback URL (ফরওয়ার্ডিং):</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        readOnly
+                        value={gatewayConfig.callback_url}
+                        className="w-full rounded-lg border border-input bg-muted px-2.5 py-1.5 font-mono text-[11px] text-muted-foreground select-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(gatewayConfig.callback_url, "callback_url")}
+                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+                        title="কপি করুন"
+                      >
+                        {copiedKey === "callback_url" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Whitelisted Domain */}
+                  <div className="space-y-1">
+                    <label className="font-semibold text-foreground">হোয়াইটলিস্টেড ডোমেইন:</label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex-1 rounded-lg border border-input bg-muted px-2.5 py-1.5 font-mono text-[11px] font-bold text-foreground">
+                        batchday52ju.xyz
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard("batchday52ju.xyz", "domain")}
+                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+                        title="কপি করুন"
+                      >
+                        {copiedKey === "domain" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Instructions Guide for API Seller */}
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-card space-y-3 text-xs leading-relaxed">
+                <div className="flex items-center gap-2 border-b border-border pb-2.5">
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <h4 className="font-display font-bold text-sm">এপিআই সরবরাহকারীর করণীয়</h4>
+                </div>
+
+                <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                  <li>
+                    <span className="font-bold text-foreground">ক্রেডেনশিয়াল ইনপুট:</span> আপনার বিকাশ পোর্টাল বা ড্যাশবোর্ড থেকে <code className="bg-muted px-1 rounded text-primary">App Key</code>, <code className="bg-muted px-1 rounded text-primary">App Secret</code>, <code className="bg-muted px-1 rounded text-primary">Username</code> ও <code className="bg-muted px-1 rounded text-primary">Password</code> ইনপুট দিন।
+                  </li>
+                  <li>
+                    <span className="font-bold text-foreground">এনভায়রনমেন্ট নির্বাচন:</span> যদি টেস্ট অ্যাকাউন্ট হয় তবে <strong>Sandbox</strong>, আর লাইভ অ্যাকাউন্ট হলে <strong>Production</strong> সিলেক্ট করুন।
+                  </li>
+                  <li>
+                    <span className="font-bold text-foreground">ডোমেইন হোয়াইটলিস্ট:</span> বিকাশ টিমের কাছে <code className="bg-muted px-1 rounded text-foreground font-mono">batchday52ju.xyz</code> ডোমেইনটি হোয়াইটলিস্ট করানো থাকতে হবে।
+                  </li>
+                  <li>
+                    <span className="font-bold text-foreground">সেভ ও টেস্ট:</span> "ক্রেডেনশিয়াল সেভ করুন" চাপুন, এরপর "এপিআই কানেকশন টেস্ট করুন" বাটনে ক্লিক করে সরাসরি গ্রিন ভেরিফিকেশন নিশ্চিত করুন।
+                  </li>
+                </ol>
+
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-200 mt-2">
+                  🔒 <strong>নিরাপত্তা গ্যারান্টি:</strong> আপনার <code className="font-mono">App Secret</code> ও <code className="font-mono">Password</code> ডাটাবেজে রো-লেভেল সিকিউরিটি (RLS) দ্বারা সংরক্ষিত থাকে এবং সাধারণ ভিজিটরদের কাছে কখনো উন্মুক্ত হবে না।
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

@@ -138,6 +138,51 @@ export default {
       }
     }
 
+    // 3. bKash Merchant API Diagnostic Test Endpoint
+    if (url.pathname === "/api/test-bkash" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const targetBase =
+          body.environment === "production"
+            ? "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout"
+            : "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout";
+
+        const grantRes = await fetch(`${targetBase}/token/grant`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            username: body.username || "",
+            password: body.password || "",
+          },
+          body: JSON.stringify({
+            app_key: body.app_key || "",
+            app_secret: body.app_secret || "",
+          }),
+        });
+
+        const data = await grantRes.json();
+        return new Response(JSON.stringify(data), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        });
+      } catch (err) {
+        return new Response(
+          JSON.stringify({ statusCode: "5000", statusMessage: err.message }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        );
+      }
+    }
+
     if (request.method !== "GET" && request.method !== "HEAD") {
       return new Response("Method Not Allowed", { status: 405 });
     }
