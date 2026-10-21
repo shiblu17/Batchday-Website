@@ -124,30 +124,48 @@ export default function AdminSettings() {
     console.log("Save button clicked. Current form:", form);
     setSaving(true);
     try {
-      console.log("Sending update request to Supabase...");
-      const { error } = await (supabase.from("site_settings") as any)
-        .update({
-          event_date: form.event_date,
-          event_location_name: form.event_location_name,
-          event_location_detail: form.event_location_detail,
-          hero_title: form.hero_title,
-          hero_subtitle: form.hero_subtitle,
-          hero_description: form.hero_description,
-          registration_open: form.registration_open,
-          registration_fee: form.registration_fee,
-          bkash_number: form.bkash_number,
-          nagad_number: form.nagad_number,
-          sponsor_video_url: form.sponsor_video_url,
-          sponsor_video_url_2: form.sponsor_video_url_2,
-          sponsor_video_url_3: form.sponsor_video_url_3,
-          sponsor_video_url_4: form.sponsor_video_url_4,
-          sponsor_video_url_5: form.sponsor_video_url_5,
-          features: features,
-        })
-        .eq("id", 1);
-      
-      console.log("Update response error:", error);
-      if (error) throw error;
+      const token = localStorage.getItem("ju52_admin_session") || "";
+      const payload = {
+        event_date: form.event_date,
+        event_location_name: form.event_location_name,
+        event_location_detail: form.event_location_detail,
+        hero_title: form.hero_title,
+        hero_subtitle: form.hero_subtitle,
+        hero_description: form.hero_description,
+        registration_open: form.registration_open,
+        registration_fee: form.registration_fee,
+        bkash_number: form.bkash_number,
+        nagad_number: form.nagad_number,
+        sponsor_video_url: form.sponsor_video_url,
+        sponsor_video_url_2: form.sponsor_video_url_2,
+        sponsor_video_url_3: form.sponsor_video_url_3,
+        sponsor_video_url_4: form.sponsor_video_url_4,
+        sponsor_video_url_5: form.sponsor_video_url_5,
+        features: features,
+      };
+
+      // 1. Try secure admin RPC first (bypasses RLS mismatch when using admin token)
+      let updateSuccessful = false;
+      try {
+        const { data: rpcSuccess, error: rpcError } = await supabase.rpc("secure_admin_update_settings", {
+          p_settings: payload,
+          p_auth_token: token,
+        });
+        if (!rpcError && rpcSuccess) {
+          updateSuccessful = true;
+        }
+      } catch {}
+
+      // 2. Fallback to direct table update if RPC not present
+      if (!updateSuccessful) {
+        console.log("Sending direct update request to Supabase...");
+        const { error } = await (supabase.from("site_settings") as any)
+          .update(payload)
+          .eq("id", 1);
+
+        console.log("Update response error:", error);
+        if (error) throw error;
+      }
 
       console.log("Invalidating queries...");
       await queryClient.invalidateQueries({ queryKey: ["site-settings"] });

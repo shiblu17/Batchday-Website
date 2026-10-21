@@ -159,11 +159,28 @@ export default function AdminPayments() {
   });
 
   const updateStatus = async (id: string, status: "verified" | "rejected") => {
-    const { error } = await supabase.from("registrations").update({ status }).eq("id", id);
+    const token = localStorage.getItem("ju52_admin_session") || "";
 
-    if (error) {
-      toast({ title: "আপডেট ব্যর্থ হয়েছে", variant: "destructive" });
-      return;
+    // 1. Try secure admin RPC first (bypasses RLS mismatch when using admin token)
+    let updateSuccessful = false;
+    try {
+      const { data: rpcSuccess, error: rpcError } = await supabase.rpc("secure_admin_update_status", {
+        p_reg_id: id,
+        p_status: status,
+        p_auth_token: token,
+      });
+      if (!rpcError && rpcSuccess) {
+        updateSuccessful = true;
+      }
+    } catch {}
+
+    // 2. Fallback to direct table update if RPC is unavailable
+    if (!updateSuccessful) {
+      const { error } = await supabase.from("registrations").update({ status }).eq("id", id);
+      if (error) {
+        toast({ title: "আপডেট ব্যর্থ হয়েছে", variant: "destructive" });
+        return;
+      }
     }
 
     queryClient.invalidateQueries({ queryKey: ["registrations"] });
