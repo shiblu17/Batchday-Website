@@ -41,70 +41,56 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Top bar (Desktop + Mobile Header) */}
-      <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl relative transition-all shadow-xs">
-        {/* Subtle hairline sunset-amber gradient accent border at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent pointer-events-none" />
-
-        <div className="container flex h-14 md:h-16 items-center justify-between">
-          <Link to="/" className="group flex items-center gap-2.5 transition-transform active:scale-95">
-            {/* Logo Icon Badge */}
-            <div className="relative flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary/95 to-amber-600 shadow-md shadow-primary/20 ring-1 ring-white/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/30 shrink-0">
-              <GraduationCap className="h-4.5 w-4.5 md:h-5 md:w-5 text-white drop-shadow-xs" />
-              <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 border border-white dark:border-slate-900"></span>
-              </span>
+      {/* Floating Capsule Island Header (Matching Reference Design) */}
+      <header className="sticky top-2.5 sm:top-3.5 z-50 px-3 sm:px-6 pointer-events-none transition-all">
+        <div className="max-w-5xl mx-auto flex h-12 sm:h-13 items-center justify-between px-3.5 sm:px-5 rounded-full bg-white/95 dark:bg-slate-900/90 backdrop-blur-md shadow-md shadow-slate-900/[0.06] border border-slate-200/80 dark:border-white/10 pointer-events-auto">
+          {/* Logo (Left) */}
+          <Link to="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
+            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0 transition-transform group-hover:scale-105">
+              <GraduationCap className="h-4 w-4 text-primary" />
             </div>
-
-            {/* Typography */}
-            <div className="flex flex-col text-left">
-              <div className="flex items-center gap-1.5 leading-none">
-                <span className="font-display text-lg md:text-xl font-black tracking-tight text-primary">JU</span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] md:text-xs font-black tracking-wider uppercase bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white shadow-xs">
-                  52
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5 leading-none">
-                <span className="text-[10px] font-bold text-muted-foreground tracking-wide">ব্যাচ ডে ২০২৫</span>
-                <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></span>
-              </div>
+            <div className="flex items-center tracking-tight leading-none font-display text-base sm:text-lg font-black">
+              <span className="text-slate-900 dark:text-white">JU</span>
+              <span className="text-primary ml-0.5">52</span>
+              <span className="hidden sm:inline-block text-[10px] font-bold text-muted-foreground ml-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                ব্যাচ ডে
+              </span>
             </div>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav (Center) */}
           <nav className="hidden md:flex items-center gap-1">
             <Link
               to="/"
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-3.5 w-3.5" />
               হোম
             </Link>
 
             {/* Features Dropdown Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors outline-none ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors outline-none ${
                   isFeatureActive
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                 }`}
               >
-                <Sparkles className="h-4 w-4 text-amber-500" />
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                 স্মৃতি ও ফিচার
-                <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                <ChevronDown className="h-3 w-3 opacity-70" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-60 p-2 shadow-2xl rounded-xl">
+              <DropdownMenuContent align="start" className="w-60 p-2 shadow-2xl rounded-2xl">
                 {featureItems.map((item) => {
                   const Icon = item.icon;
                   const active = location.pathname === item.to;
                   return (
-                    <DropdownMenuItem key={item.to} asChild className="cursor-pointer rounded-lg p-2">
+                    <DropdownMenuItem key={item.to} asChild className="cursor-pointer rounded-xl p-2">
                       <Link to={item.to} className={`flex items-center gap-3 w-full ${active ? "bg-primary/10 text-primary font-bold" : ""}`}>
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Icon className="w-4 h-4" />
@@ -122,71 +108,60 @@ export default function Navbar() {
 
             <Link
               to="/leaderboard"
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/leaderboard"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
-              <Trophy className="h-4 w-4" />
+              <Trophy className="h-3.5 w-3.5" />
               লিডারবোর্ড
             </Link>
 
             <Link
               to="/status"
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/status"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
-              <UserCheck className="h-4 w-4" />
+              <UserCheck className="h-3.5 w-3.5" />
               স্ট্যাটাস
             </Link>
 
             <Link
               to="/gallery"
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/gallery"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
-              <Image className="h-4 w-4" />
+              <Image className="h-3.5 w-3.5" />
               গ্যালারি
             </Link>
 
             <Link
               to="/game"
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname.startsWith("/game")
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
-              <Gamepad2 className="h-4 w-4" />
+              <Gamepad2 className="h-3.5 w-3.5" />
               গেম জোন
-            </Link>
-
-            <Link
-              to="/register"
-              className="relative group overflow-hidden flex items-center gap-2 ml-2 px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white font-display font-bold text-sm shadow-md shadow-amber-500/25 ring-1 ring-white/20 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-amber-500/35"
-            >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
-              <Sparkles className="w-4 h-4 text-amber-100 animate-pulse" />
-              <span>রেজিস্ট্রেশন করুন</span>
             </Link>
           </nav>
 
-          {/* Mobile Register button */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* Register Pill Button (Right) */}
+          <div className="flex items-center gap-2">
             <Link
               to="/register"
-              className="relative group overflow-hidden flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white font-display font-bold text-xs shadow-md shadow-amber-500/20 ring-1 ring-white/20 transition-all duration-300 active:scale-95 hover:shadow-lg hover:shadow-amber-500/30"
+              className="px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-xs sm:text-sm shadow-md shadow-primary/20 transition-all active:scale-95 hover:scale-105 shrink-0 flex items-center gap-1.5"
             >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
-              <Sparkles className="w-3.5 h-3.5 text-amber-100 animate-pulse" />
-              <span className="tracking-wide">রেজিস্ট্রেশন</span>
+              <span>Register Now</span>
             </Link>
           </div>
         </div>
