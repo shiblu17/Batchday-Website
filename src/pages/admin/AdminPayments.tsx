@@ -5,7 +5,6 @@ import {
   XCircle,
   Search,
   Eye,
-  EyeOff,
   Loader2,
   MessageCircle,
   Edit,
@@ -168,8 +167,6 @@ export default function AdminPayments() {
     base_url: "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout",
     callback_url: "https://batchday52ju.xyz/payment/callback",
   });
-  const [showAppSecret, setShowAppSecret] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [savingGateway, setSavingGateway] = useState(false);
   const [testingGateway, setTestingGateway] = useState(false);
   const [testResult, setTestResult] = useState<any | null>(null);
@@ -1028,28 +1025,18 @@ export default function AdminPayments() {
 
                   {/* App Secret */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-foreground flex items-center justify-between">
-                      <span>App Secret <span className="text-destructive">*</span></span>
-                      <span className="text-[10px] text-rose-500 font-medium">গোপন রাখুন</span>
+                    <label className="font-semibold text-foreground">
+                      App Secret <span className="text-destructive">*</span>
                     </label>
-                    <div className="relative">
-                      <input
-                        type={showAppSecret ? "text" : "password"}
-                        value={gatewayConfig.app_secret}
-                        onChange={(e) =>
-                          setGatewayConfig((prev) => ({ ...prev, app_secret: e.target.value }))
-                        }
-                        placeholder="••••••••••••••••••••••••"
-                        className="w-full rounded-xl border border-input bg-background pl-3.5 pr-10 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAppSecret(!showAppSecret)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                      >
-                        {showAppSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
+                    <input
+                      type="text"
+                      value={gatewayConfig.app_secret}
+                      onChange={(e) =>
+                        setGatewayConfig((prev) => ({ ...prev, app_secret: e.target.value }))
+                      }
+                      placeholder="e.g. 2384f7xxxx..."
+                      className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
                   </div>
 
                   {/* Username & Password */}
@@ -1072,24 +1059,15 @@ export default function AdminPayments() {
                       <label className="font-semibold text-foreground">
                         Merchant Password <span className="text-destructive">*</span>
                       </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={gatewayConfig.password}
-                          onChange={(e) =>
-                            setGatewayConfig((prev) => ({ ...prev, password: e.target.value }))
-                          }
-                          placeholder="••••••••••••"
-                          className="w-full rounded-xl border border-input bg-background pl-3.5 pr-10 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
+                      <input
+                        type="text"
+                        value={gatewayConfig.password}
+                        onChange={(e) =>
+                          setGatewayConfig((prev) => ({ ...prev, password: e.target.value }))
+                        }
+                        placeholder="e.g. your_merchant_password"
+                        className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
                     </div>
                   </div>
 
