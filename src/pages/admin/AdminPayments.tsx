@@ -320,7 +320,16 @@ export default function AdminPayments() {
             app_secret: testPayload.app_secret,
           }),
         });
-        resData = await directRes.json();
+        const rawText = await directRes.text();
+        try {
+          resData = JSON.parse(rawText);
+        } catch {
+          try {
+            resData = JSON.parse(rawText.replace(/[\r\n\t]+/g, " ").trim());
+          } catch {
+            resData = { statusCode: "PARSE_ERR", statusMessage: rawText };
+          }
+        }
       }
 
       setTestResult({

@@ -161,7 +161,20 @@ export default {
           }),
         });
 
-        const data = await grantRes.json();
+        const rawText = await grantRes.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseErr) {
+          try {
+            // Clean unescaped newlines/control chars inside string literals from bKash server
+            const cleaned = rawText.replace(/[\r\n\t]+/g, " ").trim();
+            data = JSON.parse(cleaned);
+          } catch {
+            data = { statusCode: "PARSE_ERR", statusMessage: rawText };
+          }
+        }
+
         return new Response(JSON.stringify(data), {
           status: 200,
           headers: {
