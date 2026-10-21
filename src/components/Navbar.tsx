@@ -14,6 +14,7 @@ import {
   Zap,
   Video,
   Shirt,
+  GraduationCap,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -41,11 +42,34 @@ export default function Navbar() {
   return (
     <>
       {/* Top bar (Desktop + Mobile Header) */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl relative transition-all shadow-xs">
+        {/* Subtle hairline sunset-amber gradient accent border at the bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent pointer-events-none" />
+
         <div className="container flex h-14 md:h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-display text-xl font-extrabold text-primary">JU-52</span>
-            <span className="hidden sm:inline text-xs font-medium text-muted-foreground">ব্যাচ ডে</span>
+          <Link to="/" className="group flex items-center gap-2.5 transition-transform active:scale-95">
+            {/* Logo Icon Badge */}
+            <div className="relative flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary/95 to-amber-600 shadow-md shadow-primary/20 ring-1 ring-white/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/30 shrink-0">
+              <GraduationCap className="h-4.5 w-4.5 md:h-5 md:w-5 text-white drop-shadow-xs" />
+              <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 border border-white dark:border-slate-900"></span>
+              </span>
+            </div>
+
+            {/* Typography */}
+            <div className="flex flex-col text-left">
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="font-display text-lg md:text-xl font-black tracking-tight text-primary">JU</span>
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] md:text-xs font-black tracking-wider uppercase bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white shadow-xs">
+                  52
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5 leading-none">
+                <span className="text-[10px] font-bold text-muted-foreground tracking-wide">ব্যাচ ডে ২০২৫</span>
+                <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+            </div>
           </Link>
 
           {/* Desktop Nav */}
@@ -146,9 +170,11 @@ export default function Navbar() {
 
             <Link
               to="/register"
-              className="ml-2 px-5 py-2 rounded-lg bg-accent text-accent-foreground font-display font-bold text-sm transition-all hover:scale-105 active:scale-95 shadow-sm"
+              className="relative group overflow-hidden flex items-center gap-2 ml-2 px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white font-display font-bold text-sm shadow-md shadow-amber-500/25 ring-1 ring-white/20 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-amber-500/35"
             >
-              Register Now
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
+              <Sparkles className="w-4 h-4 text-amber-100 animate-pulse" />
+              <span>রেজিস্ট্রেশন করুন</span>
             </Link>
           </nav>
 
@@ -156,9 +182,11 @@ export default function Navbar() {
           <div className="flex items-center gap-2 md:hidden">
             <Link
               to="/register"
-              className="px-4 py-1.5 rounded-lg bg-accent text-accent-foreground font-display font-bold text-xs"
+              className="relative group overflow-hidden flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white font-display font-bold text-xs shadow-md shadow-amber-500/20 ring-1 ring-white/20 transition-all duration-300 active:scale-95 hover:shadow-lg hover:shadow-amber-500/30"
             >
-              Register
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-100 animate-pulse" />
+              <span className="tracking-wide">রেজিস্ট্রেশন</span>
             </Link>
           </div>
         </div>
