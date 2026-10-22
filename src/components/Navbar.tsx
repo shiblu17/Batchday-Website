@@ -47,7 +47,10 @@ export default function Navbar() {
           isHome ? "-mb-14 sm:-mb-16" : ""
         }`}
       >
-        <div className="max-w-5xl mx-auto flex h-12 sm:h-13 items-center justify-between px-3.5 sm:px-5 rounded-full bg-[#580c18]/92 dark:bg-[#420813]/95 backdrop-blur-xl shadow-xl shadow-black/25 border border-white/20 text-white pointer-events-auto transition-all">
+        <div 
+          style={{ backgroundColor: "#580c18" }}
+          className="max-w-5xl mx-auto flex h-12 sm:h-13 items-center justify-between px-3.5 sm:px-5 rounded-full bg-[#580c18] dark:bg-[#3d0610] shadow-2xl shadow-black/40 border border-white/20 sm:border-amber-400/25 text-white pointer-events-auto transition-all"
+        >
           {/* Logo (Left) */}
           <Link to="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-white/15 text-amber-300 ring-1 ring-white/20 shrink-0 transition-transform group-hover:scale-105">
@@ -68,8 +71,8 @@ export default function Navbar() {
               to="/"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/"
-                  ? "bg-white/20 text-white font-bold shadow-xs"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-white/20 text-amber-300 font-bold shadow-xs"
+                  : "text-white/90 hover:text-white hover:bg-white/15"
               }`}
             >
               <Home className="h-3.5 w-3.5" />
@@ -81,8 +84,8 @@ export default function Navbar() {
               <DropdownMenuTrigger
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors outline-none ${
                   isFeatureActive
-                    ? "bg-white/20 text-white font-bold shadow-xs"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
+                    ? "bg-white/20 text-amber-300 font-bold shadow-xs"
+                    : "text-white/90 hover:text-white hover:bg-white/15"
                 }`}
               >
                 <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -114,8 +117,8 @@ export default function Navbar() {
               to="/leaderboard"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/leaderboard"
-                  ? "bg-white/20 text-white font-bold shadow-xs"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-white/20 text-amber-300 font-bold shadow-xs"
+                  : "text-white/90 hover:text-white hover:bg-white/15"
               }`}
             >
               <Trophy className="h-3.5 w-3.5" />
@@ -126,8 +129,8 @@ export default function Navbar() {
               to="/status"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/status"
-                  ? "bg-white/20 text-white font-bold shadow-xs"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-white/20 text-amber-300 font-bold shadow-xs"
+                  : "text-white/90 hover:text-white hover:bg-white/15"
               }`}
             >
               <UserCheck className="h-3.5 w-3.5" />
@@ -138,8 +141,8 @@ export default function Navbar() {
               to="/gallery"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname === "/gallery"
-                  ? "bg-white/20 text-white font-bold shadow-xs"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-white/20 text-amber-300 font-bold shadow-xs"
+                  : "text-white/90 hover:text-white hover:bg-white/15"
               }`}
             >
               <Image className="h-3.5 w-3.5" />
@@ -150,8 +153,8 @@ export default function Navbar() {
               to="/game"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 location.pathname.startsWith("/game")
-                  ? "bg-white/20 text-white font-bold shadow-xs"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-white/20 text-amber-300 font-bold shadow-xs"
+                  : "text-white/90 hover:text-white hover:bg-white/15"
               }`}
             >
               <Gamepad2 className="h-3.5 w-3.5" />
