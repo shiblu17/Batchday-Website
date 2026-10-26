@@ -154,12 +154,11 @@ export default function HomePage() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+            className="grid grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto gap-3 md:gap-4">
             
             {[
             { icon: CalendarDays, label: "তারিখ", value: dateStr, sub: timeStr },
-            { icon: MapPin, label: "স্থান", value: s.event_location.name, sub: s.event_location.detail },
-            { icon: Users, label: "রেজিস্টার্ড", value: `${verifiedCount}+`, sub: "শিক্ষার্থী" }].
+            { icon: MapPin, label: "স্থান", value: s.event_location.name, sub: s.event_location.detail }].
             map((item) =>
             <motion.div
               key={item.label}
