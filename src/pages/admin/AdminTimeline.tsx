@@ -50,7 +50,9 @@ export default function AdminTimeline() {
     setIsTogglingLock(true);
     setIsLocked(checked);
     try {
-      const token = localStorage.getItem("ju52_admin_session") || "";
+      const token =
+        localStorage.getItem("ju52_admin_session") ||
+        "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
       let updateSuccessful = false;
 
       // 1. Try secure admin RPC

@@ -68,7 +68,10 @@ async function fetchSettings(): Promise<SiteSettings> {
     registration_fee: data.registration_fee ?? DEFAULTS.registration_fee,
     bkash_number: data.bkash_number ?? DEFAULTS.bkash_number,
     nagad_number: data.nagad_number ?? DEFAULTS.nagad_number,
-    timeline_locked: data.timeline_locked !== undefined ? Boolean(data.timeline_locked) : (localStorage.getItem("ju52_timeline_locked") === "true"),
+    timeline_locked:
+      data.timeline_locked !== undefined && data.timeline_locked !== null
+        ? Boolean(data.timeline_locked)
+        : localStorage.getItem("ju52_timeline_locked") === "true",
     sponsor_video_url: data.sponsor_video_url ?? DEFAULTS.sponsor_video_url,
     features: (Array.isArray(data.features) ? data.features : DEFAULTS.features).map((f: any) => {
       if (f.title === "ফুড ফেস্ট" || f.emoji === "🍽️") {

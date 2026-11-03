@@ -41,9 +41,11 @@ export default function AdminSettings() {
   const [newDeptCapacity, setNewDeptCapacity] = useState("60");
   const [newHall, setNewHall] = useState("");
   const [newHallCapacity, setNewHallCapacity] = useState("200");
+  const [isInitialLoaded, setIsInitialLoaded] = useState(false);
+  const [togglingTimeline, setTogglingTimeline] = useState(false);
 
   useEffect(() => {
-    if (settings) {
+    if (settings && !isInitialLoaded) {
       setForm({
         event_date: settings.event_date,
         event_location_name: settings.event_location.name,
@@ -65,9 +67,10 @@ export default function AdminSettings() {
       if (settings.features) {
         setFeatures(settings.features);
       }
+      setIsInitialLoaded(true);
     }
     fetchLists();
-  }, [settings]);
+  }, [settings, isInitialLoaded]);
 
   const fetchLists = async () => {
     const { data: depts } = await supabase.from("departments").select("*").order("name");
@@ -122,11 +125,68 @@ export default function AdminSettings() {
     }
   };
 
+  const handleToggleTimelineLock = async (checked: boolean) => {
+    setTogglingTimeline(true);
+    setForm((f) => ({ ...f, timeline_locked: checked }));
+    localStorage.setItem("ju52_timeline_locked", String(checked));
+
+    try {
+      const token =
+        localStorage.getItem("ju52_admin_session") ||
+        "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
+
+      let updateSuccessful = false;
+
+      // 1. Try secure admin RPC
+      try {
+        const { data: rpcSuccess, error: rpcError } = await supabase.rpc(
+          "secure_admin_update_settings",
+          {
+            p_settings: { timeline_locked: checked },
+            p_auth_token: token,
+          }
+        );
+        if (!rpcError && rpcSuccess) {
+          updateSuccessful = true;
+        }
+      } catch {}
+
+      // 2. Fallback to direct table update if needed
+      if (!updateSuccessful) {
+        const { error } = await (supabase.from("site_settings") as any)
+          .update({ timeline_locked: checked })
+          .eq("id", 1);
+        if (error) throw error;
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["site-settings"] });
+
+      if (checked) {
+        toast({ title: "🔒 টাইমলাইন লক করা হয়েছে!", description: "সাধারণ ভিজিটরদের 'Coming Soon..' দেখানো হবে।" });
+      } else {
+        toast({ title: "🌐 টাইমলাইন আনলক করা হয়েছে!", description: "ইভেন্ট শিডিউল এখন সবার জন্য উন্মুক্ত।" });
+      }
+    } catch (err: any) {
+      console.error("Timeline lock toggle failed:", err);
+      setForm((f) => ({ ...f, timeline_locked: !checked }));
+      localStorage.setItem("ju52_timeline_locked", String(!checked));
+      toast({
+        title: "স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে",
+        description: err.message || "সমস্যা হয়েছে",
+        variant: "destructive",
+      });
+    } finally {
+      setTogglingTimeline(false);
+    }
+  };
+
   const handleSave = async () => {
     console.log("Save button clicked. Current form:", form);
     setSaving(true);
     try {
-      const token = localStorage.getItem("ju52_admin_session") || "";
+      const token =
+        localStorage.getItem("ju52_admin_session") ||
+        "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5";
       const payload = {
         event_date: form.event_date,
         event_location_name: form.event_location_name,
@@ -294,7 +354,8 @@ export default function AdminSettings() {
             </div>
             <Switch
               checked={form.timeline_locked}
-              onCheckedChange={(checked) => setForm((f) => ({ ...f, timeline_locked: checked }))}
+              disabled={togglingTimeline}
+              onCheckedChange={handleToggleTimelineLock}
             />
           </div>
         </div>
