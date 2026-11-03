@@ -101,7 +101,7 @@ export default function Index() {
     staleTime: 30_000,
   });
 
-  const eventDate = new Date(settings?.event_date || "2025-06-15T10:00:00+06:00");
+  const eventDate = new Date(settings?.event_date || "2027-02-15T10:00:00+06:00");
   const countdown = useCountdown(eventDate);
 
   if (settingsLoading) {
@@ -284,7 +284,7 @@ export default function Index() {
             <div className="flex items-center justify-center md:justify-start gap-2">
               <span className="font-display font-black text-xl text-primary">JU-52</span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                ব্যাচ ডে ২০২৬
+                ব্যাচ ডে ২০২৭
               </span>
             </div>
             <p className="text-xs text-muted-foreground max-w-sm">
@@ -305,7 +305,7 @@ export default function Index() {
           </div>
         </div>
         <div className="container max-w-6xl mx-auto mt-8 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-muted-foreground">
-          <p>© ২০২৬ জাহাঙ্গীরনগর বিশ্ববিদ্যালয় ৫২তম ব্যাচ। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>© ২০২৭ জাহাঙ্গীরনগর বিশ্ববিদ্যালয় ৫২তম ব্যাচ। সর্বস্বত্ব সংরক্ষিত।</p>
           <p className="flex items-center justify-center gap-1">
             Made with <Heart className="w-3 h-3 text-red-500 fill-red-500 inline" /> for JU 52nd Batch
           </p>

@@ -858,7 +858,7 @@ export default function MemoriesHub() {
 
                 <div className="flex items-center justify-between text-[9px] font-mono text-white/40 px-2">
                   <span>SIDE A [NORMAL BIAS]</span>
-                  <span>1970 - 2026</span>
+                  <span>1970 - 2027</span>
                 </div>
               </div>
 

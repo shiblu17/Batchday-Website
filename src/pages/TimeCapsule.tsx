@@ -156,7 +156,7 @@ export default function TimeCapsule() {
 
     toast({
       title: "Letter Sealed! 🔒 ✈",
-      description: "Your time capsule letter has been securely sealed for 2036.",
+      description: "Your time capsule letter has been securely sealed for 2037.",
     });
   };
 
@@ -181,8 +181,8 @@ export default function TimeCapsule() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: "JU-52 Time Capsule (2026 ➔ 2036)",
-        text: "I just sealed a letter to my future self for 2036 at Jahangirnagar University Batch Day 52! Write yours too.",
+        title: "JU-52 Time Capsule (2027 ➔ 2037)",
+        text: "I just sealed a letter to my future self for 2037 at Jahangirnagar University Batch Day 52! Write yours too.",
         url: window.location.href,
       }).catch(() => {});
     } else {
@@ -429,7 +429,7 @@ export default function TimeCapsule() {
                             onChange={(e) => setMessage(e.target.value)}
                             maxLength={2000}
                             rows={6}
-                            placeholder="Dear future me,&#10;&#10;I hope life has been kind to you. Today in 2026 at Jahangirnagar University, here is what is in my heart..."
+                            placeholder="Dear future me,&#10;&#10;I hope life has been kind to you. Today in 2027 at Jahangirnagar University, here is what is in my heart..."
                             className="w-full bg-[#fdfbf6] border border-[#d9cdbc] rounded-xl p-3.5 pb-8 text-sm sm:text-base text-[#2c1d1a] leading-relaxed placeholder:text-[#a89b8d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7c2237]/20 focus:border-[#7c2237] transition-all resize-none font-serif-vintage"
                             required
                           />

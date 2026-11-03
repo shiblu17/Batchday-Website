@@ -57,7 +57,7 @@ export default function HomePage() {
     staleTime: 30_000,
   });
 
-  const eventDate = new Date(settings?.event_date || "2025-06-15T10:00:00+06:00");
+  const eventDate = new Date(settings?.event_date || "2027-02-15T10:00:00+06:00");
   const countdown = useCountdown(eventDate);
 
   if (settingsLoading) {

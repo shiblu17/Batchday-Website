@@ -1136,7 +1136,7 @@ export default function DigitalJersey() {
                           letterSpacing="2"
                           fontFamily="'Hind Siliguri', sans-serif"
                         >
-                          ★ ব্যাচ ডে ২০২৬ ★
+                          ★ ব্যাচ ডে ২০২৭ ★
                         </text>
                       </g>
 

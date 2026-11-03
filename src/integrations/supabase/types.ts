@@ -139,6 +139,7 @@ export type Database = {
           id: number
           event_date: string
           registration_open: boolean
+          timeline_locked?: boolean | null
           bkash_number: string
           nagad_number: string
         }
@@ -146,6 +147,7 @@ export type Database = {
           id?: number
           event_date: string
           registration_open?: boolean
+          timeline_locked?: boolean | null
           bkash_number: string
           nagad_number: string
         }
@@ -153,6 +155,7 @@ export type Database = {
           id?: number
           event_date?: string
           registration_open?: boolean
+          timeline_locked?: boolean | null
           bkash_number?: string
           nagad_number?: string
         }

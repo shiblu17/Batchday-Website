@@ -11,6 +11,7 @@ export type SiteSettings = {
   registration_fee: number;
   bkash_number: string;
   nagad_number: string;
+  timeline_locked: boolean;
   features: { emoji: string; title: string; desc: string }[];
   sponsor_video_url: string;
   sponsor_video_url_2: string;
@@ -20,15 +21,16 @@ export type SiteSettings = {
 };
 
 const DEFAULTS: SiteSettings = {
-  event_date: "2025-06-15T10:00:00+06:00",
+  event_date: "2027-02-15T10:00:00+06:00",
   event_location: { name: "জাহাঙ্গীরনগর ক্যাম্পাস", detail: "সেন্ট্রাল ফিল্ড" },
   hero_title: "JU-52",
-  hero_subtitle: "ব্যাচ ডে ২০২৫",
+  hero_subtitle: "ব্যাচ ডে ২০২৭",
   hero_description: "সবচেয়ে বড় পুনর্মিলনী। রেজিস্ট্রেশন করো, স্মৃতি শেয়ার করো, একসাথে উদযাপন করো।",
   registration_open: true,
   registration_fee: 500,
   bkash_number: "01XXXXXXXXX",
   nagad_number: "01XXXXXXXXX",
+  timeline_locked: false,
   features: [
     { emoji: "🎶", title: "লাইভ কনসার্ট", desc: "মিউজিক ও পারফরম্যান্স" },
     { emoji: "💃", title: "গ্র্যান্ড ফ্ল্যাশমব", desc: "নাচ, গান আর ক্যাম্পাস মাতানো উন্মাদনা" },
@@ -65,6 +67,9 @@ async function fetchSettings(): Promise<SiteSettings> {
     registration_open: data.registration_open ?? DEFAULTS.registration_open,
     registration_fee: data.registration_fee ?? DEFAULTS.registration_fee,
     bkash_number: data.bkash_number ?? DEFAULTS.bkash_number,
+    nagad_number: data.nagad_number ?? DEFAULTS.nagad_number,
+    timeline_locked: data.timeline_locked !== undefined ? Boolean(data.timeline_locked) : (localStorage.getItem("ju52_timeline_locked") === "true"),
+    sponsor_video_url: data.sponsor_video_url ?? DEFAULTS.sponsor_video_url,
     features: (Array.isArray(data.features) ? data.features : DEFAULTS.features).map((f: any) => {
       if (f.title === "ফুড ফেস্ট" || f.emoji === "🍽️") {
         return {

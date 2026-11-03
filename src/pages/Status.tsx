@@ -189,7 +189,7 @@ export default function StatusPage() {
       ctx.fillStyle = '#ffffff';
       ctx.font = 'italic 20px sans-serif';
       ctx.letterSpacing = "2px";
-      ctx.fillText('BATCH DAY 2026 • OFFICIAL ID', 300, 150);
+      ctx.fillText('BATCH DAY 2027 • OFFICIAL ID', 300, 150);
       ctx.letterSpacing = "0px";
 
       // 5. User Details (Premium Typography)

@@ -897,7 +897,7 @@ export default function AdminRoles() {
               <Label className="text-xs font-semibold">নতুন পাসওয়ার্ড</Label>
               <Input
                 type="text"
-                placeholder="যেমন: ju52@secret2026"
+                placeholder="যেমন: ju52@secret2027"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />

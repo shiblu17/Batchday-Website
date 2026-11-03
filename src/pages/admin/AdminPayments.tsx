@@ -77,7 +77,7 @@ export default function AdminPayments() {
 
   // Simulator state
   const [simulatorSms, setSimulatorSms] = useState(
-    "You have received Tk 500.00 from 01712345678. Ref 5201. TrxID 9B7D4K19X2 at 13/10/2026 17:30. Balance Tk 15,200.00. Fee Tk 0.00."
+    "You have received Tk 500.00 from 01712345678. Ref 5201. TrxID 9B7D4K19X2 at 13/10/2027 17:30. Balance Tk 15,200.00. Fee Tk 0.00."
   );
   const [simulating, setSimulating] = useState(false);
   const [simulatorResult, setSimulatorResult] = useState<any | null>(null);
@@ -858,7 +858,7 @@ export default function AdminPayments() {
                   type="button"
                   onClick={() =>
                     setSimulatorSms(
-                      "You have received Tk 500.00 from 01711223344. Ref 5202. TrxID 9B7D8899XX at 13/10/2026 17:45. Balance Tk 15,700.00. Fee Tk 0.00."
+                      "You have received Tk 500.00 from 01711223344. Ref 5202. TrxID 9B7D8899XX at 13/10/2027 17:45. Balance Tk 15,700.00. Fee Tk 0.00."
                     )
                   }
                   className="px-2.5 py-1 rounded-lg bg-muted text-[11px] font-semibold hover:bg-muted/80"
@@ -869,7 +869,7 @@ export default function AdminPayments() {
                   type="button"
                   onClick={() =>
                     setSimulatorSms(
-                      "Payment received Tk 1,000.00 from 01912345678. TrxID BLK992819 at 13/10/2026 18:00. Balance Tk 25,000.00."
+                      "Payment received Tk 1,000.00 from 01912345678. TrxID BLK992819 at 13/10/2027 18:00. Balance Tk 25,000.00."
                     )
                   }
                   className="px-2.5 py-1 rounded-lg bg-muted text-[11px] font-semibold hover:bg-muted/80"

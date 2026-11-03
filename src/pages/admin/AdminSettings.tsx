@@ -24,6 +24,7 @@ export default function AdminSettings() {
     hero_subtitle: "",
     hero_description: "",
     registration_open: true,
+    timeline_locked: false,
     registration_fee: 500,
     bkash_number: "",
     nagad_number: "",
@@ -51,6 +52,7 @@ export default function AdminSettings() {
         hero_subtitle: settings.hero_subtitle,
         hero_description: settings.hero_description,
         registration_open: settings.registration_open,
+        timeline_locked: Boolean(settings.timeline_locked),
         registration_fee: settings.registration_fee,
         bkash_number: settings.bkash_number,
         nagad_number: settings.nagad_number,
@@ -133,6 +135,7 @@ export default function AdminSettings() {
         hero_subtitle: form.hero_subtitle,
         hero_description: form.hero_description,
         registration_open: form.registration_open,
+        timeline_locked: form.timeline_locked,
         registration_fee: form.registration_fee,
         bkash_number: form.bkash_number,
         nagad_number: form.nagad_number,
@@ -168,6 +171,7 @@ export default function AdminSettings() {
       }
 
       console.log("Invalidating queries...");
+      localStorage.setItem("ju52_timeline_locked", String(form.timeline_locked));
       await queryClient.invalidateQueries({ queryKey: ["site-settings"] });
       console.log("Query invalidated. Showing toast.");
       toast({ title: "সেটিংস সেভ হয়েছে ✅" });
@@ -276,6 +280,21 @@ export default function AdminSettings() {
               type="number"
               value={form.registration_fee}
               onChange={(e) => setForm((f) => ({ ...f, registration_fee: parseInt(e.target.value) || 0 }))}
+            />
+          </div>
+        </div>
+
+        {/* Timeline Control */}
+        <div className={sectionClass}>
+          <h2 className="font-display font-semibold text-base">ইভেন্ট টাইমলাইন নিয়ন্ত্রণ</h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">টাইমলাইন লক করুন (Coming Soon.. মোড)</p>
+              <p className="text-xs text-muted-foreground">লক থাকলে সাধারণ ভিউয়াররা টাইমলাইনের স্থানে প্রিমিয়াম "Coming Soon.." অ্যানিমেশন দেখতে পাবেন</p>
+            </div>
+            <Switch
+              checked={form.timeline_locked}
+              onCheckedChange={(checked) => setForm((f) => ({ ...f, timeline_locked: checked }))}
             />
           </div>
         </div>

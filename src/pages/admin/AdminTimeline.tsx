@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, Plus, MapPin, Trash2, Edit2, ChevronUp, ChevronDown, Save, X, Loader2, CalendarDays } from "lucide-react";
+import { Clock, Plus, MapPin, Trash2, Edit2, ChevronUp, ChevronDown, Save, X, Loader2, CalendarDays, Lock, Unlock } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TimelineEvent {
   id: string;
@@ -15,6 +18,11 @@ interface TimelineEvent {
 }
 
 export default function AdminTimeline() {
+  const { data: settings } = useSiteSettings();
+  const queryClient = useQueryClient();
+  const [isLocked, setIsLocked] = useState(false);
+  const [isTogglingLock, setIsTogglingLock] = useState(false);
+
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,8 +37,57 @@ export default function AdminTimeline() {
   });
 
   useEffect(() => {
+    if (settings) {
+      setIsLocked(Boolean(settings.timeline_locked));
+    }
+  }, [settings]);
+
+  useEffect(() => {
     fetchEvents();
   }, []);
+
+  const handleToggleLock = async (checked: boolean) => {
+    setIsTogglingLock(true);
+    setIsLocked(checked);
+    try {
+      const token = localStorage.getItem("ju52_admin_session") || "";
+      let updateSuccessful = false;
+
+      // 1. Try secure admin RPC
+      try {
+        const { data: rpcSuccess, error: rpcError } = await supabase.rpc("secure_admin_update_settings", {
+          p_settings: { timeline_locked: checked },
+          p_auth_token: token,
+        });
+        if (!rpcError && rpcSuccess) {
+          updateSuccessful = true;
+        }
+      } catch {}
+
+      // 2. Fallback to direct table update
+      if (!updateSuccessful) {
+        const { error } = await (supabase.from("site_settings") as any)
+          .update({ timeline_locked: checked })
+          .eq("id", 1);
+        if (error) throw error;
+      }
+
+      localStorage.setItem("ju52_timeline_locked", String(checked));
+      await queryClient.invalidateQueries({ queryKey: ["site-settings"] });
+
+      if (checked) {
+        toast.success("🔒 টাইমলাইন লক করা হয়েছে! সাধারণ ভিজিটরদের 'Coming Soon..' দেখানো হবে।");
+      } else {
+        toast.success("🌐 টাইমলাইন আনলক করা হয়েছে! এখন সবার জন্য দৃশ্যমান।");
+      }
+    } catch (err: any) {
+      console.error("Lock toggle failed:", err);
+      setIsLocked(!checked);
+      toast.error("স্ট্যাটাস আপডেট ব্যর্থ হয়েছে: " + (err.message || "সমস্যা হয়েছে"));
+    } finally {
+      setIsTogglingLock(false);
+    }
+  };
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -128,11 +185,57 @@ export default function AdminTimeline() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <CalendarDays className="w-8 h-8 text-primary" />
           টাইমলাইন মডারেশন
         </h1>
+      </div>
+
+      {/* Top Lock Status Banner / Control Card */}
+      <div className={`mb-8 p-5 rounded-2xl border transition-all duration-300 shadow-sm ${
+        isLocked 
+          ? "bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-100" 
+          : "bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-100"
+      }`}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className={`p-3 rounded-xl ${isLocked ? "bg-amber-500 text-white" : "bg-emerald-500 text-white"} shadow-sm`}>
+              {isLocked ? <Lock className="w-6 h-6 animate-pulse" /> : <Unlock className="w-6 h-6" />}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-bold">
+                  {isLocked ? "🔒 টাইমলাইন লক করা আছে" : "🌐 টাইমলাইন লাইভ ও আনলকড"}
+                </h2>
+                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  isLocked 
+                    ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30" 
+                    : "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                }`}>
+                  {isLocked ? "COMING SOON মোড সক্রিয়" : "পাবলিক ভিউ সচল"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isLocked
+                  ? "সাধারণ ব্যবহারকারীরা ওয়েবসাইটে টাইমলাইনের জায়গায় অ্যানিমেটেড 'Coming Soon..' দেখতে পাবেন। (লগইন করা অ্যাডমিনরা নিচে প্রিভিউ দেখতে পাবেন)"
+                  : "ওয়েবসাইটে সব সাধারণ ভিজিটররা পুরো ইভেন্ট শিডিউল ও স্থান সরাসরি দেখতে পাচ্ছেন।"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 self-end sm:self-center bg-card/80 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-border shadow-xs">
+            <label htmlFor="timeline-lock-toggle" className="text-xs font-semibold cursor-pointer select-none">
+              {isLocked ? "লক মোড চালু" : "আনলক মোড"}
+            </label>
+            <Switch
+              id="timeline-lock-toggle"
+              checked={isLocked}
+              disabled={isTogglingLock}
+              onCheckedChange={handleToggleLock}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
