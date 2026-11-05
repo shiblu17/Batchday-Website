@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useQuery } from "@tanstack/react-query";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { getCanonicalHall, getCanonicalDepartment } from "@/utils/academicDataNormalizer";
 
 function useCountdown(target: Date) {
   const calc = () => {
@@ -56,22 +57,34 @@ export default function Index() {
         const hallCounts: Record<string, number> = {};
         regs?.forEach(r => {
           if (r.status === 'verified') {
-            deptCounts[r.department] = (deptCounts[r.department] || 0) + 1;
-            hallCounts[r.hall] = (hallCounts[r.hall] || 0) + 1;
+            const cDept = getCanonicalDepartment(r.department);
+            const cHall = getCanonicalHall(r.hall);
+            if (cDept) {
+              deptCounts[cDept] = (deptCounts[cDept] || 0) + 1;
+            }
+            if (cHall) {
+              hallCounts[cHall] = (hallCounts[cHall] || 0) + 1;
+            }
           }
         });
 
-        setDeptData(depts.map(d => ({
-          name: d.name,
-          registered: deptCounts[d.name] || 0,
-          total: d.capacity || 60
-        })).sort((a,b) => b.registered - a.registered));
+        setDeptData(depts.map(d => {
+          const cDept = getCanonicalDepartment(d.name);
+          return {
+            name: d.name,
+            registered: deptCounts[cDept] ?? deptCounts[d.name] ?? 0,
+            total: d.capacity || 60
+          };
+        }).sort((a,b) => b.registered - a.registered));
 
-        setHallData(hl.map(h => ({
-          name: h.name,
-          registered: hallCounts[h.name] || 0,
-          total: h.capacity || 200
-        })).sort((a,b) => b.registered - a.registered));
+        setHallData(hl.map(h => {
+          const cHall = getCanonicalHall(h.name);
+          return {
+            name: h.name,
+            registered: hallCounts[cHall] ?? hallCounts[h.name] ?? 0,
+            total: h.capacity || 200
+          };
+        }).sort((a,b) => b.registered - a.registered));
       }
     };
     fetchLeaderboard();

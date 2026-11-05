@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import LeaderboardCard from './LeaderboardCard';
+import { getCanonicalHall, getCanonicalDepartment } from '@/utils/academicDataNormalizer';
 
 interface LeaderboardItem {
   id: string;
@@ -47,24 +48,36 @@ export default function Leaderboard() {
 
       regs?.forEach(r => {
         if (r.status === 'verified') {
-          deptCounts[r.department] = (deptCounts[r.department] || 0) + 1;
-          hallCounts[r.hall] = (hallCounts[r.hall] || 0) + 1;
+          const cDept = getCanonicalDepartment(r.department);
+          const cHall = getCanonicalHall(r.hall);
+          if (cDept) {
+            deptCounts[cDept] = (deptCounts[cDept] || 0) + 1;
+          }
+          if (cHall) {
+            hallCounts[cHall] = (hallCounts[cHall] || 0) + 1;
+          }
         }
       });
 
-      setDepartments(depts.map(d => ({
-        id: d.id,
-        name: d.name,
-        registered: deptCounts[d.name] || 0,
-        total: d.capacity || 60
-      })).sort((a,b) => b.registered - a.registered));
+      setDepartments(depts.map(d => {
+        const cDept = getCanonicalDepartment(d.name);
+        return {
+          id: d.id,
+          name: d.name,
+          registered: deptCounts[cDept] ?? deptCounts[d.name] ?? 0,
+          total: d.capacity || 60
+        };
+      }).sort((a,b) => b.registered - a.registered));
 
-      setHalls(hl.map(h => ({
-        id: h.id,
-        name: h.name,
-        registered: hallCounts[h.name] || 0,
-        total: h.capacity || 200
-      })).sort((a,b) => b.registered - a.registered));
+      setHalls(hl.map(h => {
+        const cHall = getCanonicalHall(h.name);
+        return {
+          id: h.id,
+          name: h.name,
+          registered: hallCounts[cHall] ?? hallCounts[h.name] ?? 0,
+          total: h.capacity || 200
+        };
+      }).sort((a,b) => b.registered - a.registered));
     } catch (err) {
       console.error(err);
     } finally {

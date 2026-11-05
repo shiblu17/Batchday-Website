@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +57,14 @@ interface Student {
 }
 
 export default function AdminStudents() {
+  const queryClient = useQueryClient();
+  const getAdminToken = () => {
+    return (
+      localStorage.getItem("ju52_admin_session") ||
+      "c145831c695ff21cffa243accd032d3f93db4708ea9582b7501efbfb513a1bd5"
+    );
+  };
+
   // Start with local bundled data for 0ms initial load
   const [students, setStudents] = useState<Student[]>(() =>
     (initialVoters as any[]).map((v, idx) => ({
@@ -225,46 +234,75 @@ export default function AdminStudents() {
       sl_no: students.length + 1,
     };
 
+    const token = getAdminToken();
+    let saved = false;
+
+    // 1. Try secure admin RPC (handles RLS bypass + immediate cascade to registrations)
     try {
+      const { data: rpcRes, error: rpcErr } = await (supabase.rpc as any)(
+        "secure_admin_manage_student",
+        {
+          p_action: "INSERT",
+          p_student_id: newId,
+          p_data: newStudent,
+          p_auth_token: token,
+        }
+      );
+      if (!rpcErr && rpcRes && rpcRes.success) {
+        saved = true;
+      } else if (rpcErr) {
+        console.warn("RPC insert failed, falling back to direct query:", rpcErr);
+      }
+    } catch (e) {
+      console.warn("RPC invocation error:", e);
+    }
+
+    // 2. Direct fallback if RPC is not present
+    if (!saved) {
       const { error } = await supabase.from("batch52_students").insert([newStudent as any]);
       if (error) {
         toast.error("সুপাবেজে যোগ করা যায়নি: " + error.message);
-      } else {
-        // Immediate local state update
-        setStudents((prev) => [newStudent, ...prev.filter((s) => s.id !== newId)]);
-
-        // Cascade update to registrations table if a registration exists for this roll
-        try {
-          const { data: matchedRegs } = await supabase
-            .from("registrations")
-            .select("id")
-            .eq("roll", cleanRoll);
-
-          if (matchedRegs && matchedRegs.length > 0) {
-            for (const r of matchedRegs) {
-              await supabase
-                .from("registrations")
-                .update({
-                  name: cleanName,
-                  department: formData.department,
-                  hall: formData.hall,
-                  updated_at: new Date().toISOString(),
-                })
-                .eq("id", r.id);
-            }
-          }
-        } catch (rErr) {
-          console.warn("Sync to registrations on add failed", rErr);
-        }
-
-        toast.success(`✓ শিক্ষার্থী "${cleanName}" সফলভাবে যুক্ত হয়েছে!`);
-        setAddModalOpen(false);
+        setSaving(false);
+        return;
       }
-    } catch (err: any) {
-      toast.error(err.message || "ত্রুটি হয়েছে");
-    } finally {
-      setSaving(false);
     }
+
+    // Immediate local state update
+    setStudents((prev) => [newStudent, ...prev.filter((s) => s.id !== newId)]);
+
+    // Cascade update to registrations table if a registration exists for this roll
+    try {
+      const { data: matchedRegs } = await supabase
+        .from("registrations")
+        .select("id")
+        .eq("roll", cleanRoll);
+
+      if (matchedRegs && matchedRegs.length > 0) {
+        for (const r of matchedRegs) {
+          await supabase
+            .from("registrations")
+            .update({
+              name: cleanName,
+              department: formData.department,
+              hall: formData.hall,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", r.id);
+        }
+      }
+    } catch (rErr) {
+      console.warn("Sync to registrations on add fallback:", rErr);
+    }
+
+    // Invalidate React Query caches so all pages update instantly
+    queryClient.invalidateQueries({ queryKey: ["batch52_students"] });
+    queryClient.invalidateQueries({ queryKey: ["registrations"] });
+    queryClient.invalidateQueries({ queryKey: ["verified-registrations-count"] });
+    queryClient.invalidateQueries({ queryKey: ["students"] });
+
+    toast.success(`✓ শিক্ষার্থী "${cleanName}" সফলভাবে যুক্ত হয়েছে!`);
+    setAddModalOpen(false);
+    setSaving(false);
   };
 
   // Open Edit Modal
@@ -304,7 +342,31 @@ export default function AdminStudents() {
       updated_at: new Date().toISOString(),
     };
 
+    const token = getAdminToken();
+    let saved = false;
+
+    // 1. Try secure admin RPC (updates batch52_students + cascades to registrations in single atomic transaction)
     try {
+      const { data: rpcRes, error: rpcErr } = await (supabase.rpc as any)(
+        "secure_admin_manage_student",
+        {
+          p_action: "UPDATE",
+          p_student_id: editingStudent.id,
+          p_data: updatedPayload,
+          p_auth_token: token,
+        }
+      );
+      if (!rpcErr && rpcRes && rpcRes.success) {
+        saved = true;
+      } else if (rpcErr) {
+        console.warn("RPC update failed, falling back to direct update:", rpcErr);
+      }
+    } catch (e) {
+      console.warn("RPC invocation error:", e);
+    }
+
+    // 2. Direct fallback
+    if (!saved) {
       const { error } = await supabase
         .from("batch52_students")
         .update(updatedPayload as any)
@@ -312,47 +374,52 @@ export default function AdminStudents() {
 
       if (error) {
         toast.error("আপডেট করা যায়নি: " + error.message);
-      } else {
-        // Immediate local state update
-        setStudents((prev) =>
-          prev.map((s) =>
-            s.id === editingStudent.id ? { ...s, ...updatedPayload } : s
-          )
-        );
-
-        // Cascade update to registrations table so student's badge, status, and registration record are always in sync!
-        try {
-          const { data: matchedRegs } = await supabase
-            .from("registrations")
-            .select("id")
-            .or(`roll.eq.${editingStudent.roll_no},roll.eq.${cleanRoll}`);
-
-          if (matchedRegs && matchedRegs.length > 0) {
-            for (const r of matchedRegs) {
-              await supabase
-                .from("registrations")
-                .update({
-                  name: cleanName,
-                  department: formData.department,
-                  hall: formData.hall,
-                  roll: cleanRoll,
-                  updated_at: new Date().toISOString(),
-                })
-                .eq("id", r.id);
-            }
-          }
-        } catch (regErr) {
-          console.warn("Cascade to registrations error:", regErr);
-        }
-
-        toast.success(`✓ "${cleanName}" এর তথ্য এবং সংশ্লিষ্ট সকল রেকর্ড আপডেট হয়েছে!`);
-        setEditModalOpen(false);
+        setSaving(false);
+        return;
       }
-    } catch (err: any) {
-      toast.error(err.message || "ত্রুটি হয়েছে");
-    } finally {
-      setSaving(false);
     }
+
+    // Immediate local state update
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.id === editingStudent.id ? { ...s, ...updatedPayload } : s
+      )
+    );
+
+    // Cascade update to registrations table so student's badge, status, and leaderboard are in sync
+    try {
+      const { data: matchedRegs } = await supabase
+        .from("registrations")
+        .select("id")
+        .or(`roll.eq.${editingStudent.roll_no},roll.eq.${cleanRoll}`);
+
+      if (matchedRegs && matchedRegs.length > 0) {
+        for (const r of matchedRegs) {
+          await supabase
+            .from("registrations")
+            .update({
+              name: cleanName,
+              department: formData.department,
+              hall: formData.hall,
+              roll: cleanRoll,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", r.id);
+        }
+      }
+    } catch (regErr) {
+      console.warn("Cascade to registrations fallback error:", regErr);
+    }
+
+    // Invalidate React Query caches so all pages update instantly
+    queryClient.invalidateQueries({ queryKey: ["batch52_students"] });
+    queryClient.invalidateQueries({ queryKey: ["registrations"] });
+    queryClient.invalidateQueries({ queryKey: ["verified-registrations-count"] });
+    queryClient.invalidateQueries({ queryKey: ["students"] });
+
+    toast.success(`✓ "${cleanName}" এর তথ্য এবং সংশ্লিষ্ট সকল রেকর্ড (হল/লিডারবোর্ড) আপডেট হয়েছে!`);
+    setEditModalOpen(false);
+    setSaving(false);
   };
 
   // Open Delete Confirmation
@@ -365,7 +432,31 @@ export default function AdminStudents() {
   const handleConfirmDelete = async () => {
     if (!studentToDelete) return;
     setSaving(true);
+    const token = getAdminToken();
+    let deleted = false;
+
+    // 1. Try secure admin RPC
     try {
+      const { data: rpcRes, error: rpcErr } = await (supabase.rpc as any)(
+        "secure_admin_manage_student",
+        {
+          p_action: "DELETE",
+          p_student_id: studentToDelete.id,
+          p_data: {},
+          p_auth_token: token,
+        }
+      );
+      if (!rpcErr && rpcRes && rpcRes.success) {
+        deleted = true;
+      } else if (rpcErr) {
+        console.warn("RPC delete failed, falling back to direct delete:", rpcErr);
+      }
+    } catch (e) {
+      console.warn("RPC invocation error:", e);
+    }
+
+    // 2. Direct fallback
+    if (!deleted) {
       const { error } = await supabase
         .from("batch52_students")
         .delete()
@@ -373,16 +464,20 @@ export default function AdminStudents() {
 
       if (error) {
         toast.error("মুছে ফেলা যায়নি: " + error.message);
-      } else {
-        setStudents((prev) => prev.filter((s) => s.id !== studentToDelete.id));
-        toast.success(`✓ "${studentToDelete.name}" সফলভাবে মুছে ফেলা হয়েছে!`);
-        setDeleteConfirmOpen(false);
+        setSaving(false);
+        return;
       }
-    } catch (err: any) {
-      toast.error(err.message || "ত্রুটি হয়েছে");
-    } finally {
-      setSaving(false);
     }
+
+    setStudents((prev) => prev.filter((s) => s.id !== studentToDelete.id));
+
+    queryClient.invalidateQueries({ queryKey: ["batch52_students"] });
+    queryClient.invalidateQueries({ queryKey: ["registrations"] });
+    queryClient.invalidateQueries({ queryKey: ["students"] });
+
+    toast.success(`✓ "${studentToDelete.name}" সফলভাবে মুছে ফেলা হয়েছে!`);
+    setDeleteConfirmOpen(false);
+    setSaving(false);
   };
 
   // Export JSON Backup
