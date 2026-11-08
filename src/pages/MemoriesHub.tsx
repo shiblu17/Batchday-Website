@@ -45,44 +45,264 @@ import { supabase } from "@/integrations/supabase/client";
 import confetti from "canvas-confetti";
 
 // ==========================================
-// 1. TRADITIONAL ALPONA BORDER PATTERN
+// 1. AUTHENTIC TERRACOTTA SIDE BORDERS
 // ==========================================
-const AlponaBorderPattern = ({ side }: { side: "left" | "right" }) => (
+const TerracottaSideBorder = ({ side }: { side: "left" | "right" }) => (
   <div
-    className={`absolute top-0 bottom-0 ${
+    className={`fixed top-0 bottom-0 ${
       side === "left" ? "left-0" : "right-0"
-    } w-4 sm:w-6 opacity-40 dark:opacity-20 pointer-events-none overflow-hidden select-none z-10`}
+    } w-3.5 sm:w-5.5 opacity-90 dark:opacity-40 pointer-events-none select-none z-30 overflow-hidden`}
   >
     <svg className="w-full h-full" viewBox="0 0 24 600" preserveAspectRatio="none" fill="none">
       <defs>
-        <pattern id={`alpona-${side}`} width="24" height="40" patternUnits="userSpaceOnUse">
-          <path d="M0 0 L12 20 L0 40 Z" fill="#8B1538" opacity="0.65" />
-          <path d="M24 0 L12 20 L24 40 Z" fill="#8B1538" opacity="0.65" />
-          <polygon points="12,12 18,20 12,28 6,20" fill="#D97706" opacity="0.85" />
-          <circle cx="12" cy="20" r="2" fill="#ffffff" />
+        <pattern id={`terracotta-alpona-${side}`} width="24" height="48" patternUnits="userSpaceOnUse">
+          {side === "left" ? (
+            <>
+              {/* Solid base strip */}
+              <rect x="0" y="0" width="5" height="48" fill="#5E1609" />
+              {/* Terracotta arch scallops curving inward */}
+              <path d="M5 0 C16 0, 24 12, 24 24 C24 36, 16 48, 5 48 Z" fill="#99321D" />
+              <path d="M5 6 C14 6, 20 15, 20 24 C20 33, 14 42, 5 42 Z" fill="#BF472C" />
+              <path d="M5 12 C11 12, 15 18, 15 24 C15 30, 11 36, 5 36 Z" fill="#752011" />
+              {/* White floral accent dots */}
+              <circle cx="10" cy="24" r="2.2" fill="#FFFFFF" opacity="0.95" />
+              <circle cx="15" cy="14" r="1.3" fill="#FFEAE4" opacity="0.8" />
+              <circle cx="15" cy="34" r="1.3" fill="#FFEAE4" opacity="0.8" />
+            </>
+          ) : (
+            <>
+              {/* Right side mirrored */}
+              <rect x="19" y="0" width="5" height="48" fill="#5E1609" />
+              <path d="M19 0 C8 0, 0 12, 0 24 C0 36, 8 48, 19 48 Z" fill="#99321D" />
+              <path d="M19 6 C10 6, 4 15, 4 24 C4 33, 10 42, 19 42 Z" fill="#BF472C" />
+              <path d="M19 12 C13 12, 9 18, 9 24 C9 30, 13 36, 19 36 Z" fill="#752011" />
+              <circle cx="14" cy="24" r="2.2" fill="#FFFFFF" opacity="0.95" />
+              <circle cx="9" cy="14" r="1.3" fill="#FFEAE4" opacity="0.8" />
+              <circle cx="9" cy="34" r="1.3" fill="#FFEAE4" opacity="0.8" />
+            </>
+          )}
         </pattern>
       </defs>
-      <rect width="24" height="100%" fill={`url(#alpona-${side})`} />
+      <rect width="24" height="100%" fill={`url(#terracotta-alpona-${side})`} />
     </svg>
   </div>
 );
 
 // ==========================================
-// 2. 12 VORTA LIST (MATCHING USER'S IMAGE)
+// 1.1 CENTRAL MANDALA WATERMARK
+// ==========================================
+const CenterMandalaPattern = () => (
+  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-80 sm:h-80 pointer-events-none select-none text-[#C49A6C] opacity-35 dark:opacity-20 z-0">
+    <svg viewBox="0 0 300 300" className="w-full h-full" fill="none">
+      <circle cx="150" cy="150" r="140" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" />
+      <circle cx="150" cy="150" r="126" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="150" cy="150" r="112" stroke="currentColor" strokeWidth="1" strokeDasharray="2 4" />
+      <circle cx="150" cy="150" r="98" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="150" cy="150" r="74" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
+      
+      {/* 16 Radiating Lotus Petals */}
+      {[0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5].map((deg) => (
+        <g key={deg} transform={`rotate(${deg} 150 150)`}>
+          <path d="M150 20 C158 50, 165 70, 150 95 C135 70, 142 50, 150 20 Z" fill="currentColor" opacity="0.38" />
+          <circle cx="150" cy="15" r="3" fill="currentColor" opacity="0.7" />
+          <path d="M150 95 L150 118" stroke="currentColor" strokeWidth="1.2" />
+        </g>
+      ))}
+
+      {/* 16 Secondary Inner Petals */}
+      {[11.25, 33.75, 56.25, 78.75, 101.25, 123.75, 146.25, 168.75, 191.25, 213.75, 236.25, 258.75, 281.25, 303.75, 326.25, 348.75].map((deg) => (
+        <g key={deg} transform={`rotate(${deg} 150 150)`}>
+          <path d="M150 44 C155 64, 160 80, 150 95 C140 80, 145 64, 150 44 Z" fill="currentColor" opacity="0.22" />
+          <circle cx="150" cy="40" r="2" fill="currentColor" opacity="0.6" />
+        </g>
+      ))}
+    </svg>
+  </div>
+);
+
+// ==========================================
+// 1.2 12 HIGH-FIDELITY DISH ILLUSTRATION ICONS
+// ==========================================
+const KalijiraIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <ellipse cx="32" cy="52" rx="20" ry="5.5" fill="#262626" opacity="0.25" />
+    <path d="M16 52 C18 48, 46 48, 48 52 C45 55, 19 55, 16 52 Z" fill="#18181b" />
+    <circle cx="22" cy="50" r="2.2" fill="#27272a" />
+    <circle cx="28" cy="48" r="2.5" fill="#09090b" />
+    <circle cx="34" cy="49" r="2.8" fill="#18181b" />
+    <circle cx="40" cy="51" r="2.3" fill="#27272a" />
+    <circle cx="25" cy="52" r="2" fill="#3f3f46" />
+    <circle cx="38" cy="53" r="2" fill="#09090b" />
+    <circle cx="31" cy="53" r="2.4" fill="#18181b" />
+    <circle cx="19" cy="53" r="1.8" fill="#27272a" />
+    <circle cx="44" cy="52" r="1.8" fill="#3f3f46" />
+    <path d="M32 50 Q31 34 32 24" stroke="#4ade80" strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M32 30 C22 28, 14 18, 18 12 C24 12, 30 20, 32 28 Z" fill="#22c55e" />
+    <path d="M31 29 C25 24, 20 18, 20 15" stroke="#86efac" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M32 26 C42 24, 50 16, 46 10 C40 10, 34 18, 32 24 Z" fill="#16a34a" />
+    <path d="M33 25 C39 21, 44 16, 44 13" stroke="#86efac" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const ShutkiIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M10 32 C16 20, 44 22, 54 32 C44 42, 16 44, 10 32 Z" fill="#b4834b" />
+    <path d="M12 32 C17 22, 42 24, 52 32 C42 40, 17 42, 12 32 Z" fill="#cfa36b" />
+    <path d="M18 34 C26 38, 40 38, 48 32 C40 35, 26 35, 18 34 Z" fill="#e7c897" />
+    <path d="M30 22 C34 16, 40 18, 42 23 Z" fill="#966835" />
+    <path d="M28 42 C32 46, 38 45, 39 41 Z" fill="#966835" />
+    <path d="M12 32 L4 24 L7 32 L4 40 Z" fill="#966835" />
+    <path d="M44 26 C42 30, 42 34, 44 38" stroke="#785025" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="48" cy="29" r="2.2" fill="#3e2723" />
+    <circle cx="48.5" cy="28.5" r="0.7" fill="#ffffff" />
+    <path d="M22 28 L20 36 M28 27 L26 37 M34 27 L32 37 M40 28 L38 36" stroke="#966835" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+  </svg>
+);
+
+const ShorishaIlishIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <ellipse cx="32" cy="34" rx="20" ry="16" fill="#d97706" />
+    <ellipse cx="32" cy="32" rx="20" ry="15" fill="#f59e0b" />
+    <ellipse cx="32" cy="31" rx="18" ry="13" fill="#fbbf24" />
+    <ellipse cx="32" cy="31" rx="6" ry="4.5" fill="#92400e" />
+    <ellipse cx="32" cy="30" rx="4.5" ry="3.5" fill="#78350f" />
+    <path d="M18 30 C22 24, 42 24, 46 30 C40 34, 24 34, 18 30 Z" fill="#fde047" opacity="0.6" />
+    <circle cx="24" cy="28" r="1.5" fill="#b45309" />
+    <circle cx="38" cy="33" r="1.2" fill="#b45309" />
+    <circle cx="28" cy="34" r="1" fill="#b45309" />
+    <path d="M14 18 L15.5 22 L19.5 23.5 L15.5 25 L14 29 L12.5 25 L8.5 23.5 L12.5 22 Z" fill="#fbbf24" />
+    <path d="M48 14 L49 17 L52 18 L49 19 L48 22 L47 19 L44 18 L47 17 Z" fill="#fde047" />
+  </svg>
+);
+
+const TakiMachIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M12 32 C18 18, 44 20, 52 32 C44 44, 18 46, 12 32 Z" fill="#3b82f6" />
+    <path d="M14 32 C19 21, 42 22, 50 32 C42 42, 19 43, 14 32 Z" fill="#60a5fa" />
+    <path d="M26 21 C30 14, 38 16, 42 22 Z" fill="#fbbf24" />
+    <path d="M26 43 C30 48, 36 47, 38 42 Z" fill="#fbbf24" />
+    <path d="M14 32 L6 22 L9 32 L6 42 Z" fill="#fbbf24" />
+    <circle cx="44" cy="28" r="3" fill="#1e293b" />
+    <circle cx="45" cy="27" r="1" fill="#ffffff" />
+    <path d="M24 30 Q28 28 32 30 M28 35 Q32 33 36 35" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const DalVortaIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M12 28 C12 28, 14 48, 32 48 C50 48, 52 28, 52 28 Z" fill="#9a3412" />
+    <path d="M10 28 C10 26, 54 26, 54 28 C54 30, 10 30, 10 28 Z" fill="#c2410c" />
+    <ellipse cx="32" cy="28" rx="19" ry="6" fill="#f59e0b" />
+    <ellipse cx="32" cy="28" rx="16" ry="4.5" fill="#facc15" />
+    <circle cx="28" cy="27" r="1.8" fill="#15803d" />
+    <circle cx="31" cy="29" r="1.5" fill="#16a34a" />
+    <circle cx="35" cy="27" r="1.6" fill="#15803d" />
+    <path d="M30 26 Q34 27 38 26" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const AluVortaIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <ellipse cx="32" cy="34" rx="18" ry="16" fill="#ca8a04" />
+    <ellipse cx="32" cy="33" rx="17" ry="15" fill="#eab308" />
+    <ellipse cx="31" cy="31" rx="15" ry="13" fill="#fde047" />
+    <circle cx="26" cy="28" r="1.6" fill="#78350f" />
+    <circle cx="36" cy="30" r="1.8" fill="#78350f" />
+    <circle cx="30" cy="37" r="1.5" fill="#78350f" />
+    <circle cx="34" cy="24" r="1.3" fill="#15803d" />
+    <circle cx="24" cy="35" r="1.5" fill="#16a34a" />
+    <circle cx="38" cy="36" r="1.2" fill="#b91c1c" />
+    <path d="M28 32 Q31 34 33 31" stroke="#92400e" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const BegunPoraIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M46 14 C44 18, 40 22, 38 24 C40 26, 44 26, 46 25 Z" fill="#15803d" />
+    <path d="M48 10 C46 12, 46 14, 46 16" stroke="#166534" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M38 24 C44 28, 48 38, 40 48 C32 56, 18 52, 14 42 C10 32, 22 22, 38 24 Z" fill="#581c87" />
+    <path d="M36 26 C41 30, 44 38, 38 46 C31 53, 20 49, 16 41 C13 32, 23 24, 36 26 Z" fill="#6b21a8" />
+    <path d="M24 34 Q28 36 30 32" stroke="#1e1b4b" strokeWidth="2" strokeLinecap="round" />
+    <path d="M20 42 Q26 44 29 40" stroke="#1e1b4b" strokeWidth="2.2" strokeLinecap="round" />
+    <circle cx="34" cy="44" r="1.5" fill="#f59e0b" />
+  </svg>
+);
+
+const MorichPoraIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M48 18 Q38 28 22 46 C18 42, 24 28, 44 16 Z" fill="#dc2626" />
+    <path d="M48 18 C50 16, 52 14, 54 12" stroke="#15803d" strokeWidth="2" strokeLinecap="round" />
+    <path d="M18 20 Q28 32 46 46 C42 50, 28 42, 16 22 Z" fill="#16a34a" />
+    <path d="M18 20 C16 18, 14 16, 12 14" stroke="#166534" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="30" cy="34" r="1.8" fill="#450a0a" />
+    <circle cx="34" cy="38" r="1.5" fill="#052e16" />
+  </svg>
+);
+
+const ChinabadamIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M16 42 C12 36, 14 26, 22 24 C28 22, 28 28, 34 26 C40 24, 46 30, 44 38 C42 46, 34 46, 28 42 C24 40, 20 46, 16 42 Z" fill="#d97706" />
+    <path d="M18 41 C15 36, 16 28, 23 26 C28 24, 28 29, 34 28 C39 26, 44 31, 42 38 C40 44, 33 44, 28 41 C24 39, 21 44, 18 41 Z" fill="#f59e0b" />
+    <path d="M22 28 Q24 36 22 40 M32 30 Q34 36 32 42 M38 32 Q40 38 38 42" stroke="#b45309" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="2 3" />
+    <ellipse cx="46" cy="46" rx="7" ry="5" fill="#991b1b" />
+    <ellipse cx="46" cy="45" rx="5.5" ry="4" fill="#b91c1c" />
+  </svg>
+);
+
+const PepeVortaIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <ellipse cx="28" cy="30" rx="14" ry="18" fill="#65a30d" transform="rotate(-15 28 30)" />
+    <ellipse cx="27" cy="29" rx="12" ry="16" fill="#84cc16" transform="rotate(-15 27 29)" />
+    <ellipse cx="42" cy="38" rx="14" ry="18" fill="#15803d" transform="rotate(35 42 38)" />
+    <ellipse cx="42" cy="38" rx="12" ry="16" fill="#ea580c" transform="rotate(35 42 38)" />
+    <ellipse cx="42" cy="38" rx="9" ry="13" fill="#f97316" transform="rotate(35 42 38)" />
+    <ellipse cx="42" cy="38" rx="5" ry="9" fill="#fed7aa" transform="rotate(35 42 38)" />
+    <circle cx="41" cy="35" r="1.3" fill="#18181b" />
+    <circle cx="43" cy="38" r="1.3" fill="#18181b" />
+    <circle cx="42" cy="41" r="1.3" fill="#18181b" />
+    <circle cx="40" cy="38" r="1.1" fill="#27272a" />
+  </svg>
+);
+
+const BorbotiIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <path d="M14 48 C16 32, 28 18, 48 16" stroke="#15803d" strokeWidth="4" strokeLinecap="round" />
+    <path d="M18 52 C20 36, 32 22, 52 20" stroke="#16a34a" strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M12 44 C16 28, 30 16, 46 14" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" />
+    <circle cx="28" cy="30" r="2" fill="#14532d" />
+    <circle cx="38" cy="22" r="2" fill="#14532d" />
+  </svg>
+);
+
+const DimVortaIcon = () => (
+  <svg className="w-10 h-10 sm:w-11 sm:h-11 shrink-0" viewBox="0 0 64 64" fill="none">
+    <ellipse cx="32" cy="34" rx="19" ry="15" fill="#f1f5f9" />
+    <ellipse cx="32" cy="33" rx="18" ry="14" fill="#ffffff" />
+    <ellipse cx="32" cy="33" rx="10" ry="8" fill="#f59e0b" />
+    <ellipse cx="32" cy="32" rx="9" ry="7" fill="#fbbf24" />
+    <circle cx="29" cy="30" r="1.2" fill="#15803d" />
+    <circle cx="34" cy="33" r="1.4" fill="#991b1b" />
+    <circle cx="31" cy="35" r="1.1" fill="#78350f" />
+    <path d="M28 32 Q32 31 35 34" stroke="#d97706" strokeWidth="1" strokeLinecap="round" />
+  </svg>
+);
+
+// ==========================================
+// 2. 12 VORTA LIST (LINKED TO CUSTOM ILLUSTRATIONS)
 // ==========================================
 const VORTA_LIST = [
-  { name: "কালিজিরা ভর্তা", icon: "🌱", color: "#18181b" },
-  { name: "শুঁটকি ভর্তা", icon: "🐟", color: "#b91c1c" },
-  { name: "সরিষা ইলিশ ভর্তা", icon: "✨", color: "#ca8a04" },
-  { name: "টাকি মাছ ভর্তা", icon: "🐠", color: "#047857" },
-  { name: "ডাল ভর্তা", icon: "🥣", color: "#ea580c" },
-  { name: "আলু ভর্তা", icon: "🥔", color: "#d97706" },
-  { name: "বেগুন পোড়া ভর্তা", icon: "🍆", color: "#6b21a8" },
-  { name: "মরিচ পোড়া ভর্তা", icon: "🌶️", color: "#dc2626" },
-  { name: "চীনাবাদাম ভর্তা", icon: "🥜", color: "#9a3412" },
-  { name: "পেঁপের ভর্তা", icon: "🍈", color: "#16a34a" },
-  { name: "বরবটি ভর্তা", icon: "🥬", color: "#059669" },
-  { name: "ডিম ভর্তা", icon: "🥚", color: "#c2410c" },
+  { name: "কালিজিরা ভর্তা", icon: KalijiraIcon },
+  { name: "শুঁটকি ভর্তা", icon: ShutkiIcon },
+  { name: "সরিষা ইলিশ ভর্তা", icon: ShorishaIlishIcon },
+  { name: "টাকি মাছ ভর্তা", icon: TakiMachIcon },
+  { name: "ডাল ভর্তা", icon: DalVortaIcon },
+  { name: "আলু ভর্তা", icon: AluVortaIcon },
+  { name: "বেগুন পোড়া ভর্তা", icon: BegunPoraIcon },
+  { name: "মরিচ পোড়া ভর্তা", icon: MorichPoraIcon },
+  { name: "চীনাবাদাম ভর্তা", icon: ChinabadamIcon },
+  { name: "পেঁপের ভর্তা", icon: PepeVortaIcon },
+  { name: "বরবটি ভর্তা", icon: BorbotiIcon },
+  { name: "ডিম ভর্তা", icon: DimVortaIcon },
 ];
 
 // ==========================================
@@ -769,111 +989,92 @@ export default function MemoriesHub() {
   const completedBucketCount = Object.values(userCheckedBuckets).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-3 md:pt-6 transition-colors select-none font-body relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-2 md:pt-4 transition-colors select-none font-body relative overflow-x-hidden">
       
-      {/* TRADITIONAL BENGALI ALPONA BORDERS ON SIDES (MATCHING USER SCREENSHOT) */}
-      <AlponaBorderPattern side="left" />
-      <AlponaBorderPattern side="right" />
+      {/* AUTHENTIC BENGALI TERRACOTTA ALPONA BORDERS ON SIDES (MATCHING USER SCREENSHOT) */}
+      <TerracottaSideBorder side="left" />
+      <TerracottaSideBorder side="right" />
 
-      {/* MANDALA WATERMARK ACCENTS IN CORNERS */}
-      <div className="absolute top-0 right-0 w-56 h-56 opacity-[0.06] pointer-events-none select-none text-[#8B1538]">
-        <svg viewBox="0 0 200 200" fill="currentColor">
-          <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
-          <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="3" />
-          <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3" />
-          <circle cx="100" cy="100" r="30" fill="none" stroke="currentColor" strokeWidth="4" />
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
-            <path key={deg} d="M100 15 C108 35, 108 45, 100 55 C92 45, 92 35, 100 15 Z" transform={`rotate(${deg} 100 100)`} />
-          ))}
-        </svg>
+      {/* SUBTLE CORNER TRADITIONAL ACCENTS */}
+      <div className="absolute top-2 right-4 sm:right-8 opacity-25 text-amber-700 pointer-events-none select-none text-base">
+        ❖ ❖
+      </div>
+      <div className="absolute top-2 left-4 sm:left-8 opacity-25 text-amber-700 pointer-events-none select-none text-base">
+        ❖ ❖
       </div>
 
-      <div className="absolute top-0 left-0 w-56 h-56 opacity-[0.06] pointer-events-none select-none text-[#8B1538]">
-        <svg viewBox="0 0 200 200" fill="currentColor">
-          <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
-          <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="3" />
-          <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3" />
-          <circle cx="100" cy="100" r="30" fill="none" stroke="currentColor" strokeWidth="4" />
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
-            <path key={deg} d="M100 15 C108 35, 108 45, 100 55 C92 45, 92 35, 100 15 Z" transform={`rotate(${deg} 100 100)`} />
-          ))}
-        </svg>
-      </div>
-
-      {/* ===== TAB SELECTOR TABS (SUBTLE TRADITIONAL PILLS) ===== */}
-      <div className="container max-w-4xl mx-auto px-6 sm:px-10 mb-6 relative z-20">
-        <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-2">
-          {[
-            { id: "bottola", label: "বটতলা খাদ্য বিলাস", icon: Utensils, badge: "ভর্তা মিটার" },
-            { id: "audio", label: "রেট্রো ক্যাসেট ও চিরকুট", icon: Disc, badge: "কণ্ঠস্বর" },
-            { id: "bucket", label: "স্মৃতির বাকেট ডায়েরি", icon: Pin, badge: "চেকলিস্ট" },
-            { id: "yearbook", label: "ইয়ারবুক হল অব ফেম", icon: Trophy, badge: "লিজেন্ডস" },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`relative flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer shadow-xs ${
-                  isActive
-                    ? "bg-[#8B1538] text-white shadow-md ring-2 ring-[#8B1538]/30 scale-102"
-                    : "bg-[#F3ECE2] dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-[#E8DDD0]"
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-300" : ""}`} />
-                <span className="font-display">{tab.label}</span>
-                <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isActive ? "bg-amber-400 text-stone-950" : "bg-black/10 dark:bg-white/10 text-current"
+      {/* ===== MINI SEGMENTED TAB SWITCHER ===== */}
+      <div className="container max-w-xl mx-auto px-4 mb-3 relative z-20">
+        <div className="flex items-center justify-center overflow-x-auto no-scrollbar py-1">
+          <div className="inline-flex items-center bg-[#EDE4D8] dark:bg-stone-800/90 p-1 rounded-xl shadow-xs gap-1 border border-stone-200/60 dark:border-stone-700">
+            {[
+              { id: "bottola", label: "বটতলা খাদ্য বিলাস", icon: Utensils },
+              { id: "audio", label: "রেট্রো ক্যাসেট", icon: Disc },
+              { id: "bucket", label: "বাকেট ডায়েরি", icon: Pin },
+              { id: "yearbook", label: "হল অব ফেম", icon: Trophy },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    isActive
+                      ? "bg-[#701222] text-white shadow-xs"
+                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-black/5"
                   }`}
                 >
-                  {tab.badge}
-                </span>
-              </button>
-            );
-          })}
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-300" : ""}`} />
+                  <span className="font-display">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* ===== MAIN CONTENT CONTAINER ===== */}
-      <div className="container max-w-3xl mx-auto px-6 sm:px-10 relative z-20">
+      <div className="container max-w-lg mx-auto px-5 sm:px-6 relative z-20">
         
         {/* ========================================================
-            TAB 1: BOTTOLA VORTA & HERITAGE (PIXEL-PERFECT AS USER SCREENSHOT)
+            TAB 1: BOTTOLA VORTA & HERITAGE (EXACT REPLICA OF USER SCREENSHOT)
            ======================================================== */}
         {activeTab === "bottola" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
             
             {/* 1.1 TOP SECTION (EXACT REPLICA OF USER UPLOADED SCREENSHOT) */}
-            <div className="text-center pt-2">
+            <div className="text-center pt-1">
               
               {/* Curved Maroon Tag */}
-              <div className="inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#8B1538] text-white text-xs sm:text-sm font-bold shadow-sm tracking-wide">
+              <div className="inline-flex items-center justify-center px-4 sm:px-5 py-1.5 rounded-full bg-[#701222] text-white text-xs sm:text-sm font-bold shadow-sm tracking-wide border border-amber-500/30">
                 <span>জাহাঙ্গীরনগর বিশ্ববিদ্যালয় • বটতলা বাঙালির ঐতিহ্য</span>
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-3xl sm:text-5xl font-black font-display text-[#8B1538] dark:text-[#f87171] flex items-center justify-center gap-2 mt-3 tracking-tight">
+              <h1 className="text-2xl sm:text-4xl font-black font-display text-[#701222] dark:text-[#f87171] flex items-center justify-center gap-2 mt-2.5 tracking-tight">
                 <span>{vortaTitle}</span>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400 mt-2 max-w-md mx-auto leading-relaxed">
-                ১২টি পদের মধ্যে আপনি <strong className="text-stone-900 dark:text-stone-100 font-bold">{vortaCount}টি ট্রাই করেছেন</strong> (অফিসিয়াল স্ট্যাটাস: <span className="text-[#8B1538] dark:text-amber-400 font-bold">{certificateRank}</span>)
+              <p className="text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-300 mt-1 max-w-md mx-auto leading-relaxed">
+                ৫২টি ক্রাফটিং করার জন্য আপনি <strong className="text-stone-900 dark:text-stone-100 font-bold">{vortaCount}টি ট্রাই করেছেন</strong> (অফিসিয়াল চ্যাটও! যারা ট্রাই করেননি!)
               </p>
 
-              {/* Glowing Concentric Circular Badge */}
-              <div className="relative my-7 flex items-center justify-center">
-                {/* Outer Golden Glow */}
-                <div className="absolute w-36 h-36 rounded-full bg-amber-400/30 blur-2xl pointer-events-none" />
+              {/* Glowing Concentric Circular Badge with Central Mandala Watermark */}
+              <div className="relative my-7 sm:my-8 flex items-center justify-center">
+                {/* Radial Mandala Ornament behind badge */}
+                <CenterMandalaPattern />
 
-                {/* Outer Golden Halo Border */}
-                <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-500 shadow-xl flex items-center justify-center">
+                {/* Outer Golden Glow */}
+                <div className="absolute w-36 h-36 rounded-full bg-amber-400/35 blur-2xl pointer-events-none z-10" />
+
+                {/* Golden Gradient Ring */}
+                <div className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-300 to-amber-500 shadow-xl flex items-center justify-center">
                   
                   {/* Deep Maroon Circle */}
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-[#800020] via-[#650019] to-[#38010f] flex flex-col items-center justify-center text-white border-2 border-amber-300/50 shadow-inner">
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-[#800020] via-[#650019] to-[#3b0110] flex flex-col items-center justify-center text-white border-2 border-amber-300/40 shadow-inner">
                     <span className="text-3xl sm:text-4xl font-black font-display tracking-tight text-white leading-none">
                       {vortaCount}/12
                     </span>
@@ -884,43 +1085,47 @@ export default function MemoriesHub() {
                 </div>
               </div>
 
+              {/* Dotted Divider Line (Matching User Screenshot) */}
+              <div className="w-full border-b border-dotted border-[#D5C7B8] dark:border-stone-700 my-4" />
+
               {/* Subheader Tan Bar with Score Pill */}
-              <div className="rounded-2xl bg-[#EDE4D8] dark:bg-stone-800/80 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs mb-5">
-                <span className="text-xs sm:text-sm font-bold text-stone-800 dark:text-stone-200 font-display">
+              <div className="rounded-xl sm:rounded-2xl bg-[#E8DFD3] dark:bg-stone-800/80 px-4 sm:px-5 py-2.5 flex items-center justify-between shadow-xs mb-4">
+                <span className="text-xs sm:text-sm font-bold text-[#3B2C22] dark:text-stone-200 font-display">
                   ভর্তার নাম (ক্লিক করে "টেস্টেড" করতে স্ট্যাম্প দিন):
                 </span>
-                <span className="bg-[#EA6825] text-white text-xs font-black px-3 py-1 rounded-full shadow-xs">
+                <span className="bg-[#EA6825] text-white text-xs font-black px-3.5 py-1 rounded-full shadow-xs tracking-wide">
                   স্কোর: {Math.round((vortaCount / 12) * 100)}%
                 </span>
               </div>
             </div>
 
-            {/* 1.2 2-COLUMN VORTA GRID (EXACT SAME AS USER IMAGE) */}
-            <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
+            {/* 1.2 2-COLUMN VORTA GRID (EXACT REPLICA OF USER IMAGE) */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-3.5">
               {VORTA_LIST.map((vorta) => {
                 const isChecked = checkedVortas.includes(vorta.name);
+                const IconComponent = vorta.icon;
                 return (
                   <button
                     key={vorta.name}
                     type="button"
                     onClick={() => toggleVorta(vorta.name)}
-                    className={`relative p-4 rounded-2xl border transition-all text-left flex flex-col justify-between min-h-[116px] sm:min-h-[126px] cursor-pointer shadow-sm hover:shadow-md ${
+                    className={`relative p-3.5 sm:p-4 rounded-2xl border transition-all text-left flex flex-col justify-between min-h-[114px] sm:min-h-[124px] cursor-pointer shadow-[0_4px_14px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-md ${
                       isChecked
-                        ? "bg-[#FFF9F3] dark:bg-[#201d1a] border-red-500/80 scale-[1.02]"
-                        : "bg-white dark:bg-[#1a1b22] border-stone-200/90 dark:border-stone-800 hover:border-amber-400"
+                        ? "bg-[#FFFDFB] dark:bg-[#1f1d1b] border-red-500/60 scale-[1.01]"
+                        : "bg-white dark:bg-[#1a1b22] border-stone-100 dark:border-stone-800 hover:border-amber-300"
                     }`}
                   >
-                    {/* Top Row: Food Icon & Circular Check Ring */}
+                    {/* Top Row: Food Icon & Circular Check Indicator */}
                     <div className="flex items-start justify-between w-full">
-                      <div className="text-3xl sm:text-4xl">
-                        {vorta.icon}
+                      <div className="flex items-center justify-center">
+                        <IconComponent />
                       </div>
 
                       {/* Clean Circular Checkbox Indicator */}
                       <div
-                        className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${
+                        className={`w-6.5 h-6.5 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${
                           isChecked
-                            ? "border-[#8B1538] bg-[#8B1538] text-white shadow-xs"
+                            ? "border-[#701222] bg-[#701222] text-white shadow-xs"
                             : "border-stone-300 dark:border-stone-600 bg-transparent"
                         }`}
                       >
@@ -929,16 +1134,16 @@ export default function MemoriesHub() {
                     </div>
 
                     {/* Bottom Row: Food Name */}
-                    <div className="mt-3">
-                      <span className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 font-display block leading-tight">
+                    <div className="mt-2.5">
+                      <span className="text-xs sm:text-sm font-bold text-[#42141F] dark:text-stone-100 font-display block leading-tight">
                         {vorta.name}
                       </span>
                     </div>
 
                     {/* Distressed Red Rubber Stamp Overlay when Checked */}
                     {isChecked && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-red-600/5 backdrop-blur-[0.5px] rounded-2xl">
-                        <div className="border-3 border-red-600 dark:border-red-500 text-red-600 dark:text-red-500 font-black text-xs sm:text-sm px-3 py-1 rounded-md tracking-widest uppercase transform rotate-[-12deg] shadow-md animate-in zoom-in-75 duration-150 bg-white/95 dark:bg-stone-900/95">
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none rounded-2xl bg-red-600/[0.03]">
+                        <div className="border-2 border-red-600 text-red-600 dark:text-red-500 font-black text-[11px] sm:text-xs px-2.5 py-0.5 rounded tracking-widest uppercase transform -rotate-12 shadow-xs bg-white/95 dark:bg-stone-900/95 animate-in zoom-in-90 duration-150">
                           টেস্টেড! ✓
                         </div>
                       </div>
