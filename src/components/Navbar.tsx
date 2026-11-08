@@ -50,7 +50,7 @@ export default function Navbar() {
       {/* Floating Capsule Island Header */}
       <header
         className={`sticky top-2.5 sm:top-3.5 z-50 px-3 sm:px-6 pointer-events-none transition-all ${
-          isHome ? "-mb-14 sm:-mb-16" : ""
+          isHome ? "hidden md:block -mb-14 sm:-mb-16" : ""
         }`}
       >
         <div 
