@@ -129,12 +129,15 @@ export default function MobileBottomNav() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
 
   useEffect(() => {
     // Check if running in standalone mode (already installed)
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone;
+      (window.navigator as any).standalone ||
+      Boolean((window as any).__pwaInstalled);
     setIsStandalone(Boolean(isRunningStandalone));
 
     // Check if iOS device
@@ -142,21 +145,50 @@ export default function MobileBottomNav() {
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isIosDevice);
 
-    // Listen for PWA install prompt
+    // Detect if inside in-app browser (Facebook, Messenger, Instagram)
+    const inApp =
+      userAgent.includes("fban") ||
+      userAgent.includes("fbav") ||
+      userAgent.includes("instagram") ||
+      userAgent.includes("messenger") ||
+      userAgent.includes("fb_iab");
+    setIsInAppBrowser(inApp);
+
+    // 1. Check if early prompt was already captured by index.html
+    if ((window as any).__deferredPwaPrompt) {
+      setDeferredPrompt((window as any).__deferredPwaPrompt);
+    }
+
+    // 2. Listen for custom event when early prompt is ready
+    const handlePromptReady = () => {
+      if ((window as any).__deferredPwaPrompt) {
+        setDeferredPrompt((window as any).__deferredPwaPrompt);
+      }
+    };
+    window.addEventListener("pwa-prompt-ready", handlePromptReady);
+
+    // 3. Listen for PWA install prompt in case it fires later
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
+      (window as any).__deferredPwaPrompt = e;
       setDeferredPrompt(e);
     };
-
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
+      window.removeEventListener("pwa-prompt-ready", handlePromptReady);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (isStandalone) {
+    // Check if running in standalone mode (already installed)
+    const isRunningStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone ||
+      Boolean((window as any).__pwaInstalled);
+
+    if (isRunningStandalone) {
       toast({
         title: "ইতিমধ্যে ইনস্টল করা আছে! ✨",
         description: "JU 52 অ্যাপটি আপনার ফোনে সক্রিয়ভাবে ইনস্টল রয়েছে।",
@@ -164,31 +196,40 @@ export default function MobileBottomNav() {
       return;
     }
 
+    // iOS users guide
     if (isIOS) {
       setShowIOSModal(true);
       return;
     }
 
-    if (deferredPrompt) {
+    // In-app browsers (Facebook, Messenger) block native install prompt
+    if (isInAppBrowser) {
+      setShowGuideModal(true);
+      return;
+    }
+
+    const promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
+
+    if (promptEvent) {
       try {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+        await promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
         if (outcome === "accepted") {
           toast({
             title: "ইনস্টল সম্পন্ন হচ্ছে! 🎉",
             description: "JU 52 অ্যাপটি আপনার হোমস্ক্রিনে যুক্ত হয়ে গেছে।",
           });
           setDeferredPrompt(null);
+          (window as any).__deferredPwaPrompt = null;
+          (window as any).__pwaInstalled = true;
           setIsOpen(false);
         }
       } catch (err) {
         console.error("Install prompt error:", err);
+        setShowGuideModal(true);
       }
     } else {
-      toast({
-        title: "অ্যাপ ইনস্টল করতে:",
-        description: "ব্রাউজারের ৩-ডট (⋮) মেনু থেকে 'Install App' বা 'Add to Home screen' এ চাপুন।",
-      });
+      setShowGuideModal(true);
     }
   };
 
@@ -504,6 +545,70 @@ export default function MobileBottomNav() {
 
             <button
               onClick={() => setShowIOSModal(false)}
+              className="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-xs cursor-pointer hover:bg-primary/90 transition-all shadow-md"
+            >
+              বুঝেছি ✓
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Android / In-App Browser Guide Modal */}
+      {showGuideModal && (
+        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in select-none">
+          <div className="bg-card dark:bg-[#1a1c24] border border-border/80 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative">
+            <button
+              onClick={() => setShowGuideModal(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 text-amber-500 mx-auto flex items-center justify-center mb-3">
+              <Smartphone className="w-7 h-7" />
+            </div>
+
+            <h3 className="font-display font-bold text-lg text-foreground mb-1">
+              {isInAppBrowser ? "ক্রোম ব্রাউজারে খুলুন" : "অ্যাপ ইনস্টল করুন"}
+            </h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              {isInAppBrowser
+                ? "ফেসবুক/মেসেঞ্জারের ভেতরে সরাসরি ইনস্টল ব্লক থাকে"
+                : "সহজেই হোমস্ক্রিনে JU 52 অ্যাপ যুক্ত করুন"}
+            </p>
+
+            <div className="space-y-3 text-left bg-muted/60 rounded-2xl p-4 text-xs font-medium text-foreground mb-4">
+              {isInAppBrowser ? (
+                <>
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">১</span>
+                    <span>উপরে ডানদিকের <strong>৩-ডট (⋮)</strong> মেনুতে চাপ দিন</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
+                    <span><strong>"Open in Chrome"</strong> বা <strong>"External Browser"</strong> এ ট্যাপ করুন</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">৩</span>
+                    <span>এরপর এই ইনস্টল বাটনে চাপলেই ইনস্টল হয়ে যাবে!</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">১</span>
+                    <span>ব্রাউজারের ডানদিকের <strong>৩-ডট (⋮)</strong> মেনুতে চাপ দিন</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
+                    <span><strong>"Install App"</strong> বা <strong>"Add to Home screen"</strong> এ চাপুন</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowGuideModal(false)}
               className="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-xs cursor-pointer hover:bg-primary/90 transition-all shadow-md"
             >
               বুঝেছি ✓
