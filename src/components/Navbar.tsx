@@ -15,6 +15,8 @@ import {
   Video,
   Shirt,
   GraduationCap,
+  Smartphone,
+  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -182,8 +184,26 @@ export default function Navbar() {
             </Link>
           </nav>
 
-          {/* Register Pill Button (Right) */}
+          {/* Action Buttons (Right) */}
           <div className="relative z-10 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  if ((window as any).__triggerPwaInstall) {
+                    (window as any).__triggerPwaInstall();
+                  } else {
+                    window.dispatchEvent(new CustomEvent("trigger-pwa-install"));
+                  }
+                }
+              }}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white/15 hover:bg-white/25 text-white font-display font-bold text-xs shadow-md border border-white/25 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+              title="JU 52 অ্যাপ ইনস্টল করুন"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-amber-300" />
+              <span>অ্যাপ ইনস্টল</span>
+            </button>
+
             <Link
               to="/register"
               className="px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-display font-bold text-xs sm:text-sm shadow-lg shadow-amber-400/30 ring-1 ring-white/30 transition-all active:scale-95 hover:scale-105 shrink-0 flex items-center gap-1.5"

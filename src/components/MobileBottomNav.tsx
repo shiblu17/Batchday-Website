@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -131,6 +131,7 @@ export default function MobileBottomNav() {
   const [showIOSModal, setShowIOSModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);
+  const [isFloatingDismissed, setIsFloatingDismissed] = useState(false);
 
   useEffect(() => {
     // Check if running in standalone mode (already installed)
@@ -175,13 +176,22 @@ export default function MobileBottomNav() {
     };
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
+    const handleAppInstalled = () => {
+      setIsStandalone(true);
+      (window as any).__pwaInstalled = true;
+      (window as any).__deferredPwaPrompt = null;
+      setDeferredPrompt(null);
+    };
+    window.addEventListener("appinstalled", handleAppInstalled);
+
     return () => {
       window.removeEventListener("pwa-prompt-ready", handlePromptReady);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = useCallback(async () => {
     // Check if running in standalone mode (already installed)
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -222,6 +232,7 @@ export default function MobileBottomNav() {
           setDeferredPrompt(null);
           (window as any).__deferredPwaPrompt = null;
           (window as any).__pwaInstalled = true;
+          setIsStandalone(true);
           setIsOpen(false);
         }
       } catch (err) {
@@ -231,7 +242,21 @@ export default function MobileBottomNav() {
     } else {
       setShowGuideModal(true);
     }
-  };
+  }, [deferredPrompt, isIOS, isInAppBrowser]);
+
+  // Expose global trigger for PWA install so any button across the app can trigger it
+  useEffect(() => {
+    const handleTrigger = () => {
+      handleInstallClick();
+    };
+    window.addEventListener("trigger-pwa-install", handleTrigger);
+    (window as any).__triggerPwaInstall = handleInstallClick;
+
+    return () => {
+      window.removeEventListener("trigger-pwa-install", handleTrigger);
+      delete (window as any).__triggerPwaInstall;
+    };
+  }, [handleInstallClick]);
 
   // Close radial menu automatically on route change
   useEffect(() => {
@@ -383,6 +408,45 @@ export default function MobileBottomNav() {
           </motion.button>
         </div>
       </nav>
+
+      {/* ===== DIRECT FLOATING QUICK-INSTALL PILL (MOBILE) ===== */}
+      {!isStandalone && !isFloatingDismissed && !isOpen && (
+        <motion.div
+          initial={{ y: 20, opacity: 0, scale: 0.95 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 20, opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="md:hidden fixed z-40 left-1/2 -translate-x-1/2 pointer-events-auto select-none"
+          style={{
+            bottom: "calc(82px + env(safe-area-inset-bottom, 0px))",
+          }}
+        >
+          <div className="flex items-center gap-2 pl-3.5 pr-2 py-1.5 rounded-full bg-stone-950/95 dark:bg-stone-950/95 backdrop-blur-xl text-white shadow-2xl shadow-black/70 border border-amber-400/70 ring-1 ring-white/10 text-xs font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+            </span>
+            <button
+              type="button"
+              onClick={handleInstallClick}
+              className="font-display font-extrabold text-amber-300 hover:text-amber-200 active:scale-95 transition-transform flex items-center gap-1.5 cursor-pointer"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+              <span>JU 52 অ্যাপ ইনস্টল করুন</span>
+              <Download className="w-3 h-3 text-amber-400" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsFloatingDismissed(true)}
+              className="text-white/60 hover:text-white p-1 rounded-full cursor-pointer ml-0.5 transition-colors"
+              aria-label="বিজ্ঞপ্তি বন্ধ করুন"
+              title="বন্ধ করুন"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* ===== RADIAL OVERLAY MENU ===== */}
       {isOpen && (

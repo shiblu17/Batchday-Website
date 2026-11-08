@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, CalendarDays, MapPin, ShieldCheck,
   Settings, Clock, ChevronRight, Music, Laptop, ArrowRight, Sparkles, Share2, Loader2,
-  Heart, Phone
+  Heart, Phone, Smartphone, Download
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
@@ -166,25 +166,46 @@ export default function Index() {
             </motion.div>
 
             {/* CTA */}
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-              {s.registration_open ?
-              <Link
-                to="/register"
-                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md">
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center items-center pt-4">
+              {s.registration_open ? (
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-display font-bold text-base transition-all hover:scale-105 hover:shadow-lg active:scale-[0.98] shadow-md"
+                >
                   Register Now
                   <ArrowRight className="h-5 w-5" />
-                </Link> :
-
-              <span className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-white/20 text-white/80 font-display font-bold text-base cursor-not-allowed">
+                </Link>
+              ) : (
+                <span className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl bg-white/20 text-white/80 font-display font-bold text-base cursor-not-allowed">
                   রেজিস্ট্রেশন বন্ধ
                 </span>
-              }
+              )}
+
               <Link
                 to="/status"
-                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl border-2 border-primary-foreground/20 text-primary-foreground font-display font-semibold text-base hover:bg-primary-foreground/10 active:scale-[0.98] transition-all">
-                
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 rounded-xl border-2 border-primary-foreground/20 text-primary-foreground font-display font-semibold text-base hover:bg-primary-foreground/10 active:scale-[0.98] transition-all"
+              >
                 Check Status
               </Link>
+
+              {/* DIRECT PWA INSTALL BUTTON */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    if ((window as any).__triggerPwaInstall) {
+                      (window as any).__triggerPwaInstall();
+                    } else {
+                      window.dispatchEvent(new CustomEvent("trigger-pwa-install"));
+                    }
+                  }
+                }}
+                className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-display font-extrabold text-base shadow-lg shadow-amber-400/25 border border-white/40 transition-all hover:scale-105 active:scale-[0.98] cursor-pointer"
+              >
+                <Smartphone className="h-5 w-5 text-stone-950" />
+                <span>JU 52 অ্যাপ ইনস্টল করুন</span>
+                <Download className="h-4 w-4 text-stone-950" />
+              </button>
             </motion.div>
           </motion.div>
         </div>
