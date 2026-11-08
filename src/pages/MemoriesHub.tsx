@@ -1000,20 +1000,20 @@ export default function MemoriesHub() {
   const completedBucketCount = Object.values(userCheckedBuckets).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-4 sm:pt-6 transition-colors select-none font-body relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-2 sm:pt-4 transition-colors select-none font-body relative overflow-x-hidden">
       
       {/* AUTHENTIC BENGALI TERRACOTTA ALPONA BORDERS ON SIDES (MATCHING USER SCREENSHOT) */}
       <TerracottaSideBorder side="left" />
       <TerracottaSideBorder side="right" />
 
-      {/* FLOATING BOTTOM NAV DOCK (DISCREET, MOBILE-FRIENDLY, ZERO CLUTTER AT TOP) */}
-      <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[94vw]">
-        <div className="flex items-center bg-[#FAF6F0]/95 dark:bg-[#1a1b22]/95 backdrop-blur-md px-2 py-1.5 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.14)] border border-[#E2D6C6] dark:border-stone-700 gap-1">
+      {/* ===== 1. TOP TAB SWITCHER (4-COLUMN EQUAL GRID, 100% FITTED ON MOBILE, NO HORIZONTAL SCROLL) ===== */}
+      <div className="container max-w-sm sm:max-w-md mx-auto px-4 mb-4 sm:mb-6 relative z-20">
+        <div className="grid grid-cols-4 bg-[#EDE3D5] dark:bg-stone-800/95 p-1 rounded-2xl shadow-xs border border-[#DFD3C1] dark:border-stone-700 gap-1">
           {[
             { id: "bottola", label: "বটতলা", icon: Utensils },
             { id: "audio", label: "ক্যাসেট", icon: Disc },
-            { id: "bucket", label: "বাকেট লিস্ট", icon: Pin },
-            { id: "yearbook", label: "হল অব ফেম", icon: Trophy },
+            { id: "bucket", label: "বাকেট", icon: Pin },
+            { id: "yearbook", label: "ইয়ারবুক", icon: Trophy },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1021,18 +1021,15 @@ export default function MemoriesHub() {
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => {
-                  setActiveTab(tab.id as any);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-1.5 sm:py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center ${
                   isActive
-                    ? "bg-[#701222] text-white shadow-sm ring-1 ring-amber-400/40"
+                    ? "bg-[#701222] text-white shadow-xs ring-1 ring-amber-400/40"
                     : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-black/5"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-300" : ""}`} />
-                <span className="font-display">{tab.label}</span>
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-amber-300" : "text-stone-500"}`} />
+                <span className="font-display leading-tight">{tab.label}</span>
               </button>
             );
           })}
