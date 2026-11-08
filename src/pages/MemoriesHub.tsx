@@ -45,7 +45,48 @@ import { supabase } from "@/integrations/supabase/client";
 import confetti from "canvas-confetti";
 
 // ==========================================
-// 1. BOTTOLA FOOD POLAROID DATA
+// 1. TRADITIONAL ALPONA BORDER PATTERN
+// ==========================================
+const AlponaBorderPattern = ({ side }: { side: "left" | "right" }) => (
+  <div
+    className={`absolute top-0 bottom-0 ${
+      side === "left" ? "left-0" : "right-0"
+    } w-4 sm:w-6 opacity-40 dark:opacity-20 pointer-events-none overflow-hidden select-none z-10`}
+  >
+    <svg className="w-full h-full" viewBox="0 0 24 600" preserveAspectRatio="none" fill="none">
+      <defs>
+        <pattern id={`alpona-${side}`} width="24" height="40" patternUnits="userSpaceOnUse">
+          <path d="M0 0 L12 20 L0 40 Z" fill="#8B1538" opacity="0.65" />
+          <path d="M24 0 L12 20 L24 40 Z" fill="#8B1538" opacity="0.65" />
+          <polygon points="12,12 18,20 12,28 6,20" fill="#D97706" opacity="0.85" />
+          <circle cx="12" cy="20" r="2" fill="#ffffff" />
+        </pattern>
+      </defs>
+      <rect width="24" height="100%" fill={`url(#alpona-${side})`} />
+    </svg>
+  </div>
+);
+
+// ==========================================
+// 2. 12 VORTA LIST (MATCHING USER'S IMAGE)
+// ==========================================
+const VORTA_LIST = [
+  { name: "কালিজিরা ভর্তা", icon: "🌱", color: "#18181b" },
+  { name: "শুঁটকি ভর্তা", icon: "🐟", color: "#b91c1c" },
+  { name: "সরিষা ইলিশ ভর্তা", icon: "✨", color: "#ca8a04" },
+  { name: "টাকি মাছ ভর্তা", icon: "🐠", color: "#047857" },
+  { name: "ডাল ভর্তা", icon: "🥣", color: "#ea580c" },
+  { name: "আলু ভর্তা", icon: "🥔", color: "#d97706" },
+  { name: "বেগুন পোড়া ভর্তা", icon: "🍆", color: "#6b21a8" },
+  { name: "মরিচ পোড়া ভর্তা", icon: "🌶️", color: "#dc2626" },
+  { name: "চীনাবাদাম ভর্তা", icon: "🥜", color: "#9a3412" },
+  { name: "পেঁপের ভর্তা", icon: "🍈", color: "#16a34a" },
+  { name: "বরবটি ভর্তা", icon: "🥬", color: "#059669" },
+  { name: "ডিম ভর্তা", icon: "🥚", color: "#c2410c" },
+];
+
+// ==========================================
+// 3. BOTTOLA ICONIC MEALS (POLAROIDS)
 // ==========================================
 const BOTTOLA_ITEMS = [
   {
@@ -130,23 +171,8 @@ const BOTTOLA_ITEMS = [
   },
 ];
 
-const VORTA_LIST = [
-  { name: "কালিজিরা ভর্তা", icon: "🌱", color: "#18181b" },
-  { name: "শুঁটকি ভর্তা", icon: "🐟", color: "#b91c1c" },
-  { name: "সরিষা ইলিশ ভর্তা", icon: "✨", color: "#ca8a04" },
-  { name: "টাকি মাছ ভর্তা", icon: "🐠", color: "#047857" },
-  { name: "ডাল ভর্তা", icon: "🥣", color: "#ea580c" },
-  { name: "আলু ভর্তা", icon: "🥔", color: "#d97706" },
-  { name: "বেগুন পোড়া ভর্তা", icon: "🍆", color: "#6b21a8" },
-  { name: "মরিচ পোড়া ভর্তা", icon: "🌶️", color: "#dc2626" },
-  { name: "বাদাম ভর্তা", icon: "🥜", color: "#9a3412" },
-  { name: "পেঁপে ভর্তা", icon: "🍈", color: "#16a34a" },
-  { name: "বরবটি ভর্তা", icon: "🥬", color: "#059669" },
-  { name: "ডিম ভর্তা", icon: "🥚", color: "#c2410c" },
-];
-
 // ==========================================
-// 2. BUCKET LIST DATA
+// 4. BUCKET LIST DATA
 // ==========================================
 const INITIAL_BUCKET_ITEMS = [
   {
@@ -242,7 +268,7 @@ const INITIAL_BUCKET_ITEMS = [
 ];
 
 // ==========================================
-// 3. YEARBOOK CATEGORIES
+// 5. YEARBOOK CATEGORIES
 // ==========================================
 interface Nominee {
   id: string;
@@ -338,7 +364,7 @@ const INITIAL_YEARBOOK: YearbookCategory[] = [
 ];
 
 // ==========================================
-// 4. CASSETTE SOUNDSCAPES (WEB AUDIO API)
+// 6. CASSETTE SOUNDSCAPES
 // ==========================================
 const SOUNDSCAPES = [
   { id: "birds", name: "শীতের অতিথি পাখির কলতান", icon: "🦆", track: "Side A • 01", type: "chirp" },
@@ -441,7 +467,6 @@ export default function MemoriesHub() {
       }
 
       if (type === "bell") {
-        // Rickshaw bell sound (double ring metallic ping)
         [0, 0.14].forEach((delay) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -455,7 +480,6 @@ export default function MemoriesHub() {
           osc.stop(ctx.currentTime + delay + 0.4);
         });
       } else if (type === "chirp") {
-        // Bird tweet/chirp sound
         [0, 0.1, 0.22, 0.35].forEach((delay, idx) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -471,7 +495,6 @@ export default function MemoriesHub() {
           osc.stop(ctx.currentTime + delay + 0.09);
         });
       } else if (type === "guitar") {
-        // Acoustic guitar resonant warm chord (Em)
         const chord = [164.81, 196.0, 246.94, 329.63];
         chord.forEach((freq, idx) => {
           const osc = ctx.createOscillator();
@@ -486,7 +509,6 @@ export default function MemoriesHub() {
           osc.stop(ctx.currentTime + idx * 0.04 + 2.1);
         });
       } else if (type === "drum") {
-        // Muktamancha dramatic deep drum beats
         [0, 0.22, 0.44].forEach((delay) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -631,7 +653,7 @@ export default function MemoriesHub() {
     localStorage.setItem("ju52_checked_vortas", JSON.stringify(next));
   };
 
-  // Vorta Scorecard Certificate Title
+  // Dynamic Vorta Rank & Title based on user selection
   const vortaCount = checkedVortas.length;
   let vortaTitle = "বটতলার নবাগত অতিথি 🌿";
   let certificateRank = "খাদ্যপ্রেমী শিক্ষানবিস";
@@ -747,97 +769,45 @@ export default function MemoriesHub() {
   const completedBucketCount = Object.values(userCheckedBuckets).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-[#f7f2ea] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-3 md:pt-6 transition-colors select-none font-body relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-3 md:pt-6 transition-colors select-none font-body relative overflow-x-hidden">
       
-      {/* VINTAGE KRAFT PAPER & CORK GRAIN AMBIENT BACKGROUND */}
-      <div
-        className="absolute inset-0 opacity-[0.35] dark:opacity-[0.06] pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(circle at 50% 50%, #c4ab80 0.75px, transparent 0.75px), radial-gradient(circle at 0% 0%, #b39265 0.5px, transparent 0.5px)`,
-          backgroundSize: "24px 24px, 48px 48px",
-        }}
-      />
+      {/* TRADITIONAL BENGALI ALPONA BORDERS ON SIDES (MATCHING USER SCREENSHOT) */}
+      <AlponaBorderPattern side="left" />
+      <AlponaBorderPattern side="right" />
 
-      {/* ===== NOSTALGIC SCRAPBOOK COVER BANNER ===== */}
-      <div className="container max-w-5xl mx-auto px-4 mb-6 relative z-10">
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-[#6b081d] via-[#4d0615] to-[#2e030c] p-6 sm:p-9 text-[#fdfaf5] shadow-2xl border-4 border-[#8c0b26]/50">
-          
-          {/* Authentic Washi Tape Accents on Top Corners */}
-          <div className="absolute -top-3 left-8 w-24 h-7 bg-amber-300/80 dark:bg-amber-500/60 backdrop-blur-xs transform -rotate-3 border-y border-dashed border-amber-600/40 shadow-sm pointer-events-none" />
-          <div className="absolute -top-3 right-8 w-24 h-7 bg-rose-300/80 dark:bg-rose-500/60 backdrop-blur-xs transform rotate-2 border-y border-dashed border-rose-600/40 shadow-sm pointer-events-none" />
-
-          {/* Golden Stitched Inner Border */}
-          <div className="absolute inset-2.5 rounded-[1.4rem] border border-dashed border-amber-400/40 pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-amber-400/25 border border-amber-300/40 text-amber-200 text-[11px] font-black uppercase tracking-wider shadow-xs transform -rotate-1">
-                <Bookmark className="w-3.5 h-3.5 fill-current text-amber-300" />
-                <span>JU-52 CAMPUS SCRAPBOOK • ৭০০ একরের চিরন্তন স্মৃতিকথা</span>
-              </div>
-              <h1 className="text-2xl sm:text-4xl font-black font-display tracking-tight text-white flex items-center gap-3">
-                <span>জাবি ভাইবস ও নস্টালজিয়া জার্নাল</span>
-                <Sparkles className="w-6 h-6 text-amber-300 animate-pulse shrink-0" />
-              </h1>
-              <p className="text-xs sm:text-sm text-amber-100/85 max-w-xl font-body leading-relaxed">
-                বটতলার গরম খিচুড়ি আর ভর্তার স্বাদ, সোনালী ক্যাসেট ফিতায় বন্ধুদের কণ্ঠস্বর, অসমাপ্ত বাকেটলিস্ট আর ইয়ারবুকের অমর আড্ডা।
-              </p>
-            </div>
-
-            {/* Vintage Scrapbook Stamp Seal */}
-            <div className="flex items-center gap-3 bg-black/35 backdrop-blur-md px-4 py-3 rounded-2xl border border-amber-400/30 shrink-0 self-start md:self-auto shadow-inner">
-              <div className="w-10 h-10 rounded-full border-2 border-dashed border-amber-400 flex items-center justify-center text-amber-300 font-black text-sm shrink-0">
-                ৫২
-              </div>
-              <div>
-                <div className="text-xs font-bold text-amber-200 uppercase tracking-wider font-display">
-                  ব্যাচ ডায়েরি ২০২৭
-                </div>
-                <div className="text-[11px] text-white/70 font-medium">
-                  স্মৃতি চির অম্লান • অমর আবর্তন
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* MANDALA WATERMARK ACCENTS IN CORNERS */}
+      <div className="absolute top-0 right-0 w-56 h-56 opacity-[0.06] pointer-events-none select-none text-[#8B1538]">
+        <svg viewBox="0 0 200 200" fill="currentColor">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
+          <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="3" />
+          <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3" />
+          <circle cx="100" cy="100" r="30" fill="none" stroke="currentColor" strokeWidth="4" />
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+            <path key={deg} d="M100 15 C108 35, 108 45, 100 55 C92 45, 92 35, 100 15 Z" transform={`rotate(${deg} 100 100)`} />
+          ))}
+        </svg>
       </div>
 
-      {/* ===== VINTAGE JOURNAL BOOKMARK TABS (POLAROID & SCRAPBOOK STYLE) ===== */}
-      <div className="container max-w-5xl mx-auto px-4 mb-8 relative z-10">
-        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-2">
+      <div className="absolute top-0 left-0 w-56 h-56 opacity-[0.06] pointer-events-none select-none text-[#8B1538]">
+        <svg viewBox="0 0 200 200" fill="currentColor">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
+          <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="3" />
+          <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3" />
+          <circle cx="100" cy="100" r="30" fill="none" stroke="currentColor" strokeWidth="4" />
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+            <path key={deg} d="M100 15 C108 35, 108 45, 100 55 C92 45, 92 35, 100 15 Z" transform={`rotate(${deg} 100 100)`} />
+          ))}
+        </svg>
+      </div>
+
+      {/* ===== TAB SELECTOR TABS (SUBTLE TRADITIONAL PILLS) ===== */}
+      <div className="container max-w-4xl mx-auto px-6 sm:px-10 mb-6 relative z-20">
+        <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-2">
           {[
-            {
-              id: "bottola",
-              label: "বটতলা খাদ্য বিলাস",
-              icon: Utensils,
-              badge: "ভর্তা মিটার",
-              tapeBg: "bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border-amber-400/60",
-              accent: "#f59e0b",
-            },
-            {
-              id: "audio",
-              label: "রেট্রো ক্যাসেট ও চিরকুট",
-              icon: Disc,
-              badge: "কণ্ঠস্বর",
-              tapeBg: "bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-400/60",
-              accent: "#f43f5e",
-            },
-            {
-              id: "bucket",
-              label: "স্মৃতির বাকেট ডায়েরি",
-              icon: Pin,
-              badge: "চেকলিস্ট",
-              tapeBg: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-400/60",
-              accent: "#10b981",
-            },
-            {
-              id: "yearbook",
-              label: "ইয়ারবুক পোলারয়েড ওয়াল",
-              icon: Camera,
-              badge: "লিজেন্ডস",
-              tapeBg: "bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-200 border-purple-400/60",
-              accent: "#a855f7",
-            },
+            { id: "bottola", label: "বটতলা খাদ্য বিলাস", icon: Utensils, badge: "ভর্তা মিটার" },
+            { id: "audio", label: "রেট্রো ক্যাসেট ও চিরকুট", icon: Disc, badge: "কণ্ঠস্বর" },
+            { id: "bucket", label: "স্মৃতির বাকেট ডায়েরি", icon: Pin, badge: "চেকলিস্ট" },
+            { id: "yearbook", label: "ইয়ারবুক হল অব ফেম", icon: Trophy, badge: "লিজেন্ডস" },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -846,21 +816,17 @@ export default function MemoriesHub() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer border-2 shadow-sm ${
+                className={`relative flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer shadow-xs ${
                   isActive
-                    ? "bg-[#6b081d] text-white border-amber-400 shadow-xl shadow-[#6b081d]/25 scale-102 ring-2 ring-amber-400/40"
-                    : `${tab.tapeBg} hover:brightness-95 hover:scale-[1.01]`
+                    ? "bg-[#8B1538] text-white shadow-md ring-2 ring-[#8B1538]/30 scale-102"
+                    : "bg-[#F3ECE2] dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-[#E8DDD0]"
                 }`}
               >
-                {/* Visual Washi Tape Pin on Active Tab */}
-                {isActive && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-3 bg-amber-300 rounded-xs shadow-xs border-x border-amber-500/40" />
-                )}
-                <Icon className={`w-4 h-4 ${isActive ? "text-amber-300" : ""}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-300" : ""}`} />
                 <span className="font-display">{tab.label}</span>
                 <span
-                  className={`text-[9px] px-2 py-0.5 rounded-full font-black ${
-                    isActive ? "bg-amber-400 text-stone-950" : "bg-black/10 text-current"
+                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
+                    isActive ? "bg-amber-400 text-stone-950" : "bg-black/10 dark:bg-white/10 text-current"
                   }`}
                 >
                   {tab.badge}
@@ -871,170 +837,164 @@ export default function MemoriesHub() {
         </div>
       </div>
 
-      {/* ===== TAB CONTENT CONTAINER ===== */}
-      <div className="container max-w-5xl mx-auto px-4 relative z-10">
+      {/* ===== MAIN CONTENT CONTAINER ===== */}
+      <div className="container max-w-3xl mx-auto px-6 sm:px-10 relative z-20">
         
         {/* ========================================================
-            TAB 1: BOTTOLA VINTAGE PLATTER & POLAROID FOOD CARDS
+            TAB 1: BOTTOLA VORTA & HERITAGE (PIXEL-PERFECT AS USER SCREENSHOT)
            ======================================================== */}
         {activeTab === "bottola" && (
-          <div className="space-y-8 animate-in fade-in duration-200">
+          <div className="space-y-6 animate-in fade-in duration-200">
             
-            {/* 1.1 VINTAGE ENGRAVED VORTA CERTIFICATE WITH WAX SEAL */}
-            <div className="relative rounded-[2rem] bg-[#fffdf9] dark:bg-[#1a1c22] border-4 border-amber-300/80 dark:border-amber-900/60 p-6 sm:p-8 shadow-xl overflow-hidden">
+            {/* 1.1 TOP SECTION (EXACT REPLICA OF USER UPLOADED SCREENSHOT) */}
+            <div className="text-center pt-2">
               
-              {/* Corner Ornaments */}
-              <div className="absolute top-3 left-3 text-amber-600/30 text-2xl font-serif">❖</div>
-              <div className="absolute top-3 right-3 text-amber-600/30 text-2xl font-serif">❖</div>
-              <div className="absolute bottom-3 left-3 text-amber-600/30 text-2xl font-serif">❖</div>
-              <div className="absolute bottom-3 right-3 text-amber-600/30 text-2xl font-serif">❖</div>
+              {/* Curved Maroon Tag */}
+              <div className="inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#8B1538] text-white text-xs sm:text-sm font-bold shadow-sm tracking-wide">
+                <span>জাহাঙ্গীরনগর বিশ্ববিদ্যালয় • বটতলা বাঙালির ঐতিহ্য</span>
+              </div>
 
-              {/* Distressed Paper Border */}
-              <div className="absolute inset-2 rounded-[1.6rem] border border-dashed border-amber-400/40 pointer-events-none" />
+              {/* Main Heading */}
+              <h1 className="text-3xl sm:text-5xl font-black font-display text-[#8B1538] dark:text-[#f87171] flex items-center justify-center gap-2 mt-3 tracking-tight">
+                <span>{vortaTitle}</span>
+              </h1>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-dashed border-amber-300/70 dark:border-amber-900/70 pb-6 mb-6 relative z-10">
-                <div className="space-y-1.5">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-amber-100 dark:bg-amber-950/80 border border-amber-400 text-amber-900 dark:text-amber-200 text-[10px] font-black uppercase tracking-wider transform -rotate-1">
-                    <span>জাহাঙ্গীরনগর বিশ্ববিদ্যালয় • বটতলা খাদ্যবিলাস সনদপত্র</span>
-                  </div>
-                  <h2 className="text-xl sm:text-3xl font-black font-display text-foreground flex items-center gap-2">
-                    <span>{vortaTitle}</span>
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    ১২টি ক্লাসিক ভর্তার মধ্যে আপনি <strong className="text-foreground font-bold">{vortaCount}</strong>টি টেস্ট করেছেন (অফিসিয়াল স্ট্যাটাস: <span className="text-[#800020] dark:text-amber-400 font-bold">{certificateRank}</span>)
-                  </p>
-                </div>
+              {/* Subtitle */}
+              <p className="text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400 mt-2 max-w-md mx-auto leading-relaxed">
+                ১২টি পদের মধ্যে আপনি <strong className="text-stone-900 dark:text-stone-100 font-bold">{vortaCount}টি ট্রাই করেছেন</strong> (অফিসিয়াল স্ট্যাটাস: <span className="text-[#8B1538] dark:text-amber-400 font-bold">{certificateRank}</span>)
+              </p>
 
-                {/* Wax Seal Badge Visual */}
-                <div className="relative flex items-center justify-center shrink-0 self-center sm:self-auto">
-                  <div className="w-22 h-22 rounded-full bg-gradient-to-br from-[#800020] via-[#5c0316] to-[#38010f] border-4 border-amber-400 flex flex-col items-center justify-center text-white shadow-2xl rotate-[-4deg] ring-4 ring-[#800020]/20">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-amber-300">JU-52</span>
-                    <span className="text-2xl font-black font-display leading-tight">{vortaCount}/12</span>
-                    <span className="text-[9px] font-bold text-amber-200">ভর্তা টেস্টেড</span>
+              {/* Glowing Concentric Circular Badge */}
+              <div className="relative my-7 flex items-center justify-center">
+                {/* Outer Golden Glow */}
+                <div className="absolute w-36 h-36 rounded-full bg-amber-400/30 blur-2xl pointer-events-none" />
+
+                {/* Outer Golden Halo Border */}
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-500 shadow-xl flex items-center justify-center">
+                  
+                  {/* Deep Maroon Circle */}
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-[#800020] via-[#650019] to-[#38010f] flex flex-col items-center justify-center text-white border-2 border-amber-300/50 shadow-inner">
+                    <span className="text-3xl sm:text-4xl font-black font-display tracking-tight text-white leading-none">
+                      {vortaCount}/12
+                    </span>
+                    <span className="text-[11px] font-bold text-amber-200 mt-1 uppercase tracking-wider">
+                      টেস্ট করেছেন
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* 1.2 12 VORTA CERAMIC DISHES WITH DISTRESSED STAMPS */}
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground font-display flex items-center gap-2">
-                    <span>🍽️ ভর্তার থালা (ক্লিক করে "টেস্টেড!" রাবার স্ট্যাম্প দিন):</span>
-                  </h3>
-                  <span className="text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-300">
-                    স্কোর: {Math.round((vortaCount / 12) * 100)}%
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-                  {VORTA_LIST.map((vorta) => {
-                    const isChecked = checkedVortas.includes(vorta.name);
-                    return (
-                      <button
-                        key={vorta.name}
-                        type="button"
-                        onClick={() => toggleVorta(vorta.name)}
-                        className={`relative group p-3.5 rounded-2xl border-2 text-left transition-all overflow-hidden flex flex-col justify-between min-h-[96px] cursor-pointer ${
-                          isChecked
-                            ? "bg-[#fff6e6] dark:bg-[#251f16] border-red-500/80 shadow-md scale-[1.02]"
-                            : "bg-[#fffefb] dark:bg-[#1a1b21] border-[#e2d5c2] dark:border-white/10 hover:border-amber-400 hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <span className="text-2xl">{vorta.icon}</span>
-                          <span className="w-2.5 h-2.5 rounded-full shadow-xs" style={{ backgroundColor: vorta.color }} />
-                        </div>
-
-                        <span className="text-xs sm:text-sm font-bold text-foreground mt-2 truncate font-display">
-                          {vorta.name}
-                        </span>
-
-                        {/* AUTHENTIC DISTRESSED RUBBER STAMP OVERLAY */}
-                        {isChecked && (
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-red-600/5 backdrop-blur-[0.5px]">
-                            <div className="border-3 border-red-600 dark:border-red-500 text-red-600 dark:text-red-500 font-black text-xs px-2.5 py-0.5 rounded-md tracking-widest uppercase transform rotate-[-14deg] shadow-sm animate-in zoom-in-75 duration-150">
-                              টেস্টেড! ✓
-                            </div>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Subheader Tan Bar with Score Pill */}
+              <div className="rounded-2xl bg-[#EDE4D8] dark:bg-stone-800/80 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs mb-5">
+                <span className="text-xs sm:text-sm font-bold text-stone-800 dark:text-stone-200 font-display">
+                  ভর্তার নাম (ক্লিক করে "টেস্টেড" করতে স্ট্যাম্প দিন):
+                </span>
+                <span className="bg-[#EA6825] text-white text-xs font-black px-3 py-1 rounded-full shadow-xs">
+                  স্কোর: {Math.round((vortaCount / 12) * 100)}%
+                </span>
               </div>
             </div>
 
-            {/* 1.3 POLAROID PHOTO GALLERY OF BOTTOLA ICONIC MEALS */}
-            <div>
+            {/* 1.2 2-COLUMN VORTA GRID (EXACT SAME AS USER IMAGE) */}
+            <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
+              {VORTA_LIST.map((vorta) => {
+                const isChecked = checkedVortas.includes(vorta.name);
+                return (
+                  <button
+                    key={vorta.name}
+                    type="button"
+                    onClick={() => toggleVorta(vorta.name)}
+                    className={`relative p-4 rounded-2xl border transition-all text-left flex flex-col justify-between min-h-[116px] sm:min-h-[126px] cursor-pointer shadow-sm hover:shadow-md ${
+                      isChecked
+                        ? "bg-[#FFF9F3] dark:bg-[#201d1a] border-red-500/80 scale-[1.02]"
+                        : "bg-white dark:bg-[#1a1b22] border-stone-200/90 dark:border-stone-800 hover:border-amber-400"
+                    }`}
+                  >
+                    {/* Top Row: Food Icon & Circular Check Ring */}
+                    <div className="flex items-start justify-between w-full">
+                      <div className="text-3xl sm:text-4xl">
+                        {vorta.icon}
+                      </div>
+
+                      {/* Clean Circular Checkbox Indicator */}
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${
+                          isChecked
+                            ? "border-[#8B1538] bg-[#8B1538] text-white shadow-xs"
+                            : "border-stone-300 dark:border-stone-600 bg-transparent"
+                        }`}
+                      >
+                        {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      </div>
+                    </div>
+
+                    {/* Bottom Row: Food Name */}
+                    <div className="mt-3">
+                      <span className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 font-display block leading-tight">
+                        {vorta.name}
+                      </span>
+                    </div>
+
+                    {/* Distressed Red Rubber Stamp Overlay when Checked */}
+                    {isChecked && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-red-600/5 backdrop-blur-[0.5px] rounded-2xl">
+                        <div className="border-3 border-red-600 dark:border-red-500 text-red-600 dark:text-red-500 font-black text-xs sm:text-sm px-3 py-1 rounded-md tracking-widest uppercase transform rotate-[-12deg] shadow-md animate-in zoom-in-75 duration-150 bg-white/95 dark:bg-stone-900/95">
+                          টেস্টেড! ✓
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 1.3 BOTTOLA ICONIC MEALS (POLAROIDS SECTION UNDERNEATH) */}
+            <div className="mt-12 pt-8 border-t border-dashed border-stone-300 dark:border-stone-800">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-black font-display flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-black font-display text-stone-900 dark:text-stone-100 flex items-center gap-2">
                     <Flame className="w-5 h-5 text-amber-500" />
-                    <span>বটতলা ও ক্যাম্পাসের জনপ্রিয় খাবার পোলারয়েড</span>
+                    <span>বটতলার সিগনেচার স্পেশাল মিলস ও আড্ডা</span>
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    ছবিতে ক্লিক করে বা হার্ট আইকন দিয়ে আপনার প্রিয় জাবি খাবারে ভোট দিন
+                    আপনার প্রিয় জাবি খাবারে ভোট দিয়ে ব্যাচের শীর্ষ স্বাদ নির্বাচন করুন
                   </p>
                 </div>
               </div>
 
-              {/* POLAROID GRID WITH NATURAL ROTATIONAL JITTER & WASHI TAPE */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {foodItems.map((item) => (
                   <div
                     key={item.id}
-                    className={`relative bg-white dark:bg-[#1a1c22] p-3.5 pb-5 rounded-2xl shadow-lg border border-stone-200/90 dark:border-stone-800 transition-all duration-300 hover:rotate-0 hover:scale-105 hover:shadow-2xl flex flex-col justify-between group ${item.rotation}`}
+                    className="relative bg-white dark:bg-[#1a1c22] p-4 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 flex items-center justify-between gap-4"
                   >
-                    {/* Washi Tape Strip on Top Edge */}
-                    <div
-                      className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 opacity-85 shadow-xs border-y border-dashed border-black/15 z-10"
-                      style={{ backgroundColor: item.tapeColor }}
-                    />
-
-                    <div>
-                      {/* Polaroid Photo Frame */}
-                      <div className="relative aspect-square w-full rounded-xl bg-gradient-to-br from-amber-50 to-orange-100 dark:from-stone-900 dark:to-stone-950 flex flex-col items-center justify-center p-4 border border-stone-200/60 dark:border-stone-800 mb-3 shadow-inner overflow-hidden">
-                        <span className="text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300">
-                          {item.icon}
-                        </span>
-                        
-                        <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/90 dark:bg-stone-800/90 text-stone-800 dark:text-stone-200 shadow-xs">
-                          {item.tag}
-                        </span>
-                      </div>
-
-                      {/* Handwritten Style Polaroid Caption */}
-                      <div className="px-1 text-center sm:text-left">
-                        <h4 className="text-sm font-black font-display text-stone-900 dark:text-stone-100 leading-snug">
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl">{item.icon}</span>
+                      <div>
+                        <h4 className="text-sm font-bold font-display text-stone-900 dark:text-stone-100">
                           {item.title}
                         </h4>
-                        <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 line-clamp-2 leading-relaxed">
-                          {item.desc}
-                        </p>
+                        <p className="text-[11px] text-stone-500 line-clamp-1">{item.desc}</p>
+                        <span className="text-[10px] font-bold text-rose-600 flex items-center gap-1 mt-1 font-display">
+                          <Heart className="w-3 h-3 fill-rose-500" />
+                          {item.votes} ভোট
+                        </span>
                       </div>
                     </div>
 
-                    {/* Voting Action Bar */}
-                    <div className="mt-4 pt-3 border-t border-dashed border-stone-200 dark:border-stone-800 flex items-center justify-between px-1">
-                      <span className="text-xs font-black text-rose-600 dark:text-rose-400 flex items-center gap-1.5 font-display">
-                        <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-                        {item.votes} ভোট
-                      </span>
-
-                      <Button
-                        size="sm"
-                        variant={foodVoted[item.id] ? "secondary" : "default"}
-                        onClick={() => handleVoteFood(item.id)}
-                        disabled={foodVoted[item.id]}
-                        className={`h-8 text-xs font-bold rounded-xl transition-all shadow-xs ${
-                          foodVoted[item.id]
-                            ? "bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
-                            : "bg-[#800020] hover:bg-[#68001a] text-white"
-                        }`}
-                      >
-                        {foodVoted[item.id] ? "ভোট সম্পন্ন ✓" : "ভোট দিন"}
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant={foodVoted[item.id] ? "secondary" : "default"}
+                      onClick={() => handleVoteFood(item.id)}
+                      disabled={foodVoted[item.id]}
+                      className={`h-8 text-xs font-bold rounded-xl shrink-0 ${
+                        foodVoted[item.id]
+                          ? "bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
+                          : "bg-[#8B1538] hover:bg-[#68001a] text-white"
+                      }`}
+                    >
+                      {foodVoted[item.id] ? "ভোট সম্পন্ন ✓" : "ভোট দিন"}
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -1044,394 +1004,232 @@ export default function MemoriesHub() {
         )}
 
         {/* ========================================================
-            TAB 2: RETRO ANALOG CASSETTE DECK & VOICE RECORDER
+            TAB 2: RETRO AUDIO CASSETTE & CAMPUS SOUNDSCAPES
            ======================================================== */}
         {activeTab === "audio" && (
-          <div className="space-y-8 animate-in fade-in duration-200">
+          <div className="space-y-6 animate-in fade-in duration-200">
             
-            {/* 2.1 AUTHENTIC RETRO CASSETTE TAPE RECORDER CHASSIS */}
-            <div className="relative rounded-[2.5rem] bg-gradient-to-b from-[#2a2b33] via-[#1e1f26] to-[#121318] border-4 border-amber-600/50 p-6 sm:p-9 text-white shadow-2xl overflow-hidden">
-              
-              {/* Metallic Screw Accents in 4 Corners */}
-              <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-stone-400/30 border border-white/20 flex items-center justify-center text-[8px] text-white/40">+</div>
-              <div className="absolute top-3 right-3 w-3 h-3 rounded-full bg-stone-400/30 border border-white/20 flex items-center justify-center text-[8px] text-white/40">+</div>
-              <div className="absolute bottom-3 left-3 w-3 h-3 rounded-full bg-stone-400/30 border border-white/20 flex items-center justify-center text-[8px] text-white/40">+</div>
-              <div className="absolute bottom-3 right-3 w-3 h-3 rounded-full bg-stone-400/30 border border-white/20 flex items-center justify-center text-[8px] text-white/40">+</div>
-
-              {/* Cassette Deck Brand Header */}
+            <div className="relative rounded-3xl bg-gradient-to-b from-[#2a2b33] via-[#1e1f26] to-[#121318] border-4 border-amber-600/50 p-6 sm:p-8 text-white shadow-xl overflow-hidden">
               <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse shadow-sm shadow-rose-500" />
                   <span className="text-xs font-mono font-bold tracking-widest text-amber-400 uppercase">
-                    JU-52 STEREO CASSETTE RECORDER • WALKMAN EDITION
+                    JU-52 STEREO CASSETTE RECORDER
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono text-white/40 uppercase">TYPE I [NORMAL]</span>
-                  <span className="text-xs font-bold text-amber-300 bg-black/40 px-2 py-0.5 rounded border border-white/10">60 MIN</span>
-                </div>
+                <span className="text-xs font-bold text-amber-300 bg-black/40 px-2 py-0.5 rounded border border-white/10">60 MIN</span>
               </div>
 
-              {/* REALISTIC CASSETTE TAPE SHELL */}
-              <div className="relative max-w-lg mx-auto bg-[#323440] rounded-2xl border-3 border-stone-500/40 p-4 sm:p-5 shadow-2xl flex flex-col justify-between mb-8">
-                
-                {/* Writable Paper Label Strip */}
+              {/* Cassette Tape Shell */}
+              <div className="relative max-w-md mx-auto bg-[#323440] rounded-2xl border-2 border-stone-500/40 p-4 shadow-xl flex flex-col justify-between mb-6">
                 <div className="bg-[#fbf7eb] text-stone-900 rounded-xl p-3 shadow-md text-center border-t-4 border-amber-500 mb-4">
                   <div className="text-[9px] font-mono font-bold text-stone-500 uppercase tracking-widest">
                     JAHANGIRNAGAR UNIVERSITY 52ND BATCH RECORDING
                   </div>
-                  <div className="text-lg font-black font-display text-[#800020] tracking-wide mt-0.5">
+                  <div className="text-base font-black font-display text-[#800020] tracking-wide mt-0.5">
                     "স্মৃতির মুক্তমঞ্চ ও লেকের গান • সাইড এ"
                   </div>
-                  <div className="text-[10px] text-stone-500 font-mono mt-0.5">
-                    RECORDS: 1970 - 2027 • STEREO MIXTAPE
-                  </div>
                 </div>
 
-                {/* Cassette Tape Spools Window */}
-                <div className="relative flex items-center justify-around bg-[#101116] rounded-xl py-4 px-6 border border-white/10 shadow-inner mb-3">
-                  
-                  {/* Left Spool Reel */}
-                  <div className={`w-14 h-14 rounded-full border-4 border-amber-400/90 bg-[#1f2129] flex items-center justify-center shadow-lg ${playingTrackId ? "animate-spin [animation-duration:1.5s]" : ""}`}>
-                    <div className="w-5 h-5 rounded-full bg-stone-300/40 border border-stone-400 flex items-center justify-center text-[7px] font-bold text-white">❖</div>
+                <div className="relative flex items-center justify-around bg-[#101116] rounded-xl py-3 px-6 border border-white/10 shadow-inner">
+                  <div className={`w-12 h-12 rounded-full border-4 border-amber-400/90 bg-[#1f2129] flex items-center justify-center shadow-lg ${playingTrackId ? "animate-spin [animation-duration:1.5s]" : ""}`}>
+                    <div className="w-4 h-4 rounded-full bg-stone-300/40 border border-stone-400" />
                   </div>
-
-                  {/* Tape Reel Center Meter */}
-                  <div className="flex flex-col items-center flex-1 mx-4">
-                    <div className="h-2.5 w-full bg-amber-950/80 rounded-full overflow-hidden border border-amber-500/30 p-0.5">
-                      <div className="h-full bg-amber-400 rounded-full w-2/3" />
-                    </div>
-                    <span className="text-[9px] font-mono text-amber-300/80 mt-1">JU-52 VINTAGE TAPE</span>
+                  <div className="h-2 w-32 bg-amber-950/80 rounded-full overflow-hidden border border-amber-500/30 p-0.5 mx-3">
+                    <div className="h-full bg-amber-400 rounded-full w-2/3" />
                   </div>
-
-                  {/* Right Spool Reel */}
-                  <div className={`w-14 h-14 rounded-full border-4 border-amber-400/90 bg-[#1f2129] flex items-center justify-center shadow-lg ${playingTrackId ? "animate-spin [animation-duration:1.5s]" : ""}`}>
-                    <div className="w-5 h-5 rounded-full bg-stone-300/40 border border-stone-400 flex items-center justify-center text-[7px] font-bold text-white">❖</div>
+                  <div className={`w-12 h-12 rounded-full border-4 border-amber-400/90 bg-[#1f2129] flex items-center justify-center shadow-lg ${playingTrackId ? "animate-spin [animation-duration:1.5s]" : ""}`}>
+                    <div className="w-4 h-4 rounded-full bg-stone-300/40 border border-stone-400" />
                   </div>
-                </div>
-
-                {/* Cassette Details Footer */}
-                <div className="flex items-center justify-between text-[10px] font-mono text-white/50 px-2">
-                  <span>DOLBY NR • B TYPE</span>
-                  <span>MADE FOR 52ND BATCH</span>
                 </div>
               </div>
 
-              {/* 2.2 CASSETTE TRACK SOUNDSCAPES BUTTONS */}
-              <div>
-                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block mb-3 font-display">
-                  ক্যাম্পাস সাউন্ড ট্র‍্যাক নির্বাচন করুন (শব্দ শুনতে ক্লিক করুন):
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                  {SOUNDSCAPES.map((sound) => {
-                    const isPlaying = playingTrackId === sound.id;
-                    return (
-                      <button
-                        key={sound.id}
-                        type="button"
-                        onClick={() => handlePlaySoundscape(sound.id, sound.type)}
-                        className={`flex items-center gap-3.5 p-3.5 rounded-2xl border-2 transition-all text-left cursor-pointer ${
-                          isPlaying
-                            ? "bg-amber-400/20 border-amber-400 text-white shadow-xl ring-2 ring-amber-400/40 scale-102"
-                            : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-white/20"
-                        }`}
-                      >
-                        <div className="w-11 h-11 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                          {isPlaying ? <Volume2 className="w-6 h-6 text-amber-300 animate-bounce" /> : sound.icon}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-[10px] font-mono text-amber-400 font-bold">{sound.track}</div>
-                          <div className="text-xs font-bold truncate mt-0.5 font-display">{sound.name}</div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* 2.3 RETRO VOICE RECORDER & SCRAPBOOK CASSETTE RACK */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              
-              {/* Voice Note Recorder (Span 5) */}
-              <div className="lg:col-span-5 bg-[#fffdf9] dark:bg-[#1a1c22] border-2 border-stone-200 dark:border-stone-800 rounded-3xl p-6 shadow-md relative">
-                
-                {/* Washi Tape Accent */}
-                <div className="absolute -top-3 left-6 w-16 h-5 bg-rose-300/80 dark:bg-rose-600/70 transform -rotate-2 border-y border-dashed border-rose-500/40" />
-
-                <div className="mb-4">
-                  <h3 className="text-base font-bold font-display flex items-center gap-2">
-                    <Mic className="w-4 h-4 text-primary" />
-                    <span>কণ্ঠ চিরকুট রেকর্ড করুন</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    বন্ধুদের উদ্দেশ্যে কোনো স্মৃতি, গান বা বিদায়ী চিরকুট রেকর্ড করুন
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center justify-center py-7 bg-stone-100/70 dark:bg-stone-900/50 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 mb-4">
-                  <div className="relative mb-3">
-                    {isRecording && (
-                      <span className="absolute inset-0 rounded-full bg-rose-500 animate-ping opacity-75" />
-                    )}
-                    <button
-                      type="button"
-                      onClick={isRecording ? stopRecording : startRecording}
-                      className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-xl cursor-pointer ${
-                        isRecording
-                          ? "bg-rose-600 text-white hover:bg-rose-700"
-                          : "bg-[#800020] text-white hover:bg-[#68001a]"
-                      }`}
-                    >
-                      {isRecording ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
-                    </button>
-                  </div>
-
-                  <div className="text-center">
-                    <span className="text-base font-black font-display text-foreground">
-                      0:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds} / 0:45
-                    </span>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {isRecording ? "রেকর্ডিং চলছে... থামাতে চাপুন" : "রেকর্ড করতে মাইক্রোফোনে চাপুন"}
-                    </p>
-                  </div>
-                </div>
-
-                {recordedAudioUrl && (
-                  <div className="space-y-3 animate-in fade-in duration-200">
-                    <audio src={recordedAudioUrl} controls className="w-full h-10 rounded-xl" />
-
-                    <div>
-                      <label className="text-xs font-bold text-muted-foreground block mb-1">
-                        আপনার নাম ও বিভাগ *
-                      </label>
-                      <Input
-                        placeholder="যেমন: রাশেদ (ইংরেজি)"
-                        value={audioNoteAuthor}
-                        onChange={(e) => setAudioNoteAuthor(e.target.value)}
-                        className="h-9 text-xs rounded-xl"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-muted-foreground block mb-1">
-                        চিরকুটের শিরোনাম *
-                      </label>
-                      <Input
-                        placeholder="যেমন: ক্যাফেটেরিয়ার সকালের আড্ডা..."
-                        value={audioNoteTitle}
-                        onChange={(e) => setAudioNoteTitle(e.target.value)}
-                        className="h-9 text-xs rounded-xl"
-                      />
-                    </div>
-
-                    <Button
-                      onClick={handleSaveVoiceNote}
-                      className="w-full h-10 rounded-xl font-bold text-xs bg-[#800020] hover:bg-[#68001a] text-white gap-1.5 shadow-md"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      ক্যাসেট ফিতায় সেভ করুন
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Community Mixtape Cassette Rack (Span 7) */}
-              <div className="lg:col-span-7 bg-[#fffdf9] dark:bg-[#1a1c22] border-2 border-stone-200 dark:border-stone-800 rounded-3xl p-6 shadow-md relative">
-                
-                {/* Washi Tape Accent */}
-                <div className="absolute -top-3 left-6 w-16 h-5 bg-amber-300/80 dark:bg-amber-600/70 transform rotate-2 border-y border-dashed border-amber-500/40" />
-
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-bold font-display flex items-center gap-1.5">
-                    <Music className="w-4 h-4 text-primary" />
-                    <span>ব্যাচমেটদের ক্যাসেট ফিতা সংগ্রহশালা</span>
-                  </h3>
-                  <span className="text-xs font-bold text-muted-foreground bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-full">
-                    {voiceNotes.length} টি চিরকুট
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {voiceNotes.map((note) => (
-                    <div
-                      key={note.id}
-                      className={`p-3.5 rounded-2xl border-2 transition-all flex items-center justify-between gap-4 shadow-xs hover:shadow-md ${note.color} dark:bg-stone-900/60 dark:border-stone-700`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/80 dark:bg-stone-800 border border-black/10 flex items-center justify-center text-primary shrink-0 shadow-inner">
-                          <Disc className="w-5 h-5 animate-spin [animation-duration:8s]" />
-                        </div>
-                        <div>
-                          <div className="text-xs sm:text-sm font-bold text-foreground font-display">{note.title}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">
-                            কণ্ঠ: <strong className="text-foreground">{note.author}</strong> • {note.timeAgo}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono font-bold bg-white/70 dark:bg-stone-800 px-2 py-0.5 rounded-md border border-black/10">
-                          {note.duration}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-8 h-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
-                        >
-                          <Heart className="w-4 h-4 fill-rose-500" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        )}
-
-        {/* ========================================================
-            TAB 3: CORKBOARD BATCH BUCKET LIST & PINNED STICKY NOTES
-           ======================================================== */}
-        {activeTab === "bucket" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            
-            {/* Scrapbook Milestone Progress Banner */}
-            <div className="rounded-[2rem] bg-[#fffdf9] dark:bg-[#1a1c22] border-4 border-amber-300 dark:border-amber-900/60 p-6 sm:p-7 shadow-xl relative overflow-hidden">
-              
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-amber-200 text-amber-900 text-[10px] font-bold uppercase transform -rotate-1 mb-2 shadow-xs">
-                    <Pin className="w-3 h-3 fill-current" />
-                    <span>৫২তম ব্যাচ ক্যাম্পাস বাকেট ডায়েরি • ৭০০ একর চেকলিস্ট</span>
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-black font-display text-foreground">
-                    ক্যাম্পাস ছাড়ার আগে অন্তত একবার করতেই হবে!
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    আপনার সম্পন্ন হয়েছে: <strong className="text-foreground font-bold">{completedBucketCount}</strong> / {bucketItems.length} টি স্মৃতি
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-3xl font-black text-[#800020] dark:text-amber-400 font-display">
-                    {Math.round((completedBucketCount / Math.max(1, bucketItems.length)) * 100)}%
-                  </span>
-                  <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">সম্পন্ন স্কোর</div>
-                </div>
-              </div>
-
-              {/* Vintage Wooden Ruler Progress Track */}
-              <div className="w-full bg-stone-200 dark:bg-stone-800 h-3.5 rounded-full overflow-hidden p-0.5 border border-stone-300 dark:border-stone-700 shadow-inner">
-                <div
-                  className="bg-gradient-to-r from-amber-500 via-orange-500 to-[#800020] h-full rounded-full transition-all duration-500 shadow-sm"
-                  style={{
-                    width: `${Math.round((completedBucketCount / Math.max(1, bucketItems.length)) * 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Add Custom Sticky Note Form */}
-            <form
-              onSubmit={handleAddCustomBucket}
-              className="flex items-center gap-2 bg-[#fffdf5] dark:bg-[#1c1d24] p-3 rounded-2xl border-2 border-dashed border-amber-400 shadow-sm"
-            >
-              <Input
-                placeholder="নতুন কোনো জাবি বাকেট স্মৃতি ডায়েরিতে যোগ করতে চান? লিখুন..."
-                value={newBucketText}
-                onChange={(e) => setNewBucketText(e.target.value)}
-                className="h-10 text-xs border-0 focus-visible:ring-0 shadow-none bg-transparent"
-              />
-              <Button type="submit" size="sm" className="h-9 font-bold text-xs rounded-xl gap-1 shrink-0 bg-[#800020] hover:bg-[#68001a] text-white shadow-xs">
-                <Plus className="w-3.5 h-3.5" />
-                পিন করুন
-              </Button>
-            </form>
-
-            {/* CORKBOARD PINNED STICKY NOTES GRID */}
-            <div className="p-4 sm:p-6 rounded-[2rem] bg-[#ecdcc6] dark:bg-[#181512] border-4 border-[#b8956e] dark:border-[#4d3824] shadow-2xl relative">
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-5 pt-2">
-                {bucketItems.map((item, idx) => {
-                  const isDone = !!userCheckedBuckets[item.id];
-                  const rotationClass = idx % 2 === 0 ? "rotate-[-1deg]" : "rotate-[1.5deg]";
+              {/* Soundscape Track Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {SOUNDSCAPES.map((sound) => {
+                  const isPlaying = playingTrackId === sound.id;
                   return (
-                    <div
-                      key={item.id}
-                      onClick={() => toggleBucketItem(item.id)}
-                      className={`relative p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start justify-between gap-3 text-left shadow-md hover:rotate-0 hover:scale-[1.02] hover:shadow-xl ${
-                        item.color
-                      } dark:bg-stone-900/90 dark:border-stone-700 ${rotationClass} ${
-                        isDone ? "opacity-85 shadow-none" : ""
+                    <button
+                      key={sound.id}
+                      type="button"
+                      onClick={() => handlePlaySoundscape(sound.id, sound.type)}
+                      className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left cursor-pointer ${
+                        isPlaying
+                          ? "bg-amber-400/20 border-amber-400 text-white shadow-xl ring-2 ring-amber-400/40 scale-102"
+                          : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
                       }`}
                     >
-                      {/* 3D Realistic Pushpin at Top Center */}
-                      <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full ${item.pinColor} shadow-md border-2 border-white flex items-center justify-center z-10`}>
-                        <div className="w-1.5 h-1.5 rounded-full bg-white/80" />
+                      <div className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-xl shrink-0">
+                        {isPlaying ? <Volume2 className="w-5 h-5 text-amber-300 animate-bounce" /> : sound.icon}
                       </div>
-
-                      <div className="flex items-start gap-3 mt-1.5 min-w-0">
-                        <div className="mt-0.5 shrink-0">
-                          {isDone ? (
-                            <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                              ✓
-                            </div>
-                          ) : (
-                            <Circle className="w-5 h-5 text-stone-500/60" />
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div
-                            className={`text-xs sm:text-sm font-bold font-display leading-snug ${
-                              isDone ? "line-through text-stone-500" : "text-stone-900 dark:text-stone-100"
-                            }`}
-                          >
-                            {item.text}
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/10 dark:bg-white/10 text-stone-800 dark:text-stone-200">
-                              {item.category}
-                            </span>
-                            {isDone && (
-                              <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400">
-                                সম্পন্ন হয়েছে! ✓
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-mono text-amber-400 font-bold">{sound.track}</div>
+                        <div className="text-xs font-bold truncate mt-0.5 font-display">{sound.name}</div>
                       </div>
-
-                      <div className="text-right shrink-0 text-[10px] font-mono font-bold text-stone-500 mt-1.5">
-                        {item.doneCount} জন
-                      </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
             </div>
 
+            {/* Voice Recorder & Feed */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white dark:bg-[#1a1c22] border border-stone-200 dark:border-stone-800 rounded-3xl p-5 shadow-sm">
+                <h3 className="text-sm font-bold font-display flex items-center gap-2 mb-2">
+                  <Mic className="w-4 h-4 text-primary" />
+                  <span>কণ্ঠ চিরকুট রেকর্ড করুন</span>
+                </h3>
+                <div className="flex flex-col items-center justify-center py-6 bg-stone-50 dark:bg-stone-900 rounded-2xl border-2 border-dashed border-stone-200 dark:border-stone-700 mb-3">
+                  <button
+                    type="button"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer ${
+                      isRecording ? "bg-rose-600 text-white" : "bg-[#8B1538] text-white"
+                    }`}
+                  >
+                    {isRecording ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                  </button>
+                  <span className="text-sm font-bold font-display text-foreground mt-2">
+                    0:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds} / 0:45
+                  </span>
+                </div>
+
+                {recordedAudioUrl && (
+                  <div className="space-y-2.5">
+                    <audio src={recordedAudioUrl} controls className="w-full h-8" />
+                    <Input
+                      placeholder="নাম ও বিভাগ *"
+                      value={audioNoteAuthor}
+                      onChange={(e) => setAudioNoteAuthor(e.target.value)}
+                      className="h-8 text-xs rounded-xl"
+                    />
+                    <Input
+                      placeholder="চিরকুটের শিরোনাম *"
+                      value={audioNoteTitle}
+                      onChange={(e) => setAudioNoteTitle(e.target.value)}
+                      className="h-8 text-xs rounded-xl"
+                    />
+                    <Button onClick={handleSaveVoiceNote} className="w-full h-8 text-xs font-bold bg-[#8B1538] text-white">
+                      সংরক্ষণ করুন
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white dark:bg-[#1a1c22] border border-stone-200 dark:border-stone-800 rounded-3xl p-5 shadow-sm">
+                <h3 className="text-sm font-bold font-display flex items-center gap-2 mb-3">
+                  <Music className="w-4 h-4 text-primary" />
+                  <span>বন্ধুদের ক্যাসেট ফিতা</span>
+                </h3>
+                <div className="space-y-2.5">
+                  {voiceNotes.map((note) => (
+                    <div key={note.id} className="p-3 rounded-xl border border-stone-200 dark:border-stone-800 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold font-display">{note.title}</div>
+                        <div className="text-[10px] text-muted-foreground">{note.author} • {note.timeAgo}</div>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded">
+                        {note.duration}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 
         {/* ========================================================
-            TAB 4: POLAROID WALL & YEARBOOK HALL OF FAME
+            TAB 3: BATCH BUCKET LIST & CORKBOARD NOTES
+           ======================================================== */}
+        {activeTab === "bucket" && (
+          <div className="space-y-5 animate-in fade-in duration-200">
+            
+            <div className="rounded-2xl bg-[#EDE4D8] dark:bg-stone-800/80 p-4 sm:p-5 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 dark:text-stone-300">
+                  ৭০০ একর বাকেট ডায়েরি
+                </span>
+                <h3 className="text-base sm:text-lg font-black font-display text-stone-900 dark:text-stone-100">
+                  ক্যাম্পাস ছাড়ার আগে অন্তত একবার করতেই হবে!
+                </h3>
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
+                  সম্পন্ন হয়েছে: <strong className="text-foreground">{completedBucketCount}</strong> / {bucketItems.length} টি
+                </p>
+              </div>
+
+              <div className="text-right">
+                <span className="text-3xl font-black text-[#8B1538] dark:text-amber-400 font-display">
+                  {Math.round((completedBucketCount / Math.max(1, bucketItems.length)) * 100)}%
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddCustomBucket} className="flex gap-2 bg-white dark:bg-stone-800 p-2 rounded-xl border border-stone-200 dark:border-stone-700">
+              <Input
+                placeholder="নতুন বাকেট স্মৃতি যোগ করতে লিখুন..."
+                value={newBucketText}
+                onChange={(e) => setNewBucketText(e.target.value)}
+                className="h-9 text-xs border-0 focus-visible:ring-0 shadow-none"
+              />
+              <Button type="submit" size="sm" className="h-8 font-bold text-xs rounded-lg bg-[#8B1538] text-white">
+                যোগ করুন
+              </Button>
+            </form>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {bucketItems.map((item) => {
+                const isDone = !!userCheckedBuckets[item.id];
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => toggleBucketItem(item.id)}
+                    className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${item.color} ${
+                      isDone ? "opacity-80" : "hover:shadow-sm"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div className="mt-0.5 shrink-0">
+                        {isDone ? (
+                          <div className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">✓</div>
+                        ) : (
+                          <Circle className="w-4 h-4 text-stone-400" />
+                        )}
+                      </div>
+                      <div>
+                        <div className={`text-xs font-bold font-display ${isDone ? "line-through text-stone-500" : "text-stone-900"}`}>
+                          {item.text}
+                        </div>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/10 text-stone-700 mt-1 inline-block">
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-stone-500 shrink-0">
+                      {item.doneCount} জন
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 4: YEARBOOK HALL OF FAME
            ======================================================== */}
         {activeTab === "yearbook" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-5 animate-in fade-in duration-200">
             
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-display flex items-center gap-2">
+                <h3 className="text-base font-bold font-display flex items-center gap-2">
                   <Award className="w-5 h-5 text-amber-500" />
-                  <span>পোলারয়েড ওয়াল ও ব্যাচ হল অব ফেম</span>
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  ব্যাচের কে কেমন? বন্ধুদের মজার সব খেতাবে ভোট দিন ও নতুন নাম নমিনেট করুন
-                </p>
+                  <span>ব্যাচ ইয়ারবুক ও হল অব ফেম</span>
+                </h3>
+                <p className="text-xs text-muted-foreground">বন্ধুদের মজার সব খেতাবে ভোট দিন</p>
               </div>
 
               <Button
@@ -1440,92 +1238,46 @@ export default function MemoriesHub() {
                   setSelectedCatId(yearbook[0]?.id || "");
                   setNominateModalOpen(true);
                 }}
-                className="text-xs font-bold rounded-xl gap-1.5 shadow-sm bg-[#800020] hover:bg-[#68001a] text-white"
+                className="text-xs font-bold rounded-xl bg-[#8B1538] text-white"
               >
-                <Plus className="w-3.5 h-3.5" />
-                বন্ধু নমিনেট করুন
+                + বন্ধু নমিনেট
               </Button>
             </div>
 
-            {/* POLAROID STYLE CARDS WITH NATURAL ROTATIONAL JITTER */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {yearbook.map((cat) => (
-                <div
-                  key={cat.id}
-                  className={`relative bg-white dark:bg-[#1a1c22] border-2 border-stone-200 dark:border-stone-800 p-5 rounded-3xl shadow-lg flex flex-col justify-between group hover:rotate-0 hover:scale-102 hover:shadow-2xl transition-all duration-300 ${cat.rotation}`}
-                >
-                  {/* Washi Tape Strip at Top */}
-                  <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded text-[10px] font-bold text-white shadow-xs transform -rotate-1 z-10"
-                    style={{ backgroundColor: cat.tapeColor }}
-                  >
-                    JU-52 খেতাব
+                <div key={cat.id} className="bg-white dark:bg-[#1a1c22] border border-stone-200 dark:border-stone-800 p-4 rounded-2xl shadow-xs">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-2xl">{cat.emoji}</span>
+                    <h4 className="text-sm font-bold font-display">{cat.title}</h4>
                   </div>
+                  <p className="text-[11px] text-muted-foreground mb-3">{cat.description}</p>
 
-                  <div className="mt-2">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-3xl">{cat.emoji}</span>
-                      <h3 className="text-sm font-bold font-display text-stone-900 dark:text-stone-100">{cat.title}</h3>
-                    </div>
-                    <p className="text-xs text-stone-600 dark:text-stone-400 mb-4">{cat.description}</p>
-
-                    {/* Nominees List */}
-                    <div className="space-y-2">
-                      {cat.nominees.map((nom, idx) => {
-                        const voteKey = `${cat.id}_${nom.id}`;
-                        const isVoted = !!votedNominees[voteKey];
-                        return (
-                          <div
-                            key={nom.id}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-                              idx === 0
-                                ? "bg-amber-50 dark:bg-amber-950/40 border-amber-400"
-                                : "bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800"
+                  <div className="space-y-1.5">
+                    {cat.nominees.map((nom, idx) => {
+                      const voteKey = `${cat.id}_${nom.id}`;
+                      const isVoted = !!votedNominees[voteKey];
+                      return (
+                        <div key={nom.id} className="p-2 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800 flex items-center justify-between">
+                          <div className="truncate">
+                            <span className="text-xs font-bold text-foreground font-display">{nom.name}</span>
+                            <span className="text-[9px] text-muted-foreground ml-1.5">({nom.dept})</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleVoteNominee(cat.id, nom.id)}
+                            disabled={isVoted}
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 ${
+                              isVoted ? "bg-rose-600 text-white" : "bg-white border text-stone-700"
                             }`}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-xs font-black text-muted-foreground w-4">
-                                {idx === 0 ? "👑" : `#${idx + 1}`}
-                              </span>
-                              <div className="truncate">
-                                <div className="text-xs font-bold text-foreground truncate font-display">
-                                  {nom.name}
-                                </div>
-                                <div className="text-[9px] text-muted-foreground truncate">
-                                  {nom.dept}
-                                </div>
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => handleVoteNominee(cat.id, nom.id)}
-                              disabled={isVoted}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                                isVoted
-                                  ? "bg-rose-600 text-white shadow-xs"
-                                  : "bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 text-stone-800 dark:text-stone-200"
-                              }`}
-                            >
-                              <Heart className="w-3 h-3 fill-current" />
-                              <span>{nom.votes}</span>
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
+                            <Heart className="w-3 h-3 fill-current" />
+                            <span>{nom.votes}</span>
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCatId(cat.id);
-                      setNominateModalOpen(true);
-                    }}
-                    className="mt-4 pt-3 border-t border-dashed border-stone-200 dark:border-stone-800 text-[11px] font-bold text-[#800020] dark:text-amber-400 hover:underline text-center w-full"
-                  >
-                    + এই খেতাবে অন্য বন্ধুকে যোগ করুন
-                  </button>
                 </div>
               ))}
             </div>
@@ -1590,7 +1342,7 @@ export default function MemoriesHub() {
                 >
                   বাতিল
                 </Button>
-                <Button type="submit" className="bg-[#800020] text-white font-bold hover:bg-[#68001a]">
+                <Button type="submit" className="bg-[#8B1538] text-white font-bold hover:bg-[#68001a]">
                   নমিনেট করুন
                 </Button>
               </div>
