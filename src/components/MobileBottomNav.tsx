@@ -17,7 +17,10 @@ import {
   X,
   Video,
   Shirt,
+  Smartphone,
+  Download,
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface RadialItem {
   to: string;
@@ -121,6 +124,73 @@ export default function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // PWA Installation State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
+
+  useEffect(() => {
+    // Check if running in standalone mode (already installed)
+    const isRunningStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone;
+    setIsStandalone(Boolean(isRunningStandalone));
+
+    // Check if iOS device
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIosDevice);
+
+    // Listen for PWA install prompt
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (isStandalone) {
+      toast({
+        title: "ইতিমধ্যে ইনস্টল করা আছে! ✨",
+        description: "JU 52 অ্যাপটি আপনার ফোনে সক্রিয়ভাবে ইনস্টল রয়েছে।",
+      });
+      return;
+    }
+
+    if (isIOS) {
+      setShowIOSModal(true);
+      return;
+    }
+
+    if (deferredPrompt) {
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          toast({
+            title: "ইনস্টল সম্পন্ন হচ্ছে! 🎉",
+            description: "JU 52 অ্যাপটি আপনার হোমস্ক্রিনে যুক্ত হয়ে গেছে।",
+          });
+          setDeferredPrompt(null);
+          setIsOpen(false);
+        }
+      } catch (err) {
+        console.error("Install prompt error:", err);
+      }
+    } else {
+      toast({
+        title: "অ্যাপ ইনস্টল করতে:",
+        description: "ব্রাউজারের ৩-ডট (⋮) মেনু থেকে 'Install App' বা 'Add to Home screen' এ চাপুন।",
+      });
+    }
+  };
 
   // Close radial menu automatically on route change
   useEffect(() => {
@@ -276,7 +346,7 @@ export default function MobileBottomNav() {
       {/* ===== RADIAL OVERLAY MENU ===== */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[100] flex items-center justify-center select-none"
+          className="md:hidden fixed inset-0 z-[100] flex flex-col items-center justify-center select-none px-4"
           role="dialog"
           aria-modal="true"
           aria-label="সকল ফিচার ও শর্টকাট মেনু"
@@ -292,10 +362,10 @@ export default function MobileBottomNav() {
             initial={{ scale: 0.3, opacity: 0, y: 60 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 340, damping: 26 }}
-            className="relative rounded-full aspect-square bg-card dark:bg-card border border-border/80 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.4)] flex items-center justify-center pointer-events-auto"
+            className="relative rounded-full aspect-square bg-card dark:bg-card border border-border/80 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.4)] flex items-center justify-center pointer-events-auto shrink-0"
             style={{
-              width: "min(360px, 92vw)",
-              height: "min(360px, 92vw)",
+              width: "min(340px, 86vw)",
+              height: "min(340px, 86vw)",
             }}
           >
               {/* Outer decorative dotted boundary */}
@@ -306,13 +376,13 @@ export default function MobileBottomNav() {
                 const total = RADIAL_ITEMS.length;
                 const angleDeg = -90 + (360 / total) * index;
                 const angleRad = (angleDeg * Math.PI) / 180;
-                // Exact radial distance in pixels (fits evenly within 360px diameter)
-                const distance = 118;
+                // Exact radial distance in pixels (fits evenly within 340px diameter)
+                const distance = 112;
                 const targetX = Math.round(Math.cos(angleRad) * distance);
                 const targetY = Math.round(Math.sin(angleRad) * distance);
 
-                const itemSize = 64; // px
-                const halfSize = itemSize / 2; // 32px
+                const itemSize = 62; // px
+                const halfSize = itemSize / 2; // 31px
 
                 const Icon = item.icon;
                 const isActive = location.pathname === item.to;
@@ -375,8 +445,72 @@ export default function MobileBottomNav() {
                 </span>
               </button>
             </motion.div>
+
+            {/* PWA INSTALL ACTION BUTTON (UNDER WHEEL DIAL) */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="relative z-20 mt-4 sm:mt-5 flex flex-col items-center gap-1.5 pointer-events-auto max-w-xs text-center"
+            >
+              <button
+                type="button"
+                onClick={handleInstallClick}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-stone-950 font-display font-extrabold text-xs shadow-lg shadow-amber-500/25 border border-white/40 active:scale-95 transition-all cursor-pointer"
+              >
+                <Smartphone className="w-4 h-4 text-stone-900" />
+                <span>JU 52 অ্যাপ ফোনে ইনস্টল করুন</span>
+                <Download className="w-3.5 h-3.5 text-stone-900" />
+              </button>
+              <span className="text-[11px] text-white/75 font-medium">
+                প্লে-স্টোর ছাড়াই সরাসরি ফোনে অ্যাপ সেভ হবে
+              </span>
+            </motion.div>
           </div>
         )}
+
+      {/* iOS Safari Install Guide Modal */}
+      {showIOSModal && (
+        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in select-none">
+          <div className="bg-card dark:bg-[#1a1c24] border border-border/80 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative">
+            <button
+              onClick={() => setShowIOSModal(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 text-amber-500 mx-auto flex items-center justify-center mb-3">
+              <Smartphone className="w-7 h-7" />
+            </div>
+
+            <h3 className="font-display font-bold text-lg text-foreground mb-1">
+              আইফোনে JU 52 অ্যাপ ইনস্টল করুন
+            </h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              কোনো অ্যাপ স্টোর ছাড়াই মাত্র ২ ক্লিকে হোমস্ক্রিনে সেভ করুন
+            </p>
+
+            <div className="space-y-3 text-left bg-muted/60 rounded-2xl p-4 text-xs font-medium text-foreground mb-4">
+              <div className="flex items-center gap-3">
+                <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">১</span>
+                <span>Safari ব্রাউজারের নিচে <strong>Share (শেয়ার)</strong> আইকনে চাপ দিন</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
+                <span>মেনু থেকে <strong>"Add to Home Screen" (+)</strong> এ ট্যাপ করুন</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowIOSModal(false)}
+              className="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-xs cursor-pointer hover:bg-primary/90 transition-all shadow-md"
+            >
+              বুঝেছি ✓
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
