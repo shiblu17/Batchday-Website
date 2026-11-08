@@ -37,7 +37,13 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 export default function Navbar() {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const isMemories = location.pathname === "/memories";
   const isFeatureActive = featureItems.some((f) => location.pathname === f.to);
+
+  // Do not render top capsule header on /memories page
+  if (isMemories) {
+    return <MobileBottomNav />;
+  }
 
   return (
     <>

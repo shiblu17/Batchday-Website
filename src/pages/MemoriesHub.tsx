@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   Sparkles,
   Utensils,
@@ -36,6 +37,7 @@ import {
   Camera,
   Layers,
   Sparkle,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1005,6 +1007,18 @@ export default function MemoriesHub() {
       {/* AUTHENTIC BENGALI TERRACOTTA ALPONA BORDERS ON SIDES (MATCHING USER SCREENSHOT) */}
       <TerracottaSideBorder side="left" />
       <TerracottaSideBorder side="right" />
+
+      {/* DISCREET BACK TO HOME BUTTON */}
+      <div className="absolute top-2.5 left-4 sm:left-7 z-30">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#EDE3D5]/90 dark:bg-stone-800/90 text-stone-700 dark:text-stone-300 text-xs font-bold shadow-xs border border-[#DFD3C1] dark:border-stone-700 hover:text-[#701222] hover:bg-white transition-all cursor-pointer"
+          title="হোমে ফিরে যান"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline font-display">হোম</span>
+        </Link>
+      </div>
 
       {/* ===== 1. TOP TAB SWITCHER (4-COLUMN EQUAL GRID, 100% FITTED ON MOBILE, NO HORIZONTAL SCROLL) ===== */}
       <div className="container max-w-sm sm:max-w-md mx-auto px-4 mb-4 sm:mb-6 relative z-20">
