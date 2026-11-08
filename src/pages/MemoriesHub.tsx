@@ -89,33 +89,44 @@ const TerracottaSideBorder = ({ side }: { side: "left" | "right" }) => (
 );
 
 // ==========================================
-// 1.1 CENTRAL MANDALA WATERMARK
+// 1.1 CENTRAL MANDALA WATERMARK (DELICATE, FAINT, ELEGANT TRADITIONAL ALPONA)
 // ==========================================
 const CenterMandalaPattern = () => (
-  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-80 sm:h-80 pointer-events-none select-none text-[#C49A6C] opacity-35 dark:opacity-20 z-0">
-    <svg viewBox="0 0 300 300" className="w-full h-full" fill="none">
-      <circle cx="150" cy="150" r="140" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" />
-      <circle cx="150" cy="150" r="126" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="150" cy="150" r="112" stroke="currentColor" strokeWidth="1" strokeDasharray="2 4" />
-      <circle cx="150" cy="150" r="98" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="150" cy="150" r="74" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
-      
-      {/* 16 Radiating Lotus Petals */}
+  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-68 h-68 sm:w-84 sm:h-84 pointer-events-none select-none z-0">
+    <svg viewBox="0 0 320 320" className="w-full h-full text-[#B58248] opacity-20 dark:opacity-15" fill="none">
+      {/* Concentric rings */}
+      <circle cx="160" cy="160" r="148" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3 3" />
+      <circle cx="160" cy="160" r="134" stroke="currentColor" strokeWidth="1" />
+      <circle cx="160" cy="160" r="120" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 3" />
+      <circle cx="160" cy="160" r="102" stroke="currentColor" strokeWidth="1.2" />
+      <circle cx="160" cy="160" r="82" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3 3" />
+      <circle cx="160" cy="160" r="68" stroke="currentColor" strokeWidth="1" />
+
+      {/* 16 Graceful Lotus Petals (Curved Alpona Motif, No Harsh Spoke Lines) */}
       {[0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5].map((deg) => (
-        <g key={deg} transform={`rotate(${deg} 150 150)`}>
-          <path d="M150 20 C158 50, 165 70, 150 95 C135 70, 142 50, 150 20 Z" fill="currentColor" opacity="0.38" />
-          <circle cx="150" cy="15" r="3" fill="currentColor" opacity="0.7" />
-          <path d="M150 95 L150 118" stroke="currentColor" strokeWidth="1.2" />
+        <g key={deg} transform={`rotate(${deg} 160 160)`}>
+          <path
+            d="M160 26 C168 56, 174 84, 160 102 C146 84, 152 56, 160 26 Z"
+            fill="currentColor"
+            opacity="0.3"
+          />
+          <circle cx="160" cy="22" r="2" fill="currentColor" opacity="0.6" />
         </g>
       ))}
 
-      {/* 16 Secondary Inner Petals */}
+      {/* 16 Secondary Soft Inner Scallop Petals */}
       {[11.25, 33.75, 56.25, 78.75, 101.25, 123.75, 146.25, 168.75, 191.25, 213.75, 236.25, 258.75, 281.25, 303.75, 326.25, 348.75].map((deg) => (
-        <g key={deg} transform={`rotate(${deg} 150 150)`}>
-          <path d="M150 44 C155 64, 160 80, 150 95 C140 80, 145 64, 150 44 Z" fill="currentColor" opacity="0.22" />
-          <circle cx="150" cy="40" r="2" fill="currentColor" opacity="0.6" />
+        <g key={deg} transform={`rotate(${deg} 160 160)`}>
+          <path
+            d="M160 52 C165 72, 170 88, 160 102 C150 88, 155 72, 160 52 Z"
+            fill="currentColor"
+            opacity="0.2"
+          />
         </g>
       ))}
+
+      {/* Outer Fine Scalloped Ring */}
+      <circle cx="160" cy="160" r="140" stroke="currentColor" strokeWidth="0.6" strokeDasharray="4 4" />
     </svg>
   </div>
 );
@@ -989,49 +1000,42 @@ export default function MemoriesHub() {
   const completedBucketCount = Object.values(userCheckedBuckets).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-2 md:pt-4 transition-colors select-none font-body relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#121318] text-[#2c241e] dark:text-[#f0eae1] pb-32 pt-4 sm:pt-6 transition-colors select-none font-body relative overflow-x-hidden">
       
       {/* AUTHENTIC BENGALI TERRACOTTA ALPONA BORDERS ON SIDES (MATCHING USER SCREENSHOT) */}
       <TerracottaSideBorder side="left" />
       <TerracottaSideBorder side="right" />
 
-      {/* SUBTLE CORNER TRADITIONAL ACCENTS */}
-      <div className="absolute top-2 right-4 sm:right-8 opacity-25 text-amber-700 pointer-events-none select-none text-base">
-        ❖ ❖
-      </div>
-      <div className="absolute top-2 left-4 sm:left-8 opacity-25 text-amber-700 pointer-events-none select-none text-base">
-        ❖ ❖
-      </div>
-
-      {/* ===== MINI SEGMENTED TAB SWITCHER ===== */}
-      <div className="container max-w-xl mx-auto px-4 mb-3 relative z-20">
-        <div className="flex items-center justify-center overflow-x-auto no-scrollbar py-1">
-          <div className="inline-flex items-center bg-[#EDE4D8] dark:bg-stone-800/90 p-1 rounded-xl shadow-xs gap-1 border border-stone-200/60 dark:border-stone-700">
-            {[
-              { id: "bottola", label: "বটতলা খাদ্য বিলাস", icon: Utensils },
-              { id: "audio", label: "রেট্রো ক্যাসেট", icon: Disc },
-              { id: "bucket", label: "বাকেট ডায়েরি", icon: Pin },
-              { id: "yearbook", label: "হল অব ফেম", icon: Trophy },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    isActive
-                      ? "bg-[#701222] text-white shadow-xs"
-                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-black/5"
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-300" : ""}`} />
-                  <span className="font-display">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+      {/* FLOATING BOTTOM NAV DOCK (DISCREET, MOBILE-FRIENDLY, ZERO CLUTTER AT TOP) */}
+      <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[94vw]">
+        <div className="flex items-center bg-[#FAF6F0]/95 dark:bg-[#1a1b22]/95 backdrop-blur-md px-2 py-1.5 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.14)] border border-[#E2D6C6] dark:border-stone-700 gap-1">
+          {[
+            { id: "bottola", label: "বটতলা", icon: Utensils },
+            { id: "audio", label: "ক্যাসেট", icon: Disc },
+            { id: "bucket", label: "বাকেট লিস্ট", icon: Pin },
+            { id: "yearbook", label: "হল অব ফেম", icon: Trophy },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id as any);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? "bg-[#701222] text-white shadow-sm ring-1 ring-amber-400/40"
+                    : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-black/5"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-300" : ""}`} />
+                <span className="font-display">{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1044,22 +1048,27 @@ export default function MemoriesHub() {
         {activeTab === "bottola" && (
           <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
             
-            {/* 1.1 TOP SECTION (EXACT REPLICA OF USER UPLOADED SCREENSHOT) */}
-            <div className="text-center pt-1">
+            {/* 1.1 TOP SECTION (CLEAN, ELEGANT & PERFECTLY BALANCED) */}
+            <div className="text-center pt-2 sm:pt-4 relative">
               
+              {/* Corner Traditional Diamond Motif */}
+              <div className="absolute top-2 right-1 sm:right-2 opacity-30 text-amber-700 pointer-events-none select-none text-xs sm:text-sm">
+                ❖
+              </div>
+
               {/* Curved Maroon Tag */}
-              <div className="inline-flex items-center justify-center px-4 sm:px-5 py-1.5 rounded-full bg-[#701222] text-white text-xs sm:text-sm font-bold shadow-sm tracking-wide border border-amber-500/30">
+              <div className="inline-flex items-center justify-center px-4 sm:px-5 py-1.5 rounded-full bg-[#701222] text-white text-xs sm:text-sm font-bold shadow-xs tracking-wide border border-amber-400/30">
                 <span>জাহাঙ্গীরনগর বিশ্ববিদ্যালয় • বটতলা বাঙালির ঐতিহ্য</span>
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-2xl sm:text-4xl font-black font-display text-[#701222] dark:text-[#f87171] flex items-center justify-center gap-2 mt-2.5 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black font-display text-[#701222] dark:text-[#f87171] flex items-center justify-center gap-2 mt-3 tracking-tight">
                 <span>{vortaTitle}</span>
               </h1>
 
-              {/* Subtitle */}
-              <p className="text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-300 mt-1 max-w-md mx-auto leading-relaxed">
-                ৫২টি ক্রাফটিং করার জন্য আপনি <strong className="text-stone-900 dark:text-stone-100 font-bold">{vortaCount}টি ট্রাই করেছেন</strong> (অফিসিয়াল চ্যাটও! যারা ট্রাই করেননি!)
+              {/* Subtitle - Clean, Natural, Perfectly Balanced */}
+              <p className="text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-300 mt-1.5 max-w-sm mx-auto leading-relaxed">
+                ১২টি ঐতিহ্যবাহী পদের মধ্যে আপনি <strong className="text-stone-900 dark:text-stone-100 font-bold">{vortaCount}টি টেস্ট করেছেন</strong>
               </p>
 
               {/* Glowing Concentric Circular Badge with Central Mandala Watermark */}
@@ -1068,17 +1077,17 @@ export default function MemoriesHub() {
                 <CenterMandalaPattern />
 
                 {/* Outer Golden Glow */}
-                <div className="absolute w-36 h-36 rounded-full bg-amber-400/35 blur-2xl pointer-events-none z-10" />
+                <div className="absolute w-32 h-32 rounded-full bg-amber-400/25 blur-xl pointer-events-none z-10" />
 
                 {/* Golden Gradient Ring */}
-                <div className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-300 to-amber-500 shadow-xl flex items-center justify-center">
+                <div className="relative z-10 w-28 h-28 sm:w-30 sm:h-30 rounded-full p-1 bg-gradient-to-tr from-[#D9822B] via-[#F6D06F] to-[#C06D1E] shadow-[0_4px_20px_rgba(217,130,43,0.3)] flex items-center justify-center">
                   
                   {/* Deep Maroon Circle */}
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-[#800020] via-[#650019] to-[#3b0110] flex flex-col items-center justify-center text-white border-2 border-amber-300/40 shadow-inner">
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-[#7D1526] via-[#610E1D] to-[#3B0711] flex flex-col items-center justify-center text-white border border-amber-300/30 shadow-inner px-2 py-1">
                     <span className="text-3xl sm:text-4xl font-black font-display tracking-tight text-white leading-none">
                       {vortaCount}/12
                     </span>
-                    <span className="text-[11px] font-bold text-amber-200 mt-1 uppercase tracking-wider">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-amber-200 mt-1 uppercase tracking-wider text-center">
                       টেস্ট করেছেন
                     </span>
                   </div>
@@ -1093,7 +1102,7 @@ export default function MemoriesHub() {
                 <span className="text-xs sm:text-sm font-bold text-[#3B2C22] dark:text-stone-200 font-display">
                   ভর্তার নাম (ক্লিক করে "টেস্টেড" করতে স্ট্যাম্প দিন):
                 </span>
-                <span className="bg-[#EA6825] text-white text-xs font-black px-3.5 py-1 rounded-full shadow-xs tracking-wide">
+                <span className="bg-[#EA6825] text-white text-xs font-black px-3.5 py-1 rounded-full shadow-xs tracking-wide shrink-0">
                   স্কোর: {Math.round((vortaCount / 12) * 100)}%
                 </span>
               </div>
