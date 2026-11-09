@@ -19,6 +19,8 @@ import {
   Shirt,
   Smartphone,
   Download,
+  RotateCw,
+  Copy,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -192,7 +194,7 @@ export default function MobileBottomNav() {
   }, []);
 
   const handleInstallClick = useCallback(async () => {
-    // Check if running in standalone mode (already installed)
+    // 1. Check if running in standalone mode (already installed)
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone ||
@@ -206,20 +208,64 @@ export default function MobileBottomNav() {
       return;
     }
 
-    // iOS users guide
+    // 2. Check if already installed via getInstalledRelatedApps
+    if ("getInstalledRelatedApps" in navigator) {
+      try {
+        const apps = await (navigator as any).getInstalledRelatedApps();
+        if (apps && apps.length > 0) {
+          (window as any).__pwaInstalled = true;
+          setIsStandalone(true);
+          toast({
+            title: "ইতিমধ্যে ইনস্টল করা আছে! 🎉",
+            description: "JU 52 অ্যাপটি আপনার ডিভাইসে সক্রিয় রয়েছে। আপনার অ্যাপ তালিকা বা হোমস্ক্রিন থেকে সরাসরি খুলতে পারবেন।",
+          });
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // 3. iOS users guide
     if (isIOS) {
       setShowIOSModal(true);
       return;
     }
 
-    // In-app browsers (Facebook, Messenger) block native install prompt
+    // 4. In-app browsers (Facebook, Messenger) block native install prompt
     if (isInAppBrowser) {
       setShowGuideModal(true);
       return;
     }
 
-    const promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
+    // 5. Check if promptEvent is ready or wait briefly (up to 2.2s) for Chrome to finish PWA verification
+    let promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
 
+    if (!promptEvent) {
+      promptEvent = await new Promise<any>((resolve) => {
+        let isDone = false;
+        const timer = setTimeout(() => {
+          if (!isDone) {
+            isDone = true;
+            window.removeEventListener("pwa-prompt-ready", onReady);
+            resolve((window as any).__deferredPwaPrompt || null);
+          }
+        }, 2200);
+
+        const onReady = () => {
+          if (!isDone) {
+            isDone = true;
+            clearTimeout(timer);
+            window.removeEventListener("pwa-prompt-ready", onReady);
+            resolve((window as any).__deferredPwaPrompt || null);
+          }
+        };
+
+        window.addEventListener("pwa-prompt-ready", onReady, { once: true });
+      });
+    }
+
+    // 6. If promptEvent acquired, prompt user immediately
     if (promptEvent) {
       try {
         await promptEvent.prompt();
@@ -234,6 +280,7 @@ export default function MobileBottomNav() {
           (window as any).__pwaInstalled = true;
           setIsStandalone(true);
           setIsOpen(false);
+          setShowGuideModal(false);
         }
       } catch (err) {
         console.error("Install prompt error:", err);
@@ -611,7 +658,7 @@ export default function MobileBottomNav() {
               onClick={() => setShowIOSModal(false)}
               className="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-xs cursor-pointer hover:bg-primary/90 transition-all shadow-md"
             >
-              বুঝেছি ✓
+              ঠিক আছে ✕
             </button>
           </div>
         </div>
@@ -633,15 +680,15 @@ export default function MobileBottomNav() {
             </div>
 
             <h3 className="font-display font-bold text-lg text-foreground mb-1">
-              {isInAppBrowser ? "ক্রোম ব্রাউজারে খুলুন" : "অ্যাপ ইনস্টল করুন"}
+              {isInAppBrowser ? "ক্রোম ব্রাউজারে খুলুন" : "ব্রাউজার থেকে ইনস্টল করুন"}
             </h3>
             <p className="text-xs text-muted-foreground mb-4">
               {isInAppBrowser
                 ? "ফেসবুক/মেসেঞ্জারের ভেতরে সরাসরি ইনস্টল ব্লক থাকে"
-                : "সহজেই হোমস্ক্রিনে JU 52 অ্যাপ যুক্ত করুন"}
+                : "ব্রাউজারে সরাসরি পপআপ না এলে নিচের ২ সেকেন্ডের সহজ নিয়মটি দেখুন:"}
             </p>
 
-            <div className="space-y-3 text-left bg-muted/60 rounded-2xl p-4 text-xs font-medium text-foreground mb-4">
+            <div className="space-y-3 text-left bg-muted/60 rounded-2xl p-4 text-xs font-medium text-foreground mb-3">
               {isInAppBrowser ? (
                 <>
                   <div className="flex items-center gap-3">
@@ -652,31 +699,57 @@ export default function MobileBottomNav() {
                     <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
                     <span><strong>"Open in Chrome"</strong> বা <strong>"External Browser"</strong> এ ট্যাপ করুন</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">৩</span>
-                    <span>এরপর এই ইনস্টল বাটনে চাপলেই ইনস্টল হয়ে যাবে!</span>
-                  </div>
                 </>
               ) : (
                 <>
                   <div className="flex items-center gap-3">
                     <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">১</span>
-                    <span>ব্রাউজারের ডানদিকের <strong>৩-ডট (⋮)</strong> মেনুতে চাপ দিন</span>
+                    <span>ব্রাউজারের উপরে ডানদিকের <strong>৩-ডট (⋮)</strong> মেনুতে চাপ দিন</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
-                    <span><strong>"Install App"</strong> বা <strong>"Add to Home screen"</strong> এ চাপুন</span>
+                    <span>মেনুতে <strong>"Install app"</strong> (অথবা ফোনে ইতিমধ্যে থাকলে <strong>"Open in JU 52"</strong>) এ চাপুন</span>
                   </div>
                 </>
               )}
             </div>
 
-            <button
-              onClick={() => setShowGuideModal(false)}
-              className="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-xs cursor-pointer hover:bg-primary/90 transition-all shadow-md"
-            >
-              বুঝেছি ✓
-            </button>
+            <div className="space-y-2 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuideModal(false);
+                  handleInstallClick();
+                }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-stone-950 font-display font-extrabold text-xs cursor-pointer hover:brightness-105 active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5"
+              >
+                <RotateCw className="w-3.5 h-3.5" />
+                <span>আবার ইনস্টল চেষ্টা করুন</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.origin);
+                  toast({
+                    title: "লিংক কপি করা হয়েছে! 📋",
+                    description: "Google Chrome ব্রাউজারে লিংকটি পেস্ট করে সহজে ইনস্টল করতে পারেন।",
+                  });
+                }}
+                className="w-full py-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-semibold text-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>সাইট লিংক কপি করুন</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(false)}
+                className="w-full py-2 rounded-xl text-muted-foreground hover:text-foreground font-medium text-xs cursor-pointer transition-all"
+              >
+                ঠিক আছে, বন্ধ করুন ✕
+              </button>
+            </div>
           </div>
         </div>
       )}

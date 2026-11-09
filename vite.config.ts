@@ -20,11 +20,11 @@ export default defineConfig({
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        id: '/',
         start_url: '/',
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
+        prefer_related_applications: false,
         name: 'JU 52nd Batch Day',
         short_name: 'JU 52',
         description: 'Jahangirnagar University 52nd Batch Day Celebration',
