@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, CalendarDays, MapPin, ShieldCheck,
   Settings, Clock, ChevronRight, Music, Laptop, ArrowRight, Sparkles, Share2, Loader2,
-  Heart, Phone, Smartphone, Download
+  Heart, Phone
 } from "lucide-react";
 import EventTimeline from "@/components/EventTimeline";
 import LeaderboardCard from "@/components/LeaderboardCard";
@@ -187,30 +187,6 @@ export default function Index() {
               >
                 Check Status
               </Link>
-
-              {/* DIRECT APK / PWA DOWNLOAD BUTTON */}
-              {typeof window !== "undefined" &&
-                !(
-                  window.matchMedia("(display-mode: standalone)").matches ||
-                  (window.navigator as any).standalone ||
-                  window.navigator.userAgent.toLowerCase().includes("ju52app")
-                ) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if ((window as any).__triggerPwaInstall) {
-                        (window as any).__triggerPwaInstall();
-                      } else {
-                        window.dispatchEvent(new CustomEvent("trigger-pwa-install"));
-                      }
-                    }}
-                    className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-display font-extrabold text-base shadow-lg shadow-amber-400/25 border border-white/40 transition-all hover:scale-105 active:scale-[0.98] cursor-pointer"
-                  >
-                    <Smartphone className="h-5 w-5 text-stone-950" />
-                    <span>JU 52 অ্যাপ ডাউনলোড করুন</span>
-                    <Download className="h-4 w-4 text-stone-950" />
-                  </button>
-                )}
             </motion.div>
           </motion.div>
         </div>
