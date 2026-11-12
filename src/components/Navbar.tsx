@@ -15,7 +15,6 @@ import {
   Video,
   Shirt,
   GraduationCap,
-  Smartphone,
   Download,
 } from "lucide-react";
 import {
@@ -186,23 +185,28 @@ export default function Navbar() {
 
           {/* Action Buttons (Right) */}
           <div className="relative z-10 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  if ((window as any).__triggerPwaInstall) {
-                    (window as any).__triggerPwaInstall();
-                  } else {
-                    window.dispatchEvent(new CustomEvent("trigger-pwa-install"));
-                  }
-                }
-              }}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white/15 hover:bg-white/25 text-white font-display font-bold text-xs shadow-md border border-white/25 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
-              title="JU 52 অ্যাপ ইনস্টল করুন"
-            >
-              <Smartphone className="w-3.5 h-3.5 text-amber-300" />
-              <span>অ্যাপ ইনস্টল</span>
-            </button>
+            {typeof window !== "undefined" &&
+              !(
+                window.matchMedia("(display-mode: standalone)").matches ||
+                (window.navigator as any).standalone ||
+                window.navigator.userAgent.toLowerCase().includes("ju52app")
+              ) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if ((window as any).__triggerPwaInstall) {
+                      (window as any).__triggerPwaInstall();
+                    } else {
+                      window.dispatchEvent(new CustomEvent("trigger-pwa-install"));
+                    }
+                  }}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white/15 hover:bg-white/25 text-white font-display font-bold text-xs shadow-md border border-white/25 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                  title="JU 52 অ্যাপ ডাউনলোড করুন"
+                >
+                  <Download className="w-3.5 h-3.5 text-amber-300" />
+                  <span>অ্যাপ ডাউনলোড</span>
+                </button>
+              )}
 
             <Link
               to="/register"

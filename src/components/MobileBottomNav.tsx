@@ -19,8 +19,6 @@ import {
   Shirt,
   Smartphone,
   Download,
-  RotateCw,
-  Copy,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -121,32 +119,39 @@ const RADIAL_ITEMS: RadialItem[] = [
   },
 ];
 
+const APK_DOWNLOAD_URL =
+  "https://github.com/shiblu17/Batchday-Website/releases/download/app-latest/JU-52.apk";
+
 export default function MobileBottomNav() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // PWA Installation State
+  // PWA & APK Installation State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);
-  const [showGuideModal, setShowGuideModal] = useState(false);
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   const [isFloatingDismissed, setIsFloatingDismissed] = useState(false);
 
   useEffect(() => {
-    // Check if running in standalone mode (already installed)
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isNativeApp = userAgent.includes("ju52app");
+    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+    const isAndroidDevice = userAgent.includes("android");
+
+    setIsIOS(isIosDevice);
+    setIsAndroid(isAndroidDevice);
+
+    // Check if running inside installed PWA or Android WebView APK
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone ||
-      Boolean((window as any).__pwaInstalled);
+      Boolean((window as any).__pwaInstalled) ||
+      isNativeApp;
     setIsStandalone(Boolean(isRunningStandalone));
-
-    // Check if iOS device
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isIosDevice);
 
     // Detect if inside in-app browser (Facebook, Messenger, Instagram)
     const inApp =
@@ -193,79 +198,55 @@ export default function MobileBottomNav() {
     };
   }, []);
 
+  const triggerApkDownload = useCallback(() => {
+    if (isInAppBrowser) {
+      window.open(APK_DOWNLOAD_URL, "_blank", "noopener,noreferrer");
+    } else {
+      const link = document.createElement("a");
+      link.href = APK_DOWNLOAD_URL;
+      link.setAttribute("download", "JU-52.apk");
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    setIsOpen(false);
+    toast({
+      title: "JU 52 অ্যাপ ডাউনলোড শুরু হয়েছে! 📥",
+      description: "ডাউনলোড শেষ হলে নোটিফিকেশন থেকে JU-52.apk ফাইলে ট্যাপ করে Install চাপুন।",
+    });
+  }, [isInAppBrowser]);
+
   const handleInstallClick = useCallback(async () => {
-    // 1. Check if running in standalone mode (already installed)
+    const ua = window.navigator.userAgent.toLowerCase();
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone ||
-      Boolean((window as any).__pwaInstalled);
+      Boolean((window as any).__pwaInstalled) ||
+      ua.includes("ju52app");
 
     if (isRunningStandalone) {
       toast({
         title: "ইতিমধ্যে ইনস্টল করা আছে! ✨",
-        description: "JU 52 অ্যাপটি আপনার ফোনে সক্রিয়ভাবে ইনস্টল রয়েছে।",
+        description: "আপনি এখন সরাসরি JU 52 অ্যাপ থেকেই এটি ব্যবহার করছেন।",
       });
       return;
     }
 
-    // 2. Check if already installed via getInstalledRelatedApps
-    if ("getInstalledRelatedApps" in navigator) {
-      try {
-        const apps = await (navigator as any).getInstalledRelatedApps();
-        if (apps && apps.length > 0) {
-          (window as any).__pwaInstalled = true;
-          setIsStandalone(true);
-          toast({
-            title: "ইতিমধ্যে ইনস্টল করা আছে! 🎉",
-            description: "JU 52 অ্যাপটি আপনার ডিভাইসে সক্রিয় রয়েছে। আপনার অ্যাপ তালিকা বা হোমস্ক্রিন থেকে সরাসরি খুলতে পারবেন।",
-          });
-          return;
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    // 3. iOS users guide
+    // iOS devices cannot install .apk files — show Safari 2-step guide
     if (isIOS) {
       setShowIOSModal(true);
       return;
     }
 
-    // 4. In-app browsers (Facebook, Messenger) block native install prompt
-    if (isInAppBrowser) {
-      setShowGuideModal(true);
+    // Android devices: auto-download real signed APK immediately on tap (works in every browser)
+    if (isAndroid || ua.includes("android")) {
+      triggerApkDownload();
       return;
     }
 
-    // 5. Check if promptEvent is ready or wait briefly (up to 2.2s) for Chrome to finish PWA verification
-    let promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
-
-    if (!promptEvent) {
-      promptEvent = await new Promise<any>((resolve) => {
-        let isDone = false;
-        const timer = setTimeout(() => {
-          if (!isDone) {
-            isDone = true;
-            window.removeEventListener("pwa-prompt-ready", onReady);
-            resolve((window as any).__deferredPwaPrompt || null);
-          }
-        }, 2200);
-
-        const onReady = () => {
-          if (!isDone) {
-            isDone = true;
-            clearTimeout(timer);
-            window.removeEventListener("pwa-prompt-ready", onReady);
-            resolve((window as any).__deferredPwaPrompt || null);
-          }
-        };
-
-        window.addEventListener("pwa-prompt-ready", onReady, { once: true });
-      });
-    }
-
-    // 6. If promptEvent acquired, prompt user immediately
+    // Desktop browsers: trigger native PWA install prompt if available, otherwise download APK
+    const promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
     if (promptEvent) {
       try {
         await promptEvent.prompt();
@@ -273,23 +254,22 @@ export default function MobileBottomNav() {
         if (outcome === "accepted") {
           toast({
             title: "ইনস্টল সম্পন্ন হচ্ছে! 🎉",
-            description: "JU 52 অ্যাপটি আপনার হোমস্ক্রিনে যুক্ত হয়ে গেছে।",
+            description: "JU 52 অ্যাপটি আপনার ডিভাইসে যুক্ত হয়ে গেছে।",
           });
           setDeferredPrompt(null);
           (window as any).__deferredPwaPrompt = null;
           (window as any).__pwaInstalled = true;
           setIsStandalone(true);
           setIsOpen(false);
-          setShowGuideModal(false);
         }
+        return;
       } catch (err) {
         console.error("Install prompt error:", err);
-        setShowGuideModal(true);
       }
-    } else {
-      setShowGuideModal(true);
     }
-  }, [deferredPrompt, isIOS, isInAppBrowser]);
+
+    triggerApkDownload();
+  }, [deferredPrompt, isIOS, isAndroid, triggerApkDownload]);
 
   // Expose global trigger for PWA install so any button across the app can trigger it
   useEffect(() => {
@@ -479,7 +459,7 @@ export default function MobileBottomNav() {
               className="font-display font-extrabold text-amber-300 hover:text-amber-200 active:scale-95 transition-transform flex items-center gap-1.5 cursor-pointer"
             >
               <Smartphone className="w-3.5 h-3.5 text-amber-400" />
-              <span>JU 52 অ্যাপ ইনস্টল করুন</span>
+              <span>{isIOS ? "JU 52 অ্যাপ ইনস্টল করুন" : "JU 52 অ্যাপ ডাউনলোড করুন"}</span>
               <Download className="w-3 h-3 text-amber-400" />
             </button>
             <button
@@ -598,26 +578,30 @@ export default function MobileBottomNav() {
               </button>
             </motion.div>
 
-            {/* PWA INSTALL ACTION BUTTON (UNDER WHEEL DIAL) */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="relative z-20 mt-4 sm:mt-5 flex flex-col items-center gap-1.5 pointer-events-auto max-w-xs text-center"
-            >
-              <button
-                type="button"
-                onClick={handleInstallClick}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-stone-950 font-display font-extrabold text-xs shadow-lg shadow-amber-500/25 border border-white/40 active:scale-95 transition-all cursor-pointer"
+            {/* PWA / APK INSTALL ACTION BUTTON (UNDER WHEEL DIAL) */}
+            {!isStandalone && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="relative z-20 mt-4 sm:mt-5 flex flex-col items-center gap-1.5 pointer-events-auto max-w-xs text-center"
               >
-                <Smartphone className="w-4 h-4 text-stone-900" />
-                <span>JU 52 অ্যাপ ফোনে ইনস্টল করুন</span>
-                <Download className="w-3.5 h-3.5 text-stone-900" />
-              </button>
-              <span className="text-[11px] text-white/75 font-medium">
-                প্লে-স্টোর ছাড়াই সরাসরি ফোনে অ্যাপ সেভ হবে
-              </span>
-            </motion.div>
+                <button
+                  type="button"
+                  onClick={handleInstallClick}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-stone-950 font-display font-extrabold text-xs shadow-lg shadow-amber-500/25 border border-white/40 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Smartphone className="w-4 h-4 text-stone-900" />
+                  <span>{isIOS ? "JU 52 অ্যাপ ফোনে ইনস্টল করুন" : "JU 52 অ্যাপ ডাউনলোড করুন (APK)"}</span>
+                  <Download className="w-3.5 h-3.5 text-stone-900" />
+                </button>
+                <span className="text-[11px] text-white/75 font-medium">
+                  {isIOS
+                    ? "প্লে-স্টোর ছাড়াই সরাসরি হোমস্ক্রিনে সেভ হবে"
+                    : "ক্লিক করলেই সরাসরি ফোনে অ্যাপ ডাউনলোড শুরু হবে"}
+                </span>
+              </motion.div>
+            )}
           </div>
         )}
 
@@ -660,96 +644,6 @@ export default function MobileBottomNav() {
             >
               ঠিক আছে ✕
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Android / In-App Browser Guide Modal */}
-      {showGuideModal && (
-        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in select-none">
-          <div className="bg-card dark:bg-[#1a1c24] border border-border/80 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative">
-            <button
-              onClick={() => setShowGuideModal(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 text-amber-500 mx-auto flex items-center justify-center mb-3">
-              <Smartphone className="w-7 h-7" />
-            </div>
-
-            <h3 className="font-display font-bold text-lg text-foreground mb-1">
-              {isInAppBrowser ? "ক্রোম ব্রাউজারে খুলুন" : "ব্রাউজার থেকে ইনস্টল করুন"}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              {isInAppBrowser
-                ? "ফেসবুক/মেসেঞ্জারের ভেতরে সরাসরি ইনস্টল ব্লক থাকে"
-                : "ব্রাউজারে সরাসরি পপআপ না এলে নিচের ২ সেকেন্ডের সহজ নিয়মটি দেখুন:"}
-            </p>
-
-            <div className="space-y-3 text-left bg-muted/60 rounded-2xl p-4 text-xs font-medium text-foreground mb-3">
-              {isInAppBrowser ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">১</span>
-                    <span>উপরে ডানদিকের <strong>৩-ডট (⋮)</strong> মেনুতে চাপ দিন</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
-                    <span><strong>"Open in Chrome"</strong> বা <strong>"External Browser"</strong> এ ট্যাপ করুন</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">১</span>
-                    <span>ব্রাউজারের উপরে ডানদিকের <strong>৩-ডট (⋮)</strong> মেনুতে চাপ দিন</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">২</span>
-                    <span>মেনুতে <strong>"Install app"</strong> (অথবা ফোনে ইতিমধ্যে থাকলে <strong>"Open in JU 52"</strong>) এ চাপুন</span>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="space-y-2 mt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowGuideModal(false);
-                  handleInstallClick();
-                }}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-stone-950 font-display font-extrabold text-xs cursor-pointer hover:brightness-105 active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5"
-              >
-                <RotateCw className="w-3.5 h-3.5" />
-                <span>আবার ইনস্টল চেষ্টা করুন</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.origin);
-                  toast({
-                    title: "লিংক কপি করা হয়েছে! 📋",
-                    description: "Google Chrome ব্রাউজারে লিংকটি পেস্ট করে সহজে ইনস্টল করতে পারেন।",
-                  });
-                }}
-                className="w-full py-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-semibold text-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5"
-              >
-                <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>সাইট লিংক কপি করুন</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowGuideModal(false)}
-                className="w-full py-2 rounded-xl text-muted-foreground hover:text-foreground font-medium text-xs cursor-pointer transition-all"
-              >
-                ঠিক আছে, বন্ধ করুন ✕
-              </button>
-            </div>
           </div>
         </div>
       )}
