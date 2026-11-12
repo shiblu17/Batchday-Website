@@ -16,7 +16,20 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
-        globIgnores: ['**/racing-limits/**'],
+        globIgnores: ['**/racing-limits/**', '**/cards/**', '**/three.module-*.js', '**/jspdf*.js'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/cards/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'card-assets-v1',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+        ],
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {

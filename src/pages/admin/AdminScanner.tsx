@@ -10,12 +10,15 @@ export default function AdminScanner() {
   const [manualInput, setManualInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [scannerInstance, setScannerInstance] = useState<Html5Qrcode | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [scanCount, setScanCount] = useState(0);
   const [result, setResult] = useState<{
     found: boolean;
     name?: string;
     roll?: string;
     dept?: string;
+    hall?: string;
+    tshirtSize?: string;
     status?: string;
   } | null>(null);
 
@@ -25,7 +28,7 @@ export default function AdminScanner() {
 
     const { data: reg, error } = await supabase
       .from("registrations")
-      .select("name, roll, department, status, attended")
+      .select("name, roll, department, hall, tshirt_size, status, attended")
       .eq("roll", roll)
       .maybeSingle();
 
@@ -38,13 +41,34 @@ export default function AdminScanner() {
     setLoading(false);
 
     if (reg && (reg.status === "verified" || reg.status === "approved")) {
-      setResult({ found: true, name: reg.name, roll: reg.roll, dept: reg.department, status: reg.attended ? "already" : "success" });
+      const scanStatus = reg.attended ? "already" : "success";
+      setResult({
+        found: true,
+        name: reg.name,
+        roll: reg.roll,
+        dept: reg.department,
+        hall: reg.hall,
+        tshirtSize: reg.tshirt_size,
+        status: scanStatus,
+      });
       if (!reg.attended) {
         await supabase.from("registrations").update({ attended: true }).eq("roll", roll);
+        setScanCount((c) => c + 1);
+      }
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(reg.attended ? [60, 40, 60] : 120);
       }
       toast({ title: `✅ ${reg.name} — এন্ট্রি কনফার্মড!` });
     } else if (reg) {
-      setResult({ found: true, name: reg.name, roll: reg.roll, dept: reg.department, status: "not_verified" });
+      setResult({
+        found: true,
+        name: reg.name,
+        roll: reg.roll,
+        dept: reg.department,
+        hall: reg.hall,
+        tshirtSize: reg.tshirt_size,
+        status: "not_verified",
+      });
       toast({ title: "❌ পেমেন্ট ভেরিফাই হয়নি", variant: "destructive" });
     } else {
       setResult({ found: false });
@@ -52,13 +76,28 @@ export default function AdminScanner() {
     }
   }, [toast]);
 
-  const startScanner = async () => {
+  const stopScanner = useCallback(async () => {
+    const instance = scannerRef.current;
+    if (instance) {
+      scannerRef.current = null;
+      try {
+        await instance.stop();
+        await instance.clear();
+      } catch {
+        // Ignore stop errors if camera was not active
+      }
+      setIsScanning(false);
+    }
+  }, []);
+
+  const startScanner = useCallback(async () => {
     try {
+      await stopScanner();
       const html5QrCode = new Html5Qrcode("reader");
-      setScannerInstance(html5QrCode);
-      
+      scannerRef.current = html5QrCode;
+
       const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-      
+
       await html5QrCode.start(
         { facingMode: "environment" },
         config,
@@ -66,34 +105,30 @@ export default function AdminScanner() {
           if (decodedText.startsWith("JU52-")) {
             html5QrCode.pause();
             lookupQR(decodedText);
-            // Resume after 3 seconds
-            setTimeout(() => html5QrCode.resume(), 3000);
+            setTimeout(() => {
+              try {
+                html5QrCode.resume();
+              } catch {
+                // Ignore if unmounted
+              }
+            }, 3000);
           }
         },
-        () => {} // Silent error for non-matches
+        () => {}
       );
       setIsScanning(true);
     } catch (err) {
       console.error("Scanner failed:", err);
       toast({ title: "ক্যামেরা চালু করা যায়নি", description: "পারমিশন চেক করুন", variant: "destructive" });
     }
-  };
-
-  const stopScanner = async () => {
-    if (scannerInstance) {
-      await scannerInstance.stop();
-      await scannerInstance.clear();
-      setScannerInstance(null);
-      setIsScanning(false);
-    }
-  };
+  }, [lookupQR, stopScanner, toast]);
 
   useEffect(() => {
     startScanner();
     return () => {
-      stopScanner();
+      void stopScanner();
     };
-  }, [lookupQR]);
+  }, [startScanner, stopScanner]);
 
   const handleManual = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,9 +140,16 @@ export default function AdminScanner() {
   return (
     <div className="max-w-lg mx-auto p-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="font-display text-3xl font-bold text-primary">QR স্ক্যানার</h1>
+        <div>
+          <h1 className="font-display text-3xl font-bold text-primary">QR স্ক্যানার</h1>
+          {scanCount > 0 && (
+            <p className="text-xs font-semibold text-emerald-700 mt-1">
+              এই সেশনে এন্ট্রি সম্পন্ন: {scanCount} জন
+            </p>
+          )}
+        </div>
         <button 
-          onClick={() => { stopScanner().then(() => startScanner()) }}
+          onClick={() => { void startScanner(); }}
           className="p-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all"
         >
           <RefreshCw className="h-5 w-5" />
@@ -196,8 +238,19 @@ export default function AdminScanner() {
                   {result.status === 'success' || result.status === 'already' ? <CheckCircle className="h-8 w-8" /> : <XCircle className="h-8 w-8" />}
                 </div>
                 <div>
-                  <p className="font-display font-black text-xl text-slate-900">{result.name}</p>
-                  <p className="text-sm font-bold text-slate-500">Roll: {result.roll} — {result.dept}</p>
+                  <p className="font-display font-black text-xl text-slate-900">{result.name || "অজানা"}</p>
+                  {result.found ? (
+                    <>
+                      <p className="text-sm font-bold text-slate-600">Roll: {result.roll} — {result.dept}</p>
+                      {(result.hall || result.tshirtSize) && (
+                        <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                          {result.hall ? `হল: ${result.hall}` : ""}{result.hall && result.tshirtSize ? " • " : ""}{result.tshirtSize ? `টি-শার্ট: ${result.tshirtSize}` : ""}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm font-semibold text-red-700">এই রোল নম্বরে কোনো রেজিস্ট্রেশন নেই</p>
+                  )}
                   <p className={`mt-2 font-bold inline-block px-3 py-1 rounded-lg text-sm ${
                     result.status === "success" ? "bg-green-600 text-white" :
                     result.status === "already" ? "bg-amber-500 text-white" :
@@ -206,6 +259,7 @@ export default function AdminScanner() {
                     {result.status === "success" && "এন্ট্রি অনুমোদিত ✅"}
                     {result.status === "already" && "ইতিমধ্যে উপস্থিত ⚠️"}
                     {result.status === "not_verified" && "পেমেন্ট পেন্ডিং ❌"}
+                    {!result.found && "তথ্য পাওয়া যায়নি ❌"}
                   </p>
                 </div>
               </div>

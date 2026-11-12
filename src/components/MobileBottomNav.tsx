@@ -128,7 +128,7 @@ export default function MobileBottomNav() {
   const navigate = useNavigate();
 
   // PWA & APK Installation State
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -148,8 +148,8 @@ export default function MobileBottomNav() {
     // Check if running inside installed PWA or Android WebView APK
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone ||
-      Boolean((window as any).__pwaInstalled) ||
+      window.navigator.standalone ||
+      Boolean(window.__pwaInstalled) ||
       isNativeApp;
     setIsStandalone(Boolean(isRunningStandalone));
 
@@ -163,30 +163,31 @@ export default function MobileBottomNav() {
     setIsInAppBrowser(inApp);
 
     // 1. Check if early prompt was already captured by index.html
-    if ((window as any).__deferredPwaPrompt) {
-      setDeferredPrompt((window as any).__deferredPwaPrompt);
+    if (window.__deferredPwaPrompt) {
+      setDeferredPrompt(window.__deferredPwaPrompt);
     }
 
     // 2. Listen for custom event when early prompt is ready
     const handlePromptReady = () => {
-      if ((window as any).__deferredPwaPrompt) {
-        setDeferredPrompt((window as any).__deferredPwaPrompt);
+      if (window.__deferredPwaPrompt) {
+        setDeferredPrompt(window.__deferredPwaPrompt);
       }
     };
     window.addEventListener("pwa-prompt-ready", handlePromptReady);
 
     // 3. Listen for PWA install prompt in case it fires later
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      (window as any).__deferredPwaPrompt = e;
-      setDeferredPrompt(e);
+      const promptEvt = e as BeforeInstallPromptEvent;
+      window.__deferredPwaPrompt = promptEvt;
+      setDeferredPrompt(promptEvt);
     };
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     const handleAppInstalled = () => {
       setIsStandalone(true);
-      (window as any).__pwaInstalled = true;
-      (window as any).__deferredPwaPrompt = null;
+      window.__pwaInstalled = true;
+      window.__deferredPwaPrompt = null;
       setDeferredPrompt(null);
     };
     window.addEventListener("appinstalled", handleAppInstalled);
@@ -221,8 +222,8 @@ export default function MobileBottomNav() {
     const ua = window.navigator.userAgent.toLowerCase();
     const isRunningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone ||
-      Boolean((window as any).__pwaInstalled) ||
+      window.navigator.standalone ||
+      Boolean(window.__pwaInstalled) ||
       ua.includes("ju52app");
 
     if (isRunningStandalone) {
@@ -246,7 +247,7 @@ export default function MobileBottomNav() {
     }
 
     // Desktop browsers: trigger native PWA install prompt if available, otherwise download APK
-    const promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
+    const promptEvent = deferredPrompt || window.__deferredPwaPrompt;
     if (promptEvent) {
       try {
         await promptEvent.prompt();
@@ -257,8 +258,8 @@ export default function MobileBottomNav() {
             description: "JU 52 অ্যাপটি আপনার ডিভাইসে যুক্ত হয়ে গেছে।",
           });
           setDeferredPrompt(null);
-          (window as any).__deferredPwaPrompt = null;
-          (window as any).__pwaInstalled = true;
+          window.__deferredPwaPrompt = null;
+          window.__pwaInstalled = true;
           setIsStandalone(true);
           setIsOpen(false);
         }
@@ -277,11 +278,11 @@ export default function MobileBottomNav() {
       handleInstallClick();
     };
     window.addEventListener("trigger-pwa-install", handleTrigger);
-    (window as any).__triggerPwaInstall = handleInstallClick;
+    window.__triggerPwaInstall = handleInstallClick;
 
     return () => {
       window.removeEventListener("trigger-pwa-install", handleTrigger);
-      delete (window as any).__triggerPwaInstall;
+      delete window.__triggerPwaInstall;
     };
   }, [handleInstallClick]);
 

@@ -188,14 +188,14 @@ export default function Navbar() {
             {typeof window !== "undefined" &&
               !(
                 window.matchMedia("(display-mode: standalone)").matches ||
-                (window.navigator as any).standalone ||
+                window.navigator.standalone ||
                 window.navigator.userAgent.toLowerCase().includes("ju52app")
               ) && (
                 <button
                   type="button"
                   onClick={() => {
-                    if ((window as any).__triggerPwaInstall) {
-                      (window as any).__triggerPwaInstall();
+                    if (window.__triggerPwaInstall) {
+                      window.__triggerPwaInstall();
                     } else {
                       window.dispatchEvent(new CustomEvent("trigger-pwa-install"));
                     }

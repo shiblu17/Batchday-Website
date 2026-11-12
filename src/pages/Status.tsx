@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Clock, CheckCircle, XCircle, Download, Loader2, CreditCard, ShieldCheck } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { jsPDF } from "jspdf";
+import { Search, Clock, CheckCircle, XCircle, Download, Loader2, CreditCard, ShieldCheck, WifiOff, Trash2 } from "lucide-react";
+import QRCode from "qrcode";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Sponsors from "@/components/Sponsors";
+import {
+  saveOfflinePass,
+  loadOfflinePass,
+  clearOfflinePass,
+  type PassUserData,
+  type SavedDigitalPass,
+} from "@/utils/offlinePass";
 
 type Status = "idle" | "pending" | "verified" | "rejected" | "not_found" | "loading";
 
@@ -16,23 +22,50 @@ const statusConfig: Record<string, { icon: React.ElementType; label: string; col
   not_found: { icon: Search, label: "এই রোলে কোনো তথ্য পাওয়া যায়নি", color: "text-slate-400", bg: "bg-slate-50" },
 };
 
-interface UserData {
-  name: string;
-  department: string;
-  hall: string;
-  status: string;
-  tshirt_size: string;
-}
-
 export default function StatusPage() {
   const { toast } = useToast();
   const [roll, setRoll] = useState("");
+  const [activeRoll, setActiveRoll] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<Status>("idle");
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<PassUserData | null>(null);
+  const [savedPass, setSavedPass] = useState<SavedDigitalPass | null>(() => loadOfflinePass());
+  const [isOfflinePreview, setIsOfflinePreview] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Auto-display cached pass when opening Status page without internet
+  useEffect(() => {
+    if (savedPass && typeof navigator !== "undefined" && !navigator.onLine) {
+      setActiveRoll(savedPass.roll);
+      setRoll(savedPass.roll);
+      setUserData(savedPass.userData);
+      setStatus("verified");
+      setIsOfflinePreview(true);
+    }
+  }, [savedPass]);
+
+  const handleOpenSavedPass = () => {
+    if (!savedPass) return;
+    setActiveRoll(savedPass.roll);
+    setRoll(savedPass.roll);
+    setUserData(savedPass.userData);
+    setStatus("verified");
+    setIsOfflinePreview(true);
+  };
+
+  const handleClearSavedPass = () => {
+    clearOfflinePass();
+    setSavedPass(null);
+    if (isOfflinePreview) {
+      setUserData(null);
+      setStatus("idle");
+      setPreviewUrl("");
+      setIsOfflinePreview(false);
+    }
+    toast({ title: "সংরক্ষিত পাস মুছে ফেলা হয়েছে" });
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +86,7 @@ export default function StatusPage() {
     try {
       let query = supabase
         .from("registrations")
-        .select("id, name, department, hall, status, tshirt_size")
+        .select("id, name, department, hall, status, tshirt_size, attended")
         .eq("roll", cleanRoll);
 
       if (cleanPhone.length === 11) {
@@ -72,10 +105,21 @@ export default function StatusPage() {
 
       const { data, error } = await query.maybeSingle();
 
-      if (error || !data) {
+      if (error) {
+        // Offline fallback if network query fails and matches saved pass
+        if (savedPass && savedPass.roll === cleanRoll) {
+          handleOpenSavedPass();
+          toast({ title: "অফলাইন পাস দেখানো হচ্ছে", description: "ইন্টারনেট সংযোগ না থাকায় সেভ করা কার্ড খোলা হয়েছে।" });
+          return;
+        }
+        throw error;
+      }
+
+      if (!data) {
         setUserData(null);
         setStatus("not_found");
         setPreviewUrl('');
+        setIsOfflinePreview(false);
         toast({
           title: "তথ্য পাওয়া যায়নি",
           description: "দেওয়া রোল ও ফোন নম্বরের সাথে কোনো রেজিস্ট্রেশন মেলেনি। অনুগ্রহ করে সঠিক তথ্য দিন।",
@@ -84,10 +128,21 @@ export default function StatusPage() {
         return;
       }
 
+      setActiveRoll(cleanRoll);
       setUserData(data);
       setStatus(data.status as Status);
-    } catch (err: any) {
+      setIsOfflinePreview(false);
+
+      if (data.status === "verified") {
+        saveOfflinePass(cleanRoll, data);
+        setSavedPass(loadOfflinePass());
+      }
+    } catch (err: unknown) {
       console.error("Status search error:", err);
+      if (savedPass && savedPass.roll === cleanRoll) {
+        handleOpenSavedPass();
+        return;
+      }
       setStatus("not_found");
     }
   };
@@ -108,9 +163,13 @@ export default function StatusPage() {
         },
         (payload) => {
           if (payload.new) {
-            const updated = payload.new as any;
+            const updated = payload.new as PassUserData;
             setUserData(updated);
             setStatus(updated.status as Status);
+            if (updated.status === "verified" && activeRoll) {
+              saveOfflinePass(activeRoll, updated);
+              setSavedPass(loadOfflinePass());
+            }
             toast({
               title: "তথ্য আপডেট হয়েছে! ✨",
               description: "অ্যাডমিন প্যানেল থেকে আপনার তথ্য রিয়েল-টাইমে আপডেট করা হয়েছে।",
@@ -123,125 +182,127 @@ export default function StatusPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userData?.id]);
+  }, [userData?.id, activeRoll, toast]);
 
   useEffect(() => {
-    if (status === "verified" && userData && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    let cancelled = false;
+    const targetRoll = activeRoll || roll.trim();
+    if (status !== "verified" || !userData || !targetRoll || !canvasRef.current) return;
 
-      // Card Dimensions (Ratio 2:3)
-      canvas.width = 600;
-      canvas.height = 900;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-      // 1. Premium Maroon Background with Gradient
-      const gradient = ctx.createLinearGradient(0, 0, 0, 900);
-      gradient.addColorStop(0, '#800000'); 
-      gradient.addColorStop(0.5, '#600000');
-      gradient.addColorStop(1, '#400000'); 
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 600, 900);
+    // Card Dimensions (Ratio 2:3)
+    canvas.width = 600;
+    canvas.height = 900;
 
-      // 2. Complex Premium Background elements
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.03)';
-      
-      // Top Right Circle
+    // 1. Premium Maroon Background with Gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 900);
+    gradient.addColorStop(0, '#800000');
+    gradient.addColorStop(0.5, '#600000');
+    gradient.addColorStop(1, '#400000');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 600, 900);
+
+    // 2. Complex Premium Background elements
+    ctx.fillStyle = 'rgba(255, 215, 0, 0.03)';
+
+    // Top Right Circle
+    ctx.beginPath();
+    ctx.arc(600, 0, 350, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bottom Left Circle
+    ctx.beginPath();
+    ctx.arc(0, 900, 250, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Decorative center band
+    const bgGradient = ctx.createLinearGradient(0, 400, 600, 400);
+    bgGradient.addColorStop(0, 'rgba(255, 215, 0, 0)');
+    bgGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.05)');
+    bgGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 400, 600, 100);
+
+    // 3. Luxurious Gold Borders
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(30, 30, 540, 840);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(40, 40, 520, 820);
+
+    // Corner accents
+    ctx.fillStyle = '#FFD700';
+    const corners = [[30, 30], [570, 30], [30, 870], [570, 870]];
+    corners.forEach(([cx, cy]) => {
       ctx.beginPath();
-      ctx.arc(600, 0, 350, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
       ctx.fill();
-      
-      // Bottom Left Circle
-      ctx.beginPath();
-      ctx.arc(0, 900, 250, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Decorative center band
-      const bgGradient = ctx.createLinearGradient(0, 400, 600, 400);
-      bgGradient.addColorStop(0, 'rgba(255, 215, 0, 0)');
-      bgGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.05)');
-      bgGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 400, 600, 100);
+    });
 
-      // 3. Luxurious Gold Borders
-      ctx.strokeStyle = '#FFD700';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(30, 30, 540, 840);
-      ctx.lineWidth = 1;
-      ctx.strokeRect(40, 40, 520, 820);
-      
-      // Corner accents
-      ctx.fillStyle = '#FFD700';
-      const corners = [[30,30], [570,30], [30,870], [570,870]];
-      corners.forEach(([cx, cy]) => {
-        ctx.beginPath();
-        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-        ctx.fill();
-      });
+    // 4. Header Section
+    ctx.fillStyle = '#FFD700';
+    ctx.font = '900 48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('JU 52nd BATCH', 300, 110);
 
-      // 4. Header Section
-      ctx.fillStyle = '#FFD700';
-      ctx.font = '900 48px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('JU 52nd BATCH', 300, 110);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'italic 20px sans-serif';
-      ctx.letterSpacing = "2px";
-      ctx.fillText('BATCH DAY 2027 • OFFICIAL ID', 300, 150);
-      ctx.letterSpacing = "0px";
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'italic 20px sans-serif';
+    ctx.letterSpacing = "2px";
+    ctx.fillText('BATCH DAY 2027 • OFFICIAL ID', 300, 150);
+    ctx.letterSpacing = "0px";
 
-      // 5. User Details (Premium Typography)
-      ctx.fillStyle = '#ffffff';
-      
-      // Auto-shrink name to prevent border overflow
-      let fontSize = 56;
+    // 5. User Details (Premium Typography)
+    ctx.fillStyle = '#ffffff';
+
+    // Auto-shrink name to prevent border overflow
+    let fontSize = 56;
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    const nameText = userData.name.toUpperCase();
+    while (ctx.measureText(nameText).width > 480 && fontSize > 24) {
+      fontSize -= 2;
       ctx.font = `900 ${fontSize}px sans-serif`;
-      const nameText = userData.name.toUpperCase();
-      while (ctx.measureText(nameText).width > 480 && fontSize > 24) {
-        fontSize -= 2;
-        ctx.font = `900 ${fontSize}px sans-serif`;
-      }
-      ctx.fillText(nameText, 300, 600);
+    }
+    ctx.fillText(nameText, 300, 600);
 
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 36px monospace';
-      ctx.fillText(`ID: JU52-${roll}`, 300, 660);
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 36px monospace';
+    ctx.fillText(`ID: JU52-${targetRoll}`, 300, 660);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.fillText(userData.department, 300, 720);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText(userData.department, 300, 720);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '24px sans-serif';
-      ctx.fillText(`Hall: ${userData.hall}`, 300, 765);
-      
-      // T-Shirt Size Badge
-      ctx.fillStyle = '#FFAE00';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.fillText(`T-SHIRT: ${userData.tshirt_size}`, 300, 820);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '24px sans-serif';
+    ctx.fillText(`Hall: ${userData.hall}`, 300, 765);
 
-      // 6. QR Code Area (Real QR from API)
-      const qrImage = new Image();
-      qrImage.crossOrigin = "anonymous";
-      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=JU52-${roll}&margin=1`;
-      qrImage.onload = () => {
-        // Draw white background for QR
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 20;
-        ctx.fillRect(200, 260, 200, 200);
-        ctx.shadowBlur = 0; // reset shadow
-        
-        ctx.drawImage(qrImage, 210, 270, 180, 180);
-        
-        // Update Preview
-        setPreviewUrl(canvas.toDataURL('image/png', 0.8));
-      };
+    // T-Shirt Size Badge
+    ctx.fillStyle = '#FFAE00';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillText(`T-SHIRT: ${userData.tshirt_size}`, 300, 820);
 
-      qrImage.onerror = () => {
-        // Offline / Error fallback: draw clean badge on card so preview & download are never blocked
+    // 6. Offline-capable local QR Code generation
+    QRCode.toDataURL(`JU52-${targetRoll}`, { width: 200, margin: 1, errorCorrectionLevel: "M" })
+      .then((qrDataUrl) => {
+        if (cancelled) return;
+        const qrImage = new Image();
+        qrImage.onload = () => {
+          if (cancelled) return;
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 20;
+          ctx.fillRect(200, 260, 200, 200);
+          ctx.shadowBlur = 0;
+          ctx.drawImage(qrImage, 210, 270, 180, 180);
+          setPreviewUrl(canvas.toDataURL('image/png', 0.85));
+        };
+        qrImage.src = qrDataUrl;
+      })
+      .catch(() => {
+        if (cancelled) return;
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(200, 260, 200, 200);
         ctx.fillStyle = '#600000';
@@ -250,20 +311,25 @@ export default function StatusPage() {
         ctx.fillText('JU 52ND BATCH', 300, 350);
         ctx.font = 'bold 16px monospace';
         ctx.fillStyle = '#111827';
-        ctx.fillText(`JU52-${roll}`, 300, 380);
-        setPreviewUrl(canvas.toDataURL('image/png', 0.8));
-      };
-    }
-  }, [status, userData, roll]);
+        ctx.fillText(`JU52-${targetRoll}`, 300, 380);
+        setPreviewUrl(canvas.toDataURL('image/png', 0.85));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, userData, activeRoll, roll]);
 
   const downloadPDF = async () => {
     if (!canvasRef.current || !userData) return;
-    
+    const targetRoll = activeRoll || roll.trim();
+
     try {
       setDownloadLoading(true);
+      const { jsPDF } = await import("jspdf");
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvasRef.current.toDataURL('image/jpeg', 0.8);
-      
+      const imgData = canvasRef.current.toDataURL('image/jpeg', 0.85);
+
       // A4 is 210 x 297 mm, we want to center 100x150mm ID card
       const imgW = 100;
       const imgH = 150;
@@ -271,10 +337,10 @@ export default function StatusPage() {
       const y = (297 - imgH) / 2;
 
       pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
-      pdf.save(`JU52_ID_${roll}.pdf`);
-      
+      pdf.save(`JU52_ID_${targetRoll}.pdf`);
+
       toast({ title: "PDF ডাউনলোড শুরু হয়েছে ✅" });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("PDF error:", err);
       toast({ title: "ডাউনলোড ব্যর্থ হয়েছে", variant: "destructive" });
     } finally {
@@ -334,10 +400,42 @@ export default function StatusPage() {
           </button>
         </form>
 
+        {/* Saved Offline Pass Quick Card */}
+        {savedPass && status !== "verified" && (
+          <div className="flex items-center justify-between gap-3 bg-emerald-50/90 border border-emerald-200 rounded-2xl px-4 py-3 shadow-sm">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <WifiOff className="h-4 w-4 text-emerald-700 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-emerald-900 truncate">
+                  অফলাইন ডিজিটাল পাস সংরক্ষিত (রোল: {savedPass.roll})
+                </p>
+                <p className="text-[11px] text-emerald-700 truncate">{savedPass.userData.name}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={handleOpenSavedPass}
+                className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold cursor-pointer transition-colors"
+              >
+                পাস দেখুন
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSavedPass}
+                title="সংরক্ষিত পাস মুছুন"
+                className="p-1.5 rounded-xl text-emerald-700 hover:bg-emerald-100 cursor-pointer transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {status !== "idle" && status !== "loading" && (
             <motion.div
-              key={status + roll}
+              key={status + (activeRoll || roll)}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -347,7 +445,7 @@ export default function StatusPage() {
                 <div className="space-y-6">
                   
                   {/* Status Badge */}
-                  <div className={`flex items-center justify-center gap-3 p-4 rounded-2xl border ${statusConfig[status]?.bg} ${statusConfig[status]?.color} border-current/20 shadow-sm`}>
+                  <div className={`flex flex-wrap items-center justify-center gap-3 p-4 rounded-2xl border ${statusConfig[status]?.bg} ${statusConfig[status]?.color} border-current/20 shadow-sm`}>
                     {(() => {
                       const Icon = statusConfig[status]?.icon;
                       return Icon ? <Icon className="h-6 w-6 stroke-[3px]" /> : null;
@@ -355,6 +453,16 @@ export default function StatusPage() {
                     <span className="font-black text-lg tracking-wide">
                       {statusConfig[status]?.label}
                     </span>
+                    {isOfflinePreview && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/80 text-emerald-800 border border-emerald-200">
+                        <WifiOff className="h-3 w-3" /> অফলাইন পাস
+                      </span>
+                    )}
+                    {userData.attended && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                        গেট এন্ট্রি সম্পন্ন ✓
+                      </span>
+                    )}
                   </div>
 
                   {/* ID Card Result (Verified Only) */}
@@ -389,7 +497,7 @@ export default function StatusPage() {
                         
                         <a 
                           href={previewUrl}
-                          download={`JU52_ID_${roll}.png`}
+                          download={`JU52_ID_${activeRoll || roll}.png`}
                           className="w-full bg-primary/5 hover:bg-primary/10 text-primary py-5 rounded-2xl font-black flex items-center justify-center gap-3 transition-all active:scale-95"
                         >
                           <CreditCard className="h-6 w-6" />
