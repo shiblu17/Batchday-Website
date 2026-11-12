@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/ju_maroon</item>
+        <item name="colorPrimaryDark">@color/ju_maroon_dark</item>
+        <item name="colorAccent">@color/ju_amber</item>
+        <item name="android:statusBarColor">@color/ju_maroon</item>
+        <item name="android:navigationBarColor">@color/ju_maroon_dark</item>
+        <item name="android:windowBackground">@color/ju_maroon</item>
+    </style>
+</resources>
