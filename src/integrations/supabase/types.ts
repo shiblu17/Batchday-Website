@@ -85,6 +85,7 @@ export type Database = {
           attended: boolean
           created_at: string
           department: string
+          food_claimed: boolean
           hall: string
           id: string
           name: string
@@ -94,6 +95,7 @@ export type Database = {
           roll: string
           sender_number: string
           status: string
+          tshirt_claimed: boolean
           tshirt_size: string
           tx_id: string
           updated_at: string
@@ -102,6 +104,7 @@ export type Database = {
           attended?: boolean
           created_at?: string
           department: string
+          food_claimed?: boolean
           hall: string
           id?: string
           name: string
@@ -111,6 +114,7 @@ export type Database = {
           roll: string
           sender_number: string
           status?: string
+          tshirt_claimed?: boolean
           tshirt_size: string
           tx_id: string
           updated_at?: string
@@ -119,6 +123,7 @@ export type Database = {
           attended?: boolean
           created_at?: string
           department?: string
+          food_claimed?: boolean
           hall?: string
           id?: string
           name?: string
@@ -128,6 +133,7 @@ export type Database = {
           roll?: string
           sender_number?: string
           status?: string
+          tshirt_claimed?: boolean
           tshirt_size?: string
           tx_id?: string
           updated_at?: string
@@ -307,12 +313,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_leaderboard_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          department: string
+          hall: string
+          status: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      lookup_registration_status: {
+        Args: {
+          p_phone_last4: string
+          p_roll: string
+        }
+        Returns: {
+          attended: boolean
+          department: string
+          hall: string
+          id: string
+          name: string
+          status: string
+          tshirt_size: string
+        }[]
       }
     }
     Enums: {

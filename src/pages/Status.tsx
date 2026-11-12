@@ -84,16 +84,7 @@ export default function StatusPage() {
     setStatus("loading");
 
     try {
-      let query = supabase
-        .from("registrations")
-        .select("id, name, department, hall, status, tshirt_size, attended")
-        .eq("roll", cleanRoll);
-
-      if (cleanPhone.length === 11) {
-        query = query.eq("phone", cleanPhone);
-      } else if (cleanPhone.length >= 4) {
-        query = query.ilike("phone", `%${cleanPhone}`);
-      } else {
+      if (cleanPhone.replace(/\D/g, "").length < 4) {
         toast({
           title: "ফোন নম্বর লিখুন",
           description: "নিরাপত্তার স্বার্থে রেজিস্ট্রেশনের সময় দেওয়া সঠিক ফোন নম্বর লিখুন (কমপক্ষে শেষ ৪ ডিজিট)।",
@@ -103,7 +94,12 @@ export default function StatusPage() {
         return;
       }
 
-      const { data, error } = await query.maybeSingle();
+      const { data: rpcData, error } = await supabase.rpc("lookup_registration_status", {
+        p_roll: cleanRoll,
+        p_phone_last4: cleanPhone,
+      });
+
+      const data = Array.isArray(rpcData) ? rpcData[0] ?? null : rpcData;
 
       if (error) {
         // Offline fallback if network query fails and matches saved pass

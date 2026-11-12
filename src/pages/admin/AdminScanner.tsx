@@ -1,26 +1,31 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, CheckCircle, XCircle, ScanLine, Loader2, RefreshCw, X } from "lucide-react";
+import { Camera, CheckCircle, XCircle, ScanLine, Loader2, RefreshCw, X, Shirt, Utensils } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+interface ScanResult {
+  found: boolean;
+  name?: string;
+  roll?: string;
+  dept?: string;
+  hall?: string;
+  tshirtSize?: string;
+  tshirtClaimed?: boolean;
+  foodClaimed?: boolean;
+  status?: string;
+}
 
 export default function AdminScanner() {
   const { toast } = useToast();
   const [manualInput, setManualInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [updatingToken, setUpdatingToken] = useState<"tshirt" | "food" | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [scanCount, setScanCount] = useState(0);
-  const [result, setResult] = useState<{
-    found: boolean;
-    name?: string;
-    roll?: string;
-    dept?: string;
-    hall?: string;
-    tshirtSize?: string;
-    status?: string;
-  } | null>(null);
+  const [result, setResult] = useState<ScanResult | null>(null);
 
   const lookupQR = useCallback(async (code: string) => {
     const roll = code.replace("JU52-", "").trim();
@@ -28,7 +33,7 @@ export default function AdminScanner() {
 
     const { data: reg, error } = await supabase
       .from("registrations")
-      .select("name, roll, department, hall, tshirt_size, status, attended")
+      .select("name, roll, department, hall, tshirt_size, tshirt_claimed, food_claimed, status, attended")
       .eq("roll", roll)
       .maybeSingle();
 
@@ -49,6 +54,8 @@ export default function AdminScanner() {
         dept: reg.department,
         hall: reg.hall,
         tshirtSize: reg.tshirt_size,
+        tshirtClaimed: Boolean(reg.tshirt_claimed),
+        foodClaimed: Boolean(reg.food_claimed),
         status: scanStatus,
       });
       if (!reg.attended) {
@@ -67,6 +74,8 @@ export default function AdminScanner() {
         dept: reg.department,
         hall: reg.hall,
         tshirtSize: reg.tshirt_size,
+        tshirtClaimed: Boolean(reg.tshirt_claimed),
+        foodClaimed: Boolean(reg.food_claimed),
         status: "not_verified",
       });
       toast({ title: "❌ পেমেন্ট ভেরিফাই হয়নি", variant: "destructive" });
@@ -75,6 +84,44 @@ export default function AdminScanner() {
       toast({ title: "❌ রেজিস্ট্রেশন পাওয়া যায়নি", variant: "destructive" });
     }
   }, [toast]);
+
+  const toggleClaimToken = async (field: "tshirt" | "food") => {
+    if (!result?.roll || (result.status !== "success" && result.status !== "already")) return;
+    const isTshirt = field === "tshirt";
+    const nextValue = !(isTshirt ? result.tshirtClaimed : result.foodClaimed);
+
+    setUpdatingToken(field);
+    const updatePayload = isTshirt ? { tshirt_claimed: nextValue } : { food_claimed: nextValue };
+    const { error } = await supabase
+      .from("registrations")
+      .update(updatePayload)
+      .eq("roll", result.roll);
+    setUpdatingToken(null);
+
+    if (error) {
+      toast({ title: "টোকেন আপডেট ব্যর্থ হয়েছে", variant: "destructive" });
+      return;
+    }
+
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            tshirtClaimed: isTshirt ? nextValue : prev.tshirtClaimed,
+            foodClaimed: !isTshirt ? nextValue : prev.foodClaimed,
+          }
+        : null
+    );
+    toast({
+      title: isTshirt
+        ? nextValue
+          ? `টি-শার্ট (${result.tshirtSize}) দেওয়া হয়েছে ✅`
+          : "টি-শার্ট টোকেন আনমার্ক করা হয়েছে"
+        : nextValue
+          ? "খাবার টোকেন দেওয়া হয়েছে ✅"
+          : "খাবার টোকেন আনমার্ক করা হয়েছে",
+    });
+  };
 
   const stopScanner = useCallback(async () => {
     const instance = scannerRef.current;
@@ -263,6 +310,37 @@ export default function AdminScanner() {
                   </p>
                 </div>
               </div>
+
+              {(result.status === "success" || result.status === "already") && (
+                <div className="mt-4 pt-4 border-t border-black/10 grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    disabled={updatingToken === "tshirt"}
+                    onClick={() => void toggleClaimToken("tshirt")}
+                    className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-60 ${
+                      result.tshirtClaimed
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "bg-white text-slate-800 border border-slate-300 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Shirt className="h-4 w-4" />
+                    <span>{result.tshirtClaimed ? `টি-শার্ট দেওয়া ✓ (${result.tshirtSize})` : `টি-শার্ট দিন (${result.tshirtSize})`}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={updatingToken === "food"}
+                    onClick={() => void toggleClaimToken("food")}
+                    className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-60 ${
+                      result.foodClaimed
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "bg-white text-slate-800 border border-slate-300 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Utensils className="h-4 w-4" />
+                    <span>{result.foodClaimed ? "খাবার টোকেন দেওয়া ✓" : "খাবার টোকেন দিন"}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

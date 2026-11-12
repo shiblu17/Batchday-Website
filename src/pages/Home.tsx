@@ -8,21 +8,30 @@ import { useSiteSettings } from "../hooks/useSiteSettings";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-function useCountdown(target: Date) {
-  const calc = () => {
-    const diff = Math.max(0, target.getTime() - Date.now());
-    return {
-      days: Math.floor(diff / 86400000),
-      hours: Math.floor(diff % 86400000 / 3600000),
-      minutes: Math.floor(diff % 3600000 / 60000),
-      seconds: Math.floor(diff % 60000 / 1000)
-    };
+interface LeaderboardStat {
+  name: string;
+  registered: number;
+  total: number;
+}
+
+function calcTimeLeft(targetMs: number) {
+  const diff = Math.max(0, targetMs - Date.now());
+  return {
+    days: Math.floor(diff / 86400000),
+    hours: Math.floor((diff % 86400000) / 3600000),
+    minutes: Math.floor((diff % 3600000) / 60000),
+    seconds: Math.floor((diff % 60000) / 1000),
   };
-  const [time, setTime] = useState(calc);
+}
+
+function useCountdown(target: Date) {
+  const targetMs = target.getTime();
+  const [time, setTime] = useState(() => calcTimeLeft(targetMs));
   useEffect(() => {
-    const id = setInterval(() => setTime(calc), 1000);
+    setTime(calcTimeLeft(targetMs));
+    const id = setInterval(() => setTime(calcTimeLeft(targetMs)), 1000);
     return () => clearInterval(id);
-  }, [target]);
+  }, [targetMs]);
   return time;
 }
 
@@ -37,8 +46,8 @@ const fadeUp = {
 
 export default function HomePage() {
   const { data: settings, isLoading: settingsLoading } = useSiteSettings();
-  const [deptData, setDeptData] = useState<any[]>([]);
-  const [hallData, setHallData] = useState<any[]>([]);
+  const [deptData, setDeptData] = useState<LeaderboardStat[]>([]);
+  const [hallData, setHallData] = useState<LeaderboardStat[]>([]);
 
   useEffect(() => {
     setDeptData(getLeaderboardData('dept'));
@@ -47,12 +56,9 @@ export default function HomePage() {
   const { data: verifiedCount = 0 } = useQuery({
     queryKey: ["verified-registrations-count"],
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from("registrations")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "verified");
+      const { data, error } = await supabase.rpc("get_public_leaderboard_stats");
       if (error) throw error;
-      return count || 0;
+      return data?.length || 0;
     },
     staleTime: 30_000,
   });

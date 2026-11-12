@@ -37,7 +37,7 @@ export default function Leaderboard() {
   const fetchLeaderboard = async () => {
     setLoading(true);
     try {
-      const { data: regs } = await supabase.from("registrations").select("department, hall, status");
+      const { data: regs } = await supabase.rpc("get_public_leaderboard_stats");
       const { data: depts } = await supabase.from("departments").select("*");
       const { data: hl } = await supabase.from("halls").select("*");
 
