@@ -61,7 +61,6 @@ const AdminReels = lazy(() => import("./pages/admin/AdminReels"));
 const AdminStudents = lazy(() => import("./pages/admin/AdminStudents"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TwentyNineGame = lazy(() => import("./pages/TwentyNineGame"));
-import JuAmbientPlayer from "@/components/JuAmbientPlayer";
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-full flex-col items-center justify-center bg-background relative overflow-hidden">
@@ -110,7 +109,6 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <GlobalRealtimeSync />
-            <JuAmbientPlayer />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 {/* Public routes with Navbar */}
